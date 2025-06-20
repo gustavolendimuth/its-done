@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  name            String
+  password        String
+  googleId        String?          @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  workHours       WorkHour[]
+  clients         Client[]
+  projects        Project[]
+  settings        Settings?
+  notificationLogs NotificationLog[]
+}
+
+model WorkHour {
+  id          String              @id @default(uuid())
+  date        DateTime
+  description String?
+  hours       Float
+  userId      String
+  clientId    String
+  projectId   String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  user        User                @relation(fields: [userId], references: [id])
+  client      Client              @relation(fields: [clientId], references: [id])
+  project     Project?            @relation(fields: [projectId], references: [id])
+  invoiceWorkHours InvoiceWorkHour[]
+}
+
+model Client {
+  id          String    @id @default(uuid())
+  name        String?
+  email       String
+  phone       String?
+  company     String
+  userId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id])
+  workHours   WorkHour[]
+  invoices    Invoice[]
+  addresses   Address[]
+  projects    Project[]
+}
+
+model Project {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  clientId    String
+  userId      String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  client      Client     @relation(fields: [clientId], references: [id])
+  user        User       @relation(fields: [userId], references: [id])
+  workHours   WorkHour[]
+}
+
+model Address {
+  id          String   @id @default(uuid())
+  street      String
+  city        String
+  state       String
+  zipCode     String
+  country     String   @default("Brazil")
+  type        String   @default("billing") // billing, shipping, office, etc.
+  isPrimary   Boolean  @default(false)
+  clientId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model Settings {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  alertHours        Float    @default(160)
+  notificationEmail String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+model Invoice {
+  id          String              @id @default(uuid())
+  number      String?
+  clientId    String
+  fileUrl     String?
+  amount      Float               @default(0)
+  status      InvoiceStatus       @default(PENDING)
+  description String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  client      Client              @relation(fields: [clientId], references: [id])
+  invoiceWorkHours InvoiceWorkHour[]
+}
+
+model InvoiceWorkHour {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  workHourId  String
+  createdAt   DateTime @default(now())
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  workHour    WorkHour @relation(fields: [workHourId], references: [id], onDelete: Cascade)
+
+  @@unique([invoiceId, workHourId])
+}
+
+model NotificationLog {
+  id           String           @id @default(uuid())
+  userId       String
+  type         NotificationType
+  threshold    Float
+  totalHours   Float
+  sentAt       DateTime         @default(now())
+  user         User             @relation(fields: [userId], references: [id])
+
+  @@index([userId, type, threshold])
+}
+
+enum NotificationType {
+  HOURS_THRESHOLD
+  INVOICE_UPLOADED
+  WELCOME
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  CANCELED
+} 

@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Frontend",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"--filter",
+				"frontend",
+				"dev"
+			],
+			"group": "build",
+			"isBackground": true
+		}
+	]
+}
