@@ -81,6 +81,7 @@ import {
 import { InfoCard } from "@/components/ui/info-card";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
+import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 
 const COLORS = [
   "#0088FE",
@@ -249,27 +250,7 @@ export default function AnalyticsPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto py-6">
-        <div className="grid gap-6">
-          {/* Loading skeleton */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[1, 2, 3, 4].map((i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div className="h-4 w-24 bg-muted rounded"></div>
-                  <div className="h-4 w-4 bg-muted rounded"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-8 w-16 bg-muted rounded mb-2"></div>
-                  <div className="h-3 w-20 bg-muted rounded"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton type="analytics-page" />;
   }
 
   return (

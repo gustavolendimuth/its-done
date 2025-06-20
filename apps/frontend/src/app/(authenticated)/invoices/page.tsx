@@ -117,7 +117,7 @@ export default function InvoicesPage() {
   };
 
   if (isLoading || clientsLoading) {
-    return <LoadingSkeleton type="stats" />;
+    return <LoadingSkeleton type="invoices-page" />;
   }
 
   if (error) {

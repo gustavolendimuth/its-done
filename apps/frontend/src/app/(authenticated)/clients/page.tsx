@@ -51,7 +51,7 @@ export default function ClientsPage() {
   };
 
   if (isLoading) {
-    return <LoadingSkeleton type="list" count={6} />;
+    return <LoadingSkeleton type="clients-page" />;
   }
 
   return (

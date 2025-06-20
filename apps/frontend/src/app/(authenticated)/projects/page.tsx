@@ -48,7 +48,7 @@ export default function ProjectsPage() {
   };
 
   if (isLoading) {
-    return <LoadingSkeleton type="card" count={6} />;
+    return <LoadingSkeleton type="projects-page" />;
   }
 
   return (

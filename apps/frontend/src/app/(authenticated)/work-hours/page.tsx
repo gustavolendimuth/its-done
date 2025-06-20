@@ -22,6 +22,7 @@ import { formatHoursToHHMM } from "@/lib/utils";
 import { InfoCard } from "@/components/ui/info-card";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
+import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 
 export default function WorkHoursPage() {
   // Inicializar com datas estáveis
@@ -53,18 +54,32 @@ export default function WorkHoursPage() {
 
   const {
     data: workHours,
-    isLoading,
+    isLoading: isLoadingWorkHours,
+    isFetching: isFetchingWorkHours,
     error: workHoursError,
   } = useTimeEntries(queryParams || undefined);
 
-  const { data: clients, error: clientsError } = useClients();
+  const {
+    data: clients,
+    isLoading: isLoadingClients,
+    error: clientsError,
+  } = useClients();
 
   // Estatísticas
   const { data: stats } = useWorkHoursStats(queryParams || undefined);
 
+  // Distinguir entre carregamento inicial e revalidação
+  const isInitialLoading = isLoadingWorkHours || isLoadingClients;
+  const isRefetching = isFetchingWorkHours && !isLoadingWorkHours;
+
   // Se houver erro de autenticação, o middleware irá redirecionar para o login
   if (workHoursError || clientsError) {
     return null;
+  }
+
+  // Skeleton para carregamento inicial
+  if (isInitialLoading) {
+    return <LoadingSkeleton type="work-hours" />;
   }
 
   const handleModalClose = () => {
@@ -144,6 +159,7 @@ export default function WorkHoursPage() {
           clientId={selectedClient}
           hourlyRate={50} // Pode ser dinâmico no futuro
           workHours={workHours || []}
+          isRefetching={isRefetching}
         />
       </div>
 
@@ -165,11 +181,17 @@ export default function WorkHoursPage() {
           })()}
         </div>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        {/* Loading apenas para revalidação */}
+        {isRefetching && (
+          <div className="flex items-center justify-center py-4 mb-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            <span className="ml-2 text-sm text-muted-foreground">
+              Updating...
+            </span>
           </div>
-        ) : workHours?.length === 0 ? (
+        )}
+
+        {workHours?.length === 0 ? (
           <div className="text-center py-12">
             <div>
               <Clock className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
