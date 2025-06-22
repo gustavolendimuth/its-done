@@ -6,48 +6,80 @@ import { join } from 'path';
 import * as fs from 'fs';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  try {
+    console.log('🚀 Starting application bootstrap...');
 
-  // Global validation pipe
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
-
-  // Configure static file serving based on environment
-  const railwayVolumePath = process.env.RAILWAY_VOLUME_PATH || '/app/data';
-  const isRailwayEnv = !!process.env.RAILWAY_ENVIRONMENT;
-  const railwayUploadsPath = join(railwayVolumePath, 'uploads');
-  const localUploadsPath = join(process.cwd(), 'uploads');
-
-  // Serve static files - priority: Railway Volume > Local
-  if (isRailwayEnv && fs.existsSync(railwayUploadsPath)) {
+    // Log environment info
+    console.log('📋 Environment variables:');
+    console.log('- NODE_ENV:', process.env.NODE_ENV || 'not-set');
     console.log(
-      '🚂 Using Railway Volume for static files:',
-      railwayUploadsPath,
+      '- DATABASE_URL:',
+      process.env.DATABASE_URL ? 'configured' : '❌ MISSING',
     );
-    app.useStaticAssets(railwayUploadsPath, {
-      prefix: '/uploads/',
+    console.log(
+      '- JWT_SECRET:',
+      process.env.JWT_SECRET ? 'configured' : '❌ MISSING',
+    );
+    console.log('- PORT:', process.env.PORT || '3002');
+    console.log(
+      '- RAILWAY_ENVIRONMENT:',
+      process.env.RAILWAY_ENVIRONMENT || 'not-set',
+    );
+
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+    // Global validation pipe
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
+
+    // Configure static file serving based on environment
+    const railwayVolumePath = process.env.RAILWAY_VOLUME_PATH || '/app/data';
+    const isRailwayEnv = !!process.env.RAILWAY_ENVIRONMENT;
+    const railwayUploadsPath = join(railwayVolumePath, 'uploads');
+    const localUploadsPath = join(process.cwd(), 'uploads');
+
+    // Serve static files - priority: Railway Volume > Local
+    if (isRailwayEnv && fs.existsSync(railwayUploadsPath)) {
+      console.log(
+        '🚂 Using Railway Volume for static files:',
+        railwayUploadsPath,
+      );
+      app.useStaticAssets(railwayUploadsPath, {
+        prefix: '/uploads/',
+      });
+    } else {
+      console.log('📁 Using local storage for static files:', localUploadsPath);
+      app.useStaticAssets(localUploadsPath, {
+        prefix: '/uploads/',
+      });
+    }
+
+    // Enable CORS for frontend communication
+    app.enableCors({
+      origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
+      credentials: true,
     });
-  } else {
-    console.log('📁 Using local storage for static files:', localUploadsPath);
-    app.useStaticAssets(localUploadsPath, {
-      prefix: '/uploads/',
-    });
+
+    const port = process.env.PORT ?? 3002;
+    await app.listen(port);
+    console.log(`✅ Application is running on port: ${port}`);
+    console.log(
+      `🌐 Health check available at: http://localhost:${port}/health`,
+    );
+  } catch (error) {
+    console.error('❌ Failed to start application:', error);
+    process.exit(1);
   }
-
-  // Enable CORS for frontend communication
-  app.enableCors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
-    credentials: true,
-  });
-
-  await app.listen(process.env.PORT ?? 3002);
-  console.log(`Application is running on: ${await app.getUrl()}`);
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('💥 Bootstrap failed:', error);
+  process.exit(1);
+});

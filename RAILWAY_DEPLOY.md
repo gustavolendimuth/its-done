@@ -76,6 +76,27 @@ git push origin main
 
 7. **Configurar Variáveis de Ambiente:**
 
+   > ⚠️ **CRÍTICO**: Health check falhará se variáveis obrigatórias não estiverem configuradas!
+
+   📋 **[Veja o guia completo: RAILWAY_ENV_SETUP.md](./RAILWAY_ENV_SETUP.md)**
+
+   **Mínimo obrigatório:**
+
+   ```env
+   # Database (CRÍTICO)
+   DATABASE_URL=${{PostgreSQL.DATABASE_URL}}
+
+   # JWT Secret (CRÍTICO)
+   JWT_SECRET=sua_chave_jwt_super_segura_de_pelo_menos_32_caracteres
+
+   # Environment
+   NODE_ENV=production
+   PORT=3002
+   RAILWAY_ENVIRONMENT=production
+   ```
+
+   **Todas as variáveis disponíveis:**
+
    ```env
    # Database (usar as credenciais do PostgreSQL criado)
    DATABASE_URL=${{PostgreSQL.DATABASE_URL}}
@@ -129,12 +150,14 @@ git push origin main
 
 6. **Configurar Variáveis de Ambiente:**
 
-   ```env
-   # NextAuth
-   NEXTAUTH_URL=${{RAILWAY_STATIC_URL}}
-   NEXTAUTH_SECRET=sua_chave_nextauth_super_segura
+   > 📋 **[Veja o guia completo: RAILWAY_ENV_SETUP.md](./RAILWAY_ENV_SETUP.md)**
 
-   # API URL (usar a URL do serviço backend)
+   ```env
+   # NextAuth (CRÍTICO)
+   NEXTAUTH_URL=${{RAILWAY_STATIC_URL}}
+   NEXTAUTH_SECRET=sua_chave_nextauth_super_segura_de_pelo_menos_32_caracteres
+
+   # API URL (CRÍTICO - usar a URL do serviço backend)
    API_URL=${{backend.RAILWAY_STATIC_URL}}
 
    # Production
