@@ -2,7 +2,12 @@
 
 ## ⚠️ Health Check Falhando?
 
-Se o health check estiver falhando com "service unavailable", é porque as **variáveis de ambiente obrigatórias** não foram configuradas.
+Se o health check estiver falhando com "service unavailable", pode ser por dois motivos:
+
+1. **Variáveis de ambiente obrigatórias** não foram configuradas
+2. **Problema de rede** - health check usando `localhost` em vez de `127.0.0.1` (✅ já corrigido)
+
+> ✅ **Correção aplicada**: Health check agora usa `curl` com `127.0.0.1` para maior compatibilidade com containers
 
 ## 📋 **1. Variáveis Obrigatórias (Backend)**
 

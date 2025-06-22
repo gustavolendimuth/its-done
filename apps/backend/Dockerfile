@@ -52,6 +52,9 @@ RUN pnpm prisma generate && \
 FROM base AS runner
 WORKDIR /app/apps/backend
 
+# Instalar curl para health check
+RUN apk add --no-cache curl
+
 # Criar usuário não-root
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nestjs
@@ -72,9 +75,9 @@ USER nestjs
 # Expor porta
 EXPOSE 3002
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3002/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+# Health check - usar curl em vez de node para maior confiabilidade
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://127.0.0.1:3002/health || exit 1
 
 # Comando para iniciar a aplicação
 CMD ["node", "dist/main.js"] 
