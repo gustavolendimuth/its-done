@@ -5,54 +5,42 @@ FROM node:18-alpine
 RUN apk add --no-cache libc6-compat curl && \
     npm install -g pnpm@8.15.4
 
-# Criar usuário não-root
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nestjs
-
 # Definir diretório de trabalho
 WORKDIR /app
 
-# Copiar arquivos de configuração do workspace
+# Copiar apenas o que é necessário para install
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY turbo.json ./
 COPY packages/ ./packages/
-
-# Copiar arquivos do backend
 COPY apps/backend/package.json ./apps/backend/
-COPY apps/backend/tsconfig*.json ./apps/backend/
-COPY apps/backend/nest-cli.json ./apps/backend/
-COPY apps/backend/src ./apps/backend/src
-COPY apps/backend/prisma ./apps/backend/prisma
 
-# Configurar pnpm e instalar dependências
+# Instalar dependências primeiro
 RUN pnpm config set network-timeout 300000 && \
-    pnpm config set registry https://registry.npmjs.org/ && \
     pnpm install --frozen-lockfile
 
-# Navegar para o diretório do backend
+# Copiar código fonte
+COPY apps/backend/ ./apps/backend/
+
+# Navegar para o backend
 WORKDIR /app/apps/backend
 
-# Debug: Verificar estrutura antes do build
-RUN echo "📋 Verificando estrutura:" && \
-    pwd && \
-    ls -la && \
-    echo "📁 Conteúdo do src:" && \
-    ls -la src/
+# Build em etapas
+RUN echo "🔧 Gerando Prisma client..." && \
+    pnpm prisma generate
 
-# Gerar Prisma client e fazer build
-RUN pnpm prisma generate && \
-    pnpm build
+RUN echo "🔨 Executando build NestJS..." && \
+    pnpm run build
 
-# Debug: Verificar build
-RUN echo "📦 Verificando build:" && \
+# Verificar resultado
+RUN echo "📦 Verificando build result:" && \
     ls -la dist/ && \
-    echo "📄 Arquivo main.js:" && \
-    ls -la dist/main.js
+    echo "📄 Main file:" && \
+    ls -la dist/main.* || echo "Nenhum main file encontrado"
 
-# Criar diretório para Railway Volume
-RUN mkdir -p /app/data/uploads && \
-    chown -R nestjs:nodejs /app && \
-    chown -R nestjs:nodejs /app/data
+# Criar usuário não-root e diretórios
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nestjs && \
+    mkdir -p /app/data/uploads && \
+    chown -R nestjs:nodejs /app
 
 # Mudar para usuário não-root
 USER nestjs
@@ -64,5 +52,5 @@ EXPOSE 3002
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://127.0.0.1:3002/health || exit 1
 
-# Comando para iniciar a aplicação
-CMD ["node", "dist/main.js"] 
+# Comando para iniciar
+CMD ["node", "dist/main"] 

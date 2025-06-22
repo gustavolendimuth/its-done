@@ -1012,13 +1012,13 @@ git push origin main
 - `apps/backend/Dockerfile` - Backend NestJS multi-stage otimizado
 - `apps/frontend/Dockerfile` - Frontend Next.js com standalone output
 - `.dockerignore` - Otimização de build Docker
-- `RAILWAY_DEPLOY.md` - Guia completo de deploy
+- `RAILWAY_COMPLETE_GUIDE.md` - Guia completo de deploy no Railway
 
 **💰 Custos estimados:** ~$15.25/mês (Database + Backend + Frontend + Volume)
 
 ### 📖 Guia Completo
 
-Consulte o arquivo [`RAILWAY_DEPLOY.md`](./RAILWAY_DEPLOY.md) para instruções detalhadas de deploy no Railway.
+Consulte o arquivo [`RAILWAY_COMPLETE_GUIDE.md`](./RAILWAY_COMPLETE_GUIDE.md) para instruções completas de deploy no Railway.
 
 ### 🐳 Docker Local
 
