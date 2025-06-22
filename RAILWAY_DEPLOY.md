@@ -45,21 +45,28 @@ git push origin main
 
 1. Clique em **"+ New Service"** → **"GitHub Repo"**
 2. Selecione o repositório `its-done`
-3. **Railway detectará automaticamente:**
+3. **Configuração Forçada do Dockerfile:**
 
-   - ✅ **Dockerfile**: `apps/backend/Dockerfile` (detecção automática)
+   - ✅ Arquivos `railway.toml` criados para forçar uso do Dockerfile
+   - ✅ Evita problema com Nixpacks ("No start command could be found")
+   - ✅ Garante uso do Dockerfile otimizado
+
+4. **Railway usará automaticamente:**
+
+   - ✅ **Dockerfile**: `apps/backend/Dockerfile` (via railway.toml)
    - ✅ **Build Process**: Multi-stage build otimizado
    - ✅ **Health Check**: Endpoint `/health` configurado
    - ✅ **Port**: 3002 (exposição automática)
 
-4. **Deploy Automático:**
-
+5. **Deploy Automático:**
    - ⚡ Railway iniciará o build automaticamente
    - 📦 Build em 3 stages: deps → builder → runtime
    - 🔒 Container seguro com usuário não-root
    - 🚀 Deploy automático após sucesso do build
 
-5. **Configurar Railway Volume (Recomendado):**
+> **⚠️ Importante:** Se o Railway tentar usar Nixpacks, vá em **Settings → Build** e confirme que **Builder** está definido como **Dockerfile**
+
+6. **Configurar Railway Volume (Recomendado):**
 
    - Vá em **Settings** → **Volumes**
    - Clique em **"New Volume"**
@@ -67,7 +74,7 @@ git push origin main
    - **Size**: 1GB (ou conforme necessário)
    - Clique em **"Add Volume"**
 
-6. **Configurar Variáveis de Ambiente:**
+7. **Configurar Variáveis de Ambiente:**
 
    ```env
    # Database (usar as credenciais do PostgreSQL criado)
@@ -99,25 +106,28 @@ git push origin main
    PORT=3002
    ```
 
-### 7. Deploy do Frontend (Automático ⚡)
+### 8. Deploy do Frontend (Automático ⚡)
 
 1. Clique em **"+ New Service"** → **"GitHub Repo"**
 2. Selecione o repositório `its-done`
-3. **Railway detectará automaticamente:**
+3. **Configuração Forçada do Dockerfile:**
+   - ✅ Arquivo `railway.toml` garante uso do Dockerfile
+   - ✅ Evita problema com Nixpacks
+4. **Railway usará automaticamente:**
 
-   - ✅ **Dockerfile**: `apps/frontend/Dockerfile` (detecção automática)
+   - ✅ **Dockerfile**: `apps/frontend/Dockerfile` (via railway.toml)
    - ✅ **Next.js**: Standalone output configurado
    - ✅ **Build Process**: Multi-stage otimizado
    - ✅ **Port**: 3000 (exposição automática)
 
-4. **Deploy Automático:**
+5. **Deploy Automático:**
 
    - ⚡ Railway iniciará o build automaticamente
    - 📦 Build otimizado com cache de dependências
    - 🔒 Container seguro com usuário não-root
    - 🚀 Deploy automático após sucesso do build
 
-5. **Configurar Variáveis de Ambiente:**
+6. **Configurar Variáveis de Ambiente:**
 
    ```env
    # NextAuth
@@ -132,7 +142,7 @@ git push origin main
    PORT=3000
    ```
 
-### 8. Configurar Networking
+### 9. Configurar Networking
 
 1. **Backend**: Gerar domínio público
 
@@ -145,7 +155,7 @@ git push origin main
    - Clique em "Generate Domain"
    - Anote a URL (ex: `frontend-production-xxx.up.railway.app`)
 
-### 9. Executar Migrações
+### 10. Executar Migrações
 
 Acesse o terminal do serviço backend:
 
@@ -177,6 +187,32 @@ railway run pnpm prisma migrate deploy
 ```
 
 ### Troubleshooting
+
+#### ⚠️ Railway usando Nixpacks em vez de Dockerfile
+
+Se você ver o erro "No start command could be found" e o Railway estiver usando Nixpacks:
+
+**🔧 Solução 1: Arquivos railway.toml (Recomendado)**
+
+- ✅ Já criados automaticamente no projeto
+- ✅ Força uso do Dockerfile em cada serviço
+- ✅ Configuração automática de health checks
+
+**🔧 Solução 2: Configuração Manual**
+
+1. Vá em **Settings → Build** do serviço
+2. Mude **Builder** de "Nixpacks" para "Dockerfile"
+3. Defina **Dockerfile Path**:
+   - Backend: `apps/backend/Dockerfile`
+   - Frontend: `apps/frontend/Dockerfile`
+4. Clique em **"Save"** e redeploy
+
+**🔧 Solução 3: Redeploy**
+
+```bash
+railway service redeploy --service backend
+railway service redeploy --service frontend
+```
 
 #### ⚠️ Build Timeout/Stuck no `pnpm install`
 
