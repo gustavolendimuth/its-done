@@ -30,26 +30,11 @@ RUN echo "🔧 Gerando Prisma client..." && \
 RUN echo "🔨 Executando build NestJS..." && \
     pnpm run build
 
-# Debug: Verificar configuração e tentar builds alternativos
-RUN echo "📋 Debug info:" && \
-    echo "TypeScript version: $(npx tsc --version)" && \
-    echo "Nest CLI version: $(npx nest --version)" && \
-    echo "📁 Conteúdo do dist após primeiro build:" && \
+# Verificar resultado do build
+RUN echo "📦 Verificando build:" && \
     ls -la dist/ && \
-    echo "🔧 Tentando build direto com tsc..." && \
-    npx tsc --project tsconfig.build.json && \
-    echo "📁 Conteúdo do dist após tsc:" && \
-    ls -la dist/ && \
-    echo "🔧 Tentando nest build direto..." && \
-    npx nest build --webpack && \
-    echo "📁 Conteúdo final do dist:" && \
-    ls -la dist/
-
-# Verificar resultado final
-RUN echo "📦 Verificando build final:" && \
-    find dist -type f -name "*.js" | head -10 && \
-    echo "📄 Procurando main file:" && \
-    ls -la dist/main.* || ls -la dist/ | grep main || echo "Nenhum main file encontrado"
+    echo "✅ Main file encontrado:" && \
+    ls -la dist/main.js
 
 # Criar usuário não-root e diretórios
 RUN addgroup --system --gid 1001 nodejs && \
@@ -67,5 +52,5 @@ EXPOSE 3002
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://127.0.0.1:3002/health || exit 1
 
-# Comando para iniciar (com debugging)
-CMD ["sh", "-c", "echo '🚀 Iniciando aplicação...' && echo '📁 Conteúdo do dist:' && ls -la dist/ && echo '📄 Procurando arquivo principal:' && find . -name '*.js' | grep -E '(main|index)' | head -5 && if [ -f dist/main.js ]; then echo '✅ Executando dist/main.js' && node dist/main.js; elif [ -f dist/src/main.js ]; then echo '✅ Executando dist/src/main.js' && node dist/src/main.js; elif [ -f main.js ]; then echo '✅ Executando main.js' && node main.js; else echo '❌ Nenhum arquivo principal encontrado' && exit 1; fi"] 
+# Comando para iniciar
+CMD ["node", "dist/main.js"] 

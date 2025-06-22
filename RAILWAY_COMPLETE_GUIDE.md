@@ -98,10 +98,12 @@ Railway detectará e usará automaticamente:
 ```bash
 # Dockerfile otimizado (single-stage):
 📦 Install: PNPM + Dependencies
-🔨 Build: TypeScript → JavaScript
+🔨 Build: TypeScript → JavaScript (pnpm run build)
 🏗️ Prisma: Generate client
-✅ Result: dist/main.js
+✅ Result: dist/main.js (2665 bytes)
 ```
+
+> ✅ **Build funcionando**: O NestJS agora compila corretamente e gera o `dist/main.js`
 
 > ⚠️ **Se Railway tentar usar Nixpacks**: Vá em **Settings → Build** e mude para **"Dockerfile"**
 
