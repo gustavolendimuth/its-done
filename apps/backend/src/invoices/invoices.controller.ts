@@ -20,9 +20,11 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { InvoicesService } from './invoices.service';
+import { UploadService } from './upload.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import * as fs from 'fs';
 import { diskStorage } from 'multer';
@@ -30,7 +32,11 @@ import { diskStorage } from 'multer';
 @Controller('invoices')
 @UseGuards(JwtAuthGuard)
 export class InvoicesController {
-  constructor(private readonly invoicesService: InvoicesService) {}
+  constructor(
+    private readonly invoicesService: InvoicesService,
+    private readonly uploadService: UploadService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Get('stats')
   async getStats(
@@ -208,13 +214,38 @@ export class InvoicesController {
     @Res() res: Response,
   ) {
     try {
-      const filepath = path.join(
-        process.cwd(),
-        'uploads',
-        'invoices',
-        userId,
-        filename,
-      );
+      const uploadInfo = this.uploadService.getUploadInfo();
+      let filepath: string;
+
+      if (uploadInfo.storage === 'railway') {
+        // Railway Volume path
+        const railwayVolumePath = this.configService.get(
+          'RAILWAY_VOLUME_PATH',
+          '/app/data',
+        );
+        filepath = path.join(
+          railwayVolumePath,
+          'uploads',
+          'invoices',
+          userId,
+          filename,
+        );
+      } else if (uploadInfo.storage === 's3') {
+        // For S3, we should redirect to the S3 URL instead of serving locally
+        // This endpoint shouldn't be used for S3 files
+        throw new NotFoundException(
+          'File not found - S3 files served directly',
+        );
+      } else {
+        // Local storage path
+        filepath = path.join(
+          process.cwd(),
+          'uploads',
+          'invoices',
+          userId,
+          filename,
+        );
+      }
 
       // Check if file exists
       if (!fs.existsSync(filepath)) {
@@ -226,6 +257,11 @@ export class InvoicesController {
     } catch (error) {
       throw new NotFoundException('File not found');
     }
+  }
+
+  @Get('upload-info')
+  async getUploadInfo() {
+    return this.uploadService.getUploadInfo();
   }
 
   @Delete(':id')

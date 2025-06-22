@@ -72,7 +72,8 @@ O **It`s Done** é um sistema completo de controle de horas de trabalho que ofer
 - **Geração Automática**: Criação de faturas baseadas nas horas trabalhadas
 - **Upload de Arquivos**: Anexação de notas fiscais e documentos (PDF, DOC, IMG)
 - **Status de Acompanhamento**: Controle de faturas pendentes, pagas e canceladas
-- **Armazenamento Seguro**: Integração com AWS S3 ou storage local como fallback
+- **Armazenamento Inteligente**: Sistema com prioridade Railway Volume > AWS S3 > Storage local
+- **Railway Volume**: Armazenamento persistente integrado para deploy em produção
 - **Dashboard do Cliente**: Portal público onde clientes visualizam suas faturas, horas trabalhadas e podem fazer download dos documentos
 - **Filtros e Pesquisa Avançada**: Componente reutilizável de busca e filtros com:
   - Busca por número da fatura, descrição ou nome do cliente
@@ -139,7 +140,8 @@ O **It`s Done** é um sistema completo de controle de horas de trabalho que ofer
 
 ### Integrações Externas
 
-- **AWS S3**: Armazenamento de arquivos de faturas
+- **Railway Volume**: Armazenamento persistente para uploads (produção)
+- **AWS S3**: Armazenamento de arquivos de faturas (fallback)
 - **Google OAuth**: Autenticação social
 - **Resend**: Serviço de email transacional
 - **PostgreSQL**: Banco de dados principal
@@ -174,7 +176,8 @@ O **It`s Done** é um sistema completo de controle de horas de trabalho que ofer
 
 #### File Upload & Storage
 
-- **@aws-sdk/client-s3** `^3.826.0` - SDK moderno da AWS para S3
+- **Railway Volume** - Armazenamento persistente nativo (prioridade)
+- **@aws-sdk/client-s3** `^3.826.0` - SDK moderno da AWS para S3 (fallback)
 - **aws-sdk** `^2.1692.0` - SDK clássico da AWS (fallback)
 - **multer** `^2.0.1` - Middleware para upload de arquivos
 
@@ -471,12 +474,54 @@ its-done/
 3. **Endereço Primário**: Cada cliente deve ter um endereço marcado como primário
 4. **Relacionamentos**: Clientes podem ter múltiplos projetos e faturas
 
+### 📂 Sistema de Upload e Armazenamento
+
+O sistema utiliza uma estratégia de armazenamento inteligente com três níveis de prioridade:
+
+#### 🚂 Railway Volume (Prioridade 1 - Produção)
+
+- **Armazenamento Persistente**: Volume montado em `/app/data`
+- **Backup Automático**: Incluído no plano Railway
+- **Performance Otimizada**: Acesso local ao sistema de arquivos
+- **Configuração**: Automática quando volume Railway está disponível
+
+#### ☁️ AWS S3 (Prioridade 2 - Fallback)
+
+- **Escalabilidade**: Armazenamento ilimitado na nuvem
+- **Integração**: SDKs moderno e clássico
+- **Configuração**: Através de variáveis de ambiente AWS
+- **Uso**: Fallback quando Railway Volume não disponível
+
+#### 📁 Storage Local (Prioridade 3 - Desenvolvimento)
+
+- **Desenvolvimento**: Ideal para ambiente local
+- **Simplicidade**: Sem configuração externa necessária
+- **Limitações**: Não recomendado para produção
+- **Localização**: Diretório `uploads/` no projeto
+
+#### 🔧 Configuração Automática
+
+```typescript
+// O sistema detecta automaticamente a melhor opção:
+// 1. Railway Volume (se RAILWAY_ENVIRONMENT + volume existir)
+// 2. AWS S3 (se credenciais AWS configuradas)
+// 3. Local Storage (fallback final)
+```
+
+#### 📋 Tipos de Arquivo Suportados
+
+- **Documentos**: PDF, DOC, DOCX
+- **Imagens**: JPEG, JPG, PNG
+- **Limite de Tamanho**: 10MB por arquivo
+- **Validação**: MIME type + extensão
+
 ### Segurança e Autorização
 
 1. **Isolamento de Dados**: Usuários só acessam seus próprios dados
 2. **Autenticação JWT**: Tokens com expiração configurável
 3. **Validação de Input**: Todas as entradas são validadas no backend
 4. **Upload Seguro**: Apenas tipos de arquivo permitidos são aceitos
+5. **Armazenamento Segregado**: Arquivos organizados por usuário e pasta
 
 ## 🧪 Testes
 
@@ -609,7 +654,11 @@ GOOGLE_CLIENT_SECRET="seu_google_client_secret"
 RESEND_API_KEY="re_sua_chave_resend"
 FROM_EMAIL="noreply@seu-dominio.com"
 
-# AWS S3 (opcional - usa storage local se não configurado)
+# Railway Storage (prioritário em produção)
+RAILWAY_ENVIRONMENT="production"
+RAILWAY_VOLUME_PATH="/app/data"
+
+# AWS S3 (fallback opcional - usa storage local se não configurado)
 AWS_ACCESS_KEY_ID="sua_aws_access_key"
 AWS_SECRET_ACCESS_KEY="sua_aws_secret_key"
 AWS_S3_BUCKET="nome-do-seu-bucket"
@@ -930,31 +979,42 @@ pnpm test:watch
 
 ## 🚢 Deploy
 
-### 🚀 Railway (Recomendado)
+### 🚀 Railway (Recomendado) - Deploy Automático ⚡
 
-O projeto está configurado para deploy no Railway usando Dockerfiles otimizados:
+O projeto está configurado para **deploy automático** no Railway usando Dockerfiles otimizados:
 
 ```bash
-# Preparar para deploy
+# Deploy automático - apenas push para o repositório!
 git add .
 git commit -m "feat: add Railway deployment configuration"
 git push origin main
+
+# 🚀 Railway detecta automaticamente e faz deploy dos serviços
 ```
 
-**Arquitetura de Deploy:**
+**🎯 Arquitetura de Deploy:**
 
 - **PostgreSQL Database** (Railway Template)
-- **Backend API** (NestJS + Docker)
-- **Frontend Web** (Next.js + Docker)
+- **Backend API** (NestJS + Docker) - **Deploy Automático** ⚡
+- **Frontend Web** (Next.js + Docker) - **Deploy Automático** ⚡
+- **Railway Volume** (1GB) - **Storage Persistente** 📁
 
-**Arquivos de configuração criados:**
+**✅ Configuração Automática:**
 
-- `apps/backend/Dockerfile` - Backend NestJS otimizado
+- Railway detecta os Dockerfiles automaticamente
+- Build multi-stage otimizado com cache inteligente
+- Health checks automáticos configurados (`/health`)
+- Deployment automático a cada push para `main`
+- Fallback inteligente: Railway Volume → AWS S3 → Local
+
+**📁 Arquivos de configuração criados:**
+
+- `apps/backend/Dockerfile` - Backend NestJS multi-stage otimizado
 - `apps/frontend/Dockerfile` - Frontend Next.js com standalone output
-- `railway.json` - Configuração geral do Railway
+- `.dockerignore` - Otimização de build Docker
 - `RAILWAY_DEPLOY.md` - Guia completo de deploy
 
-**Custos estimados:** ~$15/mês para ambiente completo
+**💰 Custos estimados:** ~$15.25/mês (Database + Backend + Frontend + Volume)
 
 ### 📖 Guia Completo
 

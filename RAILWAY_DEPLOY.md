@@ -41,17 +41,33 @@ git push origin main
 2. Selecione **"Database"** → **"PostgreSQL"**
 3. Anote as credenciais geradas automaticamente
 
-### 4. Deploy do Backend
+### 4. Deploy do Backend (Automático ⚡)
 
 1. Clique em **"+ New Service"** → **"GitHub Repo"**
 2. Selecione o repositório `its-done`
-3. **Configure o serviço:**
+3. **Railway detectará automaticamente:**
 
-   - **Root Directory**: `/apps/backend`
-   - **Build Command**: `docker build -f Dockerfile ../..`
-   - **Start Command**: `pnpm start:prod`
+   - ✅ **Dockerfile**: `apps/backend/Dockerfile` (detecção automática)
+   - ✅ **Build Process**: Multi-stage build otimizado
+   - ✅ **Health Check**: Endpoint `/health` configurado
+   - ✅ **Port**: 3002 (exposição automática)
 
-4. **Configurar Variáveis de Ambiente:**
+4. **Deploy Automático:**
+
+   - ⚡ Railway iniciará o build automaticamente
+   - 📦 Build em 3 stages: deps → builder → runtime
+   - 🔒 Container seguro com usuário não-root
+   - 🚀 Deploy automático após sucesso do build
+
+5. **Configurar Railway Volume (Recomendado):**
+
+   - Vá em **Settings** → **Volumes**
+   - Clique em **"New Volume"**
+   - **Mount Path**: `/app/data`
+   - **Size**: 1GB (ou conforme necessário)
+   - Clique em **"Add Volume"**
+
+6. **Configurar Variáveis de Ambiente:**
 
    ```env
    # Database (usar as credenciais do PostgreSQL criado)
@@ -59,6 +75,10 @@ git push origin main
 
    # JWT
    JWT_SECRET=sua_chave_jwt_super_segura_aqui
+
+   # Railway Storage (prioritário se Volume configurado)
+   RAILWAY_ENVIRONMENT=production
+   RAILWAY_VOLUME_PATH=/app/data
 
    # Email - Resend
    RESEND_API_KEY=re_sua_chave_resend
@@ -68,7 +88,7 @@ git push origin main
    GOOGLE_CLIENT_ID=seu_google_client_id
    GOOGLE_CLIENT_SECRET=seu_google_client_secret
 
-   # AWS S3 (opcional)
+   # AWS S3 (fallback opcional)
    AWS_ACCESS_KEY_ID=sua_aws_access_key
    AWS_SECRET_ACCESS_KEY=sua_aws_secret_key
    AWS_S3_BUCKET=seu-bucket-nome
@@ -79,17 +99,25 @@ git push origin main
    PORT=3002
    ```
 
-### 5. Deploy do Frontend
+### 7. Deploy do Frontend (Automático ⚡)
 
 1. Clique em **"+ New Service"** → **"GitHub Repo"**
 2. Selecione o repositório `its-done`
-3. **Configure o serviço:**
+3. **Railway detectará automaticamente:**
 
-   - **Root Directory**: `/apps/frontend`
-   - **Build Command**: `docker build -f Dockerfile ../..`
-   - **Start Command**: `node server.js`
+   - ✅ **Dockerfile**: `apps/frontend/Dockerfile` (detecção automática)
+   - ✅ **Next.js**: Standalone output configurado
+   - ✅ **Build Process**: Multi-stage otimizado
+   - ✅ **Port**: 3000 (exposição automática)
 
-4. **Configurar Variáveis de Ambiente:**
+4. **Deploy Automático:**
+
+   - ⚡ Railway iniciará o build automaticamente
+   - 📦 Build otimizado com cache de dependências
+   - 🔒 Container seguro com usuário não-root
+   - 🚀 Deploy automático após sucesso do build
+
+5. **Configurar Variáveis de Ambiente:**
 
    ```env
    # NextAuth
@@ -104,7 +132,7 @@ git push origin main
    PORT=3000
    ```
 
-### 6. Configurar Networking
+### 8. Configurar Networking
 
 1. **Backend**: Gerar domínio público
 
@@ -117,7 +145,7 @@ git push origin main
    - Clique em "Generate Domain"
    - Anote a URL (ex: `frontend-production-xxx.up.railway.app`)
 
-### 7. Executar Migrações
+### 9. Executar Migrações
 
 Acesse o terminal do serviço backend:
 
@@ -150,6 +178,30 @@ railway run pnpm prisma migrate deploy
 
 ### Troubleshooting
 
+#### ⚠️ Build Timeout/Stuck no `pnpm install`
+
+Se o build estiver travando no `pnpm install --frozen-lockfile`:
+
+```bash
+# 1. Verificar logs em tempo real
+railway logs --follow --service backend
+
+# 2. Restart do build (força rebuild)
+railway service redeploy
+
+# 3. Verificar se dependencies estão corretas
+git log --oneline -10  # Verificar últimos commits
+```
+
+**✅ Otimizações implementadas no Dockerfile:**
+
+- Multi-stage build para reduzir tamanho e melhorar cache
+- Timeout de rede aumentado (300s) para downloads lentos
+- Registry configurado para evitar problemas de conectividade
+- Health check automático com endpoint `/health`
+- Container não-root para segurança em produção
+- Cache de layers otimizado para builds mais rápidos
+
 #### Build Failure
 
 ```bash
@@ -157,9 +209,12 @@ railway run pnpm prisma migrate deploy
 railway service disconnect
 railway service connect
 
-# Verificar logs
+# Verificar logs detalhados
 railway logs --service backend
 railway logs --service frontend
+
+# Restart do deploy
+railway service redeploy
 ```
 
 #### Database Connection
@@ -167,6 +222,20 @@ railway logs --service frontend
 ```bash
 # Testar conexão do banco
 railway connect PostgreSQL
+
+# Verificar variáveis de ambiente
+railway variables --service backend
+```
+
+#### Verificação de Deploy Automático
+
+```bash
+# Verificar status dos serviços
+railway status
+
+# Ver última atividade de deploy
+railway deployments --service backend
+railway deployments --service frontend
 ```
 
 ## 📊 Monitoramento
@@ -223,19 +292,22 @@ railway logs --follow --service frontend
 - **Database**: $5/mês (Postgres)
 - **Backend**: $5/mês (512MB RAM)
 - **Frontend**: $5/mês (512MB RAM)
-- **Total**: ~$15/mês
+- **Volume Storage**: $0.25/GB/mês (1GB = $0.25/mês)
+- **Total**: ~$15.25/mês (com 1GB volume)
 
 ## 📝 Checklist Final
 
 - [ ] Todos os serviços deployados
+- [ ] Railway Volume configurado (1GB+)
 - [ ] Variáveis de ambiente configuradas
 - [ ] Domínios gerados e funcionando
 - [ ] Migrações executadas
 - [ ] Seed de dados rodado
 - [ ] Frontend consegue se comunicar com Backend
 - [ ] Autenticação funcionando
-- [ ] Upload de arquivos funcionando
+- [ ] Upload de arquivos funcionando (testar Railway Volume)
 - [ ] Emails sendo enviados
+- [ ] Storage info endpoint funcionando (`/invoices/upload-info`)
 
 ## 🔄 Atualizações
 

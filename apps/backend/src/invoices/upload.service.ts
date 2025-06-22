@@ -15,7 +15,7 @@ export interface UploadResult {
   originalName: string;
   size: number;
   mimeType: string;
-  storage: 'local' | 's3';
+  storage: 'railway' | 'local' | 's3';
 }
 
 export interface UploadOptions {
@@ -32,20 +32,34 @@ export class UploadService {
   private s3Client: S3Client;
   private readonly bucketName: string;
   private readonly useS3: boolean;
+  private readonly useRailway: boolean;
   private readonly localUploadPath: string;
+  private readonly railwayVolumePath: string;
 
   constructor(private configService: ConfigService) {
     this.bucketName = this.configService.get('AWS_S3_BUCKET', '');
     this.localUploadPath = path.join(process.cwd(), 'uploads');
 
-    // Determine if S3 is configured
-    this.useS3 = !!(
-      this.configService.get('AWS_ACCESS_KEY_ID') &&
-      this.configService.get('AWS_SECRET_ACCESS_KEY') &&
-      this.bucketName
+    // Railway Volume path (typically /app/data in Railway)
+    this.railwayVolumePath = this.configService.get(
+      'RAILWAY_VOLUME_PATH',
+      '/app/data',
     );
 
-    if (this.useS3) {
+    // Determine storage priority: Railway Volume > S3 > Local
+    this.useRailway = this.isRailwayVolumeAvailable();
+
+    this.useS3 =
+      !this.useRailway &&
+      !!(
+        this.configService.get('AWS_ACCESS_KEY_ID') &&
+        this.configService.get('AWS_SECRET_ACCESS_KEY') &&
+        this.bucketName
+      );
+
+    if (this.useRailway) {
+      this.logger.log('🚂 Railway Volume storage initialized');
+    } else if (this.useS3) {
       this.s3Client = new S3Client({
         region: this.configService.get('AWS_REGION', 'us-east-1'),
         credentials: {
@@ -55,9 +69,19 @@ export class UploadService {
       });
       this.logger.log('✅ S3 upload service initialized');
     } else {
-      this.logger.log(
-        '📁 Local upload service initialized (S3 not configured)',
-      );
+      this.logger.log('📁 Local upload service initialized (fallback)');
+    }
+  }
+
+  private isRailwayVolumeAvailable(): boolean {
+    try {
+      // Check if Railway environment and volume mount exists
+      const isRailwayEnv = !!this.configService.get('RAILWAY_ENVIRONMENT');
+      const volumeExists = require('fs').existsSync(this.railwayVolumePath);
+
+      return isRailwayEnv && volumeExists;
+    } catch (error) {
+      return false;
     }
   }
 
@@ -85,7 +109,27 @@ export class UploadService {
 
       let result: UploadResult;
 
-      if (this.useS3) {
+      if (this.useRailway) {
+        try {
+          result = await this.uploadToRailway(file, key);
+        } catch (railwayError) {
+          this.logger.warn(
+            `⚠️ Railway storage failed, falling back to S3/local: ${railwayError.message}`,
+          );
+          if (this.useS3) {
+            try {
+              result = await this.uploadToS3(file, key);
+            } catch (s3Error) {
+              this.logger.warn(
+                `⚠️ S3 upload also failed, using local storage: ${s3Error.message}`,
+              );
+              result = await this.uploadToLocal(file, key);
+            }
+          } else {
+            result = await this.uploadToLocal(file, key);
+          }
+        }
+      } else if (this.useS3) {
         try {
           result = await this.uploadToS3(file, key);
         } catch (s3Error) {
@@ -180,6 +224,38 @@ export class UploadService {
     }
   }
 
+  private async uploadToRailway(
+    file: Express.Multer.File,
+    key: string,
+  ): Promise<UploadResult> {
+    try {
+      const fullPath = path.join(this.railwayVolumePath, 'uploads', key);
+      const directory = path.dirname(fullPath);
+
+      // Ensure directory exists
+      await fs.mkdir(directory, { recursive: true });
+
+      // Write file
+      const fileData = file.buffer || (await fs.readFile(file.path));
+      await fs.writeFile(fullPath, fileData);
+
+      // Railway URL - serves files from volume
+      const url = `/uploads/${key}`;
+
+      return {
+        url,
+        key,
+        originalName: file.originalname,
+        size: file.size,
+        mimeType: file.mimetype,
+        storage: 'railway',
+      };
+    } catch (error) {
+      this.logger.error(`Railway storage upload failed: ${error.message}`);
+      throw new Error(`Failed to upload to Railway storage: ${error.message}`);
+    }
+  }
+
   private async uploadToLocal(
     file: Express.Multer.File,
     key: string,
@@ -211,7 +287,10 @@ export class UploadService {
     }
   }
 
-  async deleteFile(key: string, storage: 'local' | 's3'): Promise<void> {
+  async deleteFile(
+    key: string,
+    storage: 'railway' | 'local' | 's3',
+  ): Promise<void> {
     try {
       if (storage === 's3' && this.useS3) {
         const deleteCommand = new DeleteObjectCommand({
@@ -220,6 +299,10 @@ export class UploadService {
         });
         await this.s3Client.send(deleteCommand);
         this.logger.log(`🗑️ Deleted S3 file: ${key}`);
+      } else if (storage === 'railway') {
+        const fullPath = path.join(this.railwayVolumePath, 'uploads', key);
+        await fs.unlink(fullPath);
+        this.logger.log(`🗑️ Deleted Railway storage file: ${key}`);
       } else {
         const fullPath = path.join(this.localUploadPath, key);
         await fs.unlink(fullPath);
@@ -230,10 +313,15 @@ export class UploadService {
     }
   }
 
-  getUploadInfo(): { storage: 'local' | 's3'; configured: boolean } {
+  getUploadInfo(): {
+    storage: 'railway' | 'local' | 's3';
+    configured: boolean;
+    railwayVolumePath?: string;
+  } {
     return {
-      storage: this.useS3 ? 's3' : 'local',
-      configured: this.useS3,
+      storage: this.useRailway ? 'railway' : this.useS3 ? 's3' : 'local',
+      configured: this.useRailway || this.useS3,
+      railwayVolumePath: this.useRailway ? this.railwayVolumePath : undefined,
     };
   }
 }
