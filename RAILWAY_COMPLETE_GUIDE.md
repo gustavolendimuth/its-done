@@ -377,7 +377,23 @@ Se Railway usar Nixpacks:
    - Backend: `apps/backend/Dockerfile`
    - Frontend: `apps/frontend/Dockerfile`
 
-### **❌ Build Timeout**
+### **❌ Build Timeout ou Arquivo main.js não encontrado**
+
+#### **1. Problemas com NestJS Build**
+
+Se ver logs como "Nenhum main file encontrado":
+
+```bash
+# Verificar logs detalhados
+railway logs --service backend --follow
+
+# Procurar por:
+# 🔨 Executando build NestJS...
+# 📋 Debug info: (versões e tentativas de build)
+# 📦 Verificando build final: (resultado)
+```
+
+#### **2. Restart Build**
 
 ```bash
 # Restart Build
@@ -391,6 +407,19 @@ railway logs --service frontend
 # Limpar Cache
 railway service disconnect
 railway service connect
+```
+
+#### **3. Verificar Build Localmente**
+
+```bash
+# Testar build local
+cd apps/backend
+pnpm install
+pnpm prisma generate
+pnpm run build
+
+# Verificar se dist/main.js foi criado
+ls -la dist/
 ```
 
 ### **❌ Database Connection**
