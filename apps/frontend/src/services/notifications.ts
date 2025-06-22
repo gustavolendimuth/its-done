@@ -28,6 +28,9 @@ export const useNotifications = () => {
       const { data } = await api.get<Notification[]>("/notifications");
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -39,6 +42,9 @@ export const useNotification = (id: string) => {
       return data;
     },
     enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 

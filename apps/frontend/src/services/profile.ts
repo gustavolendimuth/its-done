@@ -43,6 +43,9 @@ export const useProfile = () => {
       const { data } = await api.get<Profile>("/profile");
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 

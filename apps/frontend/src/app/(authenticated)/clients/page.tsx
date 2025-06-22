@@ -7,7 +7,7 @@ import { FormModal } from "@/components/ui/form-modal";
 import { Button } from "@/components/ui/button";
 import { useClients } from "@/services/clients";
 import { useClientStats } from "@/services/client-stats";
-import { StatsCard } from "@/components/ui/stats-card";
+import { ClientsBigStats } from "@/components/clients/clients-big-stats";
 import { SearchInput } from "@/components/ui/search-input";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
@@ -77,31 +77,8 @@ export default function ClientsPage() {
         className="mb-6"
       />
 
-      {/* Stats */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <StatsCard
-            title="Total Clients"
-            value={stats.totalClients}
-            icon={Users}
-            variant="blue"
-          />
-
-          <StatsCard
-            title="Total Hours"
-            value={formatHoursToHHMM(stats.totalHours)}
-            icon={Clock}
-            variant="green"
-          />
-
-          <StatsCard
-            title="Total Invoices"
-            value={stats.totalInvoices}
-            icon={FileText}
-            variant="purple"
-          />
-        </div>
-      )}
+      {/* Big Stats Display */}
+      <ClientsBigStats className="mb-8" />
 
       {/* Search Bar */}
       <SearchInput

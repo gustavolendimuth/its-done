@@ -72,7 +72,7 @@ import {
   type InvoiceReport,
 } from "@/services/reports";
 import { toast } from "sonner";
-import { StatsCard } from "@/components/ui/stats-card";
+import { AnalyticsBigStats } from "@/components/analytics/analytics-big-stats";
 import {
   BigCard,
   BigCardStat,
@@ -290,44 +290,8 @@ export default function AnalyticsPage() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* Main Stats */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <StatsCard
-              title="Total Hours"
-              value={formatHoursToHHMM(dashboardStats?.totalHours || 0)}
-              description={
-                dashboardStats?.hoursGrowth !== undefined
-                  ? `${Math.abs(dashboardStats.hoursGrowth).toFixed(1)}% from last month`
-                  : undefined
-              }
-              icon={Clock}
-              variant="blue"
-            />
-
-            <StatsCard
-              title="Active Clients"
-              value={dashboardStats?.totalClients || 0}
-              description="Total registered clients"
-              icon={Users}
-              variant="green"
-            />
-
-            <StatsCard
-              title="Total Invoices"
-              value={dashboardStats?.totalInvoices || 0}
-              description={`${dashboardStats?.pendingInvoices || 0} pending`}
-              icon={FileText}
-              variant="purple"
-            />
-
-            <StatsCard
-              title="This Month"
-              value={formatHoursToHHMM(dashboardStats?.thisMonthHours || 0)}
-              description="Current month progress"
-              icon={CalendarIcon}
-              variant="orange"
-            />
-          </div>
+          {/* Big Stats Display */}
+          <AnalyticsBigStats className="mb-8" />
 
           {/* Charts Row */}
           <div className="grid gap-6 md:grid-cols-2">

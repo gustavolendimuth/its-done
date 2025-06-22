@@ -1,7 +1,8 @@
 "use client";
 
 import { WorkHourForm } from "@/components/work-hours/work-hour-form";
-import { TotalHoursDisplay } from "@/components/work-hours/total-hours-display";
+import { WorkHoursBigStats } from "@/components/work-hours/work-hours-big-stats";
+import { WorkHourCard } from "@/components/work-hours/work-hour-card";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { PeriodSelectorV2 } from "@/components/ui/period-selector-v2";
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Clock, Plus } from "lucide-react";
 import { useWorkHoursStats } from "@/services/work-hours-stats";
-import { useTimeEntries } from "@/services/time-entries";
+import { useTimeEntries, useDeleteTimeEntry } from "@/services/time-entries";
 import { useClients, Client } from "@/services/clients";
 import { formatHoursToHHMM } from "@/lib/utils";
 import { InfoCard } from "@/components/ui/info-card";
@@ -41,6 +42,7 @@ export default function WorkHoursPage() {
   }>(initialDateRange);
   const [selectedClient, setSelectedClient] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Memoizar as datas para evitar recriações desnecessárias
   const queryParams = useMemo(() => {
@@ -68,6 +70,9 @@ export default function WorkHoursPage() {
   // Estatísticas
   const { data: stats } = useWorkHoursStats(queryParams || undefined);
 
+  // Delete mutation
+  const deleteTimeEntry = useDeleteTimeEntry();
+
   // Distinguir entre carregamento inicial e revalidação
   const isInitialLoading = isLoadingWorkHours || isLoadingClients;
   const isRefetching = isFetchingWorkHours && !isLoadingWorkHours;
@@ -88,6 +93,22 @@ export default function WorkHoursPage() {
 
   const handleWorkHourAdded = () => {
     setIsModalOpen(false);
+  };
+
+  const handleEdit = (id: string) => {
+    // TODO: Implementar edição de work hour
+    console.log("Edit work hour:", id);
+  };
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    try {
+      await deleteTimeEntry.mutateAsync(id);
+    } catch (error) {
+      console.error("Error deleting work hour:", error);
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -152,9 +173,9 @@ export default function WorkHoursPage() {
         </div>
       </div>
 
-      {/* Total Hours Display - Featured */}
+      {/* Big Stats Display */}
       <div className="mb-8">
-        <TotalHoursDisplay
+        <WorkHoursBigStats
           dateRange={dateRange}
           clientId={selectedClient}
           hourlyRate={50} // Pode ser dinâmico no futuro
@@ -207,31 +228,15 @@ export default function WorkHoursPage() {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {workHours?.map((workHour: any) => (
-              <div
+              <WorkHourCard
                 key={workHour.id}
-                className="bg-card rounded-lg border p-4 hover:border-primary/30 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-medium text-foreground">
-                      {workHour.client.company}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {workHour.description}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium text-foreground">
-                      {formatHoursToHHMM(workHour.hours)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {new Date(workHour.date).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              </div>
+                workHour={workHour}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                isDeleting={deletingId === workHour.id}
+              />
             ))}
           </div>
         )}

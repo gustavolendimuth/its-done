@@ -72,6 +72,9 @@ export const useInvoices = (params?: {
       });
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -83,6 +86,9 @@ export const useInvoice = (id: string) => {
       return data;
     },
     enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -94,8 +100,21 @@ export const useCreateInvoice = () => {
       const response = await api.post<Invoice>("/invoices", data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (invoice) => {
+      // Invalidate all invoices queries
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      // Invalidate client invoices
+      queryClient.invalidateQueries({
+        queryKey: ["clients", invoice.clientId, "invoices"],
+      });
+      // Invalidate time entries (may affect available entries)
+      queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
+      // Invalidate invoice stats
+      queryClient.invalidateQueries({ queryKey: ["invoices", "stats"] });
+      // Invalidate client stats
+      queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -114,9 +133,20 @@ export const useUpdateInvoice = () => {
       const response = await api.patch<Invoice>(`/invoices/${id}`, data);
       return response.data;
     },
-    onSuccess: (_, { id }) => {
+    onSuccess: (invoice, { id }) => {
+      // Invalidate all invoices queries
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["invoices", id] });
+      // Invalidate client invoices
+      queryClient.invalidateQueries({
+        queryKey: ["clients", invoice.clientId, "invoices"],
+      });
+      // Invalidate invoice stats
+      queryClient.invalidateQueries({ queryKey: ["invoices", "stats"] });
+      // Invalidate client stats
+      queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -129,9 +159,24 @@ export const useDeleteInvoice = () => {
       const response = await api.delete<Invoice>(`/invoices/${id}`);
       return response.data;
     },
-    onSuccess: (_, id) => {
+    onSuccess: (invoice, id) => {
+      // Invalidate all invoices queries
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["invoices", id] });
+      // Invalidate client invoices
+      if (invoice?.clientId) {
+        queryClient.invalidateQueries({
+          queryKey: ["clients", invoice.clientId, "invoices"],
+        });
+      }
+      // Invalidate time entries (may affect available entries)
+      queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
+      // Invalidate invoice stats
+      queryClient.invalidateQueries({ queryKey: ["invoices", "stats"] });
+      // Invalidate client stats
+      queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -155,9 +200,16 @@ export const useUploadInvoiceFile = () => {
       );
       return response.data;
     },
-    onSuccess: (_, { id }) => {
+    onSuccess: (invoice, { id }) => {
+      // Invalidate all invoices queries
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["invoices", id] });
+      // Invalidate client invoices
+      queryClient.invalidateQueries({
+        queryKey: ["clients", invoice.clientId, "invoices"],
+      });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -172,6 +224,9 @@ export const useClientInvoices = (clientId: string) => {
       return data;
     },
     enabled: !!clientId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 

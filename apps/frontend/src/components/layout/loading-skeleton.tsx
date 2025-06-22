@@ -36,6 +36,61 @@ function CardSkeleton() {
   );
 }
 
+// Skeleton para BigStatsDisplay
+function BigStatsDisplaySkeleton() {
+  return (
+    <Card className="shadow-lg">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <SkeletonBox className="h-10 w-10 rounded-xl" />
+            <div className="space-y-2">
+              <SkeletonBox className="h-5 w-40" />
+              <SkeletonBox className="h-4 w-32" />
+            </div>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Main value */}
+        <div className="text-center py-4">
+          <SkeletonBox className="h-16 w-48 mx-auto mb-2" />
+          <SkeletonBox className="h-4 w-64 mx-auto" />
+        </div>
+
+        {/* Stats grid - 3 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-muted/20 rounded-lg p-3 space-y-2">
+              <div className="flex items-center space-x-2 mb-1">
+                <SkeletonBox className="h-4 w-4" />
+                <SkeletonBox className="h-4 w-20" />
+              </div>
+              <SkeletonBox className="h-6 w-16" />
+              <SkeletonBox className="h-3 w-24" />
+            </div>
+          ))}
+        </div>
+
+        {/* Extra content (2 columns) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="bg-muted/20 rounded-lg p-3 space-y-2">
+              <div className="flex items-center space-x-2 mb-1">
+                <SkeletonBox className="h-4 w-4" />
+                <SkeletonBox className="h-4 w-24" />
+              </div>
+              <SkeletonBox className="h-4 w-full mb-2" />
+              <SkeletonBox className="h-2 w-full rounded-full" />
+              <SkeletonBox className="h-3 w-32" />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function StatsSkeleton() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -143,33 +198,8 @@ function WorkHoursSkeleton() {
         </div>
       </div>
 
-      {/* Total Hours Display - Big Card */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <SkeletonBox className="h-10 w-10 rounded-xl" />
-            <div className="space-y-2">
-              <SkeletonBox className="h-5 w-32" />
-              <SkeletonBox className="h-4 w-24" />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="text-center">
-            <SkeletonBox className="h-16 w-32 mx-auto mb-2" />
-            <SkeletonBox className="h-4 w-48 mx-auto" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-muted/20 rounded-lg p-3 space-y-2">
-                <SkeletonBox className="h-4 w-20" />
-                <SkeletonBox className="h-6 w-16" />
-                <SkeletonBox className="h-3 w-24" />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Big Stats Display */}
+      <BigStatsDisplaySkeleton />
 
       {/* Work Hours List */}
       <div className="space-y-4">
@@ -226,12 +256,8 @@ function ClientsPageSkeleton() {
         </CardHeader>
       </Card>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[1, 2, 3].map((i) => (
-          <CardSkeleton key={i} />
-        ))}
-      </div>
+      {/* Big Stats Display */}
+      <BigStatsDisplaySkeleton />
 
       {/* Search Bar */}
       <SkeletonBox className="h-11 w-full" />
@@ -298,6 +324,9 @@ function ProjectsPageSkeleton() {
           </div>
         </CardHeader>
       </Card>
+
+      {/* Big Stats Display */}
+      <BigStatsDisplaySkeleton />
 
       {/* Filter and Count */}
       <div className="flex gap-4 items-center">
@@ -368,12 +397,8 @@ function InvoicesPageSkeleton() {
         </CardHeader>
       </Card>
 
-      {/* Stats - 4 columns */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <CardSkeleton key={i} />
-        ))}
-      </div>
+      {/* Big Stats Display */}
+      <BigStatsDisplaySkeleton />
 
       {/* Search and Filters */}
       <Card>
@@ -459,12 +484,8 @@ function AnalyticsPageSkeleton() {
       <div className="space-y-6">
         <SkeletonBox className="h-11 w-full max-w-md" />
 
-        {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <CardSkeleton key={i} />
-          ))}
-        </div>
+        {/* Big Stats Display */}
+        <BigStatsDisplaySkeleton />
 
         {/* Charts */}
         <div className="grid gap-6 md:grid-cols-2">

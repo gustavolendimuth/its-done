@@ -62,6 +62,7 @@ const accentColorStyles = {
   green: "bg-green-500",
   red: "bg-red-500",
   yellow: "bg-yellow-500",
+  purple: "bg-purple-500",
 };
 
 export function InvoiceCard({
@@ -103,6 +104,7 @@ export function InvoiceCard({
     <Card
       className={cn(
         "overflow-hidden group relative transition-all duration-200 hover:shadow-lg hover:scale-[1.02]",
+        "bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/20 dark:to-purple-900/20 border-purple-200 dark:border-purple-800",
         className
       )}
     >

@@ -50,6 +50,9 @@ export const useClients = () => {
       const { data } = await api.get<Client[]>("/clients");
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -61,6 +64,9 @@ export const useClient = (id: string) => {
       return data;
     },
     enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -80,7 +86,14 @@ export const useCreateClient = () => {
       }
     },
     onSuccess: () => {
+      // Invalidate all clients queries
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      // Invalidate client stats
+      queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      // Invalidate work hours stats
+      queryClient.invalidateQueries({ queryKey: ["workHours", "stats"] });
     },
   });
 };
@@ -94,8 +107,15 @@ export const useUpdateClient = () => {
       return response.data;
     },
     onSuccess: (_, { id }) => {
+      // Invalidate all clients queries
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["clients", id] });
+      // Invalidate client stats
+      queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      // Invalidate work hours stats
+      queryClient.invalidateQueries({ queryKey: ["workHours", "stats"] });
     },
   });
 };
@@ -109,8 +129,17 @@ export const useDeleteClient = () => {
       return response.data;
     },
     onSuccess: (_, id) => {
+      // Invalidate all clients queries
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["clients", id] });
+      // Invalidate client stats
+      queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      // Invalidate work hours stats
+      queryClient.invalidateQueries({ queryKey: ["workHours", "stats"] });
+      // Invalidate time entries (client may have been associated)
+      queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
     },
   });
 };

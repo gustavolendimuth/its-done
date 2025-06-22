@@ -26,6 +26,9 @@ export const useUsers = () => {
       const { data } = await api.get<User[]>("/users");
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -37,6 +40,9 @@ export const useUser = (id: string) => {
       return data;
     },
     enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 

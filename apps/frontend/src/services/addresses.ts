@@ -41,6 +41,9 @@ export const useAddresses = (clientId?: string) => {
       const { data } = await api.get<Address[]>("/addresses", { params });
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -52,6 +55,9 @@ export const useAddress = (id: string) => {
       return data;
     },
     enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -78,6 +84,9 @@ export const useClientAddresses = (clientId: string) => {
       }
     },
     enabled: !!clientId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -89,12 +98,19 @@ export const useCreateAddress = () => {
       const response = await api.post<Address>("/addresses", data);
       return response.data;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (address, variables) => {
+      // Invalidate all addresses queries
       queryClient.invalidateQueries({ queryKey: ["addresses"] });
       queryClient.invalidateQueries({
         queryKey: ["clients", variables.clientId, "addresses"],
       });
+      // Invalidate client data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({
+        queryKey: ["clients", variables.clientId],
+      });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -113,15 +129,20 @@ export const useUpdateAddress = () => {
       const response = await api.patch<Address>(`/addresses/${id}`, data);
       return response.data;
     },
-    onSuccess: (_, { id, data }) => {
+    onSuccess: (address, { id, data }) => {
+      // Invalidate all addresses queries
       queryClient.invalidateQueries({ queryKey: ["addresses"] });
       queryClient.invalidateQueries({ queryKey: ["addresses", id] });
       if (data.clientId) {
         queryClient.invalidateQueries({
           queryKey: ["clients", data.clientId, "addresses"],
         });
+        queryClient.invalidateQueries({ queryKey: ["clients", data.clientId] });
       }
+      // Invalidate client data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -137,8 +158,12 @@ export const useDeleteAddress = () => {
       return response.data;
     },
     onSuccess: () => {
+      // Invalidate all addresses queries
       queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      // Invalidate client data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -152,11 +177,16 @@ export const useSetPrimaryAddress = () => {
       return response.data;
     },
     onSuccess: (data) => {
+      // Invalidate all addresses queries
       queryClient.invalidateQueries({ queryKey: ["addresses"] });
       queryClient.invalidateQueries({
         queryKey: ["clients", data.clientId, "addresses"],
       });
+      // Invalidate client data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["clients", data.clientId] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };

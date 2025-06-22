@@ -176,15 +176,16 @@ export function ClientCard({ client }: ClientCardProps) {
     <div className="group transition-all duration-200 hover:scale-[1.02] space-y-0">
       <Card
         className={cn(
-          "overflow-hidden relative hover:shadow-lg rounded-b-none"
+          "overflow-hidden relative hover:shadow-lg rounded-b-none",
+          "bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20 border-blue-200 dark:border-blue-800"
         )}
       >
         {/* Accent bar */}
-        <div className="h-2 bg-green-500" />
+        <div className="h-2 bg-blue-500" />
 
         <CardHeader className="pb-3">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold bg-green-500">
+            <div className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold bg-blue-500">
               <Building2 className="h-6 w-6" />
             </div>
             <div className="min-w-0 flex-1">
@@ -232,7 +233,7 @@ export function ClientCard({ client }: ClientCardProps) {
       </Card>
 
       {/* Action Buttons - Always Visible */}
-      <div className="border border-t-0 rounded-t-none rounded-b-lg bg-card group-hover:shadow-lg">
+      <div className="border border-t-0 rounded-t-none rounded-b-lg bg-blue-50/50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 group-hover:shadow-lg">
         <div className="p-3 border-t">
           <div className="grid grid-cols-3 gap-2">
             <Button

@@ -255,6 +255,39 @@ O **It`s Done** é um sistema completo de controle de horas de trabalho que ofer
   - Spacing e estrutura visual consistente em toda a aplicação
   - Melhor acessibilidade e experiência do usuário
   - Hierarquia visual clara: PageHeader (ícone da página) + InfoCard (ícone Info)
+- **Correção de Legibilidade**: Cores de erro otimizadas para melhor legibilidade
+  - Cor `--destructive` no modo escuro alterada de `0 62.8% 30.6%` para `0 84.2% 60.2%`
+  - Melhor contraste e legibilidade em avisos de erro e alertos destructivos
+  - Mantém consistência com o tema claro usando a mesma configuração HSL
+- **Redesign dos Cards de Projects**: Cards redesenhados seguindo o padrão dos cards de clients
+  - Layout moderno com barra de destaque indigo e ícone circular
+  - Seção de estatísticas organizada em grid 3x3 com métricas relevantes
+  - Botões de ação sempre visíveis na parte inferior (Client, Edit, Delete)
+  - Hover effects e animações para melhor feedback visual
+  - AlertDialog integrado para confirmação de exclusão
+  - Componente `ProjectCard` criado seguindo os padrões do `ClientCard`
+- **Sistema de Cores Temáticas dos Cards**: Cards redesenhados com cores que correspondem aos big stats de cada página
+  - **ClientCard**: Tema azul (`blue`) com background gradient, barra de destaque e ícone azuis
+  - **ProjectCard**: Tema indigo (`indigo`) com background gradient, barra de destaque e ícone indigo
+  - **InvoiceCard**: Tema purple (`purple`) com background gradient para consistência visual
+  - **WorkHourCard**: Tema verde (`green`) seguindo o padrão visual dos outros cards com layout moderno
+  - Cards agora seguem o sistema de cores do `BigStatsDisplay` para maior coerência visual
+  - Background gradients sutis que respeitam o modo claro/escuro
+  - Bordas coloridas que complementam o tema de cada página
+- **WorkHourCard - Componente Otimizado**: Card redesenhado com layout integrado e sem redundâncias
+  - **Layout Integrado**: Design limpo sem seções separadas de estatísticas para eliminar repetições
+  - **Design Melhorado**: Barra de destaque verde e ícone circular de relógio com tema verde consistente
+  - **Informações Organizadas**:
+    - **Linha 1**: Horas trabalhadas (HH:MM) + data formatada
+    - **Linha 2**: Nome da empresa destacado + tempo trabalhado com ícone
+    - **Linha 3**: Nome do projeto com ícone (quando disponível)
+  - **Empresa Destacada**: Nome da empresa com background verde suave e bordas para maior visibilidade
+  - **Ícones Contextuais**: Building2 para empresa, FileText para projetos, Calendar para tempo trabalhado
+  - **Seção de Descrição**: Background verde destacando a descrição quando disponível
+  - **Botões de Ação**: Edit e Delete sempre visíveis com AlertDialog de confirmação
+  - **Flexibilidade**: Suporte completo para work hours com e sem projetos associados
+  - **Hover Effects**: Animações e efeitos consistentes com outros cards do sistema
+  - **Qualidade Garantida**: Componente totalmente testado com 8 testes unitários
 
 #### Forms & Validation
 
@@ -473,9 +506,15 @@ apps/frontend/src/
 │   ├── setup.ts           # Configuração global dos testes
 │   └── vitest.d.ts       # Tipos globais do Vitest
 ├── components/
-│   └── invoices/
+│   ├── invoices/
+│   │   └── __tests__/
+│   │       └── invoice-search-filters.test.tsx
+│   ├── projects/
+│   │   └── __tests__/
+│   │       └── project-card.test.tsx
+│   └── ui/
 │       └── __tests__/
-│           └── invoice-search-filters.test.tsx
+│           └── alert.test.tsx
 ```
 
 #### Exemplo de Testes
@@ -486,6 +525,8 @@ Os testes cobrem:
 - **Interações do Usuário**: Cliques, digitação, mudanças de estado
 - **Lógica de Hooks**: Teste do hook `useInvoiceFilters`
 - **Filtros e Busca**: Validação de filtros por status, busca e ordenação
+- **Componentes UI**: Testes de componentes base como Alert com suas variantes
+- **Acessibilidade**: Verificação de atributos ARIA e roles apropriados
 
 ### Backend (NestJS)
 

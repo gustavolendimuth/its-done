@@ -41,6 +41,9 @@ export const useProjects = (clientId?: string) => {
       const { data } = await api.get<Project[]>("/projects", { params });
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -52,6 +55,9 @@ export const useProject = (id: string) => {
       return data;
     },
     enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -64,8 +70,14 @@ export const useCreateProject = () => {
       return response.data;
     },
     onSuccess: (data) => {
+      // Invalidate all projects queries
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects", data.clientId] });
+      // Invalidate client data (project count may have changed)
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["clients", data.clientId] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -85,9 +97,17 @@ export const useUpdateProject = () => {
       return response.data;
     },
     onSuccess: (data) => {
+      // Invalidate all projects queries
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects", data.id] });
       queryClient.invalidateQueries({ queryKey: ["projects", data.clientId] });
+      // Invalidate client data
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["clients", data.clientId] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      // Invalidate time entries (project may have been associated)
+      queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
     },
   });
 };
@@ -100,7 +120,14 @@ export const useDeleteProject = () => {
       await api.delete(`/projects/${id}`);
     },
     onSuccess: () => {
+      // Invalidate all projects queries
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      // Invalidate client data (project count may have changed)
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      // Invalidate time entries (project may have been associated)
+      queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
     },
   });
 };

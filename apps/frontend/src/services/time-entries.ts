@@ -55,6 +55,9 @@ export const useTimeEntries = (params?: {
       });
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -71,6 +74,9 @@ export const useAvailableTimeEntries = (params?: {
       });
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -82,6 +88,9 @@ export const useTimeEntry = (id: string) => {
       return data;
     },
     enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -94,7 +103,14 @@ export const useCreateTimeEntry = () => {
       return response.data;
     },
     onSuccess: () => {
+      // Invalidate all time entries queries
       queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
+      // Invalidate work hours stats
+      queryClient.invalidateQueries({ queryKey: ["workHours", "stats"] });
+      // Invalidate client stats
+      queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -114,8 +130,15 @@ export const useUpdateTimeEntry = () => {
       return response.data;
     },
     onSuccess: (_, { id }) => {
+      // Invalidate all time entries queries
       queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
       queryClient.invalidateQueries({ queryKey: ["timeEntries", id] });
+      // Invalidate work hours stats
+      queryClient.invalidateQueries({ queryKey: ["workHours", "stats"] });
+      // Invalidate client stats
+      queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -129,8 +152,15 @@ export const useDeleteTimeEntry = () => {
       return response.data;
     },
     onSuccess: (_, id) => {
+      // Invalidate all time entries queries
       queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
       queryClient.invalidateQueries({ queryKey: ["timeEntries", id] });
+      // Invalidate work hours stats
+      queryClient.invalidateQueries({ queryKey: ["workHours", "stats"] });
+      // Invalidate client stats
+      queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -147,5 +177,8 @@ export const useTotalHours = (startDate: Date, endDate: Date) => {
       });
       return data.total;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };

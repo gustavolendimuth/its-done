@@ -51,7 +51,7 @@ import { useClients, Client } from "@/services/clients";
 
 import { useInvoiceStats } from "@/services/invoice-stats";
 import { InvoiceUploadModal } from "@/components/invoices/invoice-upload-modal";
-import { StatsCard } from "@/components/ui/stats-card";
+import { InvoicesBigStats } from "@/components/invoices/invoices-big-stats";
 import { InvoiceCard } from "@/components/invoices/invoice-card";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
@@ -155,38 +155,8 @@ export default function InvoicesPage() {
         className="mb-6"
       />
 
-      {/* Stats */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <StatsCard
-            title="Total Invoices"
-            value={Math.round(stats.totalInvoices)}
-            icon={FileText}
-            variant="blue"
-          />
-
-          <StatsCard
-            title="Total Amount"
-            value={`$${stats.totalAmount.toFixed(2)}`}
-            icon={DollarSign}
-            variant="green"
-          />
-
-          <StatsCard
-            title="Paid Invoices"
-            value={`$${stats.totalPaid.toFixed(2)}`}
-            icon={CheckCircle}
-            variant="purple"
-          />
-
-          <StatsCard
-            title="Pending"
-            value={`$${(stats.totalAmount - stats.totalPaid).toFixed(2)}`}
-            icon={Clock}
-            variant="yellow"
-          />
-        </div>
-      )}
+      {/* Big Stats Display */}
+      <InvoicesBigStats className="mb-8" />
 
       {invoices.length === 0 ? (
         <EmptyState
