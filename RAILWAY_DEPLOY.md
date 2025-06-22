@@ -254,12 +254,13 @@ git log --oneline -10  # Verificar últimos commits
 
 **✅ Otimizações implementadas no Dockerfile:**
 
-- Multi-stage build para reduzir tamanho e melhorar cache
+- Single-stage build simplificado para maior confiabilidade
 - Timeout de rede aumentado (300s) para downloads lentos
 - Registry configurado para evitar problemas de conectividade
-- Health check automático com endpoint `/health`
+- Health check automático com `curl` e `127.0.0.1`
 - Container não-root para segurança em produção
-- Cache de layers otimizado para builds mais rápidos
+- Debug logs para identificar problemas de build
+- Correção de problemas com `localhost` em containers
 
 #### Build Failure
 
