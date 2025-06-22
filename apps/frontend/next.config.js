@@ -1,10 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable standalone output for Docker
+  output: "standalone",
+
   // Ensure CSS is properly handled
   experimental: {
     turbo: {
       rules: {
-        '*.css': ['css-loader'],
+        "*.css": ["css-loader"],
       },
     },
   },

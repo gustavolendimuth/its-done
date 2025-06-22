@@ -930,17 +930,61 @@ pnpm test:watch
 
 ## 🚢 Deploy
 
-### Usando Docker (Recomendado)
+### 🚀 Railway (Recomendado)
+
+O projeto está configurado para deploy no Railway usando Dockerfiles otimizados:
 
 ```bash
-# Build das imagens
-docker-compose -f docker-compose.prod.yml build
-
-# Deploy em produção
-docker-compose -f docker-compose.prod.yml up -d
+# Preparar para deploy
+git add .
+git commit -m "feat: add Railway deployment configuration"
+git push origin main
 ```
 
-### Deploy Manual
+**Arquitetura de Deploy:**
+
+- **PostgreSQL Database** (Railway Template)
+- **Backend API** (NestJS + Docker)
+- **Frontend Web** (Next.js + Docker)
+
+**Arquivos de configuração criados:**
+
+- `apps/backend/Dockerfile` - Backend NestJS otimizado
+- `apps/frontend/Dockerfile` - Frontend Next.js com standalone output
+- `railway.json` - Configuração geral do Railway
+- `RAILWAY_DEPLOY.md` - Guia completo de deploy
+
+**Custos estimados:** ~$15/mês para ambiente completo
+
+### 📖 Guia Completo
+
+Consulte o arquivo [`RAILWAY_DEPLOY.md`](./RAILWAY_DEPLOY.md) para instruções detalhadas de deploy no Railway.
+
+### 🐳 Docker Local
+
+#### Usando Docker Compose (Desenvolvimento)
+
+```bash
+# Iniciar banco de dados local
+docker-compose up -d
+
+# Desenvolvimento com hot-reload
+pnpm dev
+```
+
+#### Build das Imagens Docker
+
+```bash
+# Backend
+cd apps/backend
+docker build -t its-done-backend -f Dockerfile ../..
+
+# Frontend
+cd apps/frontend
+docker build -t its-done-frontend -f Dockerfile ../..
+```
+
+### 🔧 Deploy Manual
 
 #### Backend
 
@@ -958,12 +1002,38 @@ pnpm build
 pnpm start
 ```
 
-### Variáveis de Ambiente para Produção
+### 🔒 Variáveis de Ambiente para Produção
 
-- Configure todas as variáveis de ambiente necessárias
-- Use secrets seguros para JWT_SECRET e outras chaves
-- Configure SSL/TLS para HTTPS
-- Configure backup automático do banco de dados
+#### Backend (.env)
+
+```env
+DATABASE_URL="postgresql://user:pass@host:5432/db"
+JWT_SECRET="sua_chave_jwt_super_segura"
+RESEND_API_KEY="re_sua_chave_resend"
+FROM_EMAIL="noreply@seudominio.com"
+NODE_ENV="production"
+PORT="3002"
+```
+
+#### Frontend (.env.local)
+
+```env
+NEXTAUTH_URL="https://seu-dominio.com"
+NEXTAUTH_SECRET="sua_chave_nextauth_super_segura"
+API_URL="https://api.seu-dominio.com"
+NODE_ENV="production"
+```
+
+### 📋 Checklist de Produção
+
+- [ ] Todas as variáveis de ambiente configuradas
+- [ ] Secrets únicos e seguros para produção
+- [ ] HTTPS configurado (Railway fornece automaticamente)
+- [ ] Backup automático do banco de dados habilitado
+- [ ] Monitoramento e logs configurados
+- [ ] Health checks funcionando (`/health` endpoint)
+- [ ] CORS configurado adequadamente
+- [ ] Rate limiting implementado
 
 ## 🎯 Próximos Passos
 
