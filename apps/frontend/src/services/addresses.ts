@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
+import { getApiUrl } from "@/lib/utils";
 
 export interface Address {
   id: string;
@@ -66,7 +67,7 @@ export const useClientAddresses = (clientId: string) => {
     queryKey: ["clients", clientId, "addresses"],
     queryFn: async () => {
       console.log("Fetching addresses for client:", clientId);
-      console.log("API base URL:", process.env.NEXT_PUBLIC_API_URL);
+      console.log("API base URL:", getApiUrl());
 
       try {
         const { data } = await api.get<Address[]>(

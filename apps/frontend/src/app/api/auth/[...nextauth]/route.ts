@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { getApiUrl } from "@/lib/utils";
 
 const authOptions: AuthOptions = {
   providers: [
@@ -26,19 +27,17 @@ const authOptions: AuthOptions = {
         }
 
         try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email: credentials.email,
-                password: credentials.password,
-              }),
-            }
-          );
+          const apiUrl = getApiUrl();
+          const response = await fetch(`${apiUrl}/auth/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          });
 
           if (!response.ok) {
             return null;
@@ -71,20 +70,18 @@ const authOptions: AuthOptions = {
 
       if (account?.provider === "google" && profile) {
         try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/google`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email: profile.email,
-                name: profile.name,
-                googleId: profile.sub,
-              }),
-            }
-          );
+          const apiUrl = getApiUrl();
+          const response = await fetch(`${apiUrl}/auth/google`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: profile.email,
+              name: profile.name,
+              googleId: profile.sub,
+            }),
+          });
 
           if (!response.ok) {
             console.error("Backend response not ok:", response.status);
