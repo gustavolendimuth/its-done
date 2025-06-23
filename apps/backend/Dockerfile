@@ -21,7 +21,6 @@ RUN pnpm config set network-timeout 300000 && \
 # Copiar código fonte e prisma
 COPY src ./src
 COPY prisma ./prisma
-COPY start.sh ./
 
 # Build da aplicação
 RUN echo "🔧 Gerando Prisma client..." && \
@@ -40,7 +39,6 @@ RUN echo "📦 Verificando build:" && \
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nestjs && \
     mkdir -p /app/data/uploads && \
-    chmod +x start.sh && \
     chown -R nestjs:nodejs /app
 
 # Mudar para usuário não-root
@@ -53,5 +51,5 @@ EXPOSE 3002
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://127.0.0.1:3002/health || exit 1
 
-# Comando para iniciar
-CMD ["./start.sh"] 
+# Comando para iniciar com migrações
+CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm prisma db seed && node dist/main.js"] 
