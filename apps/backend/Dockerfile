@@ -51,5 +51,5 @@ EXPOSE 3002
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://127.0.0.1:3002/health || exit 1
 
-# Comando para iniciar com migrações
-CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm prisma db seed && node dist/main.js"] 
+# Comando para iniciar com migrações (tolerante a falhas)
+CMD ["sh", "-c", "pnpm prisma migrate deploy || echo 'Migration failed, continuing...' && node dist/main.js"] 
