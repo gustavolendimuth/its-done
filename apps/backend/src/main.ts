@@ -65,6 +65,7 @@ async function bootstrap() {
         'http://localhost:3000',
         'http://127.0.0.1:3000',
         'https://frontend-its-done.up.railway.app',
+        'https://estafeito.app.br',
         /^https:\/\/.*\.up\.railway\.app$/,
       ],
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
