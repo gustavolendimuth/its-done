@@ -12,12 +12,12 @@ WORKDIR /app
 FROM base AS deps
 
 # Copiar arquivos de configuração
-COPY package.json pnpm-lock.yaml ./
+COPY package.json ./
 COPY components.json ./
 
 # Instalar dependências
 RUN pnpm config set network-timeout 300000 && \
-    pnpm install --frozen-lockfile
+    pnpm install --prod=false
 
 # Stage 2: Build
 FROM base AS builder
