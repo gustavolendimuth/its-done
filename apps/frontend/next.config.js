@@ -17,12 +17,15 @@ const nextConfig = {
   // Environment variables configuration
   env: {
     NEXT_PUBLIC_API_URL:
-      process.env.NEXT_PUBLIC_API_URL || "https://api.estafeito.app.br",
+      process.env.NEXT_PUBLIC_API_URL ||
+      "https://backend-its-done.up.railway.app",
   },
 
   // Explicitly set public runtime config
   publicRuntimeConfig: {
-    apiUrl: process.env.NEXT_PUBLIC_API_URL || "https://api.estafeito.app.br",
+    apiUrl:
+      process.env.NEXT_PUBLIC_API_URL ||
+      "https://backend-its-done.up.railway.app",
   },
 };
 
