@@ -15,7 +15,7 @@ COPY nest-cli.json ./
 
 # Instalar dependências
 RUN pnpm config set network-timeout 300000 && \
-    pnpm install --frozen-lockfile
+    pnpm install --prod=false
 
 # Copiar código fonte e prisma
 COPY src ./src
