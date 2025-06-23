@@ -9,7 +9,9 @@ const nextConfig = {
 
   // Disable turbo for better stability in development
   experimental: {
-    turbo: false,
+    turbo: {
+      enabled: false,
+    },
   },
 };
 
