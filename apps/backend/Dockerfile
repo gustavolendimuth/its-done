@@ -15,11 +15,13 @@ COPY nest-cli.json ./
 
 # Instalar dependências
 RUN pnpm config set network-timeout 300000 && \
-    pnpm install --prod=false
+    pnpm install --prod=false && \
+    pnpm add prisma@latest --save-dev
 
 # Copiar código fonte e prisma
 COPY src ./src
 COPY prisma ./prisma
+COPY start.sh ./
 
 # Build da aplicação
 RUN echo "🔧 Gerando Prisma client..." && \
@@ -38,6 +40,7 @@ RUN echo "📦 Verificando build:" && \
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nestjs && \
     mkdir -p /app/data/uploads && \
+    chmod +x start.sh && \
     chown -R nestjs:nodejs /app
 
 # Mudar para usuário não-root
@@ -51,4 +54,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://127.0.0.1:3002/health || exit 1
 
 # Comando para iniciar
-CMD ["node", "dist/main.js"] 
+CMD ["./start.sh"] 
