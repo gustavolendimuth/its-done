@@ -2,6 +2,12 @@ import axios from "axios";
 import { getSession } from "next-auth/react";
 import { getApiUrl } from "./utils";
 
+// Log API URL configuration
+console.log("🌐 API URL Configuration:", {
+  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  normalizedApiUrl: getApiUrl(),
+});
+
 const api = axios.create({
   baseURL: getApiUrl(),
   withCredentials: true,
@@ -21,11 +27,13 @@ api.interceptors.request.use(async (config) => {
       console.warn("⚠️ No access token found in session");
     }
 
-    console.log("📤 Request config:", {
+    console.log("📤 Full Request config:", {
       url: config.url,
       method: config.method,
       baseURL: config.baseURL,
       headers: config.headers,
+      fullUrl: `${config.baseURL}${config.url}`,
+      params: config.params,
     });
 
     return config;
