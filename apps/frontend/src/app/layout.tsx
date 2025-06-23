@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "It's Done - Professional Time Tracking",
   description:
     "A professional time tracking application for contractors and teams",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({

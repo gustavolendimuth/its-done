@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="250" height="50" viewBox="0 0 250 50" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <!-- Centralize the entire content -->
+  <g transform="translate(10, 0)">
+    <g fill="#22C55E">
+      <!-- Circle with check mark -->
+      <circle cx="20" cy="23" r="15" fill="none" stroke="#22C55E" stroke-width="4.5"/>
+      <path 
+        d="M12 24L17.5 29.5L29 16" 
+        fill="none" 
+        stroke="#22C55E" 
+        stroke-width="4.5" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+      />
+      
+      <!-- Text "Está feito!" -->
+      <text x="45" y="35" font-family="Arial, sans-serif" font-size="32" font-weight="bold">
+        Está feito!
+      </text>
+    </g>
+  </g>
+</svg> 

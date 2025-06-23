@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -25,8 +26,15 @@ export function Nav() {
         <div className="flex h-16 justify-between">
           <div className="flex">
             <div className="flex flex-shrink-0 items-center">
-              <Link href="/" className="text-xl font-bold text-gray-900">
-                It's Done
+              <Link href="/" className="flex items-center space-x-2">
+                <Image
+                  src="/logo.svg"
+                  alt="Está feito!"
+                  width={120}
+                  height={30}
+                  priority
+                  className="w-auto h-auto"
+                />
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
