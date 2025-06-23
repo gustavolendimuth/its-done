@@ -73,7 +73,6 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
       if (createdClient) {
         console.log("Setting created client:", createdClient);
         setCreatedClient(createdClient);
-        setAddresses([]);
 
         // Clear form
         setFormData({
@@ -117,6 +116,10 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
   const testApiConnection = async () => {
     try {
       console.log("Testing API connection...");
+      if (!createdClient) {
+        console.error("No client created yet");
+        return;
+      }
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/addresses/client/${createdClient.id}`,
         {
