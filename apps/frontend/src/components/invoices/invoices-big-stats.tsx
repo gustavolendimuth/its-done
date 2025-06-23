@@ -13,6 +13,7 @@ import {
   Target,
 } from "lucide-react";
 import { useInvoiceStats } from "@/services/invoice-stats";
+import { useTranslations } from "next-intl";
 
 interface InvoicesBigStatsProps {
   className?: string;
@@ -23,6 +24,7 @@ export function InvoicesBigStats({
   className,
   isRefetching = false,
 }: InvoicesBigStatsProps) {
+  const t = useTranslations("invoices");
   const { data: stats } = useInvoiceStats();
 
   if (!stats) {
@@ -39,30 +41,30 @@ export function InvoicesBigStats({
 
   // Determine cash flow health
   const getCashFlowHealth = () => {
-    if (paymentRate >= 80) return "Excellent";
-    if (paymentRate >= 60) return "Good";
-    if (paymentRate >= 40) return "Needs Attention";
-    return "Critical";
+    if (paymentRate >= 80) return t("healthExcellent");
+    if (paymentRate >= 60) return t("healthGood");
+    if (paymentRate >= 40) return t("healthNeedsAttention");
+    return t("healthCritical");
   };
 
   // Stats for the display
   const statsItems: BigStatItem[] = [
     {
-      title: "Payment Rate",
+      title: t("paymentRate"),
       value: `${paymentRate.toFixed(1)}%`,
-      description: "of total invoiced",
+      description: t("ofTotalInvoiced"),
       icon: CheckCircle,
     },
     {
-      title: "Avg Invoice Value",
+      title: t("avgInvoiceValue"),
       value: `$${stats.totalInvoices > 0 ? (stats.totalAmount / stats.totalInvoices).toFixed(2) : "0.00"}`,
-      description: "per invoice",
+      description: t("perInvoice"),
       icon: DollarSign,
     },
     {
-      title: "Cash Flow Health",
+      title: t("cashFlowHealth"),
       value: getCashFlowHealth(),
-      description: "payment efficiency",
+      description: t("paymentEfficiency"),
       icon: TrendingUp,
     },
   ];
@@ -74,13 +76,13 @@ export function InvoicesBigStats({
         <div className="flex items-center space-x-2 mb-1">
           <Target className="h-4 w-4 text-purple-600 dark:text-purple-400" />
           <span className="text-sm font-medium text-purple-900 dark:text-purple-100">
-            Collection Goal
+            {t("collectionGoal")}
           </span>
         </div>
         <div className="text-sm text-purple-900 dark:text-purple-100 mb-2">
           {pendingAmount > 0
-            ? `Collect $${pendingAmount.toFixed(2)} pending`
-            : "All invoices collected!"}
+            ? t("collectPending", { amount: pendingAmount.toFixed(2) })
+            : t("allInvoicesCollected")}
         </div>
         <div className="w-full bg-purple-200 dark:bg-purple-800 rounded-full h-2">
           <div
@@ -91,7 +93,7 @@ export function InvoicesBigStats({
           />
         </div>
         <p className="text-xs text-purple-700 dark:text-purple-300 mt-1">
-          Target: 90% collection rate • {paymentRate.toFixed(0)}%/90%
+          {t("targetCollectionRate", { current: paymentRate.toFixed(0) })}
         </p>
       </div>
 
@@ -99,20 +101,20 @@ export function InvoicesBigStats({
         <div className="flex items-center space-x-2 mb-1">
           <Clock className="h-4 w-4 text-purple-600 dark:text-purple-400" />
           <span className="text-sm font-medium text-purple-900 dark:text-purple-100">
-            Revenue Insights
+            {t("revenueInsights")}
           </span>
         </div>
         <div className="text-xl font-bold text-purple-900 dark:text-purple-100">
           {stats.totalAmount > 10000
-            ? "High Volume"
+            ? t("volumeHigh")
             : stats.totalAmount > 5000
-              ? "Growing"
+              ? t("volumeGrowing")
               : stats.totalAmount > 1000
-                ? "Developing"
-                : "Starting"}
+                ? t("volumeDeveloping")
+                : t("volumeStarting")}
         </div>
         <p className="text-xs text-purple-700 dark:text-purple-300">
-          ${stats.totalAmount.toFixed(2)} total revenue
+          {t("totalRevenue", { amount: stats.totalAmount.toFixed(2) })}
         </p>
       </div>
     </div>
@@ -120,11 +122,11 @@ export function InvoicesBigStats({
 
   return (
     <BigStatsDisplay
-      title="Invoice Management"
-      subtitle="Financial performance overview"
+      title={t("title")}
+      subtitle={t("subtitle")}
       icon={FileText}
       mainValue={`$${stats.totalAmount.toFixed(2)}`}
-      secondaryValue={`${stats.totalInvoices} invoices • $${stats.totalPaid.toFixed(2)} collected`}
+      secondaryValue={`${stats.totalInvoices} ${t("title").toLowerCase()} • $${stats.totalPaid.toFixed(2)} ${t("collected")}`}
       stats={statsItems}
       variant="purple"
       isRefetching={isRefetching}

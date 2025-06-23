@@ -18,7 +18,7 @@ interface PageHeaderAction {
 
 interface PageHeaderProps {
   title: string;
-  description?: string;
+  subtitle?: string;
   icon?: LucideIcon;
   actions?: PageHeaderAction[];
   className?: string;
@@ -27,7 +27,7 @@ interface PageHeaderProps {
 
 export function PageHeader({
   title,
-  description,
+  subtitle,
   icon: Icon,
   actions = [],
   className,
@@ -45,10 +45,8 @@ export function PageHeader({
               <h1 className="text-3xl font-bold text-foreground leading-tight">
                 {title}
               </h1>
-              {description && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {description}
-                </p>
+              {subtitle && (
+                <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
               )}
             </div>
           </div>

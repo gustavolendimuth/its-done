@@ -13,6 +13,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FolderPlus } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const projectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -37,6 +38,7 @@ export function ProjectCreateDialog({
 }: ProjectCreateDialogProps) {
   const createProject = useCreateProject();
   const { data: clients = [] } = useClients();
+  const t = useTranslations("ProjectCreateDialog");
 
   const {
     register,
@@ -70,8 +72,8 @@ export function ProjectCreateDialog({
     <FormModal
       open={open}
       onOpenChange={handleClose}
-      title="Create New Project"
-      description="Create a new project and associate it with a client"
+      title={t("title")}
+      description={t("description")}
       icon={FolderPlus}
       className="sm:max-w-[600px]"
     >

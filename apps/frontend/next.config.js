@@ -1,27 +1,16 @@
+const createNextIntlPlugin = require("next-intl/plugin");
+
+const withNextIntl = createNextIntlPlugin();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enable standalone output for Docker
   output: "standalone",
 
-  // Ensure CSS is properly handled
+  // Disable turbo for better stability in development
   experimental: {
-    turbo: {
-      rules: {
-        "*.css": ["css-loader"],
-      },
-    },
-  },
-  // Force CSS recompilation in dev mode
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.watchOptions = {
-        ...config.watchOptions,
-        ignored: /node_modules/,
-        poll: 1000,
-      };
-    }
-    return config;
+    turbo: false,
   },
 };
 
-module.exports = nextConfig;
+module.exports = withNextIntl(nextConfig);

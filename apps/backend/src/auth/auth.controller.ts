@@ -11,7 +11,13 @@ import {
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RegisterDto, LoginDto, GoogleAuthDto } from './dto/auth.dto';
+import {
+  RegisterDto,
+  LoginDto,
+  GoogleAuthDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -63,5 +69,19 @@ export class AuthController {
   async googleAuth(@Body() googleAuthDto: GoogleAuthDto) {
     this.logger.debug(`Google auth attempt for email: ${googleAuthDto.email}`);
     return this.authService.googleAuth(googleAuthDto);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    this.logger.debug(
+      `Forgot password request for email: ${forgotPasswordDto.email}`,
+    );
+    return this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    this.logger.debug(`Reset password request`);
+    return this.authService.resetPassword(resetPasswordDto);
   }
 }

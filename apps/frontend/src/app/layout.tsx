@@ -1,8 +1,9 @@
+// This page only renders when the locale is missing from a pathname.
+// Since we match all pathnames starting from the root in our middleware,
+// this case should never occur.
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Providers } from "@/providers/providers";
-import "./globals.css";
-import "react-day-picker/dist/style.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,10 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <Providers>{children}</Providers>
-      </body>
+    <html suppressHydrationWarning>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

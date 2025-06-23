@@ -7,6 +7,7 @@ import {
 import { Users, Clock, FileText, TrendingUp, Star, MapPin } from "lucide-react";
 import { useClientStats } from "@/services/client-stats";
 import { formatHoursToHHMM } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface ClientsBigStatsProps {
   className?: string;
@@ -17,6 +18,7 @@ export function ClientsBigStats({
   className,
   isRefetching = false,
 }: ClientsBigStatsProps) {
+  const t = useTranslations("clients");
   const { data: stats } = useClientStats();
 
   if (!stats) {
@@ -32,29 +34,29 @@ export function ClientsBigStats({
 
   // Determine client engagement level
   const getEngagementLevel = () => {
-    if (averageHoursPerClient >= 100) return "High";
-    if (averageHoursPerClient >= 40) return "Medium";
-    return "Low";
+    if (averageHoursPerClient >= 100) return t("engagementHigh");
+    if (averageHoursPerClient >= 40) return t("engagementMedium");
+    return t("engagementLow");
   };
 
   // Stats for the display
   const statsItems: BigStatItem[] = [
     {
-      title: "Avg Hours/Client",
+      title: t("avgHoursPerClient"),
       value: formatHoursToHHMM(averageHoursPerClient),
-      description: "per client relationship",
+      description: t("perClientRelationship"),
       icon: Clock,
     },
     {
-      title: "Avg Invoices/Client",
+      title: t("avgInvoicesPerClient"),
       value: averageInvoicesPerClient.toFixed(1),
-      description: "billing frequency",
+      description: t("billingFrequency"),
       icon: FileText,
     },
     {
-      title: "Client Engagement",
+      title: t("clientEngagement"),
       value: getEngagementLevel(),
-      description: "based on work volume",
+      description: t("basedOnWorkVolume"),
       icon: Star,
     },
   ];
@@ -66,15 +68,15 @@ export function ClientsBigStats({
         <div className="flex items-center space-x-2 mb-1">
           <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-            Growth Opportunity
+            {t("growthOpportunity")}
           </span>
         </div>
         <div className="text-sm text-blue-900 dark:text-blue-100 mb-2">
           {stats.totalClients < 5
-            ? "Focus on acquiring new clients"
+            ? t("focusOnAcquiring")
             : stats.totalClients < 15
-              ? "Great client base - consider upselling"
-              : "Excellent portfolio - optimize operations"}
+              ? t("greatClientBase")
+              : t("excellentPortfolio")}
         </div>
         <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
           <div
@@ -85,7 +87,7 @@ export function ClientsBigStats({
           />
         </div>
         <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-          Target: 20 clients • {Math.min(stats.totalClients, 20)}/20
+          {t("targetClients", { current: Math.min(stats.totalClients, 20) })}
         </p>
       </div>
 
@@ -93,20 +95,22 @@ export function ClientsBigStats({
         <div className="flex items-center space-x-2 mb-1">
           <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-            Business Health
+            {t("businessHealth")}
           </span>
         </div>
         <div className="text-xl font-bold text-blue-900 dark:text-blue-100">
           {stats.totalHours > 500
-            ? "Excellent"
+            ? t("healthExcellent")
             : stats.totalHours > 200
-              ? "Good"
+              ? t("healthGood")
               : stats.totalHours > 50
-                ? "Growing"
-                : "Starting"}
+                ? t("healthGrowing")
+                : t("healthStarting")}
         </div>
         <p className="text-xs text-blue-700 dark:text-blue-300">
-          Based on {formatHoursToHHMM(stats.totalHours)} total hours
+          {t("basedOnTotalHours", {
+            hours: formatHoursToHHMM(stats.totalHours),
+          })}
         </p>
       </div>
     </div>
@@ -114,11 +118,13 @@ export function ClientsBigStats({
 
   return (
     <BigStatsDisplay
-      title="Client Portfolio"
-      subtitle="Your business relationships overview"
+      title={t("title")}
+      subtitle={t("subtitle")}
       icon={Users}
       mainValue={stats.totalClients}
-      secondaryValue={`Managing ${formatHoursToHHMM(stats.totalHours)} of work`}
+      secondaryValue={t("managingWork", {
+        hours: formatHoursToHHMM(stats.totalHours),
+      })}
       stats={statsItems}
       variant="blue"
       isRefetching={isRefetching}

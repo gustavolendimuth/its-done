@@ -21,6 +21,7 @@ import { FormModal } from "@/components/ui/form-modal";
 import { ClientForm } from "@/components/clients/client-form";
 import { Client } from "@/types/client";
 import { Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface ClientComboboxProps {
   clients: Client[];
@@ -43,6 +44,7 @@ export function ClientCombobox({
   showAddButton = true,
   onClientAdded,
 }: ClientComboboxProps) {
+  const t = useTranslations("clients");
   const [open, setOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
@@ -79,9 +81,9 @@ export function ClientCombobox({
           align="start"
         >
           <Command>
-            <CommandInput placeholder="Search clients..." />
+            <CommandInput placeholder={t("searchClients")} />
             <CommandList>
-              <CommandEmpty>No client found.</CommandEmpty>
+              <CommandEmpty>{t("noClientsFound")}</CommandEmpty>
               <CommandGroup>
                 {clients.map((client) => (
                   <CommandItem
@@ -115,7 +117,7 @@ export function ClientCombobox({
                     className="border-t border-border cursor-pointer"
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    Add new client
+                    {t("addNewClient")}
                   </CommandItem>
                 )}
               </CommandGroup>
@@ -128,8 +130,8 @@ export function ClientCombobox({
       <FormModal
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
-        title="Add New Client"
-        description="Create a new client profile with contact details and addresses"
+        title={t("addNewClient")}
+        description={t("addNewClientFormSubtitle")}
         icon={Users}
         className="sm:max-w-[600px]"
       >

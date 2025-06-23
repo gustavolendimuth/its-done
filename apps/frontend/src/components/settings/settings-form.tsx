@@ -18,15 +18,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Settings, Mail, Clock, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useSettings, useUpdateSettings } from "@/services/settings";
+import { useTranslations } from "next-intl";
 
 const settingsSchema = z.object({
   alertHours: z
     .number()
     .min(1, "Alert hours must be at least 1")
-    .max(1000, "Alert hours must be less than 1000"),
+    .max(1000, "Alert hours must be at most 1000"),
   notificationEmail: z
     .string()
-    .email("Please enter a valid email address")
+    .email("Invalid email address")
     .optional()
     .or(z.literal("")),
 });
@@ -34,6 +35,8 @@ const settingsSchema = z.object({
 type SettingsFormData = z.infer<typeof settingsSchema>;
 
 export function SettingsForm() {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -73,13 +76,13 @@ export function SettingsForm() {
       },
       {
         onSuccess: () => {
-          toast.success("Settings updated successfully!");
+          toast.success(t("settingsUpdatedSuccessfully"));
           setIsSubmitting(false);
         },
         onError: (error: any) => {
           console.error("Error updating settings:", error);
           toast.error(
-            error.response?.data?.message || "Failed to update settings"
+            error.response?.data?.message || t("failedToUpdateSettings")
           );
           setIsSubmitting(false);
         },
@@ -92,7 +95,7 @@ export function SettingsForm() {
       <Card>
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin mr-2" />
-          <span>Loading settings...</span>
+          <span>{t("loadingSettings")}</span>
         </CardContent>
       </Card>
     );
@@ -104,9 +107,7 @@ export function SettingsForm() {
       <Card>
         <CardContent className="py-8">
           <Alert variant="destructive">
-            <AlertDescription>
-              Failed to load settings. Please try again later.
-            </AlertDescription>
+            <AlertDescription>{t("failedToLoad")}</AlertDescription>
           </Alert>
         </CardContent>
       </Card>
@@ -119,11 +120,10 @@ export function SettingsForm() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Notification Settings
+            {t("notificationSettings")}
           </CardTitle>
           <CardDescription>
-            Configure when you want to receive email notifications about your
-            work hours.
+            {t("notificationSettingsDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -131,7 +131,7 @@ export function SettingsForm() {
             <div className="space-y-2">
               <Label htmlFor="alertHours" className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                Alert Hours Threshold
+                {t("alertHoursThreshold")}
               </Label>
               <Input
                 id="alertHours"
@@ -149,8 +149,7 @@ export function SettingsForm() {
                 </p>
               )}
               <p className="text-sm text-muted-foreground">
-                You'll receive an email notification when your total work hours
-                reach this threshold.
+                {t("alertHoursDescription")}
               </p>
             </div>
 
@@ -160,7 +159,7 @@ export function SettingsForm() {
                 className="flex items-center gap-2"
               >
                 <Mail className="h-4 w-4" />
-                Notification Email
+                {t("notificationEmail")}
               </Label>
               <Input
                 id="notificationEmail"
@@ -175,8 +174,7 @@ export function SettingsForm() {
                 </p>
               )}
               <p className="text-sm text-muted-foreground">
-                Leave empty to use your account email, or specify a different
-                email for notifications.
+                {t("notificationEmailOptional")}
               </p>
             </div>
 
@@ -189,18 +187,18 @@ export function SettingsForm() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
+                    {tCommon("loading")}
                   </>
                 ) : (
                   <>
                     <Save className="mr-2 h-4 w-4" />
-                    Save Settings
+                    {t("save")}
                   </>
                 )}
               </Button>
               {isDirty && !isSubmitting && (
                 <p className="text-sm text-muted-foreground mt-2">
-                  You have unsaved changes.
+                  {t("unsavedChanges")}
                 </p>
               )}
             </div>
@@ -211,7 +209,7 @@ export function SettingsForm() {
       {/* Information Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">How it works</CardTitle>
+          <CardTitle className="text-lg">{t("howItWorks")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-start gap-3">
@@ -219,10 +217,9 @@ export function SettingsForm() {
               <Clock className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h4 className="font-medium">Automatic Monitoring</h4>
+              <h4 className="font-medium">{t("automaticMonitoring")}</h4>
               <p className="text-sm text-muted-foreground">
-                We automatically track your total work hours and check against
-                your threshold.
+                {t("automaticMonitoringDescription")}
               </p>
             </div>
           </div>
@@ -232,10 +229,9 @@ export function SettingsForm() {
               <Mail className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h4 className="font-medium">Email Notifications</h4>
+              <h4 className="font-medium">{t("emailNotifications")}</h4>
               <p className="text-sm text-muted-foreground">
-                When you reach your threshold, we'll send you an email
-                notification so you can create invoices.
+                {t("emailNotificationsDescription")}
               </p>
             </div>
           </div>

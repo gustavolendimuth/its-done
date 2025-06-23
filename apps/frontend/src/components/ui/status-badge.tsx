@@ -1,11 +1,14 @@
+import { useTranslations } from "next-intl";
 import { Badge } from "./badge";
 
 interface StatusBadgeProps {
-  status: "PENDING" | "PAID" | "CANCELED";
+  status: string;
   className?: string;
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
+  const t = useTranslations("invoices");
+
   const getStatusVariant = (status: string) => {
     switch (status) {
       case "PAID":
@@ -22,11 +25,11 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   const getStatusText = (status: string) => {
     switch (status) {
       case "PAID":
-        return "Paid";
+        return t("paid");
       case "PENDING":
-        return "Pending";
+        return t("pending");
       case "CANCELED":
-        return "Canceled";
+        return t("cancelled");
       default:
         return status;
     }

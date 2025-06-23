@@ -54,25 +54,27 @@ import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useUpdateClient, UpdateClientDto } from "@/services/clients";
 import { ClientAddresses } from "./client-addresses";
-
-const clientFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().min(1, "Phone is required"),
-  company: z.string().min(1, "Company is required"),
-});
-
-type ClientFormData = z.infer<typeof clientFormSchema>;
+import { useTranslations } from "next-intl";
 
 interface ClientCardProps {
   client: Client;
 }
 
 export function ClientCard({ client }: ClientCardProps) {
+  const t = useTranslations("clients");
   const { data: stats, isLoading } = useClientSpecificStats(client.id);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const router = useRouter();
   const updateClient = useUpdateClient();
+
+  const clientFormSchema = z.object({
+    name: z.string().min(1, t("validationNameRequired")),
+    email: z.string().email(t("validationInvalidEmail")),
+    phone: z.string().min(1, t("validationPhoneRequired")),
+    company: z.string().min(1, t("validationCompanyRequired")),
+  });
+
+  type ClientFormData = z.infer<typeof clientFormSchema>;
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientFormSchema),
@@ -106,10 +108,10 @@ export function ClientCard({ client }: ClientCardProps) {
         data: data as UpdateClientDto,
       });
       setIsEditModalOpen(false);
-      toast.success("Client updated successfully!");
+      toast.success(t("clientUpdatedSuccessfully"));
     } catch (error) {
       console.error("Failed to update client:", error);
-      toast.error("Failed to update client");
+      toast.error(t("failedToUpdateClient"));
     }
   };
 
@@ -125,30 +127,30 @@ export function ClientCard({ client }: ClientCardProps) {
     try {
       const url = getClientDashboardUrl();
       await navigator.clipboard.writeText(url);
-      toast.success("Link copied to clipboard!");
+      toast.success(t("linkCopiedToClipboard"));
     } catch (error) {
-      toast.error("Failed to copy link");
+      toast.error(t("failedToCopyLink"));
     }
   };
 
   const handleShareWhatsApp = () => {
     const url = getClientDashboardUrl();
-    const message = `Hi! You can view your project dashboard and invoices here: ${url}`;
+    const message = t("whatsappShareMessage", { url });
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
   };
 
   const handleShareEmail = () => {
     const url = getClientDashboardUrl();
-    const subject = `Your Project Dashboard - ${client.company}`;
-    const body = `Hi,\n\nYou can view your project dashboard and invoices at the following link:\n\n${url}\n\nBest regards`;
+    const subject = t("emailShareSubject", { company: client.company });
+    const body = t("emailShareBody", { url });
     const emailUrl = `mailto:${client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(emailUrl);
   };
 
   // Prepare contact info
   const contactInfo: BigCardContactInfo[] = [
-    { icon: User, value: client.name || "No contact name" },
+    { icon: User, value: client.name || t("noContactName") },
     { icon: Mail, value: client.email },
     ...(client.phone ? [{ icon: Phone, value: client.phone }] : []),
   ];
@@ -157,17 +159,17 @@ export function ClientCard({ client }: ClientCardProps) {
   const cardStats: BigCardStat[] = [
     {
       icon: Clock,
-      label: "Hours",
+      label: t("hours"),
       value: formatHoursToHHMM(stats?.totalHours ?? 0),
     },
     {
       icon: CheckCircle,
-      label: "Paid",
+      label: t("paid"),
       value: `$${(stats?.paidValue ?? 0).toFixed(2)}`,
     },
     {
       icon: Timer,
-      label: "Pending",
+      label: t("pending"),
       value: `$${(stats?.pendingValue ?? 0).toFixed(2)}`,
     },
   ];
@@ -243,7 +245,7 @@ export function ClientCard({ client }: ClientCardProps) {
               onClick={handleViewClick}
             >
               <Eye className="h-4 w-4 mr-1" />
-              View
+              {t("view")}
             </Button>
             <Button
               variant="outline"
@@ -252,7 +254,7 @@ export function ClientCard({ client }: ClientCardProps) {
               onClick={handleEditClick}
             >
               <Edit2 className="h-4 w-4 mr-1" />
-              Edit
+              {t("edit")}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -263,23 +265,25 @@ export function ClientCard({ client }: ClientCardProps) {
                   onClick={handleShareClick}
                 >
                   <Share2 className="h-4 w-4 mr-1" />
-                  Share
+                  {t("share")}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Share Client Dashboard</DropdownMenuLabel>
+                <DropdownMenuLabel>
+                  {t("shareClientDashboard")}
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleCopyLink}>
                   <Copy className="mr-2 h-4 w-4" />
-                  <span>Copy Link</span>
+                  <span>{t("copyLink")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleShareWhatsApp}>
                   <MessageCircle className="mr-2 h-4 w-4" />
-                  <span>Share via WhatsApp</span>
+                  <span>{t("shareViaWhatsApp")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleShareEmail}>
                   <Mail className="mr-2 h-4 w-4" />
-                  <span>Send via Email</span>
+                  <span>{t("sendViaEmail")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -291,8 +295,8 @@ export function ClientCard({ client }: ClientCardProps) {
       <FormModal
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
-        title="Edit Client"
-        description="Update client information, contact details and manage addresses"
+        title={t("editClient")}
+        description={t("editClientFormSubtitle")}
         icon={Users}
         className="sm:max-w-[600px]"
       >
@@ -303,7 +307,7 @@ export function ClientCard({ client }: ClientCardProps) {
               name="company"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Company</FormLabel>
+                  <FormLabel>{t("company")}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -316,7 +320,7 @@ export function ClientCard({ client }: ClientCardProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -329,7 +333,7 @@ export function ClientCard({ client }: ClientCardProps) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t("email")}</FormLabel>
                   <FormControl>
                     <Input {...field} type="email" />
                   </FormControl>
@@ -342,7 +346,7 @@ export function ClientCard({ client }: ClientCardProps) {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone</FormLabel>
+                  <FormLabel>{t("phone")}</FormLabel>
                   <FormControl>
                     <PhoneInput {...field} placeholder="(11) 99999-9999" />
                   </FormControl>
@@ -352,7 +356,7 @@ export function ClientCard({ client }: ClientCardProps) {
             />
             <ClientAddresses clientId={client.id} />
             <Button type="submit" className="w-full">
-              Save Changes
+              {t("saveChanges")}
             </Button>
           </form>
         </Form>

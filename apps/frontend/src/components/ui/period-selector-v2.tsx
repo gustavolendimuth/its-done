@@ -10,48 +10,7 @@ import {
 } from "date-fns";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Button } from "@/components/ui/button";
-
-const PRESETS = [
-  {
-    label: "Hoje",
-    getRange: () => {
-      const today = startOfToday();
-      return { startDate: today, endDate: today };
-    },
-  },
-  {
-    label: "Esta semana",
-    getRange: () => {
-      const start = startOfWeek(new Date(), { weekStartsOn: 1 });
-      const end = endOfWeek(new Date(), { weekStartsOn: 1 });
-      return { startDate: start, endDate: end };
-    },
-  },
-  {
-    label: "Este mês",
-    getRange: () => {
-      const start = startOfMonth(new Date());
-      const end = endOfMonth(new Date());
-      return { startDate: start, endDate: end };
-    },
-  },
-  {
-    label: "Últimos 7 dias",
-    getRange: () => {
-      const end = startOfToday();
-      const start = subDays(end, 6);
-      return { startDate: start, endDate: end };
-    },
-  },
-  {
-    label: "Últimos 30 dias",
-    getRange: () => {
-      const end = startOfToday();
-      const start = subDays(end, 29);
-      return { startDate: start, endDate: end };
-    },
-  },
-];
+import { useTranslations } from "next-intl";
 
 interface DateRange {
   startDate: Date | null;
@@ -69,11 +28,54 @@ export function PeriodSelectorV2({
   onChange,
   className,
 }: PeriodSelectorV2Props) {
+  const t = useTranslations("common");
   const [showCustom, setShowCustom] = useState(false);
   const customBtnRef = useRef<HTMLButtonElement>(null);
 
+  const PRESETS = [
+    {
+      label: t("today"),
+      getRange: () => {
+        const today = startOfToday();
+        return { startDate: today, endDate: today };
+      },
+    },
+    {
+      label: t("thisWeek"),
+      getRange: () => {
+        const start = startOfWeek(new Date(), { weekStartsOn: 1 });
+        const end = endOfWeek(new Date(), { weekStartsOn: 1 });
+        return { startDate: start, endDate: end };
+      },
+    },
+    {
+      label: t("thisMonth"),
+      getRange: () => {
+        const start = startOfMonth(new Date());
+        const end = endOfMonth(new Date());
+        return { startDate: start, endDate: end };
+      },
+    },
+    {
+      label: t("last7Days"),
+      getRange: () => {
+        const end = startOfToday();
+        const start = subDays(end, 6);
+        return { startDate: start, endDate: end };
+      },
+    },
+    {
+      label: t("last30Days"),
+      getRange: () => {
+        const end = startOfToday();
+        const start = subDays(end, 29);
+        return { startDate: start, endDate: end };
+      },
+    },
+  ];
+
   const formatLabel = () => {
-    if (!value.startDate || !value.endDate) return "Select a period";
+    if (!value.startDate || !value.endDate) return t("selectPeriod");
     for (const preset of PRESETS) {
       const presetRange = preset.getRange();
       if (

@@ -10,8 +10,11 @@ export interface DashboardStats {
   lastMonthHours: number;
   hoursGrowth: number;
   recentActivities: {
-    type: 'work_hour' | 'invoice' | 'client';
-    description: string;
+    type: "work_hour" | "invoice" | "client";
+    description: {
+      key: string;
+      values: Record<string, any>;
+    };
     date: string;
     client?: string;
   }[];

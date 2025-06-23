@@ -5,15 +5,15 @@ import { cn } from "@/lib/utils";
 
 interface EmptyStateAction {
   label: string;
-  icon?: LucideIcon;
   onClick: () => void;
   variant?:
     | "default"
+    | "destructive"
     | "outline"
     | "secondary"
     | "ghost"
-    | "link"
-    | "destructive";
+    | "link";
+  icon?: LucideIcon;
 }
 
 interface EmptyStateProps {

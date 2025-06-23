@@ -11,7 +11,10 @@ export interface DashboardStats {
   hoursGrowth: number;
   recentActivities: {
     type: 'work_hour' | 'invoice' | 'client';
-    description: string;
+    description: {
+      key: string;
+      values: Record<string, any>;
+    };
     date: Date;
     client?: string;
   }[];
@@ -30,6 +33,12 @@ export interface DashboardStats {
 @Injectable()
 export class DashboardService {
   constructor(private prisma: PrismaService) {}
+
+  private formatHours(hours: number): string {
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    return `${h}:${m.toString().padStart(2, '0')}`;
+  }
 
   async getDashboardStats(userId: string): Promise<DashboardStats> {
     const now = new Date();
@@ -156,21 +165,33 @@ export class DashboardService {
     const recentActivities = [
       ...recentWorkHours.map((wh) => ({
         type: 'work_hour' as const,
-        description: `Logged ${wh.hours}h: ${wh.description}`,
+        description: {
+          key: 'loggedHours',
+          values: {
+            hours: this.formatHours(wh.hours),
+            description: wh.description,
+          },
+        },
         date: wh.createdAt,
-        client: wh.client.name,
+        client: wh.client.company,
       })),
       ...recentInvoices.map((inv) => ({
         type: 'invoice' as const,
-        description: `Invoice created for ${inv.client.name}`,
+        description: {
+          key: 'invoiceCreatedFor',
+          values: { company: inv.client.company },
+        },
         date: inv.createdAt,
-        client: inv.client.name,
+        client: inv.client.company,
       })),
       ...recentClients.map((client) => ({
         type: 'client' as const,
-        description: `New client: ${client.name}`,
+        description: {
+          key: 'newClient',
+          values: { company: client.company },
+        },
         date: client.createdAt,
-        client: client.name,
+        client: client.company,
       })),
     ]
       .sort((a, b) => b.date.getTime() - a.date.getTime())
@@ -192,7 +213,7 @@ export class DashboardService {
     const topClients = clientStats
       .map((client) => ({
         id: client.id,
-        name: client.name,
+        name: client.company,
         totalHours: client.workHours.reduce((sum, wh) => sum + wh.hours, 0),
         totalInvoices: client.invoices.length,
       }))

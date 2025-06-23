@@ -13,6 +13,7 @@ import { useWorkHoursStats } from "@/services/work-hours-stats";
 import { useTotalHours } from "@/services/time-entries";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface StatCardProps {
   title: string;
@@ -72,6 +73,7 @@ export function TotalHoursDisplay({
   workHours = [],
   isRefetching = false,
 }: TotalHoursDisplayProps) {
+  const t = useTranslations("workHours");
   // Query parameters
   const queryParams =
     dateRange?.startDate && dateRange?.endDate
@@ -132,10 +134,10 @@ export function TotalHoursDisplay({
             </div>
             <div>
               <CardTitle className="text-lg font-semibold text-brand-green-900 dark:text-brand-green-100">
-                Total Work Hours
+                {t("totalWorkHours")}
               </CardTitle>
               <p className="text-sm text-brand-green-700 dark:text-brand-green-300">
-                {isFiltered ? "Selected period" : "All time"}
+                {isFiltered ? t("selectedPeriod") : t("allTime")}
               </p>
             </div>
           </div>
@@ -143,7 +145,7 @@ export function TotalHoursDisplay({
           {showLoading && (
             <div className="flex items-center space-x-2 text-brand-green-600 dark:text-brand-green-400">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-green-500"></div>
-              <span className="text-xs font-medium">Updating...</span>
+              <span className="text-xs font-medium">{t("updating")}</span>
             </div>
           )}
         </div>
@@ -159,7 +161,7 @@ export function TotalHoursDisplay({
             </div>
             {isFiltered && allTimeHours > periodHours && (
               <p className="text-sm text-brand-green-700 dark:text-brand-green-300">
-                All time total: {formatHoursToHHMM(allTimeHours)}
+                {t("allTimeTotal", { hours: formatHoursToHHMM(allTimeHours) })}
               </p>
             )}
           </div>
@@ -167,25 +169,25 @@ export function TotalHoursDisplay({
           {/* First line - Incorporated stats + Estimated Value */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <StatCard
-              title="Active Clients"
+              title={t("activeClients")}
               value={String(activeClients)}
-              description="in selected period"
+              description={t("inSelectedPeriod")}
               icon={Users}
             />
 
             <StatCard
-              title="Days Worked"
+              title={t("daysWorked")}
               value={String(workedDays)}
-              description="unique days in period"
+              description={t("uniqueDaysInPeriod")}
               icon={CalendarDays}
             />
 
             <StatCard
-              title="Estimated Value"
+              title={t("estimatedValue")}
               value={`$${estimatedValue.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
               })}`}
-              description={`@ $${hourlyRate}/hour`}
+              description={t("hourlyRate", { rate: hourlyRate })}
               icon={DollarSign}
             />
           </div>
@@ -193,9 +195,9 @@ export function TotalHoursDisplay({
           {/* Second line - Daily Average + Weekly Projection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <StatCard
-              title="Daily Average"
+              title={t("dailyAverage")}
               value={formatHoursToHHMM(averagePerDay)}
-              description="per working day"
+              description={t("perWorkingDay")}
               icon={Calendar}
             />
 
@@ -206,11 +208,11 @@ export function TotalHoursDisplay({
                   <div className="flex items-center space-x-2">
                     <TrendingUp className="h-4 w-4 text-brand-green-600 dark:text-brand-green-400" />
                     <span className="text-sm font-medium text-brand-green-900 dark:text-brand-green-100">
-                      Weekly Projection
+                      {t("weeklyProjection")}
                     </span>
                   </div>
                   <span className="text-sm font-bold text-brand-green-900 dark:text-brand-green-100">
-                    {formatHoursToHHMM(averagePerDay * 7)}/week
+                    {formatHoursToHHMM(averagePerDay * 7)}/{t("week")}
                   </span>
                 </div>
                 <div className="w-full bg-brand-green-200 dark:bg-brand-green-800 rounded-full h-2">
@@ -222,8 +224,9 @@ export function TotalHoursDisplay({
                   />
                 </div>
                 <p className="text-xs text-brand-green-700 dark:text-brand-green-300 mt-1">
-                  Target: 8h/day • {((averagePerDay / 8) * 100).toFixed(0)}% of
-                  daily target
+                  {t("dailyTarget", {
+                    percentage: ((averagePerDay / 8) * 100).toFixed(0),
+                  })}
                 </p>
               </div>
             )}

@@ -12,6 +12,7 @@ import { z } from "zod";
 import { useCreateTimeEntry } from "@/services/time-entries";
 import { useQueryClient } from "@tanstack/react-query";
 import { Client } from "@/services/clients";
+import { useTranslations } from "next-intl";
 
 const workHourSchema = z.object({
   date: z.date({
@@ -37,6 +38,8 @@ export function WorkHourForm({
   defaultClientId,
   hideClientSelection = false,
 }: WorkHourFormProps) {
+  const t = useTranslations("workHours");
+  const tCommon = useTranslations("common");
   const queryClient = useQueryClient();
   const {
     handleSubmit,
@@ -85,7 +88,9 @@ export function WorkHourForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-foreground">Date *</Label>
+        <Label className="text-sm font-medium text-foreground">
+          {t("date")} *
+        </Label>
         <Controller
           name="date"
           control={control}
@@ -93,7 +98,7 @@ export function WorkHourForm({
             <DatePickerComponent
               value={field.value}
               onChange={field.onChange}
-              placeholder="Pick a date"
+              placeholder={t("pickDate")}
               disabled={(date) =>
                 date > new Date() || date < new Date("1900-01-01")
               }
@@ -108,7 +113,7 @@ export function WorkHourForm({
       {!hideClientSelection && (
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">
-            Client *
+            {t("client")} *
           </Label>
           <Controller
             name="clientId"
@@ -118,7 +123,7 @@ export function WorkHourForm({
                 clients={clients}
                 value={field.value}
                 onSelect={field.onChange}
-                placeholder="Select a client"
+                placeholder={t("selectClient")}
                 onClientAdded={handleClientAdded}
               />
             )}
@@ -132,7 +137,9 @@ export function WorkHourForm({
       )}
 
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-foreground">Project *</Label>
+        <Label className="text-sm font-medium text-foreground">
+          {t("project")} *
+        </Label>
         <Controller
           name="projectId"
           control={control}
@@ -141,7 +148,7 @@ export function WorkHourForm({
               clientId={selectedClientId}
               value={field.value}
               onSelect={field.onChange}
-              placeholder="Select a project"
+              placeholder={t("selectProject")}
               disabled={!selectedClientId}
             />
           )}
@@ -151,13 +158,15 @@ export function WorkHourForm({
         )}
         {!selectedClientId && (
           <p className="text-sm text-muted-foreground">
-            Please select a client first
+            {t("selectClientFirst")}
           </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-foreground">Hours *</Label>
+        <Label className="text-sm font-medium text-foreground">
+          {t("hours")} *
+        </Label>
         <Controller
           name="hours"
           control={control}
@@ -203,20 +212,21 @@ export function WorkHourForm({
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              Saving...
+              {t("saving")}
             </>
           ) : hideClientSelection ? (
-            "Save Time Entry"
+            t("saveTimeEntry")
           ) : (
-            "Save Work Hour"
+            t("saveWorkHour")
           )}
         </Button>
 
         {createTimeEntry.isError && (
           <Alert variant="destructive">
             <AlertDescription>
-              Error saving {hideClientSelection ? "time entry" : "work hour"}.
-              Please try again.
+              {t("errorSaving", {
+                type: hideClientSelection ? t("timeEntry") : t("workHour"),
+              })}
             </AlertDescription>
           </Alert>
         )}
@@ -224,8 +234,9 @@ export function WorkHourForm({
         {createTimeEntry.isSuccess && (
           <Alert className="border-primary/20 bg-primary/5 text-primary">
             <AlertDescription>
-              {hideClientSelection ? "Time entry" : "Work hour"} saved
-              successfully!
+              {t("savedSuccessfully", {
+                type: hideClientSelection ? t("timeEntry") : t("workHour"),
+              })}
             </AlertDescription>
           </Alert>
         )}

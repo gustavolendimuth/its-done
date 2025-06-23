@@ -1,25 +1,23 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
+import { locales } from "./i18n/request";
 
-export default withAuth(
-  function middleware(req) {
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-  }
-);
+export default createMiddleware({
+  // Lista de todos os locales suportados
+  locales: locales,
+
+  // Locale padrão quando nenhum coincide
+  defaultLocale: "en",
+
+  // Sempre usar prefixo de locale
+  localePrefix: "always",
+});
 
 export const config = {
+  // Aplicar apenas em rotas internacionalizadas
   matcher: [
-    "/dashboard/:path*",
-    "/analytics/:path*",
-    "/work-hours/:path*",
-    "/clients/:path*",
-    "/invoices/:path*",
-    "/settings/:path*",
-    "/client-dashboard/:path*",
+    // Match all pathnames except for
+    // - … if they start with `/api`, `/_next` or `/_vercel`
+    // - … the ones containing a dot (e.g. `favicon.ico`)
+    "/((?!api|_next|_vercel|.*\\..*).*)",
   ],
 };

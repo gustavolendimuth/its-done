@@ -3,19 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useSafeHydration } from "@/hooks/use-safe-hydration";
 
-const navigation = [
-  { name: "Work Hours", href: "/work-hours" },
-  { name: "Clients", href: "/clients" },
-  { name: "Projects", href: "/projects" },
-  { name: "Invoices", href: "/invoices" },
-  { name: "Settings", href: "/settings" },
-];
-
 export function Nav() {
+  const t = useTranslations("navigation");
   const pathname = usePathname();
   const mounted = useSafeHydration();
+
+  const navigation = [
+    { name: t("workHours"), href: "/work-hours" },
+    { name: t("clients"), href: "/clients" },
+    { name: t("projects"), href: "/projects" },
+    { name: t("invoices"), href: "/invoices" },
+    { name: t("settings"), href: "/settings" },
+  ];
 
   return (
     <nav className="bg-white shadow">
@@ -24,7 +26,7 @@ export function Nav() {
           <div className="flex">
             <div className="flex flex-shrink-0 items-center">
               <Link href="/" className="text-xl font-bold text-gray-900">
-                Work Hours Tracker
+                It's Done
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

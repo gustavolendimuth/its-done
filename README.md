@@ -17,6 +17,7 @@ Sistema profissional e moderno para controle de horas de trabalho, desenvolvido 
 - [Próximos Passos](#-próximos-passos)
 - [Contribuição](#-contribuição)
 - [Licença](#-licença)
+- [Authentication](#-authentication)
 
 ## 🎯 Sobre o Projeto
 
@@ -83,18 +84,68 @@ O **It`s Done** é um sistema completo de controle de horas de trabalho que ofer
   - Interface consistente entre Dashboard e página de Invoices
 - **Métricas Avançadas**: Crescimento mensal, valor médio por fatura, análise de status e tendências
 
+### 🔐 Sistema de Autenticação e Segurança
+
+- **Login Seguro**: Autenticação JWT com tokens de acesso
+- **Registro de Usuários**: Criação de contas com validação de email
+- **Recuperação de Senha**: Sistema completo de reset de senha via email
+- **Google OAuth**: Login social integrado com Google
+- **Proteção de Rotas**: Middleware de autenticação para rotas protegidas
+- **Tokens Temporários**: Tokens de reset com expiração de 1 hora
+- **Emails Automáticos**: Templates profissionais para welcome e reset de senha
+
+### 🖼️ Sistema de Avatares Inteligente
+
+- **Fallback em Cascata**: Sistema robusto com múltiplos provedores de avatar
+- **Priorização Inteligente**: Google Profile > Gravatar > UI Avatars > DiceBear > SVG Local
+- **Tratamento de Erro DNS**: Solução para problemas de conectividade com Gravatar
+- **Detecção de Falhas**: Monitoramento automático de disponibilidade dos serviços
+- **Avatar Local**: Geração de SVG como último fallback garantido
+- **Cache Inteligente**: Sistema de cache para avatars funcionais por 5 minutos
+- **Métricas de Qualidade**: Coleta de estatísticas de sucesso/falha por provedor
+- **Performance Otimizada**: Timeout configurável e tentativas em paralelo
+
 ### 📧 Notificações Inteligentes
 
 - **Alertas de Horas**: Notificação automática quando atingir limite configurado
 - **Notificação de Faturas**: Email automático ao cliente quando fatura for enviada
 - **Sistema Anti-Spam**: Prevenção de notificações duplicadas
 - **Log de Notificações**: Histórico completo de emails enviados
+- **Email de Reset**: Template profissional para recuperação de senha
+- **Email de Boas-vindas**: Mensagem automática para novos usuários
 
-### ⚙️ Configurações Personalizáveis
+### 🔧 Configurações Personalizáveis
 
 - **Limite de Horas**: Configuração do threshold para alertas automáticos
 - **Email de Notificação**: Personalização do email para recebimento de alertas
 - **Preferências do Sistema**: Configurações de interface e comportamento
+
+### 🌐 Sistema de Traduções Inteligente
+
+- **Traduções Específicas para Formulários**: Subtítulos diferenciados para formulários, separados das descrições de páginas
+- **Sistema de Tempo Relativo Customizado**: Função `formatTimeAgo()` que usa traduções próprias ao invés do date-fns locale
+- **Suporte Multilíngue**: Idiomas português (pt-BR) e inglês (en) com traduções completas
+- **Traduções Contextuais**: Diferentes textos para contextos específicos (página vs formulário vs tempo relativo)
+- **Chaves de Tradução Organizadas**:
+  - `editClientFormSubtitle`: Texto específico para formulário de edição de cliente
+  - `addNewClientFormSubtitle`: Texto específico para formulário de novo cliente
+  - `addHoursFormSubtitle`: Texto específico para formulário de registro de horas
+  - `addProjectFormSubtitle`: Texto específico para formulário de novo projeto
+  - `createInvoiceFormSubtitle`: Texto específico para formulário de criação de fatura
+  - `editInvoiceFormSubtitle`: Texto específico para formulário de edição de fatura
+  - `workHours.timeAgo.*`: Traduções para tempo relativo (day, days, hour, hours, etc.)
+- **Função formatTimeAgo()**: Sistema customizado que substitui date-fns locale:
+
+  ```tsx
+  // ❌ Antes: date-fns com locale
+  formatDistanceToNow(date, { locale: ptBR })
+
+  // ✅ Depois: Sistema de traduções próprio
+  formatTimeAgo(date, t)
+  ```
+
+- **Fallback Inteligente**: Sistema que usa traduções específicas quando disponíveis, com fallback para traduções gerais
+- **Testes de Integridade**: Verificação automática de consistência entre traduções em diferentes idiomas
 
 ### 📈 Relatórios e Exports
 
@@ -397,7 +448,7 @@ its-done/
 │       │   ├── components/   # Componentes reutilizáveis
 │       │   │   ├── dashboard/    # Dashboard unificado
 │       │   │   ├── ui/           # Componentes UI base
-│       │   │   ├── layout/       # Componentes de layout
+│       │   ├── layout/       # Componentes de layout
 │       │   │   ├── invoices/     # Componentes de faturas
 │       │   │   │   ├── invoice-search-filters.tsx  # Filtros reutilizáveis
 │       │   │   │   ├── create-invoice-form.tsx     # Formulário de criação
@@ -572,6 +623,35 @@ Os testes cobrem:
 - **Filtros e Busca**: Validação de filtros por status, busca e ordenação
 - **Componentes UI**: Testes de componentes base como Alert com suas variantes
 - **Acessibilidade**: Verificação de atributos ARIA e roles apropriados
+- **Sistema de Traduções**: Verificação da integridade das traduções de formulários
+
+#### Testes de Traduções
+
+O sistema inclui testes específicos para verificar a integridade das traduções de formulários:
+
+```bash
+# Executar testes de tradução
+pnpm test form-translations
+```
+
+**Testes Implementados:**
+
+- **Carregamento de Traduções**: Verifica se os subtítulos específicos de formulários são carregados corretamente
+- **Consistência entre Idiomas**: Confirma que todas as chaves existem em português e inglês
+- **Diferenciação de Contexto**: Valida que traduções de formulários são diferentes das descrições de páginas
+- **Testes de Componentes**: Verificação se modais usam traduções específicas de formulários
+- **Traduções de Cards**: Verificação de traduções específicas do WorkHourCard ("on" → "em")
+- **Sistema de Traduções Customizado**: Verificação da função formatTimeAgo que usa traduções do projeto
+
+**Localização dos Testes:**
+
+```
+apps/frontend/src/components/
+├── __tests__/
+│   └── form-translations.test.tsx       # Testes de integridade de traduções
+└── clients/__tests__/
+    └── edit-client-modal.test.tsx       # Testes do modal de edição
+```
 
 ### Backend (NestJS)
 
@@ -927,6 +1007,58 @@ pnpm test                # Executar testes
 4. **Estado Global**: React Query para cache e sincronização
 5. **Formulários Validados**: Zod + React Hook Form
 
+#### Sistema de Traduções para Formulários
+
+O sistema agora inclui traduções específicas para formulários, separadas das descrições de páginas:
+
+**Implementação em Componentes FormModal:**
+
+```tsx
+import { useTranslations } from "next-intl";
+
+// Em vez de usar a descrição geral da página
+<FormModal
+  title={t("editClient")}
+  description={t("editClientDescription")} // ❌ Descrição genérica da página
+  // ...
+/>
+
+// Use o subtítulo específico do formulário
+<FormModal
+  title={t("editClient")}
+  description={t("editClientFormSubtitle")} // ✅ Texto específico para formulário
+  // ...
+/>
+```
+
+**Chaves de Tradução Disponíveis:**
+
+```json
+{
+  "clients": {
+    "editClientFormSubtitle": "Modify client details and contact information",
+    "addNewClientFormSubtitle": "Enter client information and contact details"
+  },
+  "workHours": {
+    "addHoursFormSubtitle": "Record time spent on client projects"
+  },
+  "projects": {
+    "addProjectFormSubtitle": "Create a new project and associate it with a client"
+  },
+  "invoices": {
+    "createInvoiceFormSubtitle": "Generate invoice from tracked work hours",
+    "editInvoiceFormSubtitle": "Update invoice status and details"
+  }
+}
+```
+
+**Benefícios das Traduções Específicas:**
+
+- **Contexto Apropriado**: Textos mais específicos e diretos para ações em formulários
+- **UX Melhorada**: Usuário entende melhor o que pode fazer no formulário
+- **Flexibilidade**: Permite descrições diferentes para página vs modal/formulário
+- **Manutenibilidade**: Traduções organizadas por contexto de uso
+
 ### Padrões de Código
 
 - **Naming Convention**: camelCase para variáveis, PascalCase para componentes
@@ -1202,3 +1334,38 @@ Para suporte técnico ou dúvidas:
 ---
 
 **Its Done** - Transformando controle de horas em produtividade profissional. 🚀
+
+## Authentication
+
+The application uses NextAuth.js for authentication, supporting both email/password and Google OAuth2 login methods.
+
+### Authentication Flow
+
+1. **Email/Password Authentication**
+
+   - Users can register and login using email and password
+   - Credentials are validated against the backend API
+   - JWT tokens are used for session management
+
+2. **Google OAuth2 Authentication**
+   - Users can login using their Google account
+   - The flow is handled by NextAuth.js
+   - Callback URL: `/api/auth/callback/google`
+   - After successful authentication, user data is synchronized with our backend
+
+### Environment Variables
+
+Make sure to set up the following environment variables:
+
+```env
+# Frontend (.env)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+NEXTAUTH_SECRET=your-nextauth-secret
+NEXTAUTH_URL=http://localhost:3000
+
+# Backend (.env)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/callback/google
+```

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { FormModal } from "@/components/ui/form-modal";
 import {
@@ -21,15 +22,6 @@ import { Client, UpdateClientDto } from "@/types/client";
 import { ClientAddresses } from "./client-addresses";
 import { Users } from "lucide-react";
 
-const clientFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().min(1, "Phone is required"),
-  company: z.string().min(1, "Company is required"),
-});
-
-type ClientFormData = z.infer<typeof clientFormSchema>;
-
 interface EditClientModalProps {
   client: Client;
   trigger?: React.ReactNode;
@@ -38,6 +30,17 @@ interface EditClientModalProps {
 export function EditClientModal({ client, trigger }: EditClientModalProps) {
   const [open, setOpen] = useState(false);
   const updateClient = useUpdateClient();
+  const t = useTranslations("clients");
+  const tCommon = useTranslations("common");
+
+  const clientFormSchema = z.object({
+    name: z.string().min(1, t("validationNameRequired")),
+    email: z.string().email(t("validationInvalidEmail")),
+    phone: z.string().min(1, t("validationPhoneRequired")),
+    company: z.string().min(1, t("validationCompanyRequired")),
+  });
+
+  type ClientFormData = z.infer<typeof clientFormSchema>;
 
   console.log(
     "EditClientModal rendered for client:",
@@ -81,7 +84,7 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
         </div>
       ) : (
         <Button variant="outline" onClick={handleTriggerClick}>
-          Edit Client
+          {t("editClient")}
         </Button>
       )}
 
@@ -91,8 +94,8 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
           console.log("FormModal onOpenChange:", newOpen);
           setOpen(newOpen);
         }}
-        title="Edit Client"
-        description="Update client information, contact details and manage addresses"
+        title={t("editClient")}
+        description={t("editClientFormSubtitle")}
         icon={Users}
         className="sm:max-w-[600px]"
       >
@@ -103,7 +106,7 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
               name="company"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Company</FormLabel>
+                  <FormLabel>{t("company")}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -116,7 +119,7 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -129,7 +132,7 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t("email")}</FormLabel>
                   <FormControl>
                     <Input {...field} type="email" />
                   </FormControl>
@@ -142,7 +145,7 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone</FormLabel>
+                  <FormLabel>{t("phone")}</FormLabel>
                   <FormControl>
                     <PhoneInput {...field} placeholder="(11) 99999-9999" />
                   </FormControl>
@@ -152,7 +155,7 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
             />
             <ClientAddresses clientId={client.id} />
             <Button type="submit" className="w-full">
-              Save Changes
+              {t("saveChanges")}
             </Button>
           </form>
         </Form>

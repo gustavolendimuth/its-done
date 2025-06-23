@@ -14,6 +14,13 @@ import { FormModal } from "@/components/ui/form-modal";
 import { AddressForm } from "@/components/addresses/address-form";
 import { EditAddressForm } from "@/components/addresses/edit-address-form";
 import { Address } from "@/services/addresses";
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { useTranslations } from "next-intl";
 
 interface AddressComboboxProps {
   addresses: Address[];
@@ -40,6 +47,7 @@ export function AddressCombobox({
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [popoverWidth, setPopoverWidth] = useState<number>(0);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const t = useTranslations("clients");
 
   useEffect(() => {
     if (triggerRef.current) {
@@ -159,16 +167,22 @@ export function AddressCombobox({
 
             {/* Add New Address Button inside dropdown */}
             {showAddButton && !disabled && (
-              <div className="border-t border-border bg-muted/30 p-2">
-                <Button
-                  variant="default"
-                  className="w-full justify-start h-11 px-4 py-2 rounded-md font-medium text-sm shadow-sm hover:shadow-md transition-all duration-200"
-                  onClick={handleAddNewClick}
-                >
-                  <Plus className="mr-2 h-4 w-4 font-bold" />
-                  Add New Address
-                </Button>
-              </div>
+              <Command>
+                <CommandList>
+                  <CommandGroup>
+                    <CommandItem
+                      onSelect={() => {
+                        setAddDialogOpen(true);
+                        setOpen(false);
+                      }}
+                      className="border-t border-border cursor-pointer"
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      {t("addNewAddress")}
+                    </CommandItem>
+                  </CommandGroup>
+                </CommandList>
+              </Command>
             )}
           </div>
         </PopoverContent>
@@ -178,8 +192,8 @@ export function AddressCombobox({
       <FormModal
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
-        title="Add New Address"
-        description="Add a new address for billing, delivery or office location"
+        title={t("addNewAddress")}
+        description={t("addNewAddressDescription")}
         icon={MapPin}
         className="sm:max-w-[600px]"
       >

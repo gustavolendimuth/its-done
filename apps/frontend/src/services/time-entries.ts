@@ -13,7 +13,8 @@ export interface TimeEntry {
   projectId?: string;
   client?: {
     id: string;
-    name: string;
+    name?: string;
+    company: string;
     email: string;
   };
   project?: {

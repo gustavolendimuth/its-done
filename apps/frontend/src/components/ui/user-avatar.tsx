@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { recordAvatarMetric } from "@/services/avatar";
 
 interface UserAvatarProps {
   src?: string | null;
+  fallbackUrls?: string[];
   alt?: string;
   fallbackText: string;
   className?: string;
@@ -26,20 +28,83 @@ const fallbackSizeClasses = {
 
 export function UserAvatar({
   src,
+  fallbackUrls = [],
   alt,
   fallbackText,
   className,
   size = "md",
 }: UserAvatarProps) {
+  const [currentImageSrc, setCurrentImageSrc] = useState<string | null>(
+    src || null
+  );
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(!!src);
+  const fallbackIndexRef = useRef(0);
+  const hasTriedFallbackRef = useRef(false);
+
+  // Reset state when src prop changes
+  useEffect(() => {
+    setCurrentImageSrc(src || null);
+    setImageError(false);
+    setIsLoading(!!src);
+    fallbackIndexRef.current = 0;
+    hasTriedFallbackRef.current = false;
+  }, [src]);
+
+  const tryNextFallback = () => {
+    if (fallbackUrls.length === 0) {
+      setImageError(true);
+      setIsLoading(false);
+      return;
+    }
+
+    // Try next fallback URL
+    fallbackIndexRef.current++;
+
+    if (fallbackIndexRef.current < fallbackUrls.length) {
+      const nextUrl = fallbackUrls[fallbackIndexRef.current];
+      setCurrentImageSrc(nextUrl);
+      setIsLoading(true);
+      hasTriedFallbackRef.current = true;
+    } else {
+      // No more fallbacks available
+      setImageError(true);
+      setIsLoading(false);
+      setCurrentImageSrc(null);
+    }
+  };
 
   const handleImageError = () => {
-    setImageError(true);
-    setIsLoading(false);
+    // Record metric based on current URL
+    if (currentImageSrc?.includes("gravatar.com")) {
+      recordAvatarMetric("gravatarFails");
+    }
+
+    if (!hasTriedFallbackRef.current && fallbackUrls.length > 0) {
+      // Try first fallback URL if we haven't tried any fallbacks yet
+      tryNextFallback();
+    } else if (fallbackIndexRef.current < fallbackUrls.length - 1) {
+      // Try next fallback URL
+      tryNextFallback();
+    } else {
+      // No more fallbacks, show text fallback
+      recordAvatarMetric("fallbackUsed");
+      setImageError(true);
+      setIsLoading(false);
+      setCurrentImageSrc(null);
+    }
   };
 
   const handleImageLoad = () => {
+    // Record successful load metrics
+    if (currentImageSrc?.includes("gravatar.com")) {
+      recordAvatarMetric("gravatarSuccess");
+    } else if (currentImageSrc?.includes("ui-avatars.com")) {
+      recordAvatarMetric("uiAvatarsSuccess");
+    } else if (currentImageSrc?.includes("dicebear.com")) {
+      recordAvatarMetric("diceBearSuccess");
+    }
+
     setIsLoading(false);
     setImageError(false);
   };
@@ -52,10 +117,10 @@ export function UserAvatar({
         className
       )}
     >
-      {src && !imageError && (
+      {currentImageSrc && !imageError && (
         <>
           <AvatarImage
-            src={src}
+            src={currentImageSrc}
             alt={alt}
             className="object-cover"
             onError={handleImageError}

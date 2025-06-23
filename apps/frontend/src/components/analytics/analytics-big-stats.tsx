@@ -11,9 +11,12 @@ import {
   Award,
   Activity,
   Zap,
+  Clock,
+  FileText,
 } from "lucide-react";
 import { useDashboardStats } from "@/services/dashboard";
 import { formatHoursToHHMM } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface AnalyticsBigStatsProps {
   className?: string;
@@ -24,6 +27,7 @@ export function AnalyticsBigStats({
   className,
   isRefetching = false,
 }: AnalyticsBigStatsProps) {
+  const t = useTranslations("analytics");
   const { data: stats } = useDashboardStats();
 
   if (!stats) {
@@ -56,18 +60,18 @@ export function AnalyticsBigStats({
   })();
 
   const getPerformanceLevel = () => {
-    if (productivityScore >= 80) return "Excellent";
-    if (productivityScore >= 60) return "Good";
-    if (productivityScore >= 40) return "Average";
-    return "Needs Focus";
+    if (productivityScore >= 80) return t("performanceExcellent");
+    if (productivityScore >= 60) return t("performanceGood");
+    if (productivityScore >= 40) return t("performanceAverage");
+    return t("performanceNeedsFocus");
   };
 
   const getGrowthTrend = () => {
-    if (stats.hoursGrowth === undefined) return "N/A";
-    if (stats.hoursGrowth > 15) return "Accelerating";
-    if (stats.hoursGrowth > 5) return "Growing";
-    if (stats.hoursGrowth > -5) return "Stable";
-    return "Declining";
+    if (stats.hoursGrowth === undefined) return t("growthNotAvailable");
+    if (stats.hoursGrowth > 15) return t("growthAccelerating");
+    if (stats.hoursGrowth > 5) return t("growthGrowing");
+    if (stats.hoursGrowth > -5) return t("growthStable");
+    return t("growthDeclining");
   };
 
   // Calculate efficiency metrics
@@ -80,22 +84,36 @@ export function AnalyticsBigStats({
   // Stats for the display
   const statsItems: BigStatItem[] = [
     {
-      title: "Productivity Score",
+      title: t("productivityScore"),
       value: `${productivityScore}/100`,
       description: getPerformanceLevel().toLowerCase(),
       icon: Award,
     },
     {
-      title: "Growth Trend",
+      title: t("growthTrend"),
       value: getGrowthTrend(),
-      description: `${stats.hoursGrowth?.toFixed(1) || "0"}% this month`,
+      description: t("growthThisMonth", {
+        growth: stats.hoursGrowth?.toFixed(1) || "0",
+      }),
       icon: TrendingUp,
     },
     {
-      title: "Efficiency Ratio",
+      title: t("efficiencyRatio"),
       value: `${hoursPerClient.toFixed(1)}h`,
-      description: "hours per client",
+      description: t("hoursPerClient"),
       icon: Zap,
+    },
+    {
+      title: t("avgHoursPerDay"),
+      value: `${((stats.thisMonthHours || 0) / new Date().getDate()).toFixed(1)}h`,
+      description: t("thisMonth"),
+      icon: Clock,
+    },
+    {
+      title: t("pendingInvoices"),
+      value: `${stats.pendingInvoices}`,
+      description: t("invoicesPending"),
+      icon: FileText,
     },
   ];
 
@@ -106,13 +124,15 @@ export function AnalyticsBigStats({
         <div className="flex items-center space-x-2 mb-1">
           <Target className="h-4 w-4 text-orange-600 dark:text-orange-400" />
           <span className="text-sm font-medium text-orange-900 dark:text-orange-100">
-            Monthly Target
+            {t("monthlyTarget")}
           </span>
         </div>
         <div className="text-sm text-orange-900 dark:text-orange-100 mb-2">
           {stats.thisMonthHours >= 160
-            ? "Target exceeded! Great work!"
-            : `${(160 - stats.thisMonthHours).toFixed(0)}h to reach 160h target`}
+            ? t("targetExceeded")
+            : t("hoursToTarget", {
+                hours: (160 - stats.thisMonthHours).toFixed(0),
+              })}
         </div>
         <div className="w-full bg-orange-200 dark:bg-orange-800 rounded-full h-2">
           <div
@@ -123,8 +143,10 @@ export function AnalyticsBigStats({
           />
         </div>
         <p className="text-xs text-orange-700 dark:text-orange-300 mt-1">
-          Progress: {formatHoursToHHMM(stats.thisMonthHours)}/160h •{" "}
-          {((stats.thisMonthHours / 160) * 100).toFixed(0)}%
+          {t("progressTarget", {
+            hours: formatHoursToHHMM(stats.thisMonthHours),
+            percentage: ((stats.thisMonthHours / 160) * 100).toFixed(0),
+          })}
         </p>
       </div>
 
@@ -132,20 +154,23 @@ export function AnalyticsBigStats({
         <div className="flex items-center space-x-2 mb-1">
           <Activity className="h-4 w-4 text-orange-600 dark:text-orange-400" />
           <span className="text-sm font-medium text-orange-900 dark:text-orange-100">
-            Business Maturity
+            {t("businessMaturity")}
           </span>
         </div>
         <div className="text-xl font-bold text-orange-900 dark:text-orange-100">
           {stats.totalClients >= 15 && stats.totalHours >= 500
-            ? "Mature"
+            ? t("maturityMature")
             : stats.totalClients >= 8 && stats.totalHours >= 200
-              ? "Established"
+              ? t("maturityEstablished")
               : stats.totalClients >= 3 && stats.totalHours >= 50
-                ? "Growing"
-                : "Startup"}
+                ? t("maturityGrowing")
+                : t("maturityStartup")}
         </div>
         <p className="text-xs text-orange-700 dark:text-orange-300">
-          {stats.totalClients} clients • {formatHoursToHHMM(stats.totalHours)}
+          {t("businessSummary", {
+            clients: stats.totalClients,
+            hours: formatHoursToHHMM(stats.totalHours),
+          })}
         </p>
       </div>
     </div>
@@ -153,11 +178,14 @@ export function AnalyticsBigStats({
 
   return (
     <BigStatsDisplay
-      title="Performance Analytics"
-      subtitle="Advanced business insights"
+      title={t("performanceAnalytics")}
+      subtitle={t("businessInsights")}
       icon={BarChart3}
       mainValue={formatHoursToHHMM(stats.totalHours)}
-      secondaryValue={`${stats.totalClients} clients • ${stats.totalInvoices} invoices`}
+      secondaryValue={t("analyticsSecondary", {
+        clients: stats.totalClients,
+        invoices: stats.totalInvoices,
+      })}
       stats={statsItems}
       variant="orange"
       isRefetching={isRefetching}

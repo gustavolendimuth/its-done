@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useProjects } from "@/services/projects";
 import { useClients } from "@/services/clients";
+import { useTranslations } from "next-intl";
 
 interface ProjectsBigStatsProps {
   className?: string;
@@ -26,6 +27,7 @@ export function ProjectsBigStats({
   isRefetching = false,
   selectedClientId,
 }: ProjectsBigStatsProps) {
+  const t = useTranslations("projects");
   const { data: projects = [] } = useProjects(
     selectedClientId === "all" ? undefined : selectedClientId
   );
@@ -51,38 +53,41 @@ export function ProjectsBigStats({
 
   // Determine project portfolio health
   const getPortfolioHealth = () => {
-    if (totalProjects >= 15 && projectUtilizationRate >= 70) return "Excellent";
-    if (totalProjects >= 8 && projectUtilizationRate >= 50) return "Good";
-    if (totalProjects >= 3 && projectUtilizationRate >= 30) return "Growing";
-    return "Starting";
+    if (totalProjects >= 15 && projectUtilizationRate >= 70)
+      return t("portfolioHealthExcellent");
+    if (totalProjects >= 8 && projectUtilizationRate >= 50)
+      return t("portfolioHealthGood");
+    if (totalProjects >= 3 && projectUtilizationRate >= 30)
+      return t("portfolioHealthGrowing");
+    return t("portfolioHealthStarting");
   };
 
   const getProjectFocus = () => {
-    if (uniqueClients === 0) return "No Focus";
+    if (uniqueClients === 0) return t("focusNoFocus");
     const avgProjectsPerClient = totalProjects / uniqueClients;
-    if (avgProjectsPerClient >= 3) return "Deep Client Work";
-    if (avgProjectsPerClient >= 1.5) return "Balanced";
-    return "Client Diversity";
+    if (avgProjectsPerClient >= 3) return t("focusDeepClientWork");
+    if (avgProjectsPerClient >= 1.5) return t("focusBalanced");
+    return t("focusClientDiversity");
   };
 
   // Stats for the display
   const statsItems: BigStatItem[] = [
     {
-      title: "Avg Hours/Project",
+      title: t("avgHoursPerProject"),
       value: averageHoursPerProject.toFixed(1),
-      description: "work hours per project",
+      description: t("workHoursPerProject"),
       icon: Clock,
     },
     {
-      title: "Utilization Rate",
+      title: t("utilizationRate"),
       value: `${projectUtilizationRate.toFixed(0)}%`,
-      description: "projects with work hours",
+      description: t("projectsWithWorkHours"),
       icon: TrendingUp,
     },
     {
-      title: "Project Focus",
+      title: t("projectFocus"),
       value: getProjectFocus(),
-      description: `across ${uniqueClients} clients`,
+      description: t("acrossClients", { count: uniqueClients }),
       icon: Building2,
     },
   ];
@@ -94,15 +99,15 @@ export function ProjectsBigStats({
         <div className="flex items-center space-x-2 mb-1">
           <Target className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
           <span className="text-sm font-medium text-indigo-900 dark:text-indigo-100">
-            Portfolio Goal
+            {t("portfolioGoal")}
           </span>
         </div>
         <div className="text-sm text-indigo-900 dark:text-indigo-100 mb-2">
           {totalProjects < 5
-            ? "Create more projects for better organization"
+            ? t("createMoreProjects")
             : totalProjects < 12
-              ? "Good project portfolio - focus on utilization"
-              : "Excellent portfolio - optimize management"}
+              ? t("goodProjectPortfolio")
+              : t("excellentPortfolio")}
         </div>
         <div className="w-full bg-indigo-200 dark:bg-indigo-800 rounded-full h-2">
           <div
@@ -113,7 +118,7 @@ export function ProjectsBigStats({
           />
         </div>
         <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-1">
-          Target: 15 projects • {Math.min(totalProjects, 15)}/15
+          {t("targetProjects", { current: Math.min(totalProjects, 15) })}
         </p>
       </div>
 
@@ -121,14 +126,17 @@ export function ProjectsBigStats({
         <div className="flex items-center space-x-2 mb-1">
           <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
           <span className="text-sm font-medium text-indigo-900 dark:text-indigo-100">
-            Organization Level
+            {t("organizationLevel")}
           </span>
         </div>
         <div className="text-xl font-bold text-indigo-900 dark:text-indigo-100">
           {getPortfolioHealth()}
         </div>
         <p className="text-xs text-indigo-700 dark:text-indigo-300">
-          {projectsWithWork}/{totalProjects} active projects
+          {t("activeProjects", {
+            active: projectsWithWork,
+            total: totalProjects,
+          })}
         </p>
       </div>
     </div>
@@ -136,11 +144,11 @@ export function ProjectsBigStats({
 
   return (
     <BigStatsDisplay
-      title="Project Portfolio"
-      subtitle="Organization and work distribution"
+      title={t("title")}
+      subtitle={t("subtitle")}
       icon={Folder}
       mainValue={totalProjects}
-      secondaryValue={`${totalWorkHours} total work hours • ${uniqueClients} clients involved`}
+      secondaryValue={`${totalWorkHours} ${t("totalWorkHours")} • ${uniqueClients} ${t("clientsInvolved")}`}
       stats={statsItems}
       variant="indigo"
       isRefetching={isRefetching}

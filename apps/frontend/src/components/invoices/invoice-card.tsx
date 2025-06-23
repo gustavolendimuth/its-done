@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 
 export interface InvoiceCardAction {
   icon: LucideIcon;
@@ -30,12 +31,12 @@ export interface InvoiceCardAction {
 }
 
 export interface InvoiceCardProps {
-  id: string;
+  id?: string;
   number?: string;
   clientName?: string;
   clientEmail?: string;
   amount: number;
-  status: "PAID" | "PENDING" | "CANCELED" | "paid" | "pending" | "canceled";
+  status?: "PAID" | "PENDING" | "CANCELED" | "paid" | "pending" | "canceled";
   createdAt: string | Date;
   fileUrl?: string;
   onEdit: (id: string) => void;
@@ -45,6 +46,8 @@ export interface InvoiceCardProps {
 }
 
 const getStatusColor = (status: InvoiceCardProps["status"]) => {
+  if (!status) return "blue"; // Default color if status is undefined/null
+
   switch (status.toUpperCase()) {
     case "PAID":
       return "green";
@@ -79,14 +82,16 @@ export function InvoiceCard({
   onUpload,
   className,
 }: InvoiceCardProps) {
+  const t = useTranslations("invoices");
+  const tCommon = useTranslations("common");
+
   const accentColor = getStatusColor(status);
-  const displayClient = clientName || clientEmail || "No client";
-  const invoiceNumber = number || id.slice(-8);
+  const displayClient = clientName || clientEmail || t("noClient");
+  const invoiceNumber = number || (id ? id.slice(-8) : "N/A");
 
   const handleDelete = () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this invoice? This action cannot be undone."
-    );
+    if (!id) return;
+    const confirmed = window.confirm(t("confirmDeleteMessage"));
     if (confirmed) {
       onDelete(id);
     }
@@ -95,7 +100,7 @@ export function InvoiceCard({
   const handleDownloadOrUpload = () => {
     if (fileUrl) {
       window.open(fileUrl, "_blank");
-    } else {
+    } else if (id) {
       onUpload(id);
     }
   };
@@ -128,7 +133,12 @@ export function InvoiceCard({
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-xl font-bold truncate">#{invoiceNumber}</h3>
               <StatusBadge
-                status={status.toUpperCase() as "PENDING" | "PAID" | "CANCELED"}
+                status={
+                  (status?.toUpperCase() || "PENDING") as
+                    | "PENDING"
+                    | "PAID"
+                    | "CANCELED"
+                }
               />
             </div>
             <p className="text-sm text-muted-foreground truncate">
@@ -145,7 +155,7 @@ export function InvoiceCard({
             <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <div>
               <p className="text-xs font-medium text-muted-foreground">
-                Amount
+                {t("amount")}
               </p>
               <p className="text-sm font-bold">${amount.toFixed(2)}</p>
             </div>
@@ -155,9 +165,11 @@ export function InvoiceCard({
             <CheckCircle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <div>
               <p className="text-xs font-medium text-muted-foreground">
-                Status
+                {t("status")}
               </p>
-              <p className="text-sm font-bold">{status.toUpperCase()}</p>
+              <p className="text-sm font-bold">
+                {status?.toUpperCase() || "PENDING"}
+              </p>
             </div>
           </div>
 
@@ -165,7 +177,7 @@ export function InvoiceCard({
             <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <div>
               <p className="text-xs font-medium text-muted-foreground">
-                Created
+                {t("created")}
               </p>
               <p className="text-sm font-bold">
                 {format(new Date(createdAt), "MMM dd")}
@@ -185,12 +197,12 @@ export function InvoiceCard({
             {fileUrl ? (
               <>
                 <Download className="w-3 h-3 mr-1" />
-                Download
+                {t("download")}
               </>
             ) : (
               <>
                 <Upload className="w-3 h-3 mr-1" />
-                Upload
+                {t("upload")}
               </>
             )}
           </Button>
@@ -199,10 +211,10 @@ export function InvoiceCard({
             variant="outline"
             size="sm"
             className="flex-1 h-8 text-xs"
-            onClick={() => onEdit(id)}
+            onClick={() => id && onEdit(id)}
           >
             <Edit className="w-3 h-3 mr-1" />
-            Edit
+            {t("edit")}
           </Button>
 
           <Button
@@ -212,7 +224,7 @@ export function InvoiceCard({
             onClick={handleDelete}
           >
             <Trash2 className="w-3 h-3 mr-1" />
-            Delete
+            {t("delete")}
           </Button>
         </div>
       </CardContent>

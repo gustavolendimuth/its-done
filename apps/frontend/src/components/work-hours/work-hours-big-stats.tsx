@@ -15,6 +15,7 @@ import {
 import { useWorkHoursStats } from "@/services/work-hours-stats";
 import { useTotalHours } from "@/services/time-entries";
 import { formatHoursToHHMM, cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface WorkHoursBigStatsProps {
   dateRange?: {
@@ -36,6 +37,8 @@ export function WorkHoursBigStats({
   workHours = [],
   isRefetching = false,
 }: WorkHoursBigStatsProps) {
+  const t = useTranslations("workHours");
+
   // Query parameters
   const queryParams =
     dateRange?.startDate && dateRange?.endDate
@@ -73,23 +76,23 @@ export function WorkHoursBigStats({
   // Stats for the display
   const stats: BigStatItem[] = [
     {
-      title: "Active Clients",
+      title: t("activeClients"),
       value: String(activeClients),
-      description: "in selected period",
+      description: t("inSelectedPeriod"),
       icon: Users,
     },
     {
-      title: "Days Worked",
+      title: t("daysWorked"),
       value: String(workedDays),
-      description: "unique days in period",
+      description: t("uniqueDaysInPeriod"),
       icon: CalendarDays,
     },
     {
-      title: "Estimated Value",
+      title: t("estimatedValue"),
       value: `$${estimatedValue.toLocaleString("en-US", {
         minimumFractionDigits: 2,
       })}`,
-      description: `@ $${hourlyRate}/hour`,
+      description: t("hourlyRate", { rate: hourlyRate }),
       icon: DollarSign,
     },
   ];
@@ -102,14 +105,14 @@ export function WorkHoursBigStats({
           <div className="flex items-center space-x-2 mb-1">
             <Calendar className="h-4 w-4 text-green-600 dark:text-green-400" />
             <span className="text-sm font-medium text-green-900 dark:text-green-100">
-              Daily Average
+              {t("dailyAverage")}
             </span>
           </div>
           <div className="text-xl font-bold text-green-900 dark:text-green-100">
             {formatHoursToHHMM(averagePerDay)}
           </div>
           <p className="text-xs text-green-700 dark:text-green-300">
-            per working day
+            {t("perWorkingDay")}
           </p>
         </div>
 
@@ -118,11 +121,11 @@ export function WorkHoursBigStats({
             <div className="flex items-center space-x-2">
               <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
               <span className="text-sm font-medium text-green-900 dark:text-green-100">
-                Weekly Projection
+                {t("weeklyProjection")}
               </span>
             </div>
             <span className="text-sm font-bold text-green-900 dark:text-green-100">
-              {formatHoursToHHMM(averagePerDay * 7)}/week
+              {formatHoursToHHMM(averagePerDay * 7)}/{t("week")}
             </span>
           </div>
           <div className="w-full bg-green-200 dark:bg-green-800 rounded-full h-2">
@@ -134,8 +137,9 @@ export function WorkHoursBigStats({
             />
           </div>
           <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-            Target: 8h/day • {((averagePerDay / 8) * 100).toFixed(0)}% of daily
-            target
+            {t("dailyTarget", {
+              percentage: ((averagePerDay / 8) * 100).toFixed(0),
+            })}
           </p>
         </div>
       </div>
@@ -143,13 +147,13 @@ export function WorkHoursBigStats({
 
   return (
     <BigStatsDisplay
-      title="Total Work Hours"
-      subtitle={isFiltered ? "Selected period" : "All time"}
+      title={t("totalWorkHours")}
+      subtitle={isFiltered ? t("selectedPeriod") : t("allTime")}
       icon={Clock}
       mainValue={formatHoursToHHMM(periodHours)}
       secondaryValue={
         isFiltered && allTimeHours > periodHours
-          ? `All time total: ${formatHoursToHHMM(allTimeHours)}`
+          ? t("allTimeTotal", { hours: formatHoursToHHMM(allTimeHours) })
           : undefined
       }
       stats={stats}

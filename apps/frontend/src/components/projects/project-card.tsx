@@ -15,9 +15,9 @@ import {
   Trash2,
   ExternalLink,
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn, formatTimeAgo } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,6 +53,8 @@ export function ProjectCard({
   onDelete,
   isDeleting = false,
 }: ProjectCardProps) {
+  const t = useTranslations("projects");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const [isAlertOpen, setIsAlertOpen] = useState(false);
 
@@ -77,7 +79,7 @@ export function ProjectCard({
     { icon: Building2, value: project.client.company },
     {
       icon: Calendar,
-      value: `Created ${formatDistanceToNow(new Date(project.createdAt))} ago`,
+      value: `${t("created")} ${formatTimeAgo(new Date(project.createdAt), tCommon)}`,
     },
   ];
 
@@ -85,28 +87,26 @@ export function ProjectCard({
   const cardStats = [
     {
       icon: FileText,
-      label: "Entries",
+      label: t("entries"),
       value: project._count.workHours.toString(),
     },
     {
       icon: Calendar,
-      label: "Created",
-      value: formatDistanceToNow(new Date(project.createdAt), {
-        addSuffix: true,
-      }),
+      label: t("created"),
+      value: formatTimeAgo(new Date(project.createdAt), tCommon),
     },
     {
       icon: Clock,
-      label: "Status",
-      value: "Active",
+      label: t("status"),
+      value: t("active"),
     },
   ];
 
   return (
-    <div className="group transition-all duration-200 hover:scale-[1.02] space-y-0">
+    <div className="group transition-all duration-200 hover:scale-[1.02] space-y-0 h-full flex flex-col">
       <Card
         className={cn(
-          "overflow-hidden relative hover:shadow-lg rounded-b-none",
+          "overflow-hidden relative hover:shadow-lg rounded-b-none flex-1",
           "bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-950/20 dark:to-indigo-900/20 border-indigo-200 dark:border-indigo-800"
         )}
       >
@@ -122,7 +122,7 @@ export function ProjectCard({
               <h3 className="text-xl font-bold truncate">{project.name}</h3>
               <Badge variant="info" className="mt-1">
                 <Clock className="h-3 w-3 mr-1" />
-                {project._count.workHours} entries
+                {project._count.workHours} {t("entries")}
               </Badge>
             </div>
           </div>
@@ -178,7 +178,7 @@ export function ProjectCard({
               onClick={handleViewClient}
             >
               <ExternalLink className="h-4 w-4 mr-1" />
-              Client
+              {t("client")}
             </Button>
             <Button
               variant="outline"
@@ -187,7 +187,7 @@ export function ProjectCard({
               onClick={handleEdit}
             >
               <Edit2 className="h-4 w-4 mr-1" />
-              Edit
+              {t("edit")}
             </Button>
             <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
               <AlertDialogTrigger asChild>
@@ -198,25 +198,23 @@ export function ProjectCard({
                   disabled={isDeleting}
                 >
                   <Trash2 className="h-4 w-4 mr-1" />
-                  Delete
+                  {t("delete")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                  <AlertDialogTitle>{t("deleteProject")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete the project "{project.name}
-                    "? This action cannot be undone and will remove all
-                    associated work hours.
+                    {t("deleteProjectDescription", { name: project.name })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDelete}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Delete Project
+                    {t("deleteProject")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

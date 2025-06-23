@@ -6,7 +6,7 @@ import { Settings, Plus } from "lucide-react";
 
 describe("PageHeader", () => {
   it("renders title and description", () => {
-    render(<PageHeader title="Test Title" description="Test description" />);
+    render(<PageHeader title="Test Title" subtitle="Test description" />);
 
     expect(screen.getByText("Test Title")).toBeInTheDocument();
     expect(screen.getByText("Test description")).toBeInTheDocument();
@@ -16,7 +16,7 @@ describe("PageHeader", () => {
     render(
       <PageHeader
         title="Settings"
-        description="Manage your settings"
+        subtitle="Manage your settings"
         icon={Settings}
       />
     );
@@ -29,9 +29,7 @@ describe("PageHeader", () => {
   });
 
   it("renders without icon when not provided", () => {
-    render(
-      <PageHeader title="Simple Title" description="Simple description" />
-    );
+    render(<PageHeader title="Simple Title" subtitle="Simple description" />);
 
     expect(screen.getByText("Simple Title")).toBeInTheDocument();
     // No icon should be present
@@ -82,7 +80,7 @@ describe("PageHeader", () => {
     render(
       <PageHeader
         title="Test Title"
-        description="Test description"
+        subtitle="Test description"
         icon={Settings}
       />
     );

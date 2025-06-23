@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
+import { normalizeUrl } from '../utils/url';
 
 @Injectable()
 export class NotificationsService {
@@ -11,7 +12,13 @@ export class NotificationsService {
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-    this.resend = new Resend(this.configService.get('RESEND_API_KEY'));
+    const resendApiKey = this.configService.get('RESEND_API_KEY');
+    if (!resendApiKey || resendApiKey === 'your-resend-api-key') {
+      console.warn('⚠️  RESEND_API_KEY não configurada ou usando valor padrão');
+    } else {
+      console.log('✅ Resend API configurada');
+    }
+    this.resend = new Resend(resendApiKey);
   }
 
   async sendHoursThresholdAlert(userId: string, totalHours: number) {
@@ -87,6 +94,79 @@ export class NotificationsService {
     }
   }
 
+  async sendPasswordResetEmail(
+    userEmail: string,
+    userName: string,
+    resetToken: string,
+  ) {
+    try {
+      console.log(
+        `📧 Iniciando envio de email de reset de senha para: ${userEmail}`,
+      );
+
+      const frontendUrl = normalizeUrl(
+        this.configService.get('FRONTEND_URL') || 'localhost:3000',
+      );
+      const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+      const isDevelopment =
+        this.configService.get('NODE_ENV') === 'development';
+
+      console.log(`🔗 URL de reset gerada: ${resetUrl}`);
+      console.log(`🔧 Modo desenvolvimento: ${isDevelopment}`);
+
+      // Em modo desenvolvimento, o Resend pode ter restrições
+      if (isDevelopment) {
+        console.log(
+          `⚠️  ATENÇÃO: Em modo desenvolvimento, o Resend pode restringir o envio apenas para o email do proprietário da conta`,
+        );
+        console.log(
+          `📝 Para receber emails em desenvolvimento, use o email cadastrado na conta Resend`,
+        );
+      }
+
+      const emailResult = await this.sendEmail({
+        to: userEmail,
+        subject: 'Reset Your Password - Its Done',
+        html: this.generatePasswordResetEmailTemplate(userName, resetUrl),
+      });
+
+      console.log(
+        `✅ Email de reset de senha enviado com sucesso para ${userEmail}`,
+      );
+      console.log(`📊 Resend Response:`, emailResult);
+
+      return true;
+    } catch (error) {
+      console.error(
+        `❌ Falha ao enviar email de reset de senha para ${userEmail}:`,
+        error,
+      );
+
+      // Log detalhado do erro
+      if (error.response) {
+        console.error('📄 Resposta do erro:', error.response.data);
+      }
+      if (error.message) {
+        console.error('💬 Mensagem do erro:', error.message);
+      }
+
+      // Dicas específicas para erros comuns do Resend
+      if (
+        error.message?.includes('403') ||
+        error.message?.includes('validation_error')
+      ) {
+        console.error(
+          `🔍 DICA: Em desenvolvimento, o Resend só permite envio para o email verificado na conta`,
+        );
+        console.error(
+          `📧 Verifique se o email ${userEmail} está associado à conta Resend ou adicione um domínio verificado`,
+        );
+      }
+
+      return false;
+    }
+  }
+
   private async sendEmail(options: {
     to: string;
     subject: string;
@@ -94,13 +174,32 @@ export class NotificationsService {
   }) {
     const fromEmail =
       this.configService.get('FROM_EMAIL') || 'noreply@its-done.com';
+    const resendApiKey = this.configService.get('RESEND_API_KEY');
 
-    return await this.resend.emails.send({
-      from: fromEmail,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-    });
+    console.log(`📨 Configurações de email:`);
+    console.log(`   - De: ${fromEmail}`);
+    console.log(`   - Para: ${options.to}`);
+    console.log(`   - Assunto: ${options.subject}`);
+    console.log(`   - API Key configurada: ${resendApiKey ? 'Sim' : 'Não'}`);
+
+    if (!resendApiKey || resendApiKey === 'your-resend-api-key') {
+      throw new Error('RESEND_API_KEY não configurada corretamente');
+    }
+
+    try {
+      const result = await this.resend.emails.send({
+        from: fromEmail,
+        to: options.to,
+        subject: options.subject,
+        html: options.html,
+      });
+
+      console.log(`✅ Email enviado via Resend:`, result);
+      return result;
+    } catch (resendError) {
+      console.error(`❌ Erro do Resend:`, resendError);
+      throw resendError;
+    }
   }
 
   private generateHoursThresholdEmailTemplate(
@@ -218,6 +317,57 @@ export class NotificationsService {
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generatePasswordResetEmailTemplate(
+    userName: string,
+    resetUrl: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reset Your Password</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #f8f9fa; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { background-color: #ffffff; padding: 30px; border: 1px solid #e9ecef; }
+          .footer { background-color: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; font-size: 14px; color: #6c757d; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+          .button:hover { background-color: #0056b3; }
+          .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Reset Your Password</h1>
+          </div>
+          <div class="content">
+            <p>Hello ${userName},</p>
+            <p>We received a request to reset your password for your Its Done account. If you didn't make this request, you can safely ignore this email.</p>
+            <p>To reset your password, click the button below:</p>
+            <div style="text-align: center;">
+              <a href="${resetUrl}" class="button">Reset Password</a>
+            </div>
+            <p>Or copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">${resetUrl}</p>
+            <div class="warning">
+              <strong>Important:</strong> This link will expire in 1 hour for security reasons.
+            </div>
+            <p>If you continue to have problems, please contact our support team.</p>
+            <p>Best regards,<br>The Its Done Team</p>
+          </div>
+          <div class="footer">
+            <p>This is an automated message. Please do not reply to this email.</p>
+          </div>
         </div>
       </body>
       </html>

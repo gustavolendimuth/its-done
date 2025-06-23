@@ -50,3 +50,51 @@ export function formatHoursToHHMM(hours: number): string {
 
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
 }
+
+/**
+ * Formata tempo relativo usando o sistema de traduções do projeto
+ * @param date - Data para calcular o tempo relativo
+ * @param t - Função de tradução
+ * @returns String formatada do tempo relativo
+ */
+export function formatTimeAgo(
+  date: Date,
+  t: (key: string, values?: any) => string
+): string {
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  const diffInWeeks = Math.floor(diffInDays / 7);
+  const diffInMonths = Math.floor(diffInDays / 30);
+  const diffInYears = Math.floor(diffInDays / 365);
+
+  if (diffInMinutes < 1) {
+    return t("timeAgo.justNow");
+  } else if (diffInMinutes < 2) {
+    return t("timeAgo.minute");
+  } else if (diffInMinutes < 60) {
+    return t("timeAgo.minutes", { count: diffInMinutes });
+  } else if (diffInHours < 2) {
+    return t("timeAgo.hour");
+  } else if (diffInHours < 24) {
+    return t("timeAgo.hours", { count: diffInHours });
+  } else if (diffInDays < 2) {
+    return t("timeAgo.day");
+  } else if (diffInDays < 7) {
+    return t("timeAgo.days", { count: diffInDays });
+  } else if (diffInWeeks < 2) {
+    return t("timeAgo.week");
+  } else if (diffInWeeks < 4) {
+    return t("timeAgo.weeks", { count: diffInWeeks });
+  } else if (diffInMonths < 2) {
+    return t("timeAgo.month");
+  } else if (diffInMonths < 12) {
+    return t("timeAgo.months", { count: diffInMonths });
+  } else if (diffInYears < 2) {
+    return t("timeAgo.year");
+  } else {
+    return t("timeAgo.years", { count: diffInYears });
+  }
+}

@@ -2,8 +2,10 @@
 
 import { ModeToggle } from "@/components/mode-toggle";
 import { UserAvatar } from "@/components/ui/user-avatar";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Button } from "@/components/ui/button";
 import { Bell, LogOut, LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,10 +37,11 @@ function SafeIcon({
 }
 
 export function Topbar() {
+  const t = useTranslations("navigation");
   const router = useRouter();
   const mounted = useSafeHydration();
   const { status } = useSession();
-  const { avatarUrl, initials, displayName, email } = useAvatar();
+  const { avatarUrl, fallbackUrls, initials, displayName, email } = useAvatar();
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -79,12 +82,14 @@ export function Topbar() {
         >
           <SafeIcon icon={Bell} className="h-5 w-5" />
         </Button>
+        <LanguageSwitcher />
         <ModeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <UserAvatar
                 src={avatarUrl}
+                fallbackUrls={fallbackUrls}
                 alt={`@${displayName}`}
                 fallbackText={initials}
                 size="md"
@@ -110,7 +115,7 @@ export function Topbar() {
               onClick={handleLogout}
             >
               <SafeIcon icon={LogOut} className="mr-2 h-4 w-4" />
-              <span>Sair</span>
+              <span>{t("logout")}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

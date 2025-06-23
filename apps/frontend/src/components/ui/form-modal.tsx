@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface FormModalProps {
   open: boolean;
@@ -26,11 +27,16 @@ export function FormModal({
   description,
   icon: Icon,
   children,
-  className = "max-w-4xl max-h-[90vh] overflow-y-auto",
+  className,
 }: FormModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={className}>
+      <DialogContent
+        className={cn(
+          className,
+          "sm:max-w-[700px] max-h-[90vh] overflow-y-auto"
+        )}
+      >
         <div className="space-y-6 p-2 md:p-4">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-3xl">

@@ -11,6 +11,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AddressCombobox } from "@/components/ui/address-combobox";
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle } from "lucide-react";
+import { Address } from "@/types/address";
+import { Client } from "@/types/client";
+import { useTranslations } from "next-intl";
 
 interface ClientFormData {
   name?: string;
@@ -24,13 +27,14 @@ interface ClientFormProps {
 }
 
 export function ClientForm({ onSuccess }: ClientFormProps) {
+  const t = useTranslations("clients");
   const [formData, setFormData] = useState<ClientFormData>({
     name: "",
     email: "",
     phone: "",
     company: "",
   });
-  const [createdClient, setCreatedClient] = useState<any>(null);
+  const [createdClient, setCreatedClient] = useState<Client | null>(null);
   const { data: addresses } = useClientAddresses(createdClient?.id || "");
   const createClientMutation = useCreateClient();
   const queryClient = useQueryClient();
@@ -60,16 +64,31 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
 
     console.log("Clean client data to be sent:", cleanClientData);
 
-    createClientMutation.mutate(cleanClientData, {
-      onSuccess: (data) => {
-        console.log("Client created successfully:", data);
-        setCreatedClient(data);
-      },
-      onError: (error: any) => {
-        console.error("Error creating client:", error);
-        console.error("Error details:", error.response?.data);
-      },
-    });
+    try {
+      console.log("Submitting client:", cleanClientData);
+      const createdClient =
+        await createClientMutation.mutateAsync(cleanClientData);
+      console.log("Client created successfully:", createdClient);
+
+      if (createdClient) {
+        console.log("Setting created client:", createdClient);
+        setCreatedClient(createdClient);
+        setAddresses([]);
+
+        // Clear form
+        setFormData({
+          company: "",
+          email: "",
+          name: "",
+          phone: "",
+        });
+
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ["clients"] });
+      }
+    } catch (error) {
+      console.error("Error creating client:", error);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,49 +162,47 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
         <Alert className="border-primary/20 bg-primary/5">
           <CheckCircle className="h-4 w-4 text-primary" />
           <div className="ml-2">
-            <p className="font-medium text-foreground">
-              Client created successfully!
-            </p>
+            <p className="font-medium text-foreground">{t("saveSuccess")}</p>
             <p className="text-sm text-muted-foreground">
-              Now you can add addresses for {createdClient.company}
+              {t("nowYouCanAddAddresses", { company: createdClient.company })}
             </p>
             <p className="text-xs text-muted-foreground">
-              Client ID: {createdClient.id}
+              {t("id")}: {createdClient.id}
             </p>
           </div>
         </Alert>
 
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">
-            Addresses (Optional)
+            {t("addressesOptional")}
           </Label>
           {createdClient.id ? (
             <AddressCombobox
               addresses={addresses || []}
-              placeholder="Addresses"
+              placeholder={t("addresses")}
               clientId={createdClient.id}
               showAddButton={true}
               onAddressAdded={handleAddressAdded}
             />
           ) : (
             <div className="text-sm text-red-500">
-              Error: Client ID not available
+              {t("errorClientIdNotAvailable")}
             </div>
           )}
         </div>
 
         <div className="flex gap-3">
           <Button onClick={handleFinish} className="flex-1">
-            Finish
+            {t("finish")}
           </Button>
           <Button variant="outline" onClick={() => setCreatedClient(null)}>
-            Add Another Client
+            {t("addAnotherClient")}
           </Button>
           <Button variant="ghost" size="sm" onClick={testApiConnection}>
-            Test API
+            {t("testApi")}
           </Button>
           <Button variant="ghost" size="sm" onClick={checkSession}>
-            Check Session
+            {t("checkSession")}
           </Button>
         </div>
       </div>
@@ -199,7 +216,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           htmlFor="company"
           className="text-sm font-medium text-foreground"
         >
-          Company *
+          {t("company")} *
         </Label>
         <Input
           type="text"
@@ -208,13 +225,13 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           value={formData.company}
           onChange={handleChange}
           required
-          placeholder="Enter company name"
+          placeholder={t("enterCompany")}
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="name" className="text-sm font-medium text-foreground">
-          Contact Name
+          {t("contactName")}
         </Label>
         <Input
           type="text"
@@ -222,13 +239,13 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           name="name"
           value={formData.name || ""}
           onChange={handleChange}
-          placeholder="Enter contact person name (optional)"
+          placeholder={t("enterContactNameOptional")}
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="email" className="text-sm font-medium text-foreground">
-          Email *
+          {t("email")} *
         </Label>
         <Input
           type="email"
@@ -237,13 +254,13 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           value={formData.email}
           onChange={handleChange}
           required
-          placeholder="Enter client email"
+          placeholder={t("enterEmail")}
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="phone" className="text-sm font-medium text-foreground">
-          Phone
+          {t("phone")}
         </Label>
         <PhoneInput
           id="phone"
@@ -256,9 +273,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
 
       {createClientMutation.isError && (
         <Alert variant="destructive">
-          <AlertDescription>
-            Error creating client. Please try again.
-          </AlertDescription>
+          <AlertDescription>{t("errorCreatingClient")}</AlertDescription>
         </Alert>
       )}
 
@@ -290,10 +305,10 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              Creating...
+              {t("creating")}...
             </>
           ) : (
-            "Create Client"
+            t("createClient")
           )}
         </Button>
       </div>

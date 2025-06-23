@@ -11,7 +11,7 @@ import {
   Trash2,
   FileText,
 } from "lucide-react";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +23,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTranslations } from "next-intl";
+import { formatTimeAgo } from "@/lib/utils";
 
 /**
  * WorkHourCard Component
@@ -43,9 +45,9 @@ export interface WorkHourCardProps {
   workHour: {
     id: string;
     date: string | Date;
-    description: string;
+    description?: string;
     hours: number;
-    client: {
+    client?: {
       id: string;
       name?: string;
       company: string;
@@ -70,18 +72,29 @@ export function WorkHourCard({
   isDeleting = false,
   className,
 }: WorkHourCardProps) {
-  const clientDisplayName = workHour.client.name
-    ? `${workHour.client.company} (${workHour.client.name})`
-    : workHour.client.company;
+  const t = useTranslations("workHours");
+  const tCommon = useTranslations("common");
+
+  const client = workHour.client;
+  const clientDisplayName =
+    client?.name && client.company
+      ? `${client.company} (${client.name})`
+      : (client?.company ?? t("noClient"));
 
   const workDate = new Date(workHour.date);
   const createdDate = new Date(workHour.createdAt);
 
+  const formatHoursToHHMM = (hours: number): string => {
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+  };
+
   return (
-    <div className="group transition-all duration-200 hover:scale-[1.02] space-y-0">
+    <div className="group transition-all duration-200 hover:scale-[1.02] space-y-0 h-full flex flex-col">
       <Card
         className={cn(
-          "overflow-hidden relative hover:shadow-lg rounded-b-none",
+          "overflow-hidden relative hover:shadow-lg rounded-b-none flex-1",
           "bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/20 dark:to-green-900/20 border-green-200 dark:border-green-800",
           className
         )}
@@ -104,7 +117,7 @@ export function WorkHourCard({
                   {formatHoursToHHMM(workHour.hours)}
                 </h3>
                 <span className="text-sm text-muted-foreground">
-                  on {format(workDate, "MMM dd, yyyy")}
+                  {tCommon("on")} {format(workDate, "dd/MM/yyyy")}
                 </span>
               </div>
 
@@ -112,10 +125,7 @@ export function WorkHourCard({
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Calendar className="w-4 h-4 text-green-500 flex-shrink-0" />
                 <span className="whitespace-nowrap">
-                  {formatDistanceToNow(workDate, { addSuffix: true }).replace(
-                    " ago",
-                    ""
-                  )}
+                  {formatTimeAgo(workDate, tCommon)}
                 </span>
               </div>
             </div>
@@ -129,7 +139,7 @@ export function WorkHourCard({
             <div className="flex items-center gap-2">
               <Building2 className="w-4 h-4 text-green-500 flex-shrink-0" />
               <p className="text-sm font-semibold text-foreground bg-green-50/70 dark:bg-green-900/20 px-2 py-1 rounded-md truncate border border-green-200/50 dark:border-green-800/50">
-                {workHour.client.company}
+                {workHour.client?.company ?? t("noClient")}
               </p>
             </div>
 
@@ -147,7 +157,7 @@ export function WorkHourCard({
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-green-500 flex-shrink-0" />
               <p className="text-sm text-muted-foreground">
-                Created {format(createdDate, "MMM dd, yyyy")}
+                {t("created")} {format(createdDate, "dd/MM/yyyy")}
               </p>
             </div>
           </div>
@@ -174,7 +184,7 @@ export function WorkHourCard({
               onClick={() => onEdit(workHour.id)}
             >
               <Edit className="w-3 h-3 mr-1" />
-              Edit
+              {t("edit")}
             </Button>
 
             <AlertDialog>
@@ -186,26 +196,28 @@ export function WorkHourCard({
                   disabled={isDeleting}
                 >
                   <Trash2 className="w-3 h-3 mr-1" />
-                  {isDeleting ? "Deleting..." : "Delete"}
+                  {isDeleting ? t("deleting") : t("delete")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Work Hour Entry</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {t("deleteWorkHourTitle")}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete this work hour entry of{" "}
-                    <strong>{formatHoursToHHMM(workHour.hours)}</strong> for{" "}
-                    <strong>{clientDisplayName}</strong>? This action cannot be
-                    undone.
+                    {t("deleteWorkHourDescription", {
+                      hours: formatHoursToHHMM(workHour.hours),
+                      client: clientDisplayName,
+                    })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => onDelete(workHour.id)}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Delete Entry
+                    {t("deleteEntry")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

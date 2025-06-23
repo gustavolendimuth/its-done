@@ -21,6 +21,15 @@ export interface RegisterDto {
   name: string;
 }
 
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  token: string;
+  newPassword: string;
+}
+
 export interface AuthResponse {
   user: User;
   token: string;
@@ -39,6 +48,30 @@ export const useRegister = () => {
   return useMutation({
     mutationFn: async (data: RegisterDto) => {
       const response = await api.post<AuthResponse>("/auth/register", data);
+      return response.data;
+    },
+  });
+};
+
+export const useForgotPassword = () => {
+  return useMutation({
+    mutationFn: async (data: ForgotPasswordDto) => {
+      const response = await api.post<{ message: string }>(
+        "/auth/forgot-password",
+        data
+      );
+      return response.data;
+    },
+  });
+};
+
+export const useResetPassword = () => {
+  return useMutation({
+    mutationFn: async (data: ResetPasswordDto) => {
+      const response = await api.post<{ message: string }>(
+        "/auth/reset-password",
+        data
+      );
       return response.data;
     },
   });
