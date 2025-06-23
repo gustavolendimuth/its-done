@@ -46,13 +46,14 @@
 
 ```
 its-done/
-├── apps/backend/Dockerfile ✅
-├── apps/frontend/Dockerfile ✅
-├── apps/backend/railway.toml ✅
-├── apps/frontend/railway.toml ✅
-├── railway.toml ✅
+├── apps/backend/Dockerfile ✅ (standalone)
+├── apps/frontend/Dockerfile ✅ (standalone)
+├── apps/backend/.dockerignore ✅
+├── apps/frontend/.dockerignore ✅
 └── docker-compose.yml ✅
 ```
+
+> ✅ **Dockerfiles Standalone**: Configurados para deploy direto de cada diretório, sem dependência do monorepo
 
 ---
 

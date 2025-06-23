@@ -1,4 +1,4 @@
-# Use Node.js 18 Alpine
+# Dockerfile para deploy standalone do backend
 FROM node:18-alpine
 
 # Instalar dependências do sistema
@@ -8,22 +8,20 @@ RUN apk add --no-cache libc6-compat curl && \
 # Definir diretório de trabalho
 WORKDIR /app
 
-# Copiar apenas o que é necessário para install
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/ ./packages/
-COPY apps/backend/package.json ./apps/backend/
+# Copiar arquivos de configuração
+COPY package.json ./
+COPY tsconfig*.json ./
+COPY nest-cli.json ./
 
-# Instalar dependências primeiro
+# Instalar dependências
 RUN pnpm config set network-timeout 300000 && \
     pnpm install --frozen-lockfile
 
-# Copiar código fonte
-COPY apps/backend/ ./apps/backend/
+# Copiar código fonte e prisma
+COPY src ./src
+COPY prisma ./prisma
 
-# Navegar para o backend
-WORKDIR /app/apps/backend
-
-# Build em etapas
+# Build da aplicação
 RUN echo "🔧 Gerando Prisma client..." && \
     pnpm prisma generate
 
