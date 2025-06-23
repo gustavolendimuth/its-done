@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import getConfig from "next/config";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -31,7 +32,19 @@ export function normalizeUrl(url: string | undefined): string {
  * Obtém a URL da API normalizada para uso no frontend
  */
 export function getApiUrl(): string {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const { publicRuntimeConfig } = getConfig() || {};
+  const apiUrl =
+    publicRuntimeConfig?.apiUrl ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "https://backend-its-done.up.railway.app";
+
+  console.log("🔧 Getting API URL:", {
+    publicRuntimeConfig,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    apiUrl,
+    NODE_ENV: process.env.NODE_ENV,
+  });
+
   return normalizeUrl(apiUrl);
 }
 

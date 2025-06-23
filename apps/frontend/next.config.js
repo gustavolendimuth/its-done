@@ -13,6 +13,17 @@ const nextConfig = {
       enabled: false,
     },
   },
+
+  // Environment variables configuration
+  env: {
+    NEXT_PUBLIC_API_URL:
+      process.env.NEXT_PUBLIC_API_URL || "https://api.estafeito.app.br",
+  },
+
+  // Explicitly set public runtime config
+  publicRuntimeConfig: {
+    apiUrl: process.env.NEXT_PUBLIC_API_URL || "https://api.estafeito.app.br",
+  },
 };
 
 module.exports = withNextIntl(nextConfig);
