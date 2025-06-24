@@ -31,6 +31,7 @@ export class UsersService {
         id: true,
         email: true,
         name: true,
+        role: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -45,6 +46,7 @@ export class UsersService {
         id: true,
         email: true,
         name: true,
+        role: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -59,6 +61,7 @@ export class UsersService {
         id: true,
         email: true,
         name: true,
+        role: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -74,15 +77,6 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { email },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        password: true,
-        googleId: true,
-        createdAt: true,
-        updatedAt: true,
-      },
     });
   }
 
@@ -109,6 +103,7 @@ export class UsersService {
         id: true,
         email: true,
         name: true,
+        role: true,
         createdAt: true,
         updatedAt: true,
       },

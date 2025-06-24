@@ -16,6 +16,7 @@ model User {
   name            String
   password        String
   googleId        String?          @unique
+  role            UserRole         @default(USER)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   workHours       WorkHour[]
@@ -142,4 +143,9 @@ enum InvoiceStatus {
   PENDING
   PAID
   CANCELED
+}
+
+enum UserRole {
+  USER
+  ADMIN
 } 

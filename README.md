@@ -951,6 +951,17 @@ O sistema oferece um dashboard público onde seus clientes podem:
 3. Visualize estatísticas detalhadas
 4. Exporte dados se necessário
 
+### Acesso Administrativo
+
+O primeiro usuário cadastrado no sistema (ID do banco de dados) é automaticamente definido como administrador. Administradores têm acesso a:
+
+- Painel de estatísticas do sistema
+- Gerenciamento de usuários (promover/remover admin, deletar usuários)
+- Visualização de atividades recentes
+- Métricas gerais do sistema (usuários, clientes, projetos, horas, faturas, receita)
+
+Para acessar o painel administrativo, faça login com uma conta admin e navegue para `/admin`.
+
 ## 👨‍💻 Desenvolvimento
 
 ### Estrutura de Comandos

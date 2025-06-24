@@ -15,7 +15,7 @@ COPY nest-cli.json ./
 
 # Instalar dependências
 RUN pnpm config set network-timeout 300000 && \
-    pnpm install --prod=false && \
+    pnpm install --prod=true && \
     pnpm add prisma@latest --save-dev
 
 # Copiar código fonte e prisma
@@ -52,4 +52,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://127.0.0.1:3002/health || exit 1
 
 # Comando para iniciar com migrações
-CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm prisma db seed && node dist/main.js"] 
+CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm db:seed:prod && node dist/main.js"] 

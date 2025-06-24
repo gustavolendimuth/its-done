@@ -12,11 +12,13 @@ import {
   Clock,
   FileText,
   FolderOpen,
+  Shield,
   LucideIcon,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { cn } from "@/lib/utils";
 import { useSafeHydration } from "@/hooks/use-safe-hydration";
+import { useSession } from "next-auth/react";
 
 interface NavItem {
   href: string;
@@ -33,6 +35,7 @@ function Navigation() {
   const t = useTranslations("navigation");
   const pathname = usePathname();
   const mounted = useSafeHydration();
+  const { data: session } = useSession();
 
   const dashboardItems: NavItem[] = [
     { href: "/work-hours", label: t("workHours"), icon: Clock },
@@ -40,6 +43,9 @@ function Navigation() {
     { href: "/projects", label: t("projects"), icon: FolderOpen },
     { href: "/invoices", label: t("invoices"), icon: FileText },
     { href: "/analytics", label: t("analytics"), icon: BarChart3 },
+    ...(session?.user?.role === "ADMIN"
+      ? [{ href: "/admin", label: t("admin"), icon: Shield }]
+      : []),
   ];
 
   const otherItems: NavItem[] = [

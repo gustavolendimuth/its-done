@@ -56,6 +56,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: user.role,
       },
     };
   }
@@ -86,7 +87,10 @@ export class AuthService {
 
     console.log('User validated successfully');
     const { password: _, ...result } = user;
-    return result as UserResponse;
+    return {
+      ...result,
+      role: user.role,
+    } as UserResponse;
   }
 
   async login(user: UserResponse) {
@@ -97,6 +101,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: user.role,
       },
     };
   }
@@ -127,6 +132,8 @@ export class AuthService {
       googleAuthDto.email,
     );
 
+    console.log('Existing user found:', existingUser);
+
     if (!existingUser) {
       // Criar usuário se não existir
       console.log('Creating new user from Google auth');
@@ -139,6 +146,8 @@ export class AuthService {
         googleId: googleAuthDto.googleId,
       });
 
+      console.log('New user created:', user);
+
       const payload = { email: user.email, sub: user.id };
       return {
         access_token: this.jwtService.sign(payload),
@@ -146,15 +155,20 @@ export class AuthService {
           id: user.id,
           email: user.email,
           name: user.name,
+          role: user.role,
         },
       };
     }
 
     // Atualizar googleId se o usuário já existir
     console.log('Updating existing user with Google ID');
+    console.log('Existing user role:', existingUser.role);
+
     const user = await this.usersService.update(existingUser.id, {
       googleId: googleAuthDto.googleId,
     });
+
+    console.log('Updated user:', user);
 
     const payload = { email: user.email, sub: user.id };
     return {
@@ -163,6 +177,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: user.role,
       },
     };
   }

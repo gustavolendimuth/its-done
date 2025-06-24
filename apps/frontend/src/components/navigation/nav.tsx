@@ -5,17 +5,33 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useSafeHydration } from "@/hooks/use-safe-hydration";
+import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import {
+  Home,
+  Clock,
+  Users,
+  FileText,
+  FolderOpen,
+  Settings,
+  BarChart,
+  Shield,
+} from "lucide-react";
 
 export function Nav() {
   const t = useTranslations("navigation");
   const pathname = usePathname();
   const mounted = useSafeHydration();
+  const { data: session } = useSession();
 
   const navigation = [
     { name: t("workHours"), href: "/work-hours" },
     { name: t("clients"), href: "/clients" },
     { name: t("projects"), href: "/projects" },
     { name: t("invoices"), href: "/invoices" },
+    ...(session?.user?.role === "ADMIN"
+      ? [{ name: t("admin"), href: "/admin" }]
+      : []),
     { name: t("settings"), href: "/settings" },
   ];
 

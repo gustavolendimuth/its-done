@@ -13,6 +13,8 @@ import { InvoicesModule } from './invoices/invoices.module';
 import { ReportsModule } from './reports/reports.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { AddressesModule } from './addresses/addresses.module';
     InvoicesModule,
     ReportsModule,
     DashboardModule,
+    NotificationsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

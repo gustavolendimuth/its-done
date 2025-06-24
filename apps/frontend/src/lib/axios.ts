@@ -19,7 +19,12 @@ api.interceptors.request.use(async (config) => {
     console.log("🔍 Getting NextAuth session...");
     const session = await getSession();
 
-    console.log("📱 Session:", session);
+    console.log("📱 Session status:", session ? "exists" : "null");
+    console.log("📱 Session user:", session?.user);
+    console.log(
+      "📱 Session accessToken:",
+      session?.accessToken ? "exists" : "missing"
+    );
 
     if (session?.accessToken) {
       console.log("🔑 Adding Bearer token to request");
@@ -28,19 +33,22 @@ api.interceptors.request.use(async (config) => {
       console.warn("⚠️ No access token found in session");
     }
 
-    console.log("📤 Full Request config:", {
+    console.log("📤 Request config:", {
       url: config.url,
       method: config.method,
       baseURL: config.baseURL,
-      headers: config.headers,
+      headers: {
+        ...config.headers,
+        Authorization: config.headers.Authorization
+          ? "Bearer [HIDDEN]"
+          : undefined,
+      },
       fullUrl: `${config.baseURL}${config.url}`,
-      params: config.params,
     });
 
     return config;
   } catch (error) {
     console.error("❌ Error getting session:", error);
-
     return config;
   }
 });
@@ -48,8 +56,11 @@ api.interceptors.request.use(async (config) => {
 // Add a response interceptor
 api.interceptors.response.use(
   (response) => {
-    console.log("✅ Response received:", response.status, response.statusText);
-
+    console.log("✅ Response received:", {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.config.url,
+    });
     return response;
   },
   async (error) => {
@@ -58,11 +69,20 @@ api.interceptors.response.use(
       statusText: error.response?.statusText,
       data: error.response?.data,
       url: error.config?.url,
+      headers: error.config?.headers?.Authorization
+        ? "Bearer [HIDDEN]"
+        : "No auth header",
     });
 
     if (error.response?.status === 401) {
-      console.warn("🚪 Redirecting to login due to 401");
-      window.location.href = "/login";
+      console.warn("🚪 401 Unauthorized - Checking if should redirect");
+
+      // Don't redirect for auth endpoints
+      const isAuthEndpoint = error.config?.url?.includes("/auth/");
+      if (!isAuthEndpoint) {
+        console.warn("🚪 Redirecting to login due to 401");
+        window.location.href = "/login";
+      }
     }
 
     return Promise.reject(error);
