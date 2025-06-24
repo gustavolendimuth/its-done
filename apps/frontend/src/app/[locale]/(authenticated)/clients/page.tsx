@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { ClientForm } from "@/components/clients/client-form";
 import { ClientCard } from "@/components/clients/client-card";
 import { FormModal } from "@/components/ui/form-modal";
-import { Button } from "@/components/ui/button";
 import { useClients } from "@/services/clients";
 import { useClientStats } from "@/services/client-stats";
 import { ClientsBigStats } from "@/components/clients/clients-big-stats";
@@ -15,11 +14,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 import { InfoCard } from "@/components/ui/info-card";
-import { formatHoursToHHMM } from "@/lib/utils";
 import {
   Users,
-  Clock,
-  FileText,
   Plus,
   Search as SearchIcon,
 } from "lucide-react";

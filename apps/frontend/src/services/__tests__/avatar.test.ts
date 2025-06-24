@@ -40,6 +40,7 @@ describe("Avatar Service", () => {
       }, 10);
 
       const result = await testPromise;
+
       expect(result).toBe(true);
     });
 
@@ -65,6 +66,7 @@ describe("Avatar Service", () => {
       }, 10);
 
       const result = await testPromise;
+
       expect(result).toBe(false);
     });
 
@@ -92,6 +94,7 @@ describe("Avatar Service", () => {
   describe("Avatar Metrics", () => {
     it("should start with zero metrics", () => {
       const metrics = getAvatarMetrics();
+
       expect(metrics.gravatarSuccess).toBe(0);
       expect(metrics.gravatarFails).toBe(0);
       expect(metrics.uiAvatarsSuccess).toBe(0);
@@ -105,6 +108,7 @@ describe("Avatar Service", () => {
       recordAvatarMetric("uiAvatarsSuccess");
 
       const metrics = getAvatarMetrics();
+
       expect(metrics.gravatarSuccess).toBe(1);
       expect(metrics.gravatarFails).toBe(1);
       expect(metrics.uiAvatarsSuccess).toBe(1);
@@ -117,6 +121,7 @@ describe("Avatar Service", () => {
       recordAvatarMetric("gravatarFails");
 
       let metrics = getAvatarMetrics();
+
       expect(metrics.gravatarSuccess).toBe(1);
       expect(metrics.gravatarFails).toBe(1);
 

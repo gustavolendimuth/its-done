@@ -37,6 +37,7 @@ export const useDashboardStats = (params?: { from?: string; to?: string }) => {
       const { data } = await api.get<DashboardStats>("/dashboard/stats", {
         params,
       });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

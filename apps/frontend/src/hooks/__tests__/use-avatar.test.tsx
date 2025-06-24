@@ -122,6 +122,7 @@ describe("useAvatar", () => {
 
     const lastFallback =
       result.current.fallbackUrls[result.current.fallbackUrls.length - 1];
+
     expect(lastFallback).toMatch(/^data:image\/svg\+xml;base64,/);
   });
 

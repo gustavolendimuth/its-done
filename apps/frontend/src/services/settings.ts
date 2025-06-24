@@ -21,6 +21,7 @@ export const useSettings = () => {
     queryKey: ["settings"],
     queryFn: async () => {
       const { data } = await api.get<Settings>("/settings");
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -35,6 +36,7 @@ export const useUpdateSettings = () => {
   return useMutation({
     mutationFn: async (data: UpdateSettingsDto) => {
       const response = await api.patch<Settings>("/settings", data);
+
       return response.data;
     },
     onSuccess: () => {
@@ -49,6 +51,7 @@ export const useDeleteSettings = () => {
   return useMutation({
     mutationFn: async () => {
       const response = await api.delete<Settings>("/settings");
+
       return response.data;
     },
     onSuccess: () => {

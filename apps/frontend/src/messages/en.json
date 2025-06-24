@@ -1,4 +1,13 @@
 {
+  "app": {
+    "title": "It's Done - Professional Time Tracking",
+    "description": "A professional time tracking application for contractors and teams"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
   "home": {
     "title": "Track Time, Boost Productivity",
     "description": "Professional time tracking for contractors and teams. Manage projects, track hours, and get paid for your work.",

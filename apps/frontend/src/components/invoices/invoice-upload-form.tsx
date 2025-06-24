@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { DatePickerComponent } from "@/components/ui/date-picker";
 import { ClientCombobox } from "@/components/ui/client-combobox";
 import { useForm, Controller } from "react-hook-form";
@@ -80,6 +79,7 @@ export function InvoiceUploadForm({
           id: data.number,
           file: data.file[0],
         });
+
         fileUrl = result.fileUrl || null;
       }
 
@@ -106,12 +106,14 @@ export function InvoiceUploadForm({
   // Handle file upload separately
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (file) {
       try {
         const result = await uploadFileMutation.mutateAsync({
           id: watch("number"),
           file,
         });
+
         setUploadedFileUrl(result.fileUrl || null);
         toast.success("File uploaded successfully");
       } catch (error) {

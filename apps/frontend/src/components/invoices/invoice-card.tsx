@@ -92,6 +92,7 @@ export function InvoiceCard({
   const handleDelete = () => {
     if (!id) return;
     const confirmed = window.confirm(t("confirmDeleteMessage"));
+
     if (confirmed) {
       onDelete(id);
     }

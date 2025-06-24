@@ -3,7 +3,6 @@
 import { WorkHourForm } from "@/components/work-hours/work-hour-form";
 import { WorkHoursBigStats } from "@/components/work-hours/work-hours-big-stats";
 import { WorkHourCard } from "@/components/work-hours/work-hour-card";
-import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { PeriodSelectorV2 } from "@/components/ui/period-selector-v2";
@@ -20,7 +19,6 @@ import { Clock, Plus } from "lucide-react";
 import { useWorkHoursStats } from "@/services/work-hours-stats";
 import { useTimeEntries, useDeleteTimeEntry } from "@/services/time-entries";
 import { useClients, Client } from "@/services/clients";
-import { formatHoursToHHMM } from "@/lib/utils";
 import { InfoCard } from "@/components/ui/info-card";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
@@ -34,6 +32,7 @@ export default function WorkHoursPage() {
   const initialDateRange = useMemo(() => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
     return {
       startDate: firstDayOfMonth,
       endDate: today,
@@ -51,6 +50,7 @@ export default function WorkHoursPage() {
   // Memoizar as datas para evitar recriações desnecessárias
   const queryParams = useMemo(() => {
     if (!dateRange.startDate || !dateRange.endDate) return null;
+
     return {
       from: dateRange.startDate.toISOString(),
       to: dateRange.endDate.toISOString(),
@@ -198,6 +198,7 @@ export default function WorkHoursPage() {
           </h2>
           {(() => {
             const length = workHours?.length ?? 0;
+
             return (
               length > 0 && (
                 <div className="text-sm text-muted-foreground">

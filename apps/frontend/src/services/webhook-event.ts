@@ -30,6 +30,7 @@ export const useWebhookEvents = (params?: {
       const { data } = await api.get<WebhookEvent[]>("/webhook-events", {
         params,
       });
+
       return data;
     },
   });
@@ -40,6 +41,7 @@ export const useWebhookEvent = (id: string) => {
     queryKey: ["webhook-events", id],
     queryFn: async () => {
       const { data } = await api.get<WebhookEvent>(`/webhook-events/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -79,6 +81,7 @@ export const useWebhookEventStats = (params?: {
       }>("/webhook-events/stats", {
         params,
       });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

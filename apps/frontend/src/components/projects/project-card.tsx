@@ -10,7 +10,6 @@ import {
   Calendar,
   Clock,
   FileText,
-  Eye,
   Edit2,
   Trash2,
   ExternalLink,

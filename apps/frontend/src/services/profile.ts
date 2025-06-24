@@ -41,6 +41,7 @@ export const useProfile = () => {
     queryKey: ["profile"],
     queryFn: async () => {
       const { data } = await api.get<Profile>("/profile");
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -55,6 +56,7 @@ export const useUpdateProfile = () => {
   return useMutation({
     mutationFn: async (data: UpdateProfileDto) => {
       const response = await api.patch<Profile>("/profile", data);
+
       return response.data;
     },
     onSuccess: () => {
@@ -69,6 +71,7 @@ export const useUpdateProfileAvatar = () => {
   return useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
+
       formData.append("avatar", file);
 
       const response = await api.post<Profile>("/profile/avatar", formData, {
@@ -76,6 +79,7 @@ export const useUpdateProfileAvatar = () => {
           "Content-Type": "multipart/form-data",
         },
       });
+
       return response.data;
     },
     onSuccess: () => {
@@ -90,6 +94,7 @@ export const useDeleteProfileAvatar = () => {
   return useMutation({
     mutationFn: async () => {
       const response = await api.delete<Profile>("/profile/avatar");
+
       return response.data;
     },
     onSuccess: () => {
@@ -106,6 +111,7 @@ export const useUpdateProfilePreferences = () => {
       const response = await api.patch<Profile>("/profile/preferences", {
         preferences,
       });
+
       return response.data;
     },
     onSuccess: () => {

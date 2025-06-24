@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
 import { Plus, Folder } from "lucide-react";
 import { useProjects, useDeleteProject } from "@/services/projects";
 import { useClients } from "@/services/clients";

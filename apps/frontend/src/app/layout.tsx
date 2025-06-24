@@ -4,17 +4,21 @@
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { getTranslations } from "next-intl/server";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "It's Done - Professional Time Tracking",
-  description:
-    "A professional time tracking application for contractors and teams",
-  icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("app");
+
+  return {
+    title: t("title"),
+    description: t("description"),
+    icons: {
+      icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    },
+  };
+}
 
 export default function RootLayout({
   children,

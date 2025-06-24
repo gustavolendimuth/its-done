@@ -2,53 +2,17 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import {
   Plus,
   FileText,
-  Download,
-  Eye,
-  Trash2,
-  Edit,
-  Clock,
-  Calendar,
-  Upload,
-  DollarSign,
-  CheckCircle,
 } from "lucide-react";
 import { CreateInvoiceForm } from "@/components/invoices/create-invoice-form";
 import { EditInvoiceForm } from "@/components/invoices/edit-invoice-form";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { format } from "date-fns";
+
 import { toast } from "sonner";
 import { useInvoices, useDeleteInvoice, Invoice } from "@/services/invoices";
-import { useClients, Client } from "@/services/clients";
+import { useClients } from "@/services/clients";
 
 import { useInvoiceStats } from "@/services/invoice-stats";
 import { InvoiceUploadModal } from "@/components/invoices/invoice-upload-modal";

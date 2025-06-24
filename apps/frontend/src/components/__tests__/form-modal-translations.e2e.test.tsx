@@ -3,7 +3,7 @@
  * estão sendo exibidas corretamente na interface do usuário
  */
 
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FormModal } from "@/components/ui/form-modal";

@@ -18,6 +18,7 @@ api.interceptors.request.use(async (config) => {
   try {
     console.log("🔍 Getting NextAuth session...");
     const session = await getSession();
+
     console.log("📱 Session:", session);
 
     if (session?.accessToken) {
@@ -39,6 +40,7 @@ api.interceptors.request.use(async (config) => {
     return config;
   } catch (error) {
     console.error("❌ Error getting session:", error);
+
     return config;
   }
 });
@@ -47,6 +49,7 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (response) => {
     console.log("✅ Response received:", response.status, response.statusText);
+
     return response;
   },
   async (error) => {
@@ -61,6 +64,7 @@ api.interceptors.response.use(
       console.warn("🚪 Redirecting to login due to 401");
       window.location.href = "/login";
     }
+
     return Promise.reject(error);
   }
 );

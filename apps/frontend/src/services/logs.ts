@@ -35,6 +35,7 @@ export const useLogs = (params?: {
       const { data } = await api.get<Log[]>("/logs", {
         params,
       });
+
       return data;
     },
   });
@@ -45,6 +46,7 @@ export const useLog = (id: string) => {
     queryKey: ["logs", id],
     queryFn: async () => {
       const { data } = await api.get<Log>(`/logs/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -58,6 +60,7 @@ export const useLogStats = (params?: { from?: string; to?: string }) => {
       const { data } = await api.get<LogStats>("/logs/stats", {
         params,
       });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

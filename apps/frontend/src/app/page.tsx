@@ -5,5 +5,5 @@ import { redirect } from "next/navigation";
 // this case should never occur, but we'll redirect to the default locale just in case.
 
 export default function RootPage() {
-  redirect("/en");
+  redirect("/pt-BR");
 }

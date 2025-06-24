@@ -99,10 +99,12 @@ describe("WorkHourCard Component", () => {
 
     // Check for green accent bar and icon styling
     const accentBar = document.querySelector(".bg-green-500");
+
     expect(accentBar).toBeInTheDocument();
 
     // Check for hover effects
     const cardGroup = document.querySelector(".group");
+
     expect(cardGroup).toHaveClass("hover:scale-[1.02]");
   });
 
@@ -117,6 +119,7 @@ describe("WorkHourCard Component", () => {
     );
 
     const editButton = screen.getByRole("button", { name: /edit/i });
+
     fireEvent.click(editButton);
 
     expect(mockOnEdit).toHaveBeenCalledWith("work-hour-1");
@@ -147,6 +150,7 @@ describe("WorkHourCard Component", () => {
     );
 
     const deleteButton = screen.getByRole("button", { name: /deleting.../i });
+
     expect(deleteButton).toBeDisabled();
   });
 

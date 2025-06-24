@@ -82,10 +82,12 @@ describe("ProjectCard Component", () => {
 
     // Check for indigo accent bar and icon styling
     const accentBar = document.querySelector(".bg-indigo-500");
+
     expect(accentBar).toBeInTheDocument();
 
     // Check for hover effects
     const cardGroup = document.querySelector(".group");
+
     expect(cardGroup).toHaveClass("hover:scale-[1.02]");
   });
 
@@ -99,6 +101,7 @@ describe("ProjectCard Component", () => {
     );
 
     const clientButton = screen.getByRole("button", { name: /client/i });
+
     fireEvent.click(clientButton);
 
     expect(mockRouter.push).toHaveBeenCalledWith("/clients/client-1");
@@ -128,6 +131,7 @@ describe("ProjectCard Component", () => {
     );
 
     const deleteButton = screen.getByRole("button", { name: /delete/i });
+
     expect(deleteButton).toBeDisabled();
   });
 

@@ -71,6 +71,7 @@ export const useInvoices = (params?: {
       const { data } = await api.get<Invoice[]>("/invoices", {
         params,
       });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -84,6 +85,7 @@ export const useInvoice = (id: string) => {
     queryKey: ["invoices", id],
     queryFn: async () => {
       const { data } = await api.get<Invoice>(`/invoices/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -99,6 +101,7 @@ export const useCreateInvoice = () => {
   return useMutation({
     mutationFn: async (data: CreateInvoiceDto) => {
       const response = await api.post<Invoice>("/invoices", data);
+
       return response.data;
     },
     onSuccess: (invoice) => {
@@ -132,6 +135,7 @@ export const useUpdateInvoice = () => {
       data: UpdateInvoiceDto;
     }) => {
       const response = await api.patch<Invoice>(`/invoices/${id}`, data);
+
       return response.data;
     },
     onSuccess: (invoice, { id }) => {
@@ -158,6 +162,7 @@ export const useDeleteInvoice = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.delete<Invoice>(`/invoices/${id}`);
+
       return response.data;
     },
     onSuccess: (invoice, id) => {
@@ -188,6 +193,7 @@ export const useUploadInvoiceFile = () => {
   return useMutation({
     mutationFn: async ({ id, file }: { id: string; file: File }) => {
       const formData = new FormData();
+
       formData.append("file", file);
 
       const response = await api.post<Invoice>(
@@ -199,6 +205,7 @@ export const useUploadInvoiceFile = () => {
           },
         }
       );
+
       return response.data;
     },
     onSuccess: (invoice, { id }) => {
@@ -222,6 +229,7 @@ export const useClientInvoices = (clientId: string) => {
       const { data } = await api.get<Invoice[]>(
         `/clients/${clientId}/invoices`
       );
+
       return data;
     },
     enabled: !!clientId,
@@ -237,6 +245,7 @@ export const invoicesService = {
     const { data } = await api.get<Invoice[]>(
       `/public/client/${clientId}/invoices`
     );
+
     return data;
   },
 };

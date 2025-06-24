@@ -1,15 +1,11 @@
 "use client";
 
 import { LoginForm } from "@/components/auth/login-form";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 
 export default function LoginPage() {

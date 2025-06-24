@@ -55,6 +55,7 @@ export const useTimeEntries = (params?: {
       const { data } = await api.get<TimeEntry[]>("/work-hours", {
         params,
       });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -74,6 +75,7 @@ export const useAvailableTimeEntries = (params?: {
       const { data } = await api.get<TimeEntry[]>("/work-hours/available", {
         params,
       });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -87,6 +89,7 @@ export const useTimeEntry = (id: string) => {
     queryKey: ["timeEntries", id],
     queryFn: async () => {
       const { data } = await api.get<TimeEntry>(`/work-hours/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -102,6 +105,7 @@ export const useCreateTimeEntry = () => {
   return useMutation({
     mutationFn: async (data: CreateTimeEntryDto) => {
       const response = await api.post<TimeEntry>("/work-hours", data);
+
       return response.data;
     },
     onSuccess: () => {
@@ -129,6 +133,7 @@ export const useUpdateTimeEntry = () => {
       data: UpdateTimeEntryDto;
     }) => {
       const response = await api.patch<TimeEntry>(`/work-hours/${id}`, data);
+
       return response.data;
     },
     onSuccess: (_, { id }) => {
@@ -151,6 +156,7 @@ export const useDeleteTimeEntry = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.delete<TimeEntry>(`/work-hours/${id}`);
+
       return response.data;
     },
     onSuccess: (_, id) => {
@@ -177,6 +183,7 @@ export const useTotalHours = (startDate: Date, endDate: Date) => {
           endDate: endDate.toISOString(),
         },
       });
+
       return data.total;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

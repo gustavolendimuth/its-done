@@ -29,6 +29,7 @@ export const useInvoiceStats = (params?: {
       const { data } = await api.get<InvoiceStats>("/invoices/stats", {
         params,
       });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

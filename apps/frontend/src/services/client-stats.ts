@@ -36,6 +36,7 @@ export function useClientSpecificStats(clientId: string) {
     queryKey: ["clients", clientId, "stats"],
     queryFn: async () => {
       const response = await api.get(`/clients/${clientId}/stats`);
+
       return response.data;
     },
   });
@@ -46,6 +47,7 @@ export function useClientStats() {
     queryKey: ["clients", "stats"],
     queryFn: async () => {
       const response = await api.get("/clients/stats");
+
       return response.data;
     },
   });

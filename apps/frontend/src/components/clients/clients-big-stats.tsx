@@ -36,6 +36,7 @@ export function ClientsBigStats({
   const getEngagementLevel = () => {
     if (averageHoursPerClient >= 100) return t("engagementHigh");
     if (averageHoursPerClient >= 40) return t("engagementMedium");
+
     return t("engagementLow");
   };
 

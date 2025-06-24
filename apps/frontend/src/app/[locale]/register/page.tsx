@@ -14,7 +14,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -75,6 +74,7 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+
         throw new Error(errorData.message || tCommon("errorOccurred"));
       }
 

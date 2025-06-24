@@ -37,6 +37,7 @@ describe("UserAvatar", () => {
     );
 
     const image = screen.getByRole("img", { hidden: true });
+
     expect(image).toHaveAttribute("src", "https://example.com/avatar.jpg");
     expect(image).toHaveAttribute("alt", "User avatar");
   });
@@ -112,6 +113,7 @@ describe("UserAvatar", () => {
     const { rerender } = render(<UserAvatar fallbackText="JD" size="sm" />);
 
     let avatar = screen.getByText("JD").closest('[role="img"]');
+
     expect(avatar).toHaveClass("h-6", "w-6");
 
     rerender(<UserAvatar fallbackText="JD" size="md" />);
@@ -127,6 +129,7 @@ describe("UserAvatar", () => {
     render(<UserAvatar fallbackText="JD" className="custom-avatar-class" />);
 
     const avatar = screen.getByText("JD").closest('[role="img"]');
+
     expect(avatar).toHaveClass("custom-avatar-class");
   });
 
@@ -141,6 +144,7 @@ describe("UserAvatar", () => {
     );
 
     const image = screen.getByRole("img", { hidden: true });
+
     expect(image).toHaveAttribute("src", "https://example.com/avatar2.jpg");
   });
 

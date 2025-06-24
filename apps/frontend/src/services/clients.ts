@@ -49,6 +49,7 @@ export const useClients = () => {
     queryKey: ["clients"],
     queryFn: async () => {
       const { data } = await api.get<Client[]>("/clients");
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -62,6 +63,7 @@ export const useClient = (id: string) => {
     queryKey: ["clients", id],
     queryFn: async () => {
       const { data } = await api.get<Client>(`/clients/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -79,7 +81,9 @@ export const useCreateClient = () => {
       console.log("Making API request to create client with data:", data);
       try {
         const response = await api.post<Client>("/clients", data);
+
         console.log("API response:", response.data);
+
         return response.data;
       } catch (error) {
         console.error("API error:", error);
@@ -105,6 +109,7 @@ export const useUpdateClient = () => {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateClientDto }) => {
       const response = await api.patch<Client>(`/clients/${id}`, data);
+
       return response.data;
     },
     onSuccess: (_, { id }) => {
@@ -127,6 +132,7 @@ export const useDeleteClient = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.delete<Client>(`/clients/${id}`);
+
       return response.data;
     },
     onSuccess: (_, id) => {
@@ -156,6 +162,7 @@ export const useClientStats = (params?: { from?: string; to?: string }) => {
       }>("/clients/stats", {
         params,
       });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

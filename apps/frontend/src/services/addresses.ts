@@ -40,6 +40,7 @@ export const useAddresses = (clientId?: string) => {
     queryFn: async () => {
       const params = clientId ? { clientId } : {};
       const { data } = await api.get<Address[]>("/addresses", { params });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -53,6 +54,7 @@ export const useAddress = (id: string) => {
     queryKey: ["addresses", id],
     queryFn: async () => {
       const { data } = await api.get<Address>(`/addresses/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -73,7 +75,9 @@ export const useClientAddresses = (clientId: string) => {
         const { data } = await api.get<Address[]>(
           `/addresses/client/${clientId}`
         );
+
         console.log("Addresses fetched successfully:", data);
+
         return data;
       } catch (error: any) {
         console.error("Error fetching client addresses:", error);
@@ -97,6 +101,7 @@ export const useCreateAddress = () => {
   return useMutation({
     mutationFn: async (data: CreateAddressDto) => {
       const response = await api.post<Address>("/addresses", data);
+
       return response.data;
     },
     onSuccess: (address, variables) => {
@@ -128,6 +133,7 @@ export const useUpdateAddress = () => {
       data: UpdateAddressDto;
     }) => {
       const response = await api.patch<Address>(`/addresses/${id}`, data);
+
       return response.data;
     },
     onSuccess: (address, { id, data }) => {
@@ -156,6 +162,7 @@ export const useDeleteAddress = () => {
       const response = await api.delete<{ message: string }>(
         `/addresses/${id}`
       );
+
       return response.data;
     },
     onSuccess: () => {
@@ -175,6 +182,7 @@ export const useSetPrimaryAddress = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.patch<Address>(`/addresses/${id}/set-primary`);
+
       return response.data;
     },
     onSuccess: (data) => {

@@ -27,6 +27,7 @@ export const useBackups = () => {
     queryKey: ["backups"],
     queryFn: async () => {
       const { data } = await api.get<Backup[]>("/backups");
+
       return data;
     },
   });
@@ -37,6 +38,7 @@ export const useBackup = (id: string) => {
     queryKey: ["backups", id],
     queryFn: async () => {
       const { data } = await api.get<Backup>(`/backups/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -49,6 +51,7 @@ export const useCreateBackup = () => {
   return useMutation({
     mutationFn: async (data: CreateBackupDto) => {
       const response = await api.post<Backup>("/backups", data);
+
       return response.data;
     },
     onSuccess: () => {
@@ -63,6 +66,7 @@ export const useUpdateBackup = () => {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateBackupDto }) => {
       const response = await api.patch<Backup>(`/backups/${id}`, data);
+
       return response.data;
     },
     onSuccess: (_, { id }) => {
@@ -78,6 +82,7 @@ export const useDeleteBackup = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.delete<Backup>(`/backups/${id}`);
+
       return response.data;
     },
     onSuccess: (_, id) => {
@@ -93,6 +98,7 @@ export const useDownloadBackup = () => {
       const response = await api.get(`/backups/${id}/download`, {
         responseType: "blob",
       });
+
       return response.data;
     },
   });
@@ -104,6 +110,7 @@ export const useRestoreBackup = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.post<Backup>(`/backups/${id}/restore`);
+
       return response.data;
     },
     onSuccess: () => {

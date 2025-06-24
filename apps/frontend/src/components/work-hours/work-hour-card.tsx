@@ -1,7 +1,7 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { cn, formatHoursToHHMM } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import {
   Clock,
   User,
@@ -87,6 +87,7 @@ export function WorkHourCard({
   const formatHoursToHHMM = (hours: number): string => {
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
+
     return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
   };
 
@@ -110,13 +111,13 @@ export function WorkHourCard({
             </div>
 
             {/* Work Hour Info */}
-            <div className="min-w-0 flex-1 space-y-2">
+            <div className="min-w-0 flex-1 mb-4">
               {/* First Line: Hours + Date */}
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-xl font-bold truncate">
                   {formatHoursToHHMM(workHour.hours)}
                 </h3>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-base text-muted-foreground">
                   {tCommon("on")} {format(workDate, "dd/MM/yyyy")}
                 </span>
               </div>

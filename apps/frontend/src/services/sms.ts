@@ -19,6 +19,7 @@ export const useSendSms = () => {
   return useMutation({
     mutationFn: async (data: SendSmsDto) => {
       const response = await api.post<void>("/sms/send", data);
+
       return response.data;
     },
   });
@@ -28,6 +29,7 @@ export const useSendBulkSms = () => {
   return useMutation({
     mutationFn: async (data: SendBulkSmsDto) => {
       const response = await api.post<void>("/sms/send/bulk", data);
+
       return response.data;
     },
   });

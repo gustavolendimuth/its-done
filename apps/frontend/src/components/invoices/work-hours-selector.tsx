@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Clock, Calendar, User, Briefcase } from "lucide-react";
 import { TimeEntry } from "@/services/time-entries";
-import { Client } from "@/services/clients";
 import { Label } from "@/components/ui/label";
 import { formatHoursToHHMM } from "@/lib/utils";
 
@@ -55,6 +53,7 @@ export function WorkHoursSelector({
           groups[key] = [];
         }
         groups[key].push(entry);
+
         return groups;
       },
       {} as Record<string, TimeEntry[]>
@@ -81,6 +80,7 @@ export function WorkHoursSelector({
       0
     );
     const totalAmount = totalHours * hourlyRate;
+
     onSelectionChange(Array.from(newSelectedIds), totalAmount);
   };
 
@@ -106,6 +106,7 @@ export function WorkHoursSelector({
       0
     );
     const totalAmount = totalHours * hourlyRate;
+
     onSelectionChange(Array.from(newSelectedIds), totalAmount);
   };
 

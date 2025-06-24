@@ -44,6 +44,7 @@ export function InvoicesBigStats({
     if (paymentRate >= 80) return t("healthExcellent");
     if (paymentRate >= 60) return t("healthGood");
     if (paymentRate >= 40) return t("healthNeedsAttention");
+
     return t("healthCritical");
   };
 

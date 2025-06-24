@@ -63,6 +63,7 @@ export function AnalyticsBigStats({
     if (productivityScore >= 80) return t("performanceExcellent");
     if (productivityScore >= 60) return t("performanceGood");
     if (productivityScore >= 40) return t("performanceAverage");
+
     return t("performanceNeedsFocus");
   };
 
@@ -71,6 +72,7 @@ export function AnalyticsBigStats({
     if (stats.hoursGrowth > 15) return t("growthAccelerating");
     if (stats.hoursGrowth > 5) return t("growthGrowing");
     if (stats.hoursGrowth > -5) return t("growthStable");
+
     return t("growthDeclining");
   };
 

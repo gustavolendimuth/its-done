@@ -7,6 +7,7 @@ import { Topbar } from "../topbar";
 // Mock next-auth
 vi.mock("next-auth/react", async () => {
   const actual = await vi.importActual("next-auth/react");
+
   return {
     ...actual,
     useSession: vi.fn(),
@@ -43,6 +44,7 @@ const createTestQueryClient = () =>
 
 const renderWithProviders = (component: React.ReactElement) => {
   const queryClient = createTestQueryClient();
+
   return render(
     <QueryClientProvider client={queryClient}>
       <SessionProvider session={null}>{component}</SessionProvider>
@@ -68,6 +70,7 @@ describe("Avatar Integration Tests", () => {
     };
 
     const { useSession } = await import("next-auth/react");
+
     (useSession as any).mockReturnValue({
       data: mockSession,
       status: "authenticated",
@@ -83,6 +86,7 @@ describe("Avatar Integration Tests", () => {
 
     // Check if avatar image is present
     const avatarImage = screen.getByRole("img", { hidden: true });
+
     expect(avatarImage).toHaveAttribute(
       "src",
       "https://lh3.googleusercontent.com/a/default-user"
@@ -101,6 +105,7 @@ describe("Avatar Integration Tests", () => {
     };
 
     const { useSession } = await import("next-auth/react");
+
     (useSession as any).mockReturnValue({
       data: mockSession,
       status: "authenticated",
@@ -117,6 +122,7 @@ describe("Avatar Integration Tests", () => {
 
   it("should handle unauthenticated state gracefully", async () => {
     const { useSession } = await import("next-auth/react");
+
     (useSession as any).mockReturnValue({
       data: null,
       status: "unauthenticated",
@@ -131,6 +137,7 @@ describe("Avatar Integration Tests", () => {
 
   it("should handle loading state appropriately", async () => {
     const { useSession } = await import("next-auth/react");
+
     (useSession as any).mockReturnValue({
       data: null,
       status: "loading",
@@ -142,6 +149,7 @@ describe("Avatar Integration Tests", () => {
     // Should render loading skeleton
     await waitFor(() => {
       const topbar = screen.getByRole("banner");
+
       expect(topbar).toBeInTheDocument();
     });
   });
@@ -158,6 +166,7 @@ describe("Avatar Integration Tests", () => {
     };
 
     const { useSession } = await import("next-auth/react");
+
     (useSession as any).mockReturnValue({
       data: mockSession,
       status: "authenticated",
@@ -174,6 +183,7 @@ describe("Avatar Integration Tests", () => {
     // Check that avatar has a Gravatar-like URL structure
     const avatarImage = screen.getByRole("img", { hidden: true });
     const src = avatarImage.getAttribute("src");
+
     expect(src).toMatch(/gravatar\.com\/avatar\/[a-f0-9]+/);
   });
 
@@ -189,6 +199,7 @@ describe("Avatar Integration Tests", () => {
     };
 
     const { useSession } = await import("next-auth/react");
+
     (useSession as any).mockReturnValue({
       data: mockSession,
       status: "authenticated",
@@ -216,6 +227,7 @@ describe("Avatar Integration Tests", () => {
     };
 
     const { useSession } = await import("next-auth/react");
+
     (useSession as any).mockReturnValue({
       data: mockSession,
       status: "authenticated",

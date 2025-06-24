@@ -103,6 +103,7 @@ export function SettingsForm() {
 
   if (error) {
     console.error("Error loading settings:", error);
+
     return (
       <Card>
         <CardContent className="py-8">

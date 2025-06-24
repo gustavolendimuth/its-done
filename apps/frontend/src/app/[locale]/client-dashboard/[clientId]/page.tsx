@@ -34,6 +34,7 @@ export default function ClientDashboardPage() {
           (hourSum, iwh) => hourSum + (iwh.workHour?.hours || 0),
           0
         ) || 0;
+
       return sum + invoiceHours;
     }, 0);
 

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSafeHydration } from "@/hooks/use-safe-hydration";
 
@@ -40,6 +39,7 @@ export function Nav() {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navigation.map((item) => {
                 const isActive = mounted ? pathname === item.href : false;
+
                 return (
                   <Link
                     key={item.name}

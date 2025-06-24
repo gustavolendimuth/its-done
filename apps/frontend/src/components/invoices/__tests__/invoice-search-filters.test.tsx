@@ -63,6 +63,7 @@ describe("InvoiceSearchFilters", () => {
     const searchInput = screen.getByPlaceholderText(
       "Search invoices by number or description..."
     );
+
     expect(searchInput).toBeInTheDocument();
   });
 
@@ -71,6 +72,7 @@ describe("InvoiceSearchFilters", () => {
 
     // Check for select triggers (combobox role)
     const selectElements = screen.getAllByRole("combobox");
+
     expect(selectElements).toHaveLength(2);
   });
 
@@ -88,6 +90,7 @@ describe("InvoiceSearchFilters", () => {
 
   it("should call onSearchChange when search input changes", () => {
     const onSearchChange = vi.fn();
+
     render(
       <InvoiceSearchFilters {...defaultProps} onSearchChange={onSearchChange} />
     );
@@ -95,6 +98,7 @@ describe("InvoiceSearchFilters", () => {
     const searchInput = screen.getByPlaceholderText(
       "Search invoices by number or description..."
     );
+
     fireEvent.change(searchInput, { target: { value: "new search" } });
 
     expect(onSearchChange).toHaveBeenCalledWith("new search");
@@ -106,6 +110,7 @@ describe("InvoiceSearchFilters", () => {
     );
 
     const searchInput = screen.getByDisplayValue("existing search");
+
     expect(searchInput).toBeInTheDocument();
   });
 });
@@ -180,6 +185,7 @@ describe("useInvoiceFilters", () => {
     render(<TestComponent invoices={mockInvoices} />);
 
     const invoiceElements = screen.getAllByTestId(/^invoice-/);
+
     // Should be sorted by date desc - most recent first
     expect(invoiceElements[0]).toHaveTextContent("INV-002"); // 2024-01-20
     expect(invoiceElements[1]).toHaveTextContent("INV-001"); // 2024-01-15
@@ -267,6 +273,7 @@ describe("useInvoiceFilters", () => {
     fireEvent.click(screen.getByText("Sort by Amount"));
 
     const invoiceElements = screen.getAllByTestId(/^invoice-\d+$/);
+
     // Should be sorted by amount desc - highest first
     expect(invoiceElements[0]).toHaveTextContent("1500"); // INV-002
     expect(invoiceElements[1]).toHaveTextContent("1000"); // INV-001

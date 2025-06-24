@@ -11,6 +11,7 @@ describe("Alert Component", () => {
     );
 
     const alert = screen.getByRole("alert");
+
     expect(alert).toBeInTheDocument();
     expect(alert).toHaveClass("bg-background", "text-foreground");
   });
@@ -24,6 +25,7 @@ describe("Alert Component", () => {
     );
 
     const alert = screen.getByRole("alert");
+
     expect(alert).toBeInTheDocument();
     expect(alert).toHaveClass("border-destructive/50", "text-destructive");
   });
@@ -36,6 +38,7 @@ describe("Alert Component", () => {
     );
 
     const title = screen.getByText("Test Alert Title");
+
     expect(title).toBeInTheDocument();
     expect(title.tagName).toBe("H5");
   });
@@ -48,6 +51,7 @@ describe("Alert Component", () => {
     );
 
     const description = screen.getByText("Test Alert Description");
+
     expect(description).toBeInTheDocument();
   });
 
@@ -59,6 +63,7 @@ describe("Alert Component", () => {
     );
 
     const alert = screen.getByRole("alert");
+
     expect(alert).toHaveClass("custom-class");
   });
 
@@ -70,6 +75,7 @@ describe("Alert Component", () => {
     );
 
     const alert = screen.getByTestId("test-alert");
+
     expect(alert).toHaveAttribute("role", "alert");
     expect(alert).toHaveAttribute("aria-label", "Test alert");
   });

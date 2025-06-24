@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AddressCombobox } from "@/components/ui/address-combobox";
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle } from "lucide-react";
-import { Address } from "@/types/address";
 import { Client } from "@/types/client";
 import { useTranslations } from "next-intl";
 
@@ -46,11 +45,13 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
     // Validação básica
     if (!formData.company.trim()) {
       console.error("Company is required");
+
       return;
     }
 
     if (!formData.email.trim()) {
       console.error("Email is required");
+
       return;
     }
 
@@ -68,6 +69,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
       console.log("Submitting client:", cleanClientData);
       const createdClient =
         await createClientMutation.mutateAsync(cleanClientData);
+
       console.log("Client created successfully:", createdClient);
 
       if (createdClient) {
@@ -118,6 +120,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
       console.log("Testing API connection...");
       if (!createdClient) {
         console.error("No client created yet");
+
         return;
       }
       const response = await fetch(
@@ -129,9 +132,11 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           credentials: "include",
         }
       );
+
       console.log("API test response status:", response.status);
       console.log("API test response headers:", response.headers);
       const data = await response.text();
+
       console.log("API test response data:", data);
     } catch (error) {
       console.error("API test failed:", error);
@@ -143,6 +148,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
       console.log("🔍 Checking NextAuth session...");
       const { getSession } = await import("next-auth/react");
       const session = await getSession();
+
       console.log("📱 Current session:", session);
 
       if (!session) {
@@ -160,6 +166,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
   // Se o cliente foi criado, mostrar a seção de endereços
   if (createdClient) {
     console.log("Created client:", createdClient);
+
     return (
       <div className="space-y-6">
         <Alert className="border-primary/20 bg-primary/5">

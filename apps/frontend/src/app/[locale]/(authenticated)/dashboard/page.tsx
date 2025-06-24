@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
-import { Clock, BarChart3 } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
@@ -100,8 +100,10 @@ export default function DashboardPage() {
     const clientHours = timeEntries.reduce(
       (acc, entry) => {
         const clientId = entry.clientId;
+
         if (!acc[clientId]) {
           const client = clients.find((c) => c.id === clientId);
+
           acc[clientId] = {
             id: clientId,
             name: client?.name || "Unknown Client",
@@ -111,6 +113,7 @@ export default function DashboardPage() {
           };
         }
         acc[clientId].hours += entry.hours;
+
         return acc;
       },
       {} as Record<string, any>

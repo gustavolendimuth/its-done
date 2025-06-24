@@ -1,8 +1,29 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { vi } from "vitest";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { PageHeader } from "../page-header";
 import { Settings, Plus } from "lucide-react";
+import { Topbar } from "../topbar";
+
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+  })),
+}));
+
+// Mock next-auth/react
+vi.mock("next-auth/react", () => ({
+  useSession: vi.fn(),
+  signOut: vi.fn(),
+}));
+
+// Mock next-intl
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
 
 describe("PageHeader", () => {
   it("renders title and description", () => {
@@ -24,6 +45,7 @@ describe("PageHeader", () => {
     expect(screen.getByText("Settings")).toBeInTheDocument();
     // The icon is rendered as an SVG element with original size (h-8 w-8)
     const iconElement = document.querySelector("svg");
+
     expect(iconElement).toBeInTheDocument();
     expect(iconElement).toHaveClass("h-8", "w-8", "text-primary");
   });
@@ -34,6 +56,7 @@ describe("PageHeader", () => {
     expect(screen.getByText("Simple Title")).toBeInTheDocument();
     // No icon should be present
     const iconElement = document.querySelector("svg");
+
     expect(iconElement).not.toBeInTheDocument();
   });
 
@@ -91,5 +114,73 @@ describe("PageHeader", () => {
 
     // Both should be within the flex container that aligns them to the left
     expect(titleElement.closest("div")).toBe(descriptionElement.closest("div"));
+  });
+});
+
+describe("Topbar", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should render add hours shortcut button when authenticated", () => {
+    // Mock authenticated session
+    (useSession as any).mockReturnValue({
+      data: {
+        user: {
+          name: "Test User",
+          email: "test@example.com",
+        },
+      },
+      status: "authenticated",
+    });
+
+    render(<Topbar />);
+
+    // Find the add hours button by its title
+    const addHoursButton = screen.getByTitle("addHours");
+
+    expect(addHoursButton).toBeInTheDocument();
+  });
+
+  it("should navigate to work hours page when clicking the shortcut button", () => {
+    // Mock authenticated session
+    (useSession as any).mockReturnValue({
+      data: {
+        user: {
+          name: "Test User",
+          email: "test@example.com",
+        },
+      },
+      status: "authenticated",
+    });
+
+    const mockRouter = { push: vi.fn() };
+
+    (useRouter as any).mockReturnValue(mockRouter);
+
+    render(<Topbar />);
+
+    // Click the add hours button
+    const addHoursButton = screen.getByTitle("addHours");
+
+    fireEvent.click(addHoursButton);
+
+    // Verify navigation
+    expect(mockRouter.push).toHaveBeenCalledWith("/work-hours");
+  });
+
+  it("should not render add hours button when not authenticated", () => {
+    // Mock unauthenticated session
+    (useSession as any).mockReturnValue({
+      data: null,
+      status: "unauthenticated",
+    });
+
+    render(<Topbar />);
+
+    // Button should not be present
+    const addHoursButton = screen.queryByTitle("addHours");
+
+    expect(addHoursButton).not.toBeInTheDocument();
   });
 });

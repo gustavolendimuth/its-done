@@ -44,6 +44,7 @@ const authOptions: AuthOptions = {
           }
 
           const data = await response.json();
+
           if (data.access_token) {
             return {
               id: data.user.id,
@@ -52,9 +53,11 @@ const authOptions: AuthOptions = {
               accessToken: data.access_token,
             };
           }
+
           return null;
         } catch (error) {
           console.error("Login error:", error);
+
           return null;
         }
       },
@@ -85,6 +88,7 @@ const authOptions: AuthOptions = {
 
           if (!response.ok) {
             console.error("Backend response not ok:", response.status);
+
             return false;
           }
 
@@ -98,16 +102,20 @@ const authOptions: AuthOptions = {
               user.name = data.user.name;
               user.accessToken = data.access_token;
             }
+
             return true;
           }
+
           return false;
         } catch (error) {
           console.error("Google sign in error:", error);
+
           return false;
         }
       }
 
       console.log("SignIn returning true");
+
       return true;
     },
     async jwt({ token, user, account }) {
@@ -138,6 +146,7 @@ const authOptions: AuthOptions = {
       }
 
       console.log("Token after:", token);
+
       return token;
     },
     async session({ session, token }) {
@@ -153,7 +162,17 @@ const authOptions: AuthOptions = {
       }
 
       console.log("Session after:", session);
+
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // Se a URL for relativa ao baseUrl, redireciona para work-hours
+      if (url.startsWith(baseUrl)) {
+        return `${baseUrl}/work-hours`;
+      }
+
+      // Se for uma URL externa, mantém o redirecionamento original
+      return url;
     },
   },
   pages: {
@@ -162,6 +181,11 @@ const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 7 * 24 * 60 * 60, // 7 days
+  },
+  events: {
+    signIn: async () => {
+      console.log("User signed in");
+    },
   },
 };
 

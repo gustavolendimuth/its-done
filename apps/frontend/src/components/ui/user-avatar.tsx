@@ -55,6 +55,7 @@ export function UserAvatar({
     if (fallbackUrls.length === 0) {
       setImageError(true);
       setIsLoading(false);
+
       return;
     }
 
@@ -63,6 +64,7 @@ export function UserAvatar({
 
     if (fallbackIndexRef.current < fallbackUrls.length) {
       const nextUrl = fallbackUrls[fallbackIndexRef.current];
+
       setCurrentImageSrc(nextUrl);
       setIsLoading(true);
       hasTriedFallbackRef.current = true;

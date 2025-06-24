@@ -28,6 +28,7 @@ export const useUserStats = (params?: { from?: string; to?: string }) => {
       const { data } = await api.get<UserStats>("/users/stats", {
         params,
       });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

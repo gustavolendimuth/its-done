@@ -49,6 +49,7 @@ export default function ForgotPasswordPage() {
       ) {
         console.warn("🔇 Suppressing browser extension error:", event.message);
         event.preventDefault();
+
         return true;
       }
     };

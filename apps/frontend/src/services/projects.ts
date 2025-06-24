@@ -39,6 +39,7 @@ export const useProjects = (clientId?: string) => {
     queryFn: async () => {
       const params = clientId ? { clientId } : {};
       const { data } = await api.get<Project[]>("/projects", { params });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -52,6 +53,7 @@ export const useProject = (id: string) => {
     queryKey: ["projects", id],
     queryFn: async () => {
       const { data } = await api.get<Project>(`/projects/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -67,6 +69,7 @@ export const useCreateProject = () => {
   return useMutation({
     mutationFn: async (data: CreateProjectData) => {
       const response = await api.post<Project>("/projects", data);
+
       return response.data;
     },
     onSuccess: (data) => {
@@ -94,6 +97,7 @@ export const useUpdateProject = () => {
       data: UpdateProjectData;
     }) => {
       const response = await api.patch<Project>(`/projects/${id}`, data);
+
       return response.data;
     },
     onSuccess: (data) => {

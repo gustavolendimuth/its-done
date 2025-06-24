@@ -1,15 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import {
   Select,
   SelectContent,
@@ -27,7 +20,6 @@ import {
   useUpdateInvoice,
   useUploadInvoiceFile,
 } from "@/services/invoices";
-import { FileText, Upload } from "lucide-react";
 
 const editInvoiceSchema = z.object({
   status: z.enum(["PENDING", "PAID", "CANCELED"]),
@@ -92,6 +84,7 @@ export function EditInvoiceForm({
   const handleFileUpload = async (): Promise<void> => {
     if (!selectedFile) {
       toast.error("Please select a file to upload");
+
       return;
     }
 

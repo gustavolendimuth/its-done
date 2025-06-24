@@ -112,6 +112,7 @@ export function useInvoiceFilters(invoices: any[]) {
       // Filter by search term
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
+
         return (
           (invoice.number &&
             invoice.number.toLowerCase().includes(searchLower)) ||
@@ -122,6 +123,7 @@ export function useInvoiceFilters(invoices: any[]) {
             invoice.client.name.toLowerCase().includes(searchLower))
         );
       }
+
       return true;
     })
     .filter((invoice) => {
@@ -129,6 +131,7 @@ export function useInvoiceFilters(invoices: any[]) {
       if (filterStatus !== "ALL") {
         return invoice.status.toUpperCase() === filterStatus;
       }
+
       return true;
     })
     .sort((a, b) => {
@@ -153,6 +156,7 @@ export function useInvoiceFilters(invoices: any[]) {
               (sum: number, iwh: any) => sum + (iwh.workHour?.hours || 0),
               0
             ) || 0;
+
           return bHours - aHours;
         default:
           return 0;

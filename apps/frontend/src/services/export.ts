@@ -13,6 +13,7 @@ export const useExport = () => {
       const response = await api.post("/export", options, {
         responseType: "blob",
       });
+
       return response.data;
     },
   });

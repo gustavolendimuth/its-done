@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useGravatarHealth, shouldDisableGravatar } from "@/services/avatar";
 import { useShouldSkipExternalServices } from "@/services/network-status";
@@ -15,11 +15,14 @@ interface UseAvatarResult {
 // Simple MD5-like hash function for Gravatar
 function simpleHash(str: string): string {
   let hash = 0;
+
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
+
     hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32bit integer
   }
+
   return Math.abs(hash).toString(16).padStart(8, "0");
 }
 
@@ -27,12 +30,14 @@ function simpleHash(str: string): string {
 function generateGravatarUrl(email: string, size: number = 40): string {
   const cleanEmail = email.toLowerCase().trim();
   const emailHash = simpleHash(cleanEmail);
+
   return `https://www.gravatar.com/avatar/${emailHash}?s=${size}&d=404&r=pg`;
 }
 
 // Generate DiceBear avatar URL with better error handling
 function generateDiceBearUrl(seed: string, size: number = 40): string {
   const encodedSeed = encodeURIComponent(seed.toLowerCase().trim());
+
   return `https://api.dicebear.com/7.x/initials/svg?seed=${encodedSeed}&size=${size}&backgroundColor=22c55e&textColor=ffffff`;
 }
 
@@ -43,6 +48,7 @@ function generateUIAvatarsUrl(
   size: number = 40
 ): string {
   const encodedName = encodeURIComponent(name);
+
   return `https://ui-avatars.com/api/?name=${encodedName}&background=${backgroundColor}&color=ffffff&size=${size}&bold=true&format=svg`;
 }
 
@@ -59,6 +65,7 @@ function generateLocalSVGAvatar(
       </text>
     </svg>
   `;
+
   return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
@@ -117,6 +124,7 @@ export function useAvatar(): UseAvatarResult {
     let currentFallbackIndex = 0;
     const getNextFallback = (): string | null => {
       currentFallbackIndex++;
+
       return fallbackUrls[currentFallbackIndex] || null;
     };
 

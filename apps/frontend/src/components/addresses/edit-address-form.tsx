@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useUpdateAddress } from "@/services/addresses";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,21 +89,25 @@ export function EditAddressForm({ address, onSuccess }: EditAddressFormProps) {
     // Basic validation
     if (!formData.street.trim()) {
       console.error("Street is required");
+
       return;
     }
 
     if (!formData.city.trim()) {
       console.error("City is required");
+
       return;
     }
 
     if (!formData.state.trim()) {
       console.error("State is required");
+
       return;
     }
 
     if (!formData.zipCode.trim()) {
       console.error("ZIP code is required");
+
       return;
     }
 

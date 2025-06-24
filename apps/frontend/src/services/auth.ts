@@ -39,6 +39,7 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: async (data: LoginDto) => {
       const response = await api.post<AuthResponse>("/auth/login", data);
+
       return response.data;
     },
   });
@@ -48,6 +49,7 @@ export const useRegister = () => {
   return useMutation({
     mutationFn: async (data: RegisterDto) => {
       const response = await api.post<AuthResponse>("/auth/register", data);
+
       return response.data;
     },
   });
@@ -60,6 +62,7 @@ export const useForgotPassword = () => {
         "/auth/forgot-password",
         data
       );
+
       return response.data;
     },
   });
@@ -72,6 +75,7 @@ export const useResetPassword = () => {
         "/auth/reset-password",
         data
       );
+
       return response.data;
     },
   });
@@ -81,6 +85,7 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: async () => {
       const response = await api.post<void>("/auth/logout");
+
       return response.data;
     },
   });
@@ -90,6 +95,7 @@ export const useMe = () => {
   return useMutation({
     mutationFn: async () => {
       const response = await api.get<User>("/auth/me");
+
       return response.data;
     },
   });

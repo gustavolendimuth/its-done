@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { InfoCard } from "../info-card";
-import { Clock, Info } from "lucide-react";
+import { Clock } from "lucide-react";
 
 describe("InfoCard", () => {
   const defaultProps = {
@@ -25,6 +25,7 @@ describe("InfoCard", () => {
 
     // Should have SVG element (Info icon)
     const svgElements = document.querySelectorAll("svg");
+
     expect(svgElements.length).toBe(1); // Only the Info icon
   });
 
@@ -33,6 +34,7 @@ describe("InfoCard", () => {
 
     // Should still only have one SVG element (Info icon)
     const svgElements = document.querySelectorAll("svg");
+
     expect(svgElements.length).toBe(1);
   });
 
@@ -42,14 +44,17 @@ describe("InfoCard", () => {
     );
 
     const card = container.querySelector('[class*="bg-green"]');
+
     expect(card).toBeInTheDocument();
 
     rerender(<InfoCard {...defaultProps} variant="warning" />);
     const warningCard = container.querySelector('[class*="bg-yellow"]');
+
     expect(warningCard).toBeInTheDocument();
 
     rerender(<InfoCard {...defaultProps} variant="error" />);
     const errorCard = container.querySelector('[class*="bg-red"]');
+
     expect(errorCard).toBeInTheDocument();
   });
 
@@ -58,6 +63,7 @@ describe("InfoCard", () => {
 
     // Should have the default info variant classes
     const card = container.querySelector('[class*="bg-primary"]');
+
     expect(card).toBeInTheDocument();
   });
 
@@ -80,6 +86,7 @@ describe("InfoCard", () => {
 
     // The content should not have right padding anymore
     const contentDiv = document.querySelector('[class*="pr-8"]');
+
     expect(contentDiv).not.toBeInTheDocument();
   });
 });

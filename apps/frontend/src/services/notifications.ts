@@ -26,6 +26,7 @@ export const useNotifications = () => {
     queryKey: ["notifications"],
     queryFn: async () => {
       const { data } = await api.get<Notification[]>("/notifications");
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -39,6 +40,7 @@ export const useNotification = (id: string) => {
     queryKey: ["notifications", id],
     queryFn: async () => {
       const { data } = await api.get<Notification>(`/notifications/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -54,6 +56,7 @@ export const useCreateNotification = () => {
   return useMutation({
     mutationFn: async (data: CreateNotificationDto) => {
       const response = await api.post<Notification>("/notifications", data);
+
       return response.data;
     },
     onSuccess: () => {
@@ -77,6 +80,7 @@ export const useUpdateNotification = () => {
         `/notifications/${id}`,
         data
       );
+
       return response.data;
     },
     onSuccess: (_, { id }) => {
@@ -92,6 +96,7 @@ export const useDeleteNotification = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.delete<Notification>(`/notifications/${id}`);
+
       return response.data;
     },
     onSuccess: (_, id) => {
@@ -107,6 +112,7 @@ export const useMarkAllNotificationsAsRead = () => {
   return useMutation({
     mutationFn: async () => {
       const response = await api.post<void>("/notifications/mark-all-as-read");
+
       return response.data;
     },
     onSuccess: () => {

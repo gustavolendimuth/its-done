@@ -24,6 +24,7 @@ export const useUsers = () => {
     queryKey: ["users"],
     queryFn: async () => {
       const { data } = await api.get<User[]>("/users");
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -37,6 +38,7 @@ export const useUser = (id: string) => {
     queryKey: ["users", id],
     queryFn: async () => {
       const { data } = await api.get<User>(`/users/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -52,6 +54,7 @@ export const useCreateUser = () => {
   return useMutation({
     mutationFn: async (data: CreateUserDto) => {
       const response = await api.post<User>("/users", data);
+
       return response.data;
     },
     onSuccess: () => {
@@ -66,6 +69,7 @@ export const useUpdateUser = () => {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateUserDto }) => {
       const response = await api.patch<User>(`/users/${id}`, data);
+
       return response.data;
     },
     onSuccess: (_, { id }) => {
@@ -81,6 +85,7 @@ export const useDeleteUser = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.delete<User>(`/users/${id}`);
+
       return response.data;
     },
     onSuccess: (_, id) => {

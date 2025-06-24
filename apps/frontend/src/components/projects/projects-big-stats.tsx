@@ -59,14 +59,17 @@ export function ProjectsBigStats({
       return t("portfolioHealthGood");
     if (totalProjects >= 3 && projectUtilizationRate >= 30)
       return t("portfolioHealthGrowing");
+
     return t("portfolioHealthStarting");
   };
 
   const getProjectFocus = () => {
     if (uniqueClients === 0) return t("focusNoFocus");
     const avgProjectsPerClient = totalProjects / uniqueClients;
+
     if (avgProjectsPerClient >= 3) return t("focusDeepClientWork");
     if (avgProjectsPerClient >= 1.5) return t("focusBalanced");
+
     return t("focusClientDiversity");
   };
 

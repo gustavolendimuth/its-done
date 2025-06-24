@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -42,25 +41,20 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { format, subDays, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import {
   Download,
   BarChart3,
   FileText,
   Clock,
   Users,
-  Calendar as CalendarIcon,
   Calendar,
   Filter,
   RefreshCw,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
   Activity,
 } from "lucide-react";
 import { DatePickerComponent } from "@/components/ui/date-picker";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { useDashboardStats } from "@/services/dashboard";
 import { useTimeEntries } from "@/services/time-entries";
 import { useClients } from "@/services/clients";
@@ -69,16 +63,10 @@ import {
   useInvoiceReport,
   useSummaryReport,
   type ReportFilters,
-  type HoursReport,
-  type InvoiceReport,
 } from "@/services/reports";
 import { toast } from "sonner";
 import { AnalyticsBigStats } from "@/components/analytics/analytics-big-stats";
-import {
-  BigCard,
-  BigCardStat,
-  BigCardContactInfo,
-} from "@/components/ui/big-card";
+
 import { InfoCard } from "@/components/ui/info-card";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";

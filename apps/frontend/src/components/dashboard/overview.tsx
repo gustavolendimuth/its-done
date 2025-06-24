@@ -8,24 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { StatusBadge } from "@/components/ui/status-badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import { format } from "date-fns";
 import {
   Clock,
@@ -33,8 +16,6 @@ import {
   DollarSign,
   Calendar,
   CheckCircle,
-  Download,
-  Eye,
   Building2,
   Mail,
   TrendingUp,
@@ -138,6 +119,7 @@ export function Overview({ data, isLoading, error, className }: OverviewProps) {
               (sum: number, iwh: any) => sum + (iwh.workHour?.hours || 0),
               0
             ) || 0;
+
           return bHours - aHours;
         default:
           return 0;
@@ -204,6 +186,7 @@ export function Overview({ data, isLoading, error, className }: OverviewProps) {
         </div>
       );
     }
+
     return null;
   };
 

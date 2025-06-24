@@ -31,6 +31,7 @@ export const useWebhookDeliveries = (params?: {
       const { data } = await api.get<WebhookDelivery[]>("/webhook-deliveries", {
         params,
       });
+
       return data;
     },
   });
@@ -43,6 +44,7 @@ export const useWebhookDelivery = (id: string) => {
       const { data } = await api.get<WebhookDelivery>(
         `/webhook-deliveries/${id}`
       );
+
       return data;
     },
     enabled: !!id,
@@ -83,6 +85,7 @@ export const useWebhookDeliveryStats = (params?: {
       }>("/webhook-deliveries/stats", {
         params,
       });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

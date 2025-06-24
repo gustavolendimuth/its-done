@@ -37,6 +37,7 @@ export function PeriodSelectorV2({
       label: t("today"),
       getRange: () => {
         const today = startOfToday();
+
         return { startDate: today, endDate: today };
       },
     },
@@ -45,6 +46,7 @@ export function PeriodSelectorV2({
       getRange: () => {
         const start = startOfWeek(new Date(), { weekStartsOn: 1 });
         const end = endOfWeek(new Date(), { weekStartsOn: 1 });
+
         return { startDate: start, endDate: end };
       },
     },
@@ -53,6 +55,7 @@ export function PeriodSelectorV2({
       getRange: () => {
         const start = startOfMonth(new Date());
         const end = endOfMonth(new Date());
+
         return { startDate: start, endDate: end };
       },
     },
@@ -61,6 +64,7 @@ export function PeriodSelectorV2({
       getRange: () => {
         const end = startOfToday();
         const start = subDays(end, 6);
+
         return { startDate: start, endDate: end };
       },
     },
@@ -69,6 +73,7 @@ export function PeriodSelectorV2({
       getRange: () => {
         const end = startOfToday();
         const start = subDays(end, 29);
+
         return { startDate: start, endDate: end };
       },
     },
@@ -78,6 +83,7 @@ export function PeriodSelectorV2({
     if (!value.startDate || !value.endDate) return t("selectPeriod");
     for (const preset of PRESETS) {
       const presetRange = preset.getRange();
+
       if (
         value.startDate.toDateString() ===
           presetRange.startDate.toDateString() &&
@@ -89,6 +95,7 @@ export function PeriodSelectorV2({
     if (value.startDate.toDateString() === value.endDate.toDateString()) {
       return format(value.startDate, "dd MMM yyyy");
     }
+
     return `${format(value.startDate, "dd MMM")} - ${format(value.endDate, "dd MMM yyyy")}`;
   };
 
@@ -123,6 +130,7 @@ export function PeriodSelectorV2({
             value.startDate.toDateString() ===
               presetRange.startDate.toDateString() &&
             value.endDate.toDateString() === presetRange.endDate.toDateString();
+
           return (
             <Button
               key={preset.label}

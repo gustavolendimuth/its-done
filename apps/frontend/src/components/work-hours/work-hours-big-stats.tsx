@@ -13,8 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useWorkHoursStats } from "@/services/work-hours-stats";
-import { useTotalHours } from "@/services/time-entries";
-import { formatHoursToHHMM, cn } from "@/lib/utils";
+import { formatHoursToHHMM } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
 interface WorkHoursBigStatsProps {

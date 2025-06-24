@@ -76,11 +76,13 @@ export const useHoursReport = (filters?: ReportFilters) => {
     queryKey: ["reports", "hours", filters],
     queryFn: async () => {
       const params = new URLSearchParams();
+
       if (filters?.startDate) params.append("startDate", filters.startDate);
       if (filters?.endDate) params.append("endDate", filters.endDate);
       if (filters?.clientId) params.append("clientId", filters.clientId);
       
       const { data } = await api.get<HoursReport>(`/reports/hours?${params}`);
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -93,11 +95,13 @@ export const useInvoiceReport = (filters?: ReportFilters) => {
     queryKey: ["reports", "invoices", filters],
     queryFn: async () => {
       const params = new URLSearchParams();
+
       if (filters?.startDate) params.append("startDate", filters.startDate);
       if (filters?.endDate) params.append("endDate", filters.endDate);
       if (filters?.clientId) params.append("clientId", filters.clientId);
       
       const { data } = await api.get<InvoiceReport>(`/reports/invoices?${params}`);
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -110,10 +114,12 @@ export const useSummaryReport = (filters?: Omit<ReportFilters, 'clientId'>) => {
     queryKey: ["reports", "summary", filters],
     queryFn: async () => {
       const params = new URLSearchParams();
+
       if (filters?.startDate) params.append("startDate", filters.startDate);
       if (filters?.endDate) params.append("endDate", filters.endDate);
       
       const { data } = await api.get<SummaryReport>(`/reports/summary?${params}`);
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -131,6 +137,7 @@ export const useReports = () => {
     queryKey: ["reports"],
     queryFn: async () => {
       const { data } = await api.get<Report[]>("/reports");
+
       return data;
     },
   });
@@ -141,6 +148,7 @@ export const useReport = (id: string) => {
     queryKey: ["reports", id],
     queryFn: async () => {
       const { data } = await api.get<Report>(`/reports/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -153,6 +161,7 @@ export const useCreateReport = () => {
   return useMutation({
     mutationFn: async (data: CreateReportDto) => {
       const response = await api.post<Report>("/reports", data);
+
       return response.data;
     },
     onSuccess: () => {
@@ -167,6 +176,7 @@ export const useUpdateReport = () => {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateReportDto }) => {
       const response = await api.patch<Report>(`/reports/${id}`, data);
+
       return response.data;
     },
     onSuccess: (_, { id }) => {
@@ -182,6 +192,7 @@ export const useDeleteReport = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.delete<Report>(`/reports/${id}`);
+
       return response.data;
     },
     onSuccess: (_, id) => {
@@ -197,6 +208,7 @@ export const useDownloadReport = () => {
       const response = await api.get(`/reports/${id}/download`, {
         responseType: "blob",
       });
+
       return response.data;
     },
   });

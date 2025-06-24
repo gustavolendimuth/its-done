@@ -33,6 +33,7 @@ export const useSendEmail = () => {
   return useMutation({
     mutationFn: async (data: SendEmailDto) => {
       const response = await api.post<void>("/email/send", data);
+
       return response.data;
     },
   });
@@ -42,6 +43,7 @@ export const useSendBulkEmail = () => {
   return useMutation({
     mutationFn: async (data: SendBulkEmailDto) => {
       const response = await api.post<void>("/email/send/bulk", data);
+
       return response.data;
     },
   });

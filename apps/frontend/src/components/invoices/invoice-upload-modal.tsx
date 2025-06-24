@@ -27,11 +27,13 @@ export function InvoiceUploadModal({
   const handleFileUpload = async (): Promise<void> => {
     if (!selectedFile) {
       toast.error("Please select a file to upload");
+
       return;
     }
 
     if (!invoiceNumber.trim()) {
       toast.error("Please enter an invoice number");
+
       return;
     }
 

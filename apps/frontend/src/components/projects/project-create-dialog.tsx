@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { FormModal } from "@/components/ui/form-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +55,7 @@ export function ProjectCreateDialog({
   const onSubmit = async (data: ProjectFormData) => {
     try {
       const project = await createProject.mutateAsync(data);
+
       reset();
       onSuccess?.(project);
     } catch (error) {

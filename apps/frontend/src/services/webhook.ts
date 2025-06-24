@@ -27,6 +27,7 @@ export const useWebhooks = () => {
     queryKey: ["webhooks"],
     queryFn: async () => {
       const { data } = await api.get<Webhook[]>("/webhooks");
+
       return data;
     },
   });
@@ -37,6 +38,7 @@ export const useWebhook = (id: string) => {
     queryKey: ["webhooks", id],
     queryFn: async () => {
       const { data } = await api.get<Webhook>(`/webhooks/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -49,6 +51,7 @@ export const useCreateWebhook = () => {
   return useMutation({
     mutationFn: async (data: CreateWebhookDto) => {
       const response = await api.post<Webhook>("/webhooks", data);
+
       return response.data;
     },
     onSuccess: () => {
@@ -69,6 +72,7 @@ export const useUpdateWebhook = () => {
       data: UpdateWebhookDto;
     }) => {
       const response = await api.patch<Webhook>(`/webhooks/${id}`, data);
+
       return response.data;
     },
     onSuccess: (_, { id }) => {
@@ -84,6 +88,7 @@ export const useDeleteWebhook = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.delete<Webhook>(`/webhooks/${id}`);
+
       return response.data;
     },
     onSuccess: (_, id) => {
@@ -97,6 +102,7 @@ export const useTestWebhook = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.post<void>(`/webhooks/${id}/test`);
+
       return response.data;
     },
   });

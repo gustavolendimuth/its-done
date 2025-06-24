@@ -4,122 +4,102 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Button } from "@/components/ui/button";
-import { Bell, LogOut, LucideIcon } from "lucide-react";
+import { Clock, LogOut, LucideIcon, PlusCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { cn } from "@/lib/utils";
 import { useSafeHydration } from "@/hooks/use-safe-hydration";
-import { useAvatar } from "@/hooks/use-avatar";
+import { useState } from "react";
+import { FormModal } from "../ui/form-modal";
+import { WorkHourForm } from "../work-hours/work-hour-form";
 
 // Component to handle icon rendering without hydration issues
-function SafeIcon({
-  icon: Icon,
-  className,
-}: {
-  icon: LucideIcon;
-  className?: string;
-}) {
-  const mounted = useSafeHydration();
+function IconWrapper({ icon: Icon }: { icon: LucideIcon }) {
+  const isHydrated = useSafeHydration();
 
-  if (!mounted) {
-    return <div className={cn("h-5 w-5", className)} />;
-  }
+  if (!isHydrated) return null;
 
-  return <Icon className={className} />;
+  return <Icon className="h-4 w-4" />;
 }
 
 export function Topbar() {
-  const t = useTranslations("navigation");
+  const t = useTranslations();
+  const tWorkHours = useTranslations("workHours");
   const router = useRouter();
-  const mounted = useSafeHydration();
-  const { status } = useSession();
-  const { avatarUrl, fallbackUrls, initials, displayName, email } = useAvatar();
+  const { data: session } = useSession();
+  const [isAddHoursOpen, setIsAddHoursOpen] = useState(false);
 
-  const handleLogout = async () => {
-    await signOut({ redirect: false });
-    router.push("/login");
+  const handleLogout = () => {
+    signOut();
   };
 
-  if (!mounted || status === "loading") {
-    return (
-      <header className="h-16 flex items-center justify-between px-6 border-b border-border bg-background sticky top-0 z-30">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground hover:text-primary"
-          >
-            <div className="h-5 w-5" />
-          </Button>
-          <div className="h-10 w-10" />
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <UserAvatar src={null} alt="User" fallbackText="U" size="md" />
-          </Button>
-        </div>
-      </header>
-    );
-  }
-
-  if (status === "unauthenticated") {
-    return null;
-  }
+  const handleAddHoursSuccess = () => {
+    setIsAddHoursOpen(false);
+  };
 
   return (
-    <header className="h-16 flex items-center justify-between px-6 border-b border-border bg-background sticky top-0 z-30">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-muted-foreground hover:text-primary"
-        >
-          <SafeIcon icon={Bell} className="h-5 w-5" />
-        </Button>
-        <LanguageSwitcher />
-        <ModeToggle />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <UserAvatar
-                src={avatarUrl}
-                fallbackUrls={fallbackUrls}
-                alt={`@${displayName}`}
-                fallbackText={initials}
-                size="md"
-              />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="start" forceMount>
-            <div className="flex items-center justify-start gap-2 p-2">
-              <div className="flex flex-col space-y-1 leading-none">
-                {displayName && (
-                  <p className="font-medium text-sm">{displayName}</p>
-                )}
-                {email && (
-                  <p className="w-[200px] truncate text-xs text-muted-foreground">
-                    {email}
-                  </p>
-                )}
-              </div>
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-red-600 focus:text-red-600 cursor-pointer"
-              onClick={handleLogout}
-            >
-              <SafeIcon icon={LogOut} className="mr-2 h-4 w-4" />
-              <span>{t("logout")}</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center">
+        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+          <div className="w-full flex justify-end items-center space-x-2">
+            {session && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8"
+                onClick={() => setIsAddHoursOpen(true)}
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                {tWorkHours("addHours")}
+              </Button>
+            )}
+            <ModeToggle />
+            <LanguageSwitcher />
+            {session && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
+                    <UserAvatar
+                      src={session.user?.image}
+                      alt={`@${session.user?.name || session.user?.email}`}
+                      className="h-8 w-8"
+                      fallbackText={
+                        session.user?.name?.[0] ||
+                        session.user?.email?.[0] ||
+                        "?"
+                      }
+                    />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>{t("auth.logout")}</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        </div>
       </div>
+      <FormModal
+        open={isAddHoursOpen}
+        onOpenChange={setIsAddHoursOpen}
+        title={tWorkHours("addHours")}
+        description={tWorkHours("addHoursFormSubtitle")}
+        icon={Clock}
+      >
+        <WorkHourForm onSuccess={handleAddHoursSuccess} clients={[]} />
+      </FormModal>
     </header>
   );
 }

@@ -17,6 +17,7 @@ const mockT = (key: string, values?: any): string => {
     "timeAgo.year": "1 year",
     "timeAgo.years": `${values?.count} years`,
   };
+
   return translations[key] || key;
 };
 
@@ -35,31 +36,37 @@ describe("formatTimeAgo", () => {
 
   it("should return 'just now' for very recent dates", () => {
     const recentDate = new Date(now.getTime() - 30 * 1000); // 30 segundos atrás
+
     expect(formatTimeAgo(recentDate, mockT)).toBe("just now");
   });
 
   it("should return '1 minute' for 1 minute ago", () => {
     const oneMinuteAgo = new Date(now.getTime() - 1 * 60 * 1000);
+
     expect(formatTimeAgo(oneMinuteAgo, mockT)).toBe("1 minute");
   });
 
   it("should return 'X minutes' for multiple minutes", () => {
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+
     expect(formatTimeAgo(fiveMinutesAgo, mockT)).toBe("5 minutes");
   });
 
   it("should return '1 hour' for 1 hour ago", () => {
     const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
+
     expect(formatTimeAgo(oneHourAgo, mockT)).toBe("1 hour");
   });
 
   it("should return '1 day' for 1 day ago", () => {
     const oneDayAgo = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+
     expect(formatTimeAgo(oneDayAgo, mockT)).toBe("1 day");
   });
 
   it("should return 'X days' for multiple days", () => {
     const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+
     expect(formatTimeAgo(threeDaysAgo, mockT)).toBe("3 days");
   });
 });

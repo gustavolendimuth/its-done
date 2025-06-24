@@ -12,6 +12,7 @@ function AuthCallbackContent() {
 
   useEffect(() => {
     const token = searchParams.get("token");
+
     if (token) {
       // Sign in with the token
       signIn("credentials", {

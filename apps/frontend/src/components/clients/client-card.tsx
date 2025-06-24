@@ -9,7 +9,6 @@ import {
   Mail,
   Phone,
   Clock,
-  DollarSign,
   User,
   Edit2,
   Eye,
@@ -22,7 +21,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
-  BigCard,
   BigCardStat,
   BigCardContactInfo,
 } from "@/components/ui/big-card";
@@ -120,12 +118,14 @@ export function ClientCard({ client }: ClientCardProps) {
       typeof window !== "undefined"
         ? `${window.location.protocol}//${window.location.host}`
         : "";
+
     return `${baseUrl}/client-dashboard/${client.id}`;
   };
 
   const handleCopyLink = async () => {
     try {
       const url = getClientDashboardUrl();
+
       await navigator.clipboard.writeText(url);
       toast.success(t("linkCopiedToClipboard"));
     } catch (error) {
@@ -137,6 +137,7 @@ export function ClientCard({ client }: ClientCardProps) {
     const url = getClientDashboardUrl();
     const message = t("whatsappShareMessage", { url });
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+
     window.open(whatsappUrl, "_blank");
   };
 
@@ -145,6 +146,7 @@ export function ClientCard({ client }: ClientCardProps) {
     const subject = t("emailShareSubject", { company: client.company });
     const body = t("emailShareBody", { url });
     const emailUrl = `mailto:${client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
     window.open(emailUrl);
   };
 

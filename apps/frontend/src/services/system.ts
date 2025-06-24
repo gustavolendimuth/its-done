@@ -44,6 +44,7 @@ export const useSystemInfo = () => {
     queryKey: ["system", "info"],
     queryFn: async () => {
       const { data } = await api.get<SystemInfo>("/system/info");
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -57,6 +58,7 @@ export const useSystemSettings = () => {
     queryKey: ["system", "settings"],
     queryFn: async () => {
       const { data } = await api.get<SystemSettings>("/system/settings");
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -74,6 +76,7 @@ export const useUpdateSystemSettings = () => {
         "/system/settings",
         data
       );
+
       return response.data;
     },
     onSuccess: () => {
@@ -95,6 +98,7 @@ export const useSystemHealth = () => {
           cpu: boolean;
         };
       }>("/system/health");
+
       return data;
     },
     staleTime: 1 * 60 * 1000, // 1 minute
@@ -121,6 +125,7 @@ export const useSystemLogs = (params?: {
       }>("/system/logs", {
         params,
       });
+
       return data;
     },
   });
@@ -142,6 +147,7 @@ export const useSystemMetrics = (params?: { from?: string; to?: string }) => {
       }>("/system/metrics", {
         params,
       });
+
       return data;
     },
     staleTime: 1 * 60 * 1000, // 1 minute

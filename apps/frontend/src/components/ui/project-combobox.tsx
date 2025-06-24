@@ -18,12 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useProjects, type Project } from "@/services/projects";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+
 import { ProjectCreateDialog } from "@/components/projects/project-create-dialog";
 
 interface ProjectComboboxProps {

@@ -9,7 +9,6 @@ import {
   Upload,
   FileText,
   CheckCircle,
-  AlertCircle,
   X,
   File,
   Loader2,
@@ -66,6 +65,7 @@ export function InvoiceFileUpload({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+
     onFileSelect(file);
   };
 
@@ -77,6 +77,7 @@ export function InvoiceFileUpload({
     if (disabled) return;
 
     const files = e.dataTransfer.files;
+
     if (files && files[0]) {
       const file = files[0];
 
@@ -92,12 +93,14 @@ export function InvoiceFileUpload({
 
       if (!allowedTypes.includes(file.type)) {
         toast.error("Please select a PDF, image, or Word document");
+
         return;
       }
 
       // Validate file size (10MB)
       if (file.size > 10 * 1024 * 1024) {
         toast.error("File size must be less than 10MB");
+
         return;
       }
 
@@ -124,18 +127,21 @@ export function InvoiceFileUpload({
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const getFileIcon = (file: File) => {
     if (file.type === "application/pdf") return FileText;
     if (file.type.startsWith("image/")) return File;
+
     return FileText;
   };
 
   const handleUploadClick = async () => {
     if (!selectedFile) {
       toast.error("Please select a file to upload");
+
       return;
     }
 
@@ -301,6 +307,7 @@ export function InvoiceFileUpload({
                   <div className="flex items-center gap-3">
                     {(() => {
                       const IconComponent = getFileIcon(selectedFile);
+
                       return (
                         <IconComponent className="h-8 w-8 text-blue-600" />
                       );

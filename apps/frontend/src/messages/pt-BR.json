@@ -1,4 +1,13 @@
 {
+  "app": {
+    "title": "It's Done - Controle Profissional de Horas",
+    "description": "Um aplicativo profissional de controle de horas para contratados e equipes"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
+  },
   "home": {
     "title": "Controle Tempo, Aumente Produtividade",
     "description": "Controle de tempo profissional para contratados e equipes. Gerencie projetos, registre horas e seja pago pelo seu trabalho.",

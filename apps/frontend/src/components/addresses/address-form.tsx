@@ -84,6 +84,7 @@ export function AddressForm({ clientId, onSuccess }: AddressFormProps) {
 
   useEffect(() => {
     const isFirst = !existingAddresses || existingAddresses.length === 0;
+
     setFormData((prev) => ({
       ...prev,
       isPrimary: isFirst,
@@ -100,26 +101,31 @@ export function AddressForm({ clientId, onSuccess }: AddressFormProps) {
     // Basic validation
     if (!formData.street.trim()) {
       console.error("Street is required");
+
       return;
     }
 
     if (!formData.city.trim()) {
       console.error("City is required");
+
       return;
     }
 
     if (!formData.state.trim()) {
       console.error("State is required");
+
       return;
     }
 
     if (!formData.zipCode.trim()) {
       console.error("ZIP code is required");
+
       return;
     }
 
     if (!clientId) {
       console.error("Client ID is required but not provided");
+
       return;
     }
 
@@ -142,6 +148,7 @@ export function AddressForm({ clientId, onSuccess }: AddressFormProps) {
         console.log("Address created successfully:", data);
         // Reset form but keep isPrimary logic for potential next address
         const willBeFirstAfterReset = false; // After creating one, it's no longer the first
+
         setFormData({
           street: "",
           city: "",

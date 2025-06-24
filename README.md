@@ -126,7 +126,10 @@ O **It`s Done** é um sistema completo de controle de horas de trabalho que ofer
 - **Sistema de Tempo Relativo Customizado**: Função `formatTimeAgo()` que usa traduções próprias ao invés do date-fns locale
 - **Suporte Multilíngue**: Idiomas português (pt-BR) e inglês (en) com traduções completas
 - **Traduções Contextuais**: Diferentes textos para contextos específicos (página vs formulário vs tempo relativo)
+- **Título e Descrição da Aplicação**: Tradução do título e descrição principal da aplicação em todos os idiomas
 - **Chaves de Tradução Organizadas**:
+  - `app.title`: Título principal da aplicação
+  - `app.description`: Descrição principal da aplicação
   - `editClientFormSubtitle`: Texto específico para formulário de edição de cliente
   - `addNewClientFormSubtitle`: Texto específico para formulário de novo cliente
   - `addHoursFormSubtitle`: Texto específico para formulário de registro de horas

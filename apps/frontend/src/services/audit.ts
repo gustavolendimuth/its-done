@@ -53,6 +53,7 @@ export const useAuditLogs = (params?: {
       const { data } = await api.get<AuditLog[]>("/audit", {
         params,
       });
+
       return data;
     },
   });
@@ -63,6 +64,7 @@ export const useAuditLog = (id: string) => {
     queryKey: ["audit", id],
     queryFn: async () => {
       const { data } = await api.get<AuditLog>(`/audit/${id}`);
+
       return data;
     },
     enabled: !!id,
@@ -76,6 +78,7 @@ export const useAuditStats = (params?: { from?: string; to?: string }) => {
       const { data } = await api.get<AuditStats>("/audit/stats", {
         params,
       });
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

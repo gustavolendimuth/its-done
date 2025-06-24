@@ -1,12 +1,10 @@
 import React from "react";
 import {
   FileText,
-  DollarSign,
   Clock,
   Calendar,
   Download,
   Eye,
-  ExternalLink,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,6 +69,7 @@ export function ClientInvoiceCard({
     if (invoice.fileUrl) {
       // Create a temporary link to download the file
       const link = document.createElement("a");
+
       link.href = invoice.fileUrl;
       link.download = `${invoiceNumber}.pdf`;
       link.target = "_blank";
