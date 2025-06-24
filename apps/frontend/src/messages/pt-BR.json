@@ -39,9 +39,11 @@
     "settings": "Configurações",
     "dashboard": "Dashboard",
     "analytics": "Analytics",
+    "admin": "Admin",
     "logout": "Sair"
   },
   "auth": {
+    "logout": "Sair",
     "login": {
       "title": "Bem-vindo de volta",
       "description": "Digite suas credenciais para entrar",
@@ -696,5 +698,38 @@
   "ProjectCreateDialog": {
     "title": "Criar Novo Projeto",
     "description": "Crie um novo projeto e associe-o a um cliente"
+  },
+  "admin": {
+    "title": "Painel de Admin",
+    "subtitle": "Gerencie configurações do sistema e visualize estatísticas",
+    "infoTitle": "Painel de Administração",
+    "description": "Painel de administração centralizado para gerenciar configurações do sistema, monitorar estatísticas e controlar o acesso dos usuários. Visualize métricas importantes como total de usuários, clientes, projetos e faturamento. Configure parâmetros do sistema como limites de clientes, projetos e alertas de horas.",
+    "stats": {
+      "title": "Estatísticas do Sistema",
+      "totalUsers": "Total de Usuários",
+      "totalClients": "Total de Clientes",
+      "totalProjects": "Total de Projetos",
+      "totalWorkHours": "Total de Horas",
+      "totalInvoices": "Total de Faturas",
+      "totalInvoiceAmount": "Valor Total Faturado",
+      "userGrowth": "Crescimento de Usuários",
+      "clientGrowth": "Crescimento de Clientes",
+      "revenueGrowth": "Crescimento de Receita",
+      "topUsers": "Principais Usuários",
+      "noData": "Nenhum dado disponível"
+    },
+    "settings": {
+      "title": "Configurações do Sistema",
+      "defaultAlertHours": "Horas de Alerta Padrão",
+      "allowGoogleAuth": "Permitir Login com Google",
+      "allowPasswordReset": "Permitir Redefinição de Senha",
+      "maxClientsPerUser": "Máximo de Clientes por Usuário",
+      "maxProjectsPerClient": "Máximo de Projetos por Cliente",
+      "systemEmailFrom": "Email do Sistema (From)",
+      "save": "Salvar Configurações",
+      "saving": "Salvando...",
+      "saved": "Configurações salvas com sucesso!",
+      "error": "Erro ao salvar configurações"
+    }
   }
 }

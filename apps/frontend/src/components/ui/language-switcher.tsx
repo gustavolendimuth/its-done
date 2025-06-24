@@ -40,7 +40,7 @@ export function LanguageSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-2">
-          <Globe className="h-4 w-4" />
+          <Globe className="h-4 w-4" aria-hidden="true" />
           <span className="text-sm">{currentLocale?.flag}</span>
           <span className="sr-only">{t("language")}</span>
         </Button>
