@@ -37,7 +37,7 @@ const variantStyles = {
 export function InfoCard({
   title,
   description,
-  icon,
+  icon: Icon = Info,
   variant = "info",
   className,
 }: InfoCardProps) {
@@ -48,7 +48,7 @@ export function InfoCard({
       <CardContent className="p-6">
         <div className="flex items-start space-x-4">
           <div className={cn("p-3 rounded-full", styles.iconBg)}>
-            <Info className={cn("h-6 w-6", styles.icon)} />
+            <Icon className={cn("h-6 w-6", styles.icon)} />
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-semibold mb-2">{title}</h3>

@@ -189,7 +189,6 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           {createdClient.id ? (
             <AddressCombobox
               addresses={addresses || []}
-              placeholder={t("addresses")}
               clientId={createdClient.id}
               showAddButton={true}
               onAddressAdded={handleAddressAdded}

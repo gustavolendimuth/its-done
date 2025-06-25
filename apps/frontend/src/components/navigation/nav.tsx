@@ -5,18 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useSafeHydration } from "@/hooks/use-safe-hydration";
-import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
-import {
-  Home,
-  Clock,
-  Users,
-  FileText,
-  FolderOpen,
-  Settings,
-  BarChart,
-  Shield,
-} from "lucide-react";
 
 export function Nav() {
   const t = useTranslations("navigation");

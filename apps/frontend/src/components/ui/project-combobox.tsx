@@ -39,7 +39,7 @@ export function ProjectCombobox({
   const [open, setOpen] = React.useState(false);
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
 
-  const { data: projects = [], isLoading } = useProjects(clientId);
+  const { data: projects = [] } = useProjects(clientId);
 
   const selectedProject = projects.find((project) => project.id === value);
 

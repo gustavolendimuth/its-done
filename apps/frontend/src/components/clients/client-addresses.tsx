@@ -24,7 +24,6 @@ export function ClientAddresses({ clientId }: ClientAddressesProps) {
       <Label className="text-sm font-medium text-foreground">Addresses</Label>
       <AddressCombobox
         addresses={addresses || []}
-        placeholder="Addresses"
         clientId={clientId}
         showAddButton={true}
         onAddressAdded={handleAddressAdded}

@@ -31,7 +31,6 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
   const [open, setOpen] = useState(false);
   const updateClient = useUpdateClient();
   const t = useTranslations("clients");
-  const tCommon = useTranslations("common");
 
   const clientFormSchema = z.object({
     name: z.string().min(1, t("validationNameRequired")),

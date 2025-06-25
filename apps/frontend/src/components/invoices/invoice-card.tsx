@@ -83,7 +83,6 @@ export function InvoiceCard({
   className,
 }: InvoiceCardProps) {
   const t = useTranslations("invoices");
-  const tCommon = useTranslations("common");
 
   const accentColor = getStatusColor(status);
   const displayClient = clientName || clientEmail || t("noClient");

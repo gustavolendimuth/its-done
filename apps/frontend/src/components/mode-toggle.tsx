@@ -32,7 +32,7 @@ function SafeIcon({
 }
 
 export function ModeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
   const mounted = useSafeHydration();
   const t = useTranslations("theme");
 

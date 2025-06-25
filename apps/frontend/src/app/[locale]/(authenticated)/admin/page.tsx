@@ -18,7 +18,6 @@ import {
   FileText,
   DollarSign,
   Shield,
-  Activity,
 } from "lucide-react";
 import AdminUsers from "./users";
 import AdminActivity from "./activity";

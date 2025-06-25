@@ -101,6 +101,7 @@ describe("AdminPage", () => {
 
     // Should show skeleton loaders
     const skeletons = screen.getAllByTestId("skeleton");
+
     expect(skeletons.length).toBeGreaterThan(0);
   });
 });

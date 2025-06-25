@@ -3,13 +3,12 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+
 import { invoicesService } from "@/services/invoices";
 import { subMonths, isAfter, isBefore } from "date-fns";
 import { Overview, OverviewData } from "@/components/dashboard/overview";
 
 export default function ClientDashboardPage() {
-  const t = useTranslations("clientDashboard");
   const { clientId } = useParams();
 
   const {

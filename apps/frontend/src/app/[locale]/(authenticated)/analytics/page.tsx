@@ -102,8 +102,7 @@ export default function AnalyticsPage() {
 
   const { data: dashboardStats, isLoading: statsLoading } =
     useDashboardStats(period);
-  const { data: timeEntries = [], isLoading: entriesLoading } =
-    useTimeEntries(period);
+  const { isLoading: entriesLoading } = useTimeEntries(period);
   const { data: clients } = useClients();
 
   // Fetch reports based on type and filters
@@ -164,15 +163,6 @@ export default function AnalyticsPage() {
         hours: client.totalHours,
         percentage: client.percentage,
         color: COLORS[index % COLORS.length],
-      })) || []
-    );
-  }, [hoursReport]);
-
-  const monthlyChartData = useMemo(() => {
-    return (
-      hoursReport?.monthlyBreakdown?.map((item) => ({
-        month: item.month,
-        hours: item.totalHours,
       })) || []
     );
   }, [hoursReport]);
@@ -381,18 +371,15 @@ export default function AnalyticsPage() {
                   ) : (
                     recentActivities.map((activity, index) => {
                       // Determine styles based on activity type
-                      let accentColor = "blue";
                       let gradientClasses =
                         "from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20 border-blue-200 dark:border-blue-800";
                       let iconBgColor = "bg-blue-500";
 
                       if (activity.type === "invoice") {
-                        accentColor = "purple";
                         gradientClasses =
                           "from-purple-50 to-purple-100/50 dark:from-purple-950/20 dark:to-purple-900/20 border-purple-200 dark:border-purple-800";
                         iconBgColor = "bg-purple-500";
                       } else if (activity.type === "client") {
-                        accentColor = "green";
                         gradientClasses =
                           "from-green-50 to-green-100/50 dark:from-green-950/20 dark:to-green-900/20 border-green-200 dark:border-green-800";
                         iconBgColor = "bg-green-500";

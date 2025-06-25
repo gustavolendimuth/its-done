@@ -15,7 +15,6 @@ dist
 # misc
 .DS_Store
 *.pem
-seed.ts
 
 # debug
 npm-debug.log*

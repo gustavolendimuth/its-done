@@ -6,7 +6,7 @@ import { ClientForm } from "@/components/clients/client-form";
 import { ClientCard } from "@/components/clients/client-card";
 import { FormModal } from "@/components/ui/form-modal";
 import { useClients } from "@/services/clients";
-import { useClientStats } from "@/services/client-stats";
+
 import { ClientsBigStats } from "@/components/clients/clients-big-stats";
 import { SearchInput } from "@/components/ui/search-input";
 import { PageContainer } from "@/components/layout/page-container";
@@ -14,11 +14,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 import { InfoCard } from "@/components/ui/info-card";
-import {
-  Users,
-  Plus,
-  Search as SearchIcon,
-} from "lucide-react";
+import { Users, Plus, Search as SearchIcon } from "lucide-react";
 
 export default function ClientsPage() {
   const t = useTranslations("clients");
@@ -27,8 +23,6 @@ export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const { data: clients, isLoading } = useClients();
-  const { data: stats } = useClientStats();
-
   const filteredClients = useMemo(() => {
     if (!clients) return [];
     if (!searchTerm) return clients;
@@ -40,10 +34,6 @@ export default function ClientsPage() {
         client.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [clients, searchTerm]);
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-  };
 
   const handleClientAdded = () => {
     setIsModalOpen(false);

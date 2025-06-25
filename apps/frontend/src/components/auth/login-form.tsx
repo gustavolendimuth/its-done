@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,9 +24,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const t = useTranslations("auth.login");
-  const tCommon = useTranslations("common");
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const {
     register,
@@ -39,7 +37,7 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError(null);
-      const result = await signIn("credentials", {
+      await signIn("credentials", {
         email: data.email,
         password: data.password,
         redirect: true,

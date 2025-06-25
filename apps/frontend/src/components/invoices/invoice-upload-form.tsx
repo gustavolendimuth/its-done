@@ -49,7 +49,7 @@ export function InvoiceUploadForm({
     register,
     handleSubmit,
     reset,
-    setValue,
+
     watch,
     control,
     formState: { errors },
@@ -59,8 +59,6 @@ export function InvoiceUploadForm({
       dueDate: new Date(),
     },
   });
-
-  const watchedFile = watch("file");
 
   // Upload file mutation
   const uploadFileMutation = useUploadInvoiceFile();

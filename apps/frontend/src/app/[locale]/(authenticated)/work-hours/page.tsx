@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Clock, Plus } from "lucide-react";
-import { useWorkHoursStats } from "@/services/work-hours-stats";
+
 import { useTimeEntries, useDeleteTimeEntry } from "@/services/time-entries";
 import { useClients, Client } from "@/services/clients";
 import { InfoCard } from "@/components/ui/info-card";
@@ -71,9 +71,6 @@ export default function WorkHoursPage() {
     error: clientsError,
   } = useClients();
 
-  // Estatísticas
-  const { data: stats } = useWorkHoursStats(queryParams || undefined);
-
   // Delete mutation
   const deleteTimeEntry = useDeleteTimeEntry();
 
@@ -90,10 +87,6 @@ export default function WorkHoursPage() {
   if (isInitialLoading) {
     return <LoadingSkeleton type="work-hours" />;
   }
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-  };
 
   const handleWorkHourAdded = () => {
     setIsModalOpen(false);

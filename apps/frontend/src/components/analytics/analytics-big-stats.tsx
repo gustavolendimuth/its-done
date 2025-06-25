@@ -80,9 +80,6 @@ export function AnalyticsBigStats({
   const hoursPerClient =
     stats.totalClients > 0 ? stats.totalHours / stats.totalClients : 0;
 
-  const invoicesPerClient =
-    stats.totalClients > 0 ? stats.totalInvoices / stats.totalClients : 0;
-
   // Stats for the display
   const statsItems: BigStatItem[] = [
     {

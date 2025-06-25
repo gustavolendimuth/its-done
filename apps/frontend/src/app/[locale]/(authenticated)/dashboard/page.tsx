@@ -35,7 +35,7 @@ export default function DashboardPage() {
 
   const { data: clients = [], isLoading: clientsLoading } = useClients();
 
-  const { data: stats, isLoading: statsLoading } = useWorkHoursStats({
+  const { isLoading: statsLoading } = useWorkHoursStats({
     from: period.from,
     to: period.to,
   });
@@ -116,7 +116,16 @@ export default function DashboardPage() {
 
         return acc;
       },
-      {} as Record<string, any>
+      {} as Record<
+        string,
+        {
+          id: string;
+          name: string;
+          company: string;
+          hours: number;
+          invoices: number;
+        }
+      >
     );
 
     // Add invoice counts to clients
@@ -125,19 +134,6 @@ export default function DashboardPage() {
         clientHours[invoice.clientId].invoices++;
       }
     });
-
-    const topClients = Object.values(clientHours)
-      .sort((a: any, b: any) => b.hours - a.hours)
-      .slice(0, 5);
-
-    // Mock chart data for weekly progress
-    const chartData = [
-      { name: "Mon", hours: 8 },
-      { name: "Tue", hours: 6 },
-      { name: "Wed", hours: 7 },
-      { name: "Thu", hours: 8 },
-      { name: "Fri", hours: 5 },
-    ];
 
     return {
       stats: {

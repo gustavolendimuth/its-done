@@ -20,7 +20,7 @@ export function useNetworkStatus() {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 2000);
 
-          const response = await fetch("https://www.gravatar.com/favicon.ico", {
+          await fetch("https://www.gravatar.com/favicon.ico", {
             method: "HEAD",
             signal: controller.signal,
             mode: "no-cors", // Avoid CORS issues

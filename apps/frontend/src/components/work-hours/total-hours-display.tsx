@@ -8,11 +8,12 @@ import {
   Calendar,
   Users,
   CalendarDays,
+  LucideIcon,
 } from "lucide-react";
 import { useWorkHoursStats } from "@/services/work-hours-stats";
-import { useTotalHours } from "@/services/time-entries";
+
 import { cn, formatHoursToHHMM } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
+
 import { useTranslations } from "next-intl";
 
 interface StatCardProps {
@@ -85,20 +86,12 @@ export function TotalHoursDisplay({
       : undefined;
 
   // Selected period stats
-  const { data: periodStats, isLoading: isPeriodLoading } =
-    useWorkHoursStats(queryParams);
+  const { data: periodStats } = useWorkHoursStats(queryParams);
 
   // Total stats (without date filters)
-  const { data: totalStats, isLoading: isTotalLoading } = useWorkHoursStats({
+  const { data: totalStats } = useWorkHoursStats({
     clientId: clientId !== "all" ? clientId : undefined,
   });
-
-  // Total hours specific to the period
-  const { data: totalHoursPeriod, isLoading: isTotalHoursLoading } =
-    useTotalHours(
-      dateRange?.startDate || new Date(),
-      dateRange?.endDate || new Date()
-    );
 
   // Only show green loading spinner during refetch, not initial load
   const showLoading = isRefetching;

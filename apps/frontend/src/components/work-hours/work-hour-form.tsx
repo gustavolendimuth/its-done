@@ -39,7 +39,7 @@ export function WorkHourForm({
   hideClientSelection = false,
 }: WorkHourFormProps) {
   const t = useTranslations("workHours");
-  const tCommon = useTranslations("common");
+
   const queryClient = useQueryClient();
   const {
     handleSubmit,

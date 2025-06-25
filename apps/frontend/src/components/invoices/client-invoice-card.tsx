@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  FileText,
-  Clock,
-  Calendar,
-  Download,
-  Eye,
-} from "lucide-react";
+import { FileText, Clock, Calendar, Download, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -225,7 +219,7 @@ export function ClientInvoiceCard({
               Work Sessions ({invoice.invoiceWorkHours.length})
             </p>
             <div className="space-y-2 max-h-32 overflow-y-auto">
-              {invoice.invoiceWorkHours.slice(0, 3).map((iwh, index) => (
+              {invoice.invoiceWorkHours.slice(0, 3).map((iwh) => (
                 <div
                   key={iwh.id}
                   className="flex justify-between items-start text-xs bg-muted/30 p-2 rounded"

@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-import {
-  Plus,
-  FileText,
-} from "lucide-react";
+import { Plus, FileText } from "lucide-react";
 import { CreateInvoiceForm } from "@/components/invoices/create-invoice-form";
 import { EditInvoiceForm } from "@/components/invoices/edit-invoice-form";
 
@@ -14,7 +11,6 @@ import { toast } from "sonner";
 import { useInvoices, useDeleteInvoice, Invoice } from "@/services/invoices";
 import { useClients } from "@/services/clients";
 
-import { useInvoiceStats } from "@/services/invoice-stats";
 import { InvoiceUploadModal } from "@/components/invoices/invoice-upload-modal";
 import { InvoicesBigStats } from "@/components/invoices/invoices-big-stats";
 import { InvoiceCard } from "@/components/invoices/invoice-card";
@@ -52,21 +48,7 @@ export default function InvoicesPage() {
     setFilterStatus,
   } = useInvoiceFilters(invoices);
 
-  const { data: stats } = useInvoiceStats();
   const deleteInvoice = useDeleteInvoice();
-
-  const getStatusBadgeVariant = (status: Invoice["status"]) => {
-    switch (status) {
-      case "PAID":
-        return "default";
-      case "PENDING":
-        return "outline";
-      case "CANCELED":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -177,9 +159,9 @@ export default function InvoicesPage() {
                   status={invoice.status}
                   createdAt={invoice.createdAt}
                   fileUrl={invoice.fileUrl}
-                  onEdit={(id) => handleEditInvoice(invoice)}
+                  onEdit={() => handleEditInvoice(invoice)}
                   onDelete={handleDelete}
-                  onUpload={(id) => {
+                  onUpload={() => {
                     setUploadInvoice(invoice);
                     setIsUploadDialogOpen(true);
                   }}

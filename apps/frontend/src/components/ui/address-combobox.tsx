@@ -24,7 +24,6 @@ import { useTranslations } from "next-intl";
 
 interface AddressComboboxProps {
   addresses: Address[];
-  placeholder?: string;
   className?: string;
   disabled?: boolean;
   showAddButton?: boolean;
@@ -34,7 +33,6 @@ interface AddressComboboxProps {
 
 export function AddressCombobox({
   addresses,
-  placeholder = "Addresses",
   className,
   disabled = false,
   showAddButton = true,
@@ -83,13 +81,6 @@ export function AddressCombobox({
     console.log("Edit button clicked for address:", address.id);
     setEditingAddress(address);
     setEditDialogOpen(true);
-    setOpen(false); // Close the popover
-  };
-
-  const handleAddNewClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setAddDialogOpen(true);
     setOpen(false); // Close the popover
   };
 

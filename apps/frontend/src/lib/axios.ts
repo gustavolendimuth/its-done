@@ -49,6 +49,7 @@ api.interceptors.request.use(async (config) => {
     return config;
   } catch (error) {
     console.error("❌ Error getting session:", error);
+
     return config;
   }
 });
@@ -61,6 +62,7 @@ api.interceptors.response.use(
       statusText: response.statusText,
       url: response.config.url,
     });
+
     return response;
   },
   async (error) => {
@@ -79,6 +81,7 @@ api.interceptors.response.use(
 
       // Don't redirect for auth endpoints
       const isAuthEndpoint = error.config?.url?.includes("/auth/");
+
       if (!isAuthEndpoint) {
         console.warn("🚪 Redirecting to login due to 401");
         window.location.href = "/login";

@@ -28,7 +28,7 @@ export function WorkHoursSelector({
 
   // Filter only entries that don't have an invoice yet
   const availableEntries = timeEntries.filter(
-    (entry) => true // For now, show all entries
+    () => true // For now, show all entries
   );
 
   // Group entries based on selected grouping

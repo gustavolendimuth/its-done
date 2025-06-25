@@ -4,7 +4,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Button } from "@/components/ui/button";
-import { Clock, LogOut, LucideIcon, PlusCircle } from "lucide-react";
+import { Clock, LogOut, PlusCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   DropdownMenu,
@@ -12,26 +12,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
+
 import { signOut, useSession } from "next-auth/react";
-import { useSafeHydration } from "@/hooks/use-safe-hydration";
+
 import { useState } from "react";
 import { FormModal } from "../ui/form-modal";
 import { WorkHourForm } from "../work-hours/work-hour-form";
 
-// Component to handle icon rendering without hydration issues
-function IconWrapper({ icon: Icon }: { icon: LucideIcon }) {
-  const isHydrated = useSafeHydration();
-
-  if (!isHydrated) return null;
-
-  return <Icon className="h-4 w-4" />;
-}
-
 export function Topbar() {
   const t = useTranslations();
   const tWorkHours = useTranslations("workHours");
-  const router = useRouter();
+
   const { data: session } = useSession();
   const [isAddHoursOpen, setIsAddHoursOpen] = useState(false);
 

@@ -36,9 +36,29 @@ export interface AdminUser {
 }
 
 export interface RecentActivity {
-  workHours: any[];
-  invoices: any[];
-  newUsers: any[];
+  workHours: Array<{
+    id: string;
+    date: string;
+    hours: number;
+    description: string;
+    client: { name: string };
+    project?: { name: string };
+  }>;
+  invoices: Array<{
+    id: string;
+    number: string;
+    amount: number;
+    status: string;
+    client: { name: string };
+    createdAt: string;
+  }>;
+  newUsers: Array<{
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    createdAt: string;
+  }>;
 }
 
 export const useSystemStats = () => {
@@ -46,6 +66,7 @@ export const useSystemStats = () => {
     queryKey: ["admin", "stats"],
     queryFn: async () => {
       const response = await api.get<SystemStats>("/admin/stats");
+
       return response.data;
     },
   });
@@ -56,6 +77,7 @@ export const useAllUsers = () => {
     queryKey: ["admin", "users"],
     queryFn: async () => {
       const response = await api.get<AdminUser[]>("/admin/users");
+
       return response.data;
     },
   });
@@ -76,6 +98,7 @@ export const useUpdateUserRole = () => {
         `/admin/users/${userId}/role`,
         { role }
       );
+
       return response.data;
     },
     onSuccess: () => {
@@ -91,6 +114,7 @@ export const useDeleteUser = () => {
   return useMutation({
     mutationFn: async (userId: string) => {
       const response = await api.delete(`/admin/users/${userId}`);
+
       return response.data;
     },
     onSuccess: () => {
@@ -105,6 +129,7 @@ export const useRecentActivity = () => {
     queryKey: ["admin", "activity"],
     queryFn: async () => {
       const response = await api.get<RecentActivity>("/admin/activity");
+
       return response.data;
     },
   });

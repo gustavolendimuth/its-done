@@ -13,7 +13,7 @@ import {
   Target,
 } from "lucide-react";
 import { useProjects } from "@/services/projects";
-import { useClients } from "@/services/clients";
+
 import { useTranslations } from "next-intl";
 
 interface ProjectsBigStatsProps {
@@ -31,7 +31,6 @@ export function ProjectsBigStats({
   const { data: projects = [] } = useProjects(
     selectedClientId === "all" ? undefined : selectedClientId
   );
-  const { data: clients = [] } = useClients();
 
   // Calculate insights
   const totalProjects = projects.length;

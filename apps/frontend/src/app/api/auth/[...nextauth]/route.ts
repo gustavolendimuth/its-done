@@ -28,6 +28,7 @@ const authOptions: AuthOptions = {
 
         if (!credentials?.email || !credentials?.password) {
           console.log("Missing credentials");
+
           return null;
         }
 
@@ -35,6 +36,7 @@ const authOptions: AuthOptions = {
           const normalizedBackendUrl = normalizeUrl(
             process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"
           );
+
           console.log("Backend URL:", normalizedBackendUrl);
 
           const response = await fetch(`${normalizedBackendUrl}/auth/login`, {
@@ -48,10 +50,12 @@ const authOptions: AuthOptions = {
 
           console.log("Response status:", response.status);
           const data = await response.json();
+
           console.log("Response data:", data);
 
           if (response.ok && data.access_token) {
             console.log("Login successful");
+
             return {
               id: data.user.id,
               email: data.user.email,
@@ -62,9 +66,11 @@ const authOptions: AuthOptions = {
           }
 
           console.log("Login failed");
+
           return null;
         } catch (error) {
           console.error("Error during login:", error);
+
           return null;
         }
       },
@@ -126,7 +132,7 @@ const authOptions: AuthOptions = {
 
       return true;
     },
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account }) {
       console.log("=== JWT CALLBACK ===");
       console.log("Token before:", token);
       console.log("User:", user);
@@ -153,6 +159,7 @@ const authOptions: AuthOptions = {
       }
 
       console.log("Token after:", token);
+
       return token;
     },
     async session({ session, token }) {
@@ -163,6 +170,7 @@ const authOptions: AuthOptions = {
         session.user.role = token.role as "USER" | "ADMIN";
       }
       session.accessToken = token.accessToken as string;
+
       return session;
     },
     async redirect({ url, baseUrl }) {

@@ -81,10 +81,9 @@ export function CreateInvoiceForm({
   const watchedHourlyRate = watch("hourlyRate");
 
   // Buscar horas disponíveis (não faturadas ou de faturas canceladas)
-  const { data: availableTimeEntries = [], isLoading: timeEntriesLoading } =
-    useAvailableTimeEntries({
-      clientId: watchedClientId,
-    });
+  const { data: availableTimeEntries = [] } = useAvailableTimeEntries({
+    clientId: watchedClientId,
+  });
 
   // As horas já vêm filtradas pelo clientId se fornecido
   const filteredTimeEntries = availableTimeEntries;

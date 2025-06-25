@@ -26,11 +26,6 @@ interface NavItem {
   icon: LucideIcon;
 }
 
-interface NavGroup {
-  title: string;
-  items: NavItem[];
-}
-
 function Navigation() {
   const t = useTranslations("navigation");
   const pathname = usePathname();

@@ -3,41 +3,27 @@
   "plugins": ["import", "@typescript-eslint", "unused-imports"],
   "parser": "@typescript-eslint/parser",
   "rules": {
-    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "error",
     "unused-imports/no-unused-imports": "error",
     "unused-imports/no-unused-vars": [
       "error",
       {
         "vars": "all",
+        "varsIgnorePattern": "^_",
         "args": "after-used",
-        "ignoreRestSiblings": true,
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
+        "argsIgnorePattern": "^_"
       }
     ],
-    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-explicit-any": "warn",
     "no-unused-vars": "off",
-    "import/no-unused-modules": [
-      "error",
-      {
-        "missingExports": false,
-        "unusedExports": true,
-        "ignoreExports": [
-          "src/app/**/*",
-          "src/components/**/*",
-          "src/providers/**/*",
-          "src/types/**/*",
-          "src/test/**/*",
-          "vitest.config.ts"
-        ]
-      }
-    ],
+    "import/no-unused-modules": "off",
     "import/no-unresolved": "off",
     "import/named": "error",
     "import/default": "error",
     "import/namespace": "error",
-    "import/no-unused-imports": "off",
+
     "react/no-unescaped-entities": "off",
+    "react/display-name": "off",
     "no-multiple-empty-lines": [
       "error",
       {

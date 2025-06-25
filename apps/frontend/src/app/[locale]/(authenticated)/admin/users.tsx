@@ -25,7 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Shield, ShieldOff, Trash2, User } from "lucide-react";
+import { MoreHorizontal, Shield, ShieldOff, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -48,6 +48,7 @@ export default function AdminUsers() {
 
   const handleUpdateRole = async (userId: string, currentRole: string) => {
     const newRole = currentRole === "ADMIN" ? "USER" : "ADMIN";
+
     try {
       await updateRole.mutateAsync({ userId, role: newRole });
       toast({

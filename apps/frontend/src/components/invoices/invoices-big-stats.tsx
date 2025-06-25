@@ -36,8 +36,6 @@ export function InvoicesBigStats({
     stats.totalInvoices > 0 ? (stats.totalPaid / stats.totalAmount) * 100 : 0;
 
   const pendingAmount = stats.totalAmount - stats.totalPaid;
-  const pendingRate =
-    stats.totalInvoices > 0 ? (pendingAmount / stats.totalAmount) * 100 : 0;
 
   // Determine cash flow health
   const getCashFlowHealth = () => {
