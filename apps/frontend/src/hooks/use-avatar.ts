@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useGravatarHealth, shouldDisableGravatar } from "@/services/avatar";
 import { useShouldSkipExternalServices } from "@/services/network-status";
+import { sha256 } from "js-sha256";
 
 interface UseAvatarResult {
   avatarUrl: string | null;
@@ -12,26 +13,30 @@ interface UseAvatarResult {
   getNextFallback: () => string | null;
 }
 
-// Simple MD5-like hash function for Gravatar
-function simpleHash(str: string): string {
-  let hash = 0;
+// Gravatar API Key (configurado pelo usuário)
+const GRAVATAR_API_KEY =
+  "4691:gk-dGh1eZYP2WnY3scq1Bx9yQ6gOtLu0NvZkFRGu_lNNclTij0k8t4fltPfvbTw5";
 
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
+// Generate SHA256 hash for Gravatar (conforme documentação oficial)
+function generateGravatarHash(email: string): string {
+  const cleanEmail = email.toLowerCase().trim();
 
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-
-  return Math.abs(hash).toString(16).padStart(8, "0");
+  return sha256(cleanEmail);
 }
 
 // Generate Gravatar URL from email
 function generateGravatarUrl(email: string, size: number = 40): string {
-  const cleanEmail = email.toLowerCase().trim();
-  const emailHash = simpleHash(cleanEmail);
+  const emailHash = generateGravatarHash(email);
 
-  return `https://www.gravatar.com/avatar/${emailHash}?s=${size}&d=404&r=pg`;
+  // Base URL com hash SHA256 correto
+  let gravatarUrl = `https://gravatar.com/avatar/${emailHash}?s=${size}&d=404&r=pg`;
+
+  // Adicionar API key se disponível para melhor performance
+  if (GRAVATAR_API_KEY) {
+    gravatarUrl += `&api_key=${GRAVATAR_API_KEY}`;
+  }
+
+  return gravatarUrl;
 }
 
 // Generate DiceBear avatar URL with better error handling

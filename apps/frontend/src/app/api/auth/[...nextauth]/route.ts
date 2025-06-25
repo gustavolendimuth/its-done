@@ -34,7 +34,7 @@ const authOptions: AuthOptions = {
 
         try {
           const normalizedBackendUrl = normalizeUrl(
-            process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002"
           );
 
           console.log("Backend URL:", normalizedBackendUrl);
@@ -65,7 +65,7 @@ const authOptions: AuthOptions = {
             };
           }
 
-          console.log("Login failed");
+          console.log("Login failed - Response:", response.status, data);
 
           return null;
         } catch (error) {
@@ -174,12 +174,18 @@ const authOptions: AuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
+      console.log("=== REDIRECT CALLBACK ===");
+      console.log("URL:", url);
+      console.log("BaseURL:", baseUrl);
+
       // Se a URL for relativa ao baseUrl, redireciona para work-hours
       if (url.startsWith(baseUrl)) {
+        console.log("Redirecting to work-hours");
         return `${baseUrl}/work-hours`;
       }
 
       // Se for uma URL externa, mantém o redirecionamento original
+      console.log("External URL, keeping original redirect");
       return url;
     },
   },
