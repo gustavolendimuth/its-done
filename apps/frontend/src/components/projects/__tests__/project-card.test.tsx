@@ -1,37 +1,39 @@
+import { jest } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { vi } from "vitest";
-import { ProjectCard } from "../project-card";
 import { useRouter } from "next/navigation";
 
+import { ProjectCard } from "../project-card";
+
+import type { NextRouter } from "next/router";
+
 // Mock next/navigation
-vi.mock("next/navigation", () => ({
-  useRouter: vi.fn(),
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
 }));
 
-const mockRouter = {
-  push: vi.fn(),
+const mockRouter: Pick<NextRouter, "push"> = {
+  push: jest.fn(),
 };
 
 const mockProject = {
   id: "1",
   name: "Test Project",
-  description: "This is a test project description",
-  createdAt: "2023-12-01T00:00:00.000Z",
-  clientId: "client-1",
+  description: "Test Description",
   client: {
+    id: "1",
+    name: "Test Client",
     company: "Test Company",
+    email: "test@example.com",
   },
-  _count: {
-    workHours: 5,
-  },
+  createdAt: new Date().toISOString(),
 };
 
-const mockOnDelete = vi.fn();
+const mockOnDelete = jest.fn();
 
 describe("ProjectCard Component", () => {
   beforeEach(() => {
-    (useRouter as any).mockReturnValue(mockRouter);
-    vi.clearAllMocks();
+    (useRouter as jest.Mock).mockReturnValue(mockRouter);
+    jest.clearAllMocks();
   });
 
   test("renders project information correctly", () => {
@@ -45,9 +47,7 @@ describe("ProjectCard Component", () => {
 
     expect(screen.getByText("Test Project")).toBeInTheDocument();
     expect(screen.getByText("Test Company")).toBeInTheDocument();
-    expect(
-      screen.getByText("This is a test project description")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Test Description")).toBeInTheDocument();
     expect(screen.getByText("5 entries")).toBeInTheDocument();
   });
 
@@ -66,9 +66,7 @@ describe("ProjectCard Component", () => {
     );
 
     expect(screen.getByText("Test Project")).toBeInTheDocument();
-    expect(
-      screen.queryByText("This is a test project description")
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Test Description")).not.toBeInTheDocument();
   });
 
   test("has correct visual styling", () => {

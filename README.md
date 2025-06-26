@@ -579,81 +579,34 @@ O sistema utiliza uma estratégia de armazenamento inteligente com três níveis
 
 ## 🧪 Testes
 
-### Frontend (Next.js + Vitest)
+### Frontend (Next.js + Jest)
 
-O frontend usa Vitest com Testing Library para testes:
+O frontend usa Jest com Testing Library para testes:
 
 ```bash
-cd apps/frontend
-pnpm test          # Executar testes em modo watch
-pnpm test:run      # Executar todos os testes uma vez
-pnpm test:ui       # Interface visual para testes
+# Rodar testes em modo watch
+npm test
+
+# Rodar testes em CI
+npm run test:ci
+
+# Rodar testes com cobertura
+npm run test:coverage
 ```
 
-#### Configuração de Testes Frontend
+#### Estrutura de Testes
 
-- **Framework**: Vitest com JSDOM
-- **Testing Library**: React Testing Library + Jest DOM
-- **Setup**: Arquivo de setup em `src/test/setup.ts`
-- **Configuração**: `vitest.config.ts`
-
-#### Estrutura de Testes Frontend
+- **Framework**: Jest com JSDOM
+- **Biblioteca**: React Testing Library
+- **Configuração**: `jest.config.ts`
+- **Arquivos**:
 
 ```
-apps/frontend/src/
+  src/
 ├── test/
-│   ├── setup.ts           # Configuração global dos testes
-│   └── vitest.d.ts       # Tipos globais do Vitest
-├── components/
-│   ├── invoices/
-│   │   └── __tests__/
-│   │       └── invoice-search-filters.test.tsx
-│   ├── projects/
-│   │   └── __tests__/
-│   │       └── project-card.test.tsx
-│   └── ui/
-│       └── __tests__/
-│           └── alert.test.tsx
-```
-
-#### Exemplo de Testes
-
-Os testes cobrem:
-
-- **Renderização de Componentes**: Verificação se elementos aparecem corretamente
-- **Interações do Usuário**: Cliques, digitação, mudanças de estado
-- **Lógica de Hooks**: Teste do hook `useInvoiceFilters`
-- **Filtros e Busca**: Validação de filtros por status, busca e ordenação
-- **Componentes UI**: Testes de componentes base como Alert com suas variantes
-- **Acessibilidade**: Verificação de atributos ARIA e roles apropriados
-- **Sistema de Traduções**: Verificação da integridade das traduções de formulários
-
-#### Testes de Traduções
-
-O sistema inclui testes específicos para verificar a integridade das traduções de formulários:
-
-```bash
-# Executar testes de tradução
-pnpm test form-translations
-```
-
-**Testes Implementados:**
-
-- **Carregamento de Traduções**: Verifica se os subtítulos específicos de formulários são carregados corretamente
-- **Consistência entre Idiomas**: Confirma que todas as chaves existem em português e inglês
-- **Diferenciação de Contexto**: Valida que traduções de formulários são diferentes das descrições de páginas
-- **Testes de Componentes**: Verificação se modais usam traduções específicas de formulários
-- **Traduções de Cards**: Verificação de traduções específicas do WorkHourCard ("on" → "em")
-- **Sistema de Traduções Customizado**: Verificação da função formatTimeAgo que usa traduções do projeto
-
-**Localização dos Testes:**
-
-```
-apps/frontend/src/components/
-├── __tests__/
-│   └── form-translations.test.tsx       # Testes de integridade de traduções
-└── clients/__tests__/
-    └── edit-client-modal.test.tsx       # Testes do modal de edição
+  │   ├── setup.ts         # Configuração global dos testes
+  │   └── jest.d.ts        # Tipos globais do Jest
+  └── __tests__/          # Testes de componentes e hooks
 ```
 
 ### Backend (NestJS)

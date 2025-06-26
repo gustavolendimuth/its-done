@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
 import getConfig from "next/config";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -72,7 +72,7 @@ export function formatHoursToHHMM(hours: number): string {
  */
 export function formatTimeAgo(
   date: Date,
-  t: (key: string, values?: any) => string
+  t: (key: string, values?: Record<string, string | number>) => string
 ): string {
   const now = new Date();
   const diffInMs = now.getTime() - date.getTime();

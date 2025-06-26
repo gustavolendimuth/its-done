@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Clock,
   TrendingUp,
@@ -10,11 +9,12 @@ import {
   CalendarDays,
   LucideIcon,
 } from "lucide-react";
-import { useWorkHoursStats } from "@/services/work-hours-stats";
-
-import { cn, formatHoursToHHMM } from "@/lib/utils";
-
 import { useTranslations } from "next-intl";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn, formatHoursToHHMM } from "@/lib/utils";
+import { useWorkHoursStats } from "@/services/work-hours-stats";
+import { WorkHour } from "@/types";
 
 interface StatCardProps {
   title: string;
@@ -62,7 +62,7 @@ interface TotalHoursDisplayProps {
   clientId?: string;
   hourlyRate?: number;
   className?: string;
-  workHours?: any[]; // Array of work hours to calculate worked days
+  workHours?: WorkHour[]; // Array of work hours to calculate worked days
   isRefetching?: boolean; // New prop to show loading only during refetch
 }
 

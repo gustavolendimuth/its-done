@@ -1,4 +1,6 @@
-import { formatTimeAgo, formatHoursToHHMM } from "../utils";
+import { describe, it, expect } from "@jest/globals";
+
+import { formatTimeAgo, formatHoursToHHMM, cn } from "../utils";
 
 // Mock da função de tradução (já namespaced para workHours)
 const mockT = (key: string, values?: any): string => {
@@ -85,5 +87,35 @@ describe("formatHoursToHHMM", () => {
   it("should handle edge cases", () => {
     expect(formatHoursToHHMM(0)).toBe("00:00");
     expect(formatHoursToHHMM(NaN)).toBe("00:00");
+  });
+});
+
+describe("cn utility", () => {
+  it("should merge class names correctly", () => {
+    const result = cn("base-class", {
+      "conditional-class": true,
+      "false-class": false,
+    });
+
+    expect(result).toBe("base-class conditional-class");
+  });
+
+  it("should handle multiple arguments", () => {
+    const result = cn(
+      "base-class",
+      "additional-class",
+      { "conditional-class": true },
+      ["array-class"]
+    );
+
+    expect(result).toBe(
+      "base-class additional-class conditional-class array-class"
+    );
+  });
+
+  it("should handle undefined and null values", () => {
+    const result = cn("base-class", undefined, null, false, "valid-class");
+
+    expect(result).toBe("base-class valid-class");
   });
 });

@@ -1,13 +1,16 @@
 "use client";
 
-import { WorkHourForm } from "@/components/work-hours/work-hour-form";
-import { WorkHoursBigStats } from "@/components/work-hours/work-hours-big-stats";
-import { WorkHourCard } from "@/components/work-hours/work-hour-card";
-import { useState, useMemo } from "react";
+import { Clock, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { PeriodSelectorV2 } from "@/components/ui/period-selector-v2";
+import { useState, useMemo } from "react";
+
+import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { FormModal } from "@/components/ui/form-modal";
+import { InfoCard } from "@/components/ui/info-card";
+import { PeriodSelectorV2 } from "@/components/ui/period-selector-v2";
 import {
   Select,
   SelectContent,
@@ -15,14 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Clock, Plus } from "lucide-react";
-
-import { useTimeEntries, useDeleteTimeEntry } from "@/services/time-entries";
+import { WorkHourCard } from "@/components/work-hours/work-hour-card";
+import { WorkHourForm } from "@/components/work-hours/work-hour-form";
+import { WorkHoursBigStats } from "@/components/work-hours/work-hours-big-stats";
 import { useClients, Client } from "@/services/clients";
-import { InfoCard } from "@/components/ui/info-card";
-import { PageContainer } from "@/components/layout/page-container";
-import { PageHeader } from "@/components/layout/page-header";
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import { useTimeEntries, useDeleteTimeEntry } from "@/services/time-entries";
 
 export default function WorkHoursPage() {
   const t = useTranslations("workHours");

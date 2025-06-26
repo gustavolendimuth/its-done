@@ -1,33 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import {
-  useAllUsers,
-  useUpdateUserRole,
-  useDeleteUser,
-} from "@/services/admin";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Shield, ShieldOff, Trash2 } from "lucide-react";
+import { ApiError } from "@its-done/types";
 import { format } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
+import { MoreHorizontal, Shield, ShieldOff, Trash2 } from "lucide-react";
+import { useState } from "react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +15,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
+import {
+  useAllUsers,
+  useUpdateUserRole,
+  useDeleteUser,
+} from "@/services/admin";
 
 export default function AdminUsers() {
   const { data: users, isLoading } = useAllUsers();
@@ -74,10 +76,13 @@ export default function AdminUsers() {
         description: "User has been deleted successfully",
       });
       setDeleteUserId(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as ApiError)?.response?.data?.message ?? "Failed to delete user";
+
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to delete user",
+        description: errorMessage,
         variant: "destructive",
       });
       setDeleteUserId(null);

@@ -1,145 +1,81 @@
-import { useMemo } from "react";
 import { useSession } from "next-auth/react";
-import { useGravatarHealth, shouldDisableGravatar } from "@/services/avatar";
-import { useShouldSkipExternalServices } from "@/services/network-status";
-import { sha256 } from "js-sha256";
+import { useMemo } from "react";
 
-interface UseAvatarResult {
+import { useGravatarHealth, useGravatarProfile } from "@/services/gravatar";
+import { useShouldSkipExternalServices } from "@/services/network-status";
+
+export interface UseAvatarResult {
+  name: string;
+  initials: string;
+  image: string | null;
+  gravatarProfile: any;
+  isLoading: boolean;
   avatarUrl: string | null;
   fallbackUrls: string[];
-  initials: string;
   displayName: string;
-  email: string;
-  getNextFallback: () => string | null;
-}
-
-// Gravatar API Key (configurado pelo usuário)
-const GRAVATAR_API_KEY =
-  "4691:gk-dGh1eZYP2WnY3scq1Bx9yQ6gOtLu0NvZkFRGu_lNNclTij0k8t4fltPfvbTw5";
-
-// Generate SHA256 hash for Gravatar (conforme documentação oficial)
-function generateGravatarHash(email: string): string {
-  const cleanEmail = email.toLowerCase().trim();
-
-  return sha256(cleanEmail);
-}
-
-// Generate Gravatar URL from email
-function generateGravatarUrl(email: string, size: number = 40): string {
-  const emailHash = generateGravatarHash(email);
-
-  // Base URL com hash SHA256 correto
-  let gravatarUrl = `https://gravatar.com/avatar/${emailHash}?s=${size}&d=404&r=pg`;
-
-  // Adicionar API key se disponível para melhor performance
-  if (GRAVATAR_API_KEY) {
-    gravatarUrl += `&api_key=${GRAVATAR_API_KEY}`;
-  }
-
-  return gravatarUrl;
+  email: string | null;
 }
 
 // Generate DiceBear avatar URL with better error handling
-function generateDiceBearUrl(seed: string, size: number = 40): string {
-  const encodedSeed = encodeURIComponent(seed.toLowerCase().trim());
-
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodedSeed}&size=${size}&backgroundColor=22c55e&textColor=ffffff`;
-}
+const generateDiceBearUrl = (seed: string) => {
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(seed)}`;
+};
 
 // Generate UI Avatars URL (more reliable fallback)
-function generateUIAvatarsUrl(
-  name: string,
-  backgroundColor: string = "22c55e",
-  size: number = 40
-): string {
-  const encodedName = encodeURIComponent(name);
-
-  return `https://ui-avatars.com/api/?name=${encodedName}&background=${backgroundColor}&color=ffffff&size=${size}&bold=true&format=svg`;
-}
+const generateUIAvatarsUrl = (seed: string) => {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=22c55e&color=ffffff`;
+};
 
 // Generate local SVG avatar as final fallback
-function generateLocalSVGAvatar(
-  initials: string,
-  color: string = "#22c55e"
-): string {
-  const svg = `
-    <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="20" fill="${color}"/>
-      <text x="20" y="26" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="14" font-weight="600">
-        ${initials}
-      </text>
-    </svg>
-  `;
-
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
-}
+const generateLocalSVGAvatar = (initials: string) => {
+  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="%2322c55e"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-size="16">${initials}</text></svg>`;
+};
 
 export function useAvatar(): UseAvatarResult {
   const { data: session } = useSession();
   const { data: isGravatarHealthy } = useGravatarHealth();
   const { skipGravatar } = useShouldSkipExternalServices();
 
+  const user = session?.user;
+  const email = user?.email || "";
+
+  // Fetch Gravatar profile data (only if we have email and service is healthy)
+  const shouldFetchProfile =
+    !skipGravatar && isGravatarHealthy !== false && !!email;
+  const { data: gravatarProfileData, isLoading: isLoadingProfile } =
+    useGravatarProfile(shouldFetchProfile ? email : undefined);
+
   return useMemo(() => {
-    const user = session?.user;
-    const email = user?.email || "";
     const name = user?.name || "User";
-    const googleImage = user?.image;
+    const initials = name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
 
-    // Generate initials from name
-    const initials =
-      name
-        .split(" ")
-        .filter((n) => n.length > 0)
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2) || "U";
-
-    // Build fallback chain - ordered by reliability
-    const fallbackUrls: string[] = [];
-
-    // 1. Google profile image (most reliable if available)
-    if (googleImage) {
-      fallbackUrls.push(googleImage);
-    }
-
-    // 2. Gravatar (only if healthy, reachable and email available)
-    if (
-      email &&
-      !skipGravatar &&
-      isGravatarHealthy !== false &&
-      !shouldDisableGravatar()
-    ) {
-      fallbackUrls.push(generateGravatarUrl(email));
-    }
-
-    // 3. UI Avatars (reliable third-party service)
-    fallbackUrls.push(generateUIAvatarsUrl(name));
-
-    // 4. DiceBear (alternative service)
-    fallbackUrls.push(generateDiceBearUrl(name));
-
-    // 5. Local SVG (always works as final fallback)
-    fallbackUrls.push(generateLocalSVGAvatar(initials));
-
-    // Primary avatar URL (first in chain)
-    const avatarUrl = fallbackUrls[0] || null;
-
-    // Function to get next fallback URL
-    let currentFallbackIndex = 0;
-    const getNextFallback = (): string | null => {
-      currentFallbackIndex++;
-
-      return fallbackUrls[currentFallbackIndex] || null;
-    };
+    const avatarUrl =
+      user?.image || generateDiceBearUrl(email || user?.name || "");
+    const fallbackUrls = [
+      generateUIAvatarsUrl(name),
+      generateLocalSVGAvatar(initials),
+    ];
 
     return {
+      name,
+      initials,
+      image: avatarUrl || null,
+      gravatarProfile: gravatarProfileData,
+      isLoading: isLoadingProfile,
       avatarUrl,
       fallbackUrls,
-      initials,
       displayName: name,
-      email,
-      getNextFallback,
+      email: user?.email || null,
     };
-  }, [session, isGravatarHealthy, skipGravatar]);
+  }, [
+    user?.name,
+    user?.image,
+    user?.email,
+    gravatarProfileData,
+    isLoadingProfile,
+  ]);
 }

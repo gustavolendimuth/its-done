@@ -2,11 +2,18 @@
 
 import * as React from "react";
 import InputMask from "react-input-mask";
+
 import { cn } from "@/lib/utils";
 
 export interface PhoneInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+// Interface para as props passadas pelo InputMask
+interface InputMaskProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  key?: string;
+  ref?: React.Ref<HTMLInputElement>;
 }
 
 const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
@@ -83,7 +90,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
         placeholder="(11) 99999-9999"
         alwaysShowMask={false}
       >
-        {(inputProps: any) => (
+        {(inputProps: InputMaskProps) => (
           <input
             {...inputProps}
             ref={setInputRef}

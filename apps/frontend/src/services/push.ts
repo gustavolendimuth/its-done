@@ -1,11 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
+
+// Tipo para dados personalizados de push notification
+type PushNotificationData = Record<string, string | number | boolean>;
 
 export interface SendPushDto {
   to: string;
   title: string;
   body: string;
-  data?: Record<string, any>;
+  data?: PushNotificationData;
   icon?: string;
   badge?: string;
   sound?: string;
@@ -16,7 +20,7 @@ export interface SendBulkPushDto {
   to: string[];
   title: string;
   body: string;
-  data?: Record<string, any>;
+  data?: PushNotificationData;
   icon?: string;
   badge?: string;
   sound?: string;

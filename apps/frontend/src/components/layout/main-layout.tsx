@@ -1,10 +1,5 @@
 "use client";
 
-import { ReactNode } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
 import {
   BarChart3,
   Users,
@@ -15,10 +10,21 @@ import {
   Shield,
   LucideIcon,
 } from "lucide-react";
-import { Topbar } from "@/components/layout/topbar";
-import { cn } from "@/lib/utils";
-import { useSafeHydration } from "@/hooks/use-safe-hydration";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
+import { ReactNode } from "react";
+
+import { MobileNav } from "@/components/layout/mobile-nav";
+import { Topbar } from "@/components/layout/topbar";
+import { useSafeHydration } from "@/hooks/use-safe-hydration";
+import { cn } from "@/lib/utils";
+
+interface MainLayoutProps {
+  children: ReactNode;
+}
 
 interface NavItem {
   href: string;
@@ -26,7 +32,7 @@ interface NavItem {
   icon: LucideIcon;
 }
 
-function Navigation() {
+export function Navigation() {
   const t = useTranslations("navigation");
   const pathname = usePathname();
   const mounted = useSafeHydration();
@@ -105,10 +111,6 @@ function SafeIcon({
   return <Icon className={className} />;
 }
 
-interface MainLayoutProps {
-  children: ReactNode;
-}
-
 export function MainLayout({ children }: MainLayoutProps) {
   const t = useTranslations("home");
 
@@ -135,7 +137,9 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col min-h-screen md:ml-64">
-        <Topbar />
+        <Topbar>
+          <MobileNav />
+        </Topbar>
         <main className="flex-1 bg-background px-4 py-8 md:px-10 md:py-10">
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>

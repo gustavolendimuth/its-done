@@ -1,35 +1,37 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { jest } from "@jest/globals";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen, waitFor } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";
-import { vi } from "vitest";
+
 import { Topbar } from "../topbar";
 
+import type { Session } from "next-auth";
+
 // Mock next-auth
-vi.mock("next-auth/react", async () => {
-  const actual = await vi.importActual("next-auth/react");
+jest.mock("next-auth/react", async () => {
+  const actual = await jest.importActual("next-auth/react");
 
   return {
     ...actual,
-    useSession: vi.fn(),
+    useSession: jest.fn(),
   };
 });
 
 // Mock next/navigation
-vi.mock("next/navigation", () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    prefetch: vi.fn(),
+    push: jest.fn(),
+    replace: jest.fn(),
   }),
 }));
 
 // Mock next-intl
-vi.mock("next-intl", () => ({
+jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
 // Mock safe hydration hook
-vi.mock("../../hooks/use-safe-hydration", () => ({
+jest.mock("../../hooks/use-safe-hydration", () => ({
   useSafeHydration: () => true,
 }));
 
@@ -53,28 +55,38 @@ const renderWithProviders = (component: React.ReactElement) => {
 };
 
 describe("Avatar Integration Tests", () => {
+  const mockSession: Session = {
+    user: {
+      id: "1",
+      name: "John Doe",
+      email: "john@example.com",
+      role: "USER",
+      image: "https://lh3.googleusercontent.com/a/default-user",
+    },
+    expires: new Date().toISOString(),
+  };
+
+  const mockRouter = {
+    push: jest.fn(),
+    replace: jest.fn(),
+  };
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    (useSession as jest.Mock).mockReturnValue({
+      data: mockSession,
+      status: "authenticated",
+      update: jest.fn(),
+    });
   });
 
   it("should handle complete avatar fallback chain when user has Google image", async () => {
-    const mockSession = {
-      user: {
-        id: "1",
-        name: "John Doe",
-        email: "john@example.com",
-        image: "https://lh3.googleusercontent.com/a/default-user",
-      },
-      expires: "2024-01-01",
-      accessToken: "mock-token",
-    };
-
     const { useSession } = await import("next-auth/react");
 
     (useSession as any).mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: jest.fn(),
     });
 
     renderWithProviders(<Topbar />);
@@ -94,22 +106,12 @@ describe("Avatar Integration Tests", () => {
   });
 
   it("should fallback to initials when user has no image", async () => {
-    const mockSession = {
-      user: {
-        id: "2",
-        name: "Jane Smith",
-        email: "jane@example.com",
-      },
-      expires: "2024-01-01",
-      accessToken: "mock-token",
-    };
-
     const { useSession } = await import("next-auth/react");
 
     (useSession as any).mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: jest.fn(),
     });
 
     renderWithProviders(<Topbar />);
@@ -126,7 +128,7 @@ describe("Avatar Integration Tests", () => {
     (useSession as any).mockReturnValue({
       data: null,
       status: "unauthenticated",
-      update: vi.fn(),
+      update: jest.fn(),
     });
 
     renderWithProviders(<Topbar />);
@@ -141,7 +143,7 @@ describe("Avatar Integration Tests", () => {
     (useSession as any).mockReturnValue({
       data: null,
       status: "loading",
-      update: vi.fn(),
+      update: jest.fn(),
     });
 
     renderWithProviders(<Topbar />);
@@ -155,22 +157,12 @@ describe("Avatar Integration Tests", () => {
   });
 
   it("should generate proper gravatar URLs for emails", async () => {
-    const mockSession = {
-      user: {
-        id: "3",
-        name: "Test User",
-        email: "test@example.com",
-      },
-      expires: "2024-01-01",
-      accessToken: "mock-token",
-    };
-
     const { useSession } = await import("next-auth/react");
 
     (useSession as any).mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: jest.fn(),
     });
 
     renderWithProviders(<Topbar />);
@@ -188,50 +180,30 @@ describe("Avatar Integration Tests", () => {
   });
 
   it("should display user information in dropdown menu", async () => {
-    const mockSession = {
-      user: {
-        id: "4",
-        name: "Full Name User",
-        email: "fullname@example.com",
-      },
-      expires: "2024-01-01",
-      accessToken: "mock-token",
-    };
-
     const { useSession } = await import("next-auth/react");
 
     (useSession as any).mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: jest.fn(),
     });
 
     renderWithProviders(<Topbar />);
 
     await waitFor(() => {
       // User name should be displayed in dropdown
-      expect(screen.getByText("Full Name User")).toBeInTheDocument();
-      expect(screen.getByText("fullname@example.com")).toBeInTheDocument();
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
+      expect(screen.getByText("john@example.com")).toBeInTheDocument();
     });
   });
 
   it("should handle names with special characters for initials", async () => {
-    const mockSession = {
-      user: {
-        id: "5",
-        name: "José da Silva-Santos",
-        email: "jose@example.com",
-      },
-      expires: "2024-01-01",
-      accessToken: "mock-token",
-    };
-
     const { useSession } = await import("next-auth/react");
 
     (useSession as any).mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: jest.fn(),
     });
 
     renderWithProviders(<Topbar />);

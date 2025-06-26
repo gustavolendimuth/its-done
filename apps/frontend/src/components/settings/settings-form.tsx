@@ -1,12 +1,15 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Settings, Mail, Clock, Save } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { z } from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -14,11 +17,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Settings, Mail, Clock, Save } from "lucide-react";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useSettings, useUpdateSettings } from "@/services/settings";
-import { useTranslations } from "next-intl";
+
 
 const settingsSchema = z.object({
   alertHours: z
@@ -79,11 +81,14 @@ export function SettingsForm() {
           toast.success(t("settingsUpdatedSuccessfully"));
           setIsSubmitting(false);
         },
-        onError: (error: any) => {
+        onError: (error: unknown) => {
           console.error("Error updating settings:", error);
-          toast.error(
-            error.response?.data?.message || t("failedToUpdateSettings")
-          );
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : t("failedToUpdateSettings");
+
+          toast.error(errorMessage);
           setIsSubmitting(false);
         },
       }

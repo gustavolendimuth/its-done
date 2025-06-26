@@ -1,42 +1,55 @@
-# Dockerfile para deploy standalone do frontend
+# Dockerfile for frontend standalone deployment
 FROM node:18-alpine AS base
 
-# Instalar dependências do sistema
+# Install system dependencies
 RUN apk add --no-cache libc6-compat && \
     npm install -g pnpm@8.15.4
 
-# Definir diretório de trabalho
+# Set working directory
 WORKDIR /app
 
 # Stage 1: Dependencies
 FROM base AS deps
 
-# Copiar arquivos de configuração
+# Copy workspace configuration
 COPY package.json ./
-COPY components.json ./
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
 
-# Instalar dependências
-RUN pnpm config set network-timeout 300000 && \
-    pnpm install --prod=false
+# Copy shared packages
+COPY packages/types ./packages/types/
+
+# Copy frontend package files
+COPY apps/frontend/package.json ./apps/frontend/
+COPY apps/frontend/components.json ./apps/frontend/
+
+# Install dependencies
+RUN pnpm install
 
 # Stage 2: Build
 FROM base AS builder
 WORKDIR /app
 
-# Copiar node_modules
+# Copy workspace files and dependencies
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/package.json ./package.json
+COPY --from=deps /app/package.json ./
+COPY --from=deps /app/pnpm-workspace.yaml ./
+COPY --from=deps /app/pnpm-lock.yaml ./
+COPY --from=deps /app/packages ./packages
+COPY --from=deps /app/apps/frontend/node_modules ./apps/frontend/node_modules
+COPY --from=deps /app/apps/frontend/package.json ./apps/frontend/
 
-# Copiar código fonte
-COPY src ./src
-COPY public ./public
-COPY next.config.js ./
-COPY tailwind.config.ts ./
-COPY tsconfig.json ./
-COPY postcss.config.* ./
-COPY components.json ./
+# Copy frontend source code
+COPY apps/frontend/src ./apps/frontend/src
+COPY apps/frontend/public ./apps/frontend/public
+COPY apps/frontend/next.config.js ./apps/frontend/
+COPY apps/frontend/tailwind.config.ts ./apps/frontend/
+COPY apps/frontend/tsconfig.json ./apps/frontend/
+COPY apps/frontend/postcss.config.* ./apps/frontend/
+COPY apps/frontend/components.json ./apps/frontend/
 
-# Build da aplicação
+# Build the application
+WORKDIR /app/apps/frontend
 RUN echo "🔨 Building Next.js application..." && \
     pnpm build
 
@@ -44,27 +57,135 @@ RUN echo "🔨 Building Next.js application..." && \
 FROM base AS runner
 WORKDIR /app
 
-# Criar usuário não-root
+# Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copiar arquivos necessários
-COPY --from=builder /app/next.config.js ./
-COPY --from=builder /app/public ./public
+# Copy necessary files
+COPY --from=builder /app/apps/frontend/next.config.js ./
+COPY --from=builder /app/apps/frontend/public ./public
 
-# Copiar aplicação buildada
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Copy built application
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./.next/static
 
-# Mudar para usuário não-root
+# Switch to non-root user
 USER nextjs
 
-# Expor porta
+# Expose port
 EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1
 
-# Comando para iniciar
+# Start command
+CMD ["node", "server.js"]
+
+# Development Dockerfile for frontend
+FROM node:18-alpine
+
+# Install system dependencies
+RUN apk add --no-cache libc6-compat && \
+    npm install -g pnpm@8.15.4
+
+# Set working directory
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Switch to non-root user and ensure directory permissions
+RUN chown -R nextjs:nodejs /app
+USER nextjs
+
+# Expose port
+EXPOSE 3000
+
+# Start development server
+CMD ["sh", "-c", "cd apps/frontend && pnpm install && pnpm dev"]
+
+# Production Dockerfile for frontend
+FROM node:18-alpine AS base
+
+# Install system dependencies
+RUN apk add --no-cache libc6-compat && \
+    npm install -g pnpm@8.15.4
+
+# Set working directory
+WORKDIR /app
+
+# Stage 1: Dependencies
+FROM base AS deps
+
+# Copy workspace configuration
+COPY package.json ./
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+
+# Copy shared packages
+COPY packages/types ./packages/types/
+
+# Copy frontend package files
+COPY apps/frontend/package.json ./apps/frontend/
+COPY apps/frontend/components.json ./apps/frontend/
+
+# Install dependencies
+RUN pnpm install
+
+# Stage 2: Build
+FROM base AS builder
+WORKDIR /app
+
+# Copy workspace files and dependencies
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package.json ./
+COPY --from=deps /app/pnpm-workspace.yaml ./
+COPY --from=deps /app/pnpm-lock.yaml ./
+COPY --from=deps /app/packages ./packages
+COPY --from=deps /app/apps/frontend/node_modules ./apps/frontend/node_modules
+COPY --from=deps /app/apps/frontend/package.json ./apps/frontend/
+
+# Copy frontend source code
+COPY apps/frontend/src ./apps/frontend/src
+COPY apps/frontend/public ./apps/frontend/public
+COPY apps/frontend/next.config.js ./apps/frontend/
+COPY apps/frontend/tailwind.config.ts ./apps/frontend/
+COPY apps/frontend/tsconfig.json ./apps/frontend/
+COPY apps/frontend/postcss.config.* ./apps/frontend/
+COPY apps/frontend/components.json ./apps/frontend/
+
+# Build the application
+WORKDIR /app/apps/frontend
+RUN echo "🔨 Building Next.js application..." && \
+    pnpm build
+
+# Stage 3: Production
+FROM base AS runner
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy necessary files
+COPY --from=builder /app/apps/frontend/next.config.js ./
+COPY --from=builder /app/apps/frontend/public ./public
+
+# Copy built application
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./.next/static
+
+# Switch to non-root user
+USER nextjs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1
+
+# Start command
 CMD ["node", "server.js"] 

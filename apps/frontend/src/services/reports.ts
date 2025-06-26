@@ -1,5 +1,44 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
+
+// Tipos específicos para diferentes tipos de filtros de relatório
+type ClientReportFilters = {
+  clientIds?: string[];
+  startDate?: string;
+  endDate?: string;
+};
+
+type InvoiceReportFilters = {
+  status?: string[];
+  clientIds?: string[];
+  startDate?: string;
+  endDate?: string;
+  minAmount?: number;
+  maxAmount?: number;
+};
+
+type TimeReportFilters = {
+  clientIds?: string[];
+  projectIds?: string[];
+  userIds?: string[];
+  startDate?: string;
+  endDate?: string;
+};
+
+type UserReportFilters = {
+  userIds?: string[];
+  roles?: string[];
+  startDate?: string;
+  endDate?: string;
+};
+
+// União de todos os tipos de filtros possíveis
+type ReportFiltersUnion =
+  | ClientReportFilters
+  | InvoiceReportFilters
+  | TimeReportFilters
+  | UserReportFilters;
 
 export interface Report {
   id: string;
@@ -7,7 +46,7 @@ export interface Report {
   description: string;
   type: "client" | "invoice" | "time" | "user";
   format: "pdf" | "excel" | "csv";
-  filters: Record<string, any>;
+  filters: ReportFiltersUnion;
   status: "pending" | "processing" | "completed" | "failed";
   fileUrl?: string;
   createdAt: string;
@@ -19,7 +58,7 @@ export interface CreateReportDto {
   description: string;
   type: Report["type"];
   format: Report["format"];
-  filters: Record<string, any>;
+  filters: ReportFiltersUnion;
 }
 
 export interface ReportFilters {
@@ -80,7 +119,7 @@ export const useHoursReport = (filters?: ReportFilters) => {
       if (filters?.startDate) params.append("startDate", filters.startDate);
       if (filters?.endDate) params.append("endDate", filters.endDate);
       if (filters?.clientId) params.append("clientId", filters.clientId);
-      
+
       const { data } = await api.get<HoursReport>(`/reports/hours?${params}`);
 
       return data;
@@ -99,8 +138,10 @@ export const useInvoiceReport = (filters?: ReportFilters) => {
       if (filters?.startDate) params.append("startDate", filters.startDate);
       if (filters?.endDate) params.append("endDate", filters.endDate);
       if (filters?.clientId) params.append("clientId", filters.clientId);
-      
-      const { data } = await api.get<InvoiceReport>(`/reports/invoices?${params}`);
+
+      const { data } = await api.get<InvoiceReport>(
+        `/reports/invoices?${params}`
+      );
 
       return data;
     },
@@ -109,7 +150,7 @@ export const useInvoiceReport = (filters?: ReportFilters) => {
   });
 };
 
-export const useSummaryReport = (filters?: Omit<ReportFilters, 'clientId'>) => {
+export const useSummaryReport = (filters?: Omit<ReportFilters, "clientId">) => {
   return useQuery({
     queryKey: ["reports", "summary", filters],
     queryFn: async () => {
@@ -117,8 +158,10 @@ export const useSummaryReport = (filters?: Omit<ReportFilters, 'clientId'>) => {
 
       if (filters?.startDate) params.append("startDate", filters.startDate);
       if (filters?.endDate) params.append("endDate", filters.endDate);
-      
-      const { data } = await api.get<SummaryReport>(`/reports/summary?${params}`);
+
+      const { data } = await api.get<SummaryReport>(
+        `/reports/summary?${params}`
+      );
 
       return data;
     },

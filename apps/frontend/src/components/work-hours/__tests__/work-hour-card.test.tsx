@@ -1,195 +1,203 @@
-import { describe, test, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, jest } from "@jest/globals";
+import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import userEvent from "@testing-library/user-event";
+
 import { WorkHourCard } from "../work-hour-card";
 
-const mockWorkHour = {
-  id: "work-hour-1",
-  date: "2024-01-15T10:00:00Z",
-  description: "Frontend development work",
-  hours: 8.5,
-  client: {
-    id: "client-1",
-    name: "John Doe",
-    company: "Acme Corp",
-    email: "john@acme.com",
-  },
-  project: {
-    id: "project-1",
-    name: "Website Redesign",
-  },
-  createdAt: "2024-01-15T09:00:00Z",
-};
+import type { WorkHourCardProps } from "../work-hour-card";
 
-const mockWorkHourWithoutProject = {
-  id: "work-hour-2",
-  date: "2024-01-16T10:00:00Z",
-  description: "General consulting work",
-  hours: 4.0,
-  client: {
-    id: "client-2",
-    company: "Tech Solutions",
-    email: "contact@techsol.com",
-  },
-  createdAt: "2024-01-16T09:00:00Z",
-};
+// Mock next-intl
+jest.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
 
-const mockOnEdit = vi.fn();
-const mockOnDelete = vi.fn();
+// Mock date-fns
+jest.mock("date-fns", () => ({
+  format: jest.fn((date: Date, format: string) => "01/01/2024"),
+}));
 
-describe("WorkHourCard Component", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+// Mock utils
+jest.mock("@/lib/utils", () => ({
+  cn: (...args: unknown[]) => args.filter(Boolean).join(" "),
+  formatTimeAgo: jest.fn(() => "2 days ago"),
+}));
 
-  test("renders work hour information correctly", () => {
-    render(
-      <WorkHourCard
-        workHour={mockWorkHour}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        isDeleting={false}
-      />
-    );
+describe("WorkHourCard", () => {
+  const mockWorkHour: WorkHourCardProps["workHour"] = {
+    id: "1",
+    date: "2024-01-01T00:00:00Z",
+    description: "Test description",
+    hours: 8.5,
+    client: {
+      id: "client1",
+      name: "John Doe",
+      company: "Test Company",
+      email: "john@example.com",
+    },
+    project: {
+      id: "project1",
+      name: "Test Project",
+    },
+    createdAt: "2024-01-01T00:00:00Z",
+  };
 
-    // Check if hours are displayed
+  const defaultProps: WorkHourCardProps = {
+    workHour: mockWorkHour,
+    onEdit: jest.fn(),
+    onDelete: jest.fn(),
+    isDeleting: false,
+  };
+
+  it("should render work hour details correctly", () => {
+    render(<WorkHourCard {...defaultProps} />);
+
+    // Check hours and date
     expect(screen.getByText("08:30")).toBeInTheDocument();
+    expect(screen.getByText("on 01/01/2024")).toBeInTheDocument();
 
-    // Check if client company is displayed (highlighted)
-    expect(screen.getByText("Acme Corp")).toBeInTheDocument();
+    // Check client and project info
+    expect(screen.getByText("Test Company")).toBeInTheDocument();
+    expect(screen.getByText("Test Project")).toBeInTheDocument();
 
-    // Check if description is displayed
-    expect(screen.getByText('"Frontend development work"')).toBeInTheDocument();
+    // Check description
+    expect(screen.getByText('"Test description"')).toBeInTheDocument();
 
-    // Check if project is displayed
-    expect(screen.getByText("Website Redesign")).toBeInTheDocument();
-
-    // Check if worked badge is displayed
-    expect(screen.getByText("over 1 year")).toBeInTheDocument();
+    // Check created date
+    expect(screen.getByText("created 01/01/2024")).toBeInTheDocument();
   });
 
-  test("renders work hour without project correctly", () => {
-    render(
-      <WorkHourCard
-        workHour={mockWorkHourWithoutProject}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        isDeleting={false}
-      />
-    );
-
-    // Check if hours are displayed
-    expect(screen.getByText("04:00")).toBeInTheDocument();
-
-    // Check if client information is displayed (only once in new layout)
-    expect(screen.getByText("Tech Solutions")).toBeInTheDocument();
-
-    // Project section should not be rendered when no project exists
-    expect(screen.queryByText("Website Redesign")).not.toBeInTheDocument();
-  });
-
-  test("has correct visual styling with green theme", () => {
-    render(
-      <WorkHourCard
-        workHour={mockWorkHour}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        isDeleting={false}
-      />
-    );
-
-    // Check for green accent bar and icon styling
-    const accentBar = document.querySelector(".bg-green-500");
-
-    expect(accentBar).toBeInTheDocument();
-
-    // Check for hover effects
-    const cardGroup = document.querySelector(".group");
-
-    expect(cardGroup).toHaveClass("hover:scale-[1.02]");
-  });
-
-  test("calls onEdit when edit button is clicked", () => {
-    render(
-      <WorkHourCard
-        workHour={mockWorkHour}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        isDeleting={false}
-      />
-    );
-
-    const editButton = screen.getByRole("button", { name: /edit/i });
-
-    fireEvent.click(editButton);
-
-    expect(mockOnEdit).toHaveBeenCalledWith("work-hour-1");
-  });
-
-  test("displays all action buttons", () => {
-    render(
-      <WorkHourCard
-        workHour={mockWorkHour}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        isDeleting={false}
-      />
-    );
-
-    expect(screen.getByRole("button", { name: /edit/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /delete/i })).toBeInTheDocument();
-  });
-
-  test("disables delete button when deleting", () => {
-    render(
-      <WorkHourCard
-        workHour={mockWorkHour}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        isDeleting={true}
-      />
-    );
-
-    const deleteButton = screen.getByRole("button", { name: /deleting.../i });
-
-    expect(deleteButton).toBeDisabled();
-  });
-
-  test("shows correct information in new integrated layout", () => {
-    render(
-      <WorkHourCard
-        workHour={mockWorkHour}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        isDeleting={false}
-      />
-    );
-
-    // Check company name is highlighted
-    expect(screen.getByText("Acme Corp")).toBeInTheDocument();
-
-    // Check project name is displayed with icon
-    expect(screen.getByText("Website Redesign")).toBeInTheDocument();
-
-    // Check worked time badge is present
-    expect(screen.getByText("over 1 year")).toBeInTheDocument();
-  });
-
-  test("handles work hour without description", () => {
-    const workHourWithoutDescription = {
-      ...mockWorkHour,
-      description: "",
+  it("should render without client information", () => {
+    const props: WorkHourCardProps = {
+      ...defaultProps,
+      workHour: {
+        ...mockWorkHour,
+        client: undefined,
+      },
     };
 
-    render(
-      <WorkHourCard
-        workHour={workHourWithoutDescription}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        isDeleting={false}
-      />
-    );
+    render(<WorkHourCard {...props} />);
 
-    // Description section should not be rendered when empty
-    expect(screen.queryByText('""')).not.toBeInTheDocument();
+    expect(screen.getByText("noClient")).toBeInTheDocument();
+  });
+
+  it("should render without project information", () => {
+    const props: WorkHourCardProps = {
+      ...defaultProps,
+      workHour: {
+        ...mockWorkHour,
+        project: undefined,
+      },
+    };
+
+    render(<WorkHourCard {...props} />);
+
+    expect(screen.queryByText("Test Project")).not.toBeInTheDocument();
+  });
+
+  it("should render without description", () => {
+    const props: WorkHourCardProps = {
+      ...defaultProps,
+      workHour: {
+        ...mockWorkHour,
+        description: undefined,
+      },
+    };
+
+    render(<WorkHourCard {...props} />);
+
+    expect(screen.queryByText('"Test description"')).not.toBeInTheDocument();
+  });
+
+  it("should handle edit button click", () => {
+    const onEdit = jest.fn();
+    render(<WorkHourCard {...defaultProps} onEdit={onEdit} />);
+
+    const editButton = screen.getByText("edit");
+    userEvent.click(editButton);
+
+    expect(onEdit).toHaveBeenCalledWith("1");
+  });
+
+  it("should handle delete button click", () => {
+    const onDelete = jest.fn();
+    render(<WorkHourCard {...defaultProps} onDelete={onDelete} />);
+
+    // Open delete dialog
+    const deleteButton = screen.getByText("delete");
+    userEvent.click(deleteButton);
+
+    // Check dialog content
+    expect(screen.getByText("deleteWorkHourTitle")).toBeInTheDocument();
+    expect(screen.getByText("deleteWorkHourDescription")).toBeInTheDocument();
+
+    // Confirm deletion
+    const confirmButton = screen.getByText("deleteEntry");
+    userEvent.click(confirmButton);
+
+    expect(onDelete).toHaveBeenCalledWith("1");
+  });
+
+  it("should handle delete cancellation", () => {
+    const onDelete = jest.fn();
+    render(<WorkHourCard {...defaultProps} onDelete={onDelete} />);
+
+    // Open delete dialog
+    const deleteButton = screen.getByText("delete");
+    userEvent.click(deleteButton);
+
+    // Cancel deletion
+    const cancelButton = screen.getByText("cancel");
+    userEvent.click(cancelButton);
+
+    expect(onDelete).not.toHaveBeenCalled();
+  });
+
+  it("should show deleting state", () => {
+    render(<WorkHourCard {...defaultProps} isDeleting={true} />);
+
+    expect(screen.getByText("deleting")).toBeInTheDocument();
+    expect(screen.getByText("deleting")).toBeDisabled();
+  });
+
+  it("should format hours correctly", () => {
+    const testCases = [
+      { hours: 8, expected: "08:00" },
+      { hours: 8.5, expected: "08:30" },
+      { hours: 8.25, expected: "08:15" },
+      { hours: 8.75, expected: "08:45" },
+      { hours: 0.5, expected: "00:30" },
+    ];
+
+    testCases.forEach(({ hours, expected }) => {
+      const props: WorkHourCardProps = {
+        ...defaultProps,
+        workHour: {
+          ...mockWorkHour,
+          hours,
+        },
+      };
+
+      const { rerender } = render(<WorkHourCard {...props} />);
+      expect(screen.getByText(expected)).toBeInTheDocument();
+      rerender(<></>);
+    });
+  });
+
+  it("should display client name with company when both are available", () => {
+    render(<WorkHourCard {...defaultProps} />);
+
+    const deleteButton = screen.getByText("delete");
+    userEvent.click(deleteButton);
+
+    expect(screen.getByText("deleteWorkHourDescription")).toBeInTheDocument();
+    expect(screen.getByText(/Test Company \(John Doe\)/)).toBeInTheDocument();
+  });
+
+  it("should apply custom className", () => {
+    render(<WorkHourCard {...defaultProps} className="custom-class" />);
+
+    const card = screen.getByRole("article");
+    expect(card).toHaveClass("custom-class");
   });
 });

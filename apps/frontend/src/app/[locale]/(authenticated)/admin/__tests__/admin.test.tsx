@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+import { useSession } from "next-auth/react";
+
 import AdminPage from "../page";
 
 // Mock dependencies

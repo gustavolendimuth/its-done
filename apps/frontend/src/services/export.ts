@@ -1,10 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
+
+// Tipos específicos para filtros de exportação
+type ExportFilters = {
+  startDate?: string;
+  endDate?: string;
+  clientIds?: string[];
+  userIds?: string[];
+  status?: string[];
+  includeArchived?: boolean;
+};
 
 export interface ExportOptions {
   type: "client" | "invoice" | "time" | "user";
   format: "pdf" | "excel" | "csv";
-  filters?: Record<string, any>;
+  filters?: ExportFilters;
 }
 
 export const useExport = () => {

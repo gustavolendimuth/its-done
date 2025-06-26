@@ -1,9 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Folder,
   Building2,
@@ -14,9 +10,10 @@ import {
   Trash2,
   ExternalLink,
 } from "lucide-react";
-import { cn, formatTimeAgo } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +25,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { cn, formatTimeAgo } from "@/lib/utils";
 
 interface ProjectCardProps {
   project: {

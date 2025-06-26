@@ -1,31 +1,58 @@
-import React from "react";
+import { jest } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { vi } from "vitest";
+import { Settings, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import React from "react";
+
 import { PageHeader } from "../page-header";
-import { Settings, Plus } from "lucide-react";
 import { Topbar } from "../topbar";
 
+import type { NextRouter } from "next/router";
+import type { Session } from "next-auth";
+
 // Mock next/navigation
-vi.mock("next/navigation", () => ({
-  useRouter: vi.fn(() => ({
-    push: vi.fn(),
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
   })),
 }));
 
 // Mock next-auth/react
-vi.mock("next-auth/react", () => ({
-  useSession: vi.fn(),
-  signOut: vi.fn(),
+jest.mock("next-auth/react", () => ({
+  useSession: jest.fn(),
+  signOut: jest.fn(),
 }));
 
 // Mock next-intl
-vi.mock("next-intl", () => ({
+jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
 describe("PageHeader", () => {
+  const mockSession: Session = {
+    user: {
+      id: "1",
+      name: "John Doe",
+      email: "john@example.com",
+      role: "USER",
+    },
+    expires: new Date().toISOString(),
+  };
+
+  const mockRouter: Pick<NextRouter, "push"> = {
+    push: jest.fn(),
+  };
+
+  beforeEach(() => {
+    (useSession as jest.Mock).mockReturnValue({
+      data: mockSession,
+      status: "authenticated",
+      update: jest.fn(),
+    });
+    (useRouter as jest.Mock).mockReturnValue(mockRouter);
+  });
+
   it("renders title and description", () => {
     render(<PageHeader title="Test Title" subtitle="Test description" />);
 
@@ -61,7 +88,7 @@ describe("PageHeader", () => {
   });
 
   it("renders action buttons with icons", () => {
-    const mockAction = vi.fn();
+    const mockAction = jest.fn();
 
     render(
       <PageHeader
@@ -119,7 +146,7 @@ describe("PageHeader", () => {
 
 describe("Topbar", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it("should render add hours shortcut button when authenticated", () => {
@@ -154,7 +181,7 @@ describe("Topbar", () => {
       status: "authenticated",
     });
 
-    const mockRouter = { push: vi.fn() };
+    const mockRouter = { push: jest.fn() };
 
     (useRouter as any).mockReturnValue(mockRouter);
 

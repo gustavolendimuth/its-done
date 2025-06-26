@@ -1,9 +1,8 @@
-import NextAuth from "next-auth";
-import { AuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { getApiUrl } from "@/lib/utils";
-import { normalizeUrl } from "@/lib/utils";
+import GoogleProvider from "next-auth/providers/google";
+
+import { getApiUrl , normalizeUrl } from "@/lib/utils";
 
 const authOptions: AuthOptions = {
   providers: [
@@ -181,11 +180,13 @@ const authOptions: AuthOptions = {
       // Se a URL for relativa ao baseUrl, redireciona para work-hours
       if (url.startsWith(baseUrl)) {
         console.log("Redirecting to work-hours");
+
         return `${baseUrl}/work-hours`;
       }
 
       // Se for uma URL externa, mantém o redirecionamento original
       console.log("External URL, keeping original redirect");
+
       return url;
     },
   },

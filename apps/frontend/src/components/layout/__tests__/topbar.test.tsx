@@ -1,34 +1,59 @@
+import { jest } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { vi } from "vitest";
 import { useSession } from "next-auth/react";
+
 import { Topbar } from "../topbar";
 
+import type { Session } from "next-auth";
+
 // Mock next/navigation
-vi.mock("next/navigation", () => ({
-  useRouter: vi.fn(() => ({
-    push: vi.fn(),
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
   })),
 }));
 
 // Mock next-auth/react
-vi.mock("next-auth/react", () => ({
-  useSession: vi.fn(),
-  signOut: vi.fn(),
+jest.mock("next-auth/react", () => ({
+  useSession: jest.fn(),
+  signOut: jest.fn(),
 }));
 
 // Mock next-intl
-vi.mock("next-intl", () => ({
+jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
 // Mock clients service
-vi.mock("@/services/clients", () => ({
-  useClients: vi.fn(() => ({ data: [] })),
+jest.mock("@/services/clients", () => ({
+  useClients: jest.fn(() => ({ data: [] })),
 }));
 
 describe("Topbar", () => {
+  const mockSession: Session = {
+    user: {
+      id: "1",
+      name: "John Doe",
+      email: "john@example.com",
+      role: "USER",
+    },
+    expires: new Date().toISOString(),
+  };
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+  });
+
+  it("should render user name when session is authenticated", () => {
+    (useSession as jest.Mock).mockReturnValue({
+      data: mockSession,
+      status: "authenticated",
+      update: jest.fn(),
+    });
+
+    render(<Topbar />);
+
+    expect(screen.getByText("John Doe")).toBeInTheDocument();
   });
 
   it("should render add hours button when authenticated", () => {

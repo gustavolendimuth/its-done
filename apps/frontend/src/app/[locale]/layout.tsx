@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { notFound } from "next/navigation";
+
 import { locales } from "@/i18n/request";
 import { Providers } from "@/providers/providers";
+
+import type { Metadata } from "next";
 import "../globals.css";
 import "react-day-picker/dist/style.css";
 
@@ -25,7 +27,7 @@ export default async function LocaleLayout({
   params: { locale: string };
 }) {
   // Validate that the incoming `locale` parameter is valid
-  if (!locales.includes(locale as any)) notFound();
+  if (!locales.includes(locale as (typeof locales)[number])) notFound();
 
   const messages = await getMessages();
 

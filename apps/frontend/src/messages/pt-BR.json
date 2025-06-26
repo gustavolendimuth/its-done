@@ -13,6 +13,7 @@
     "description": "Controle de tempo profissional para contratados e equipes. Gerencie projetos, registre horas e seja pago pelo seu trabalho.",
     "getStarted": "Começar",
     "login": "Entrar",
+    "openMenu": "Abrir menu",
     "features": {
       "timeTracking": {
         "title": "Controle de Tempo",

@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { BarChart3 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState, useMemo } from "react";
+
+import { Overview, OverviewData } from "@/components/dashboard/overview";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
-import { useTimeEntries } from "@/services/time-entries";
-import { useInvoices } from "@/services/invoices";
 import { useClients } from "@/services/clients";
+import { useInvoices } from "@/services/invoices";
+import { useTimeEntries } from "@/services/time-entries";
 import { useWorkHoursStats } from "@/services/work-hours-stats";
-import { Overview, OverviewData } from "@/components/dashboard/overview";
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");

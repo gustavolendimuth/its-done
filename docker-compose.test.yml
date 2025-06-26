@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=test
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=your-test-secret
+      - GOOGLE_CLIENT_ID=test-client-id
+      - GOOGLE_CLIENT_SECRET=test-client-secret
+      - BACKEND_URL=http://backend:3002
+    volumes:
+      - ./apps/frontend:/app/apps/frontend
+      - /app/apps/frontend/node_modules
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile.dev
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/its_done_test
+    volumes:
+      - ./apps/backend:/app/apps/backend
+      - /app/apps/backend/node_modules
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=its_done_test
+    ports:
+      - "5432:5432"
+
+  cypress:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile.cypress
+    environment:
+      - CYPRESS_baseUrl=http://frontend:3000
+      - TEST_USER_EMAIL=test@example.com
+      - TEST_USER_PASSWORD=test123
+    depends_on:
+      - frontend
+      - backend
+      - db
+    volumes:
+      - ./apps/frontend:/app/apps/frontend
+      - /app/apps/frontend/node_modules
+      - ./apps/frontend/cypress/screenshots:/app/apps/frontend/cypress/screenshots
+      - ./apps/frontend/cypress/videos:/app/apps/frontend/cypress/videos

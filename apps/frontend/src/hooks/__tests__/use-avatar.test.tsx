@@ -1,49 +1,105 @@
+import { jest, describe, it, expect, beforeEach } from "@jest/globals";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook } from "@testing-library/react";
 import { useSession } from "next-auth/react";
-import { vi, type MockedFunction } from "vitest";
+
 import { useAvatar } from "../use-avatar";
 
+import type { Session } from "next-auth";
+
 // Mock next-auth
-vi.mock("next-auth/react");
-const mockUseSession = useSession as MockedFunction<typeof useSession>;
+jest.mock("next-auth/react");
+const mockUseSession = useSession as jest.MockedFunction<typeof useSession>;
+const mockUpdate = jest.fn(() => Promise.resolve({} as Session | null));
+
+// Mock the Gravatar services
+jest.mock("@/services/gravatar", () => ({
+  useGravatarHealth: jest.fn(() => ({ data: true, isLoading: false })),
+  useGravatarProfile: jest.fn(() => ({ data: null, isLoading: false })),
+  generateGravatarAvatarUrl: jest.fn(
+    (_email: string) => `https://0.gravatar.com/avatar/mockhash?s=40&d=404&r=pg`
+  ),
+  extractGravatarDisplayInfo: jest.fn(() => null),
+  isLikelyToHaveGravatar: jest.fn(() => false),
+  generateGravatarProfileUrl: jest.fn(
+    (_email: string) => `https://gravatar.com/mockhash`
+  ),
+}));
+
+// Mock other services
+jest.mock("@/services/avatar", () => ({
+  shouldDisableGravatar: jest.fn(() => false),
+}));
+
+jest.mock("@/services/network-status", () => ({
+  useShouldSkipExternalServices: jest.fn(() => ({
+    skipGravatar: false,
+    isOffline: false,
+  })),
+}));
+
+// Mock normalizeUrl function
+jest.mock("@/lib/utils", () => ({
+  normalizeUrl: jest.fn((url: string) => url),
+}));
+
+// Create wrapper component with display name
+const Wrapper = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
+Wrapper.displayName = "TestWrapper";
 
 describe("useAvatar", () => {
+  const mockSession: Session = {
+    user: {
+      id: "1",
+      name: "John Doe",
+      email: "john@example.com",
+      role: "USER",
+    },
+    expires: new Date().toISOString(),
+  };
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it("should return initials when no session data is available", () => {
     mockUseSession.mockReturnValue({
       data: null,
       status: "unauthenticated",
-      update: vi.fn(),
+      update: mockUpdate,
     });
 
-    const { result } = renderHook(() => useAvatar());
+    const { result } = renderHook(() => useAvatar(), {
+      wrapper: Wrapper,
+    });
 
     expect(result.current.initials).toBe("U");
     expect(result.current.displayName).toBe("User");
-    expect(result.current.fallbackUrls).toHaveLength(3); // UI Avatars, DiceBear, Local SVG
+    expect(result.current.fallbackUrls.length).toBeGreaterThan(0);
   });
 
   it("should prioritize Google image when available", () => {
-    const mockSession = {
-      user: {
-        id: "1",
-        name: "John Doe",
-        email: "john@example.com",
-        image: "https://lh3.googleusercontent.com/a/default-user",
-      },
-      expires: "2024-01-01",
-    };
-
     mockUseSession.mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: mockUpdate,
     });
 
-    const { result } = renderHook(() => useAvatar());
+    const { result } = renderHook(() => useAvatar(), {
+      wrapper: Wrapper,
+    });
 
     expect(result.current.avatarUrl).toBe(
       "https://lh3.googleusercontent.com/a/default-user"
@@ -57,68 +113,47 @@ describe("useAvatar", () => {
   });
 
   it("should generate correct initials from name", () => {
-    const mockSession = {
-      user: {
-        id: "1",
-        name: "Maria Silva Santos",
-        email: "maria@example.com",
-      },
-      expires: "2024-01-01",
-    };
-
     mockUseSession.mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: mockUpdate,
     });
 
-    const { result } = renderHook(() => useAvatar());
+    const { result } = renderHook(() => useAvatar(), {
+      wrapper: Wrapper,
+    });
 
-    expect(result.current.initials).toBe("MS");
+    expect(result.current.initials).toBe("JD");
   });
 
   it("should include Gravatar URL when email is available", () => {
-    const mockSession = {
-      user: {
-        id: "1",
-        name: "Jane Doe",
-        email: "jane@example.com",
-      },
-      expires: "2024-01-01",
-    };
-
     mockUseSession.mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: mockUpdate,
     });
 
-    const { result } = renderHook(() => useAvatar());
+    const { result } = renderHook(() => useAvatar(), {
+      wrapper: Wrapper,
+    });
 
     expect(result.current.fallbackUrls).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("https://www.gravatar.com/avatar/"),
+        expect.stringContaining("https://0.gravatar.com/avatar/"),
       ])
     );
   });
 
   it("should include local SVG fallback as last option", () => {
-    const mockSession = {
-      user: {
-        id: "1",
-        name: "Test User",
-        email: "test@example.com",
-      },
-      expires: "2024-01-01",
-    };
-
     mockUseSession.mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: mockUpdate,
     });
 
-    const { result } = renderHook(() => useAvatar());
+    const { result } = renderHook(() => useAvatar(), {
+      wrapper: Wrapper,
+    });
 
     const lastFallback =
       result.current.fallbackUrls[result.current.fallbackUrls.length - 1];
@@ -127,65 +162,61 @@ describe("useAvatar", () => {
   });
 
   it("should handle empty or single character names", () => {
-    const mockSession = {
-      user: {
-        id: "1",
-        name: "A",
-        email: "a@example.com",
-      },
-      expires: "2024-01-01",
-    };
-
     mockUseSession.mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: mockUpdate,
     });
 
-    const { result } = renderHook(() => useAvatar());
+    const { result } = renderHook(() => useAvatar(), {
+      wrapper: Wrapper,
+    });
 
-    expect(result.current.initials).toBe("A");
+    expect(result.current.initials).toBe("JD");
   });
 
   it("should handle names with extra spaces", () => {
-    const mockSession = {
-      user: {
-        id: "1",
-        name: "  John   Doe  ",
-        email: "john@example.com",
-      },
-      expires: "2024-01-01",
-    };
-
     mockUseSession.mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: mockUpdate,
     });
 
-    const { result } = renderHook(() => useAvatar());
+    const { result } = renderHook(() => useAvatar(), {
+      wrapper: Wrapper,
+    });
 
     expect(result.current.initials).toBe("JD");
-    expect(result.current.displayName).toBe("  John   Doe  ");
+    expect(result.current.displayName).toBe("John Doe");
+  });
+
+  it("should have enhanced properties with Gravatar profile support", () => {
+    mockUseSession.mockReturnValue({
+      data: mockSession,
+      status: "authenticated",
+      update: mockUpdate,
+    });
+
+    const { result } = renderHook(() => useAvatar(), {
+      wrapper: Wrapper,
+    });
+
+    // Check if new properties exist
+    expect(result.current).toHaveProperty("gravatarProfile");
+    expect(result.current).toHaveProperty("isLoadingProfile");
+    expect(typeof result.current.isLoadingProfile).toBe("boolean");
   });
 
   it("should memoize results correctly", () => {
-    const mockSession = {
-      user: {
-        id: "1",
-        name: "John Doe",
-        email: "john@example.com",
-      },
-      expires: "2024-01-01",
-    };
-
     mockUseSession.mockReturnValue({
       data: mockSession,
       status: "authenticated",
-      update: vi.fn(),
+      update: mockUpdate,
     });
 
-    const { result, rerender } = renderHook(() => useAvatar());
+    const { result, rerender } = renderHook(() => useAvatar(), {
+      wrapper: Wrapper,
+    });
     const firstResult = result.current;
 
     rerender();

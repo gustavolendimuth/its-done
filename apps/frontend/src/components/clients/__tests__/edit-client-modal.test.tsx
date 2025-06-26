@@ -1,8 +1,10 @@
-import { render, screen } from "@testing-library/react";
-import { EditClientModal } from "../edit-client-modal";
-import { Client } from "@/types/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+
+import { Client } from "@/types/client";
+
+import { EditClientModal } from "../edit-client-modal";
 
 // Mock das traduções
 const messages = {

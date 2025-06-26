@@ -1,16 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { InfoCard } from "@/components/ui/info-card";
-import { PageContainer } from "@/components/layout/page-container";
-import { PageHeader } from "@/components/layout/page-header";
-import { useSystemStats } from "@/services/admin";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Users,
   Briefcase,
@@ -19,8 +8,22 @@ import {
   DollarSign,
   Shield,
 } from "lucide-react";
-import AdminUsers from "./users";
+import { redirect } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoCard } from "@/components/ui/info-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSystemStats } from "@/services/admin";
+
+
 import AdminActivity from "./activity";
+import AdminUsers from "./users";
 
 export default function AdminPage() {
   const t = useTranslations("admin");

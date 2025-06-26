@@ -1,13 +1,15 @@
 "use client";
 
+import { Users, Clock, FileText, TrendingUp, Star, MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
+
 import {
   BigStatsDisplay,
   BigStatItem,
 } from "@/components/ui/big-stats-display";
-import { Users, Clock, FileText, TrendingUp, Star, MapPin } from "lucide-react";
-import { useClientStats } from "@/services/client-stats";
 import { formatHoursToHHMM } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useClientStats } from "@/services/client-stats";
+
 
 interface ClientsBigStatsProps {
   className?: string;

@@ -1,6 +1,8 @@
 "use client";
 
+import { Search } from "lucide-react";
 import { useState } from "react";
+
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -9,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Invoice } from "@/services/invoices";
 
 export type SortBy = "date" | "amount" | "status" | "hours";
 export type FilterStatus = "ALL" | "PAID" | "PENDING" | "CANCELED";
@@ -95,14 +97,14 @@ export function InvoiceSearchFilters({
         <span>
           Showing {totalResults} of {totalInvoices} invoices
         </span>
-        {searchTerm && <span>Search: "{searchTerm}"</span>}
+        {searchTerm && <span>Search: &quot;{searchTerm}&quot;</span>}
       </div>
     </div>
   );
 }
 
 // Hook para usar os filtros com lógica de filtragem
-export function useInvoiceFilters(invoices: any[]) {
+export function useInvoiceFilters(invoices: Invoice[]) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<SortBy>("date");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("ALL");
@@ -148,12 +150,12 @@ export function useInvoiceFilters(invoices: any[]) {
         case "hours":
           const aHours =
             a.invoiceWorkHours?.reduce(
-              (sum: number, iwh: any) => sum + (iwh.workHour?.hours || 0),
+              (sum: number, iwh) => sum + (iwh.workHour?.hours || 0),
               0
             ) || 0;
           const bHours =
             b.invoiceWorkHours?.reduce(
-              (sum: number, iwh: any) => sum + (iwh.workHour?.hours || 0),
+              (sum: number, iwh) => sum + (iwh.workHour?.hours || 0),
               0
             ) || 0;
 

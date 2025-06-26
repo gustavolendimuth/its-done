@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { invoicesService } from "@/services/invoices";
 import { subMonths, isAfter, isBefore } from "date-fns";
+import { useParams } from "next/navigation";
+import { useMemo } from "react";
+
 import { Overview, OverviewData } from "@/components/dashboard/overview";
+import { invoicesService } from "@/services/invoices";
 
 export default function ClientDetailPage() {
   const { clientId } = useParams();

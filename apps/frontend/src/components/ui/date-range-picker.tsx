@@ -1,8 +1,9 @@
-import React from "react";
+import { format } from "date-fns";
+import * as React from "react";
 import DatePicker from "react-datepicker";
+
 import "react-datepicker/dist/react-datepicker.css";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
 
 interface DateRange {
   startDate: Date | null;

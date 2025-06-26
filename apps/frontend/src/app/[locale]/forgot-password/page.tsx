@@ -1,13 +1,15 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Mail, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useTranslations } from "next-intl";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -15,9 +17,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useForgotPassword } from "@/services/auth";
 
 export default function ForgotPasswordPage() {
@@ -87,6 +88,17 @@ export default function ForgotPasswordPage() {
     }
   };
 
+  const getErrorMessage = (error: unknown): string => {
+    if (error && typeof error === "object" && "response" in error) {
+      const response = (error as { response?: { data?: { message?: string } } })
+        .response;
+
+      return response?.data?.message || tCommon("errorOccurred");
+    }
+
+    return tCommon("errorOccurred");
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
@@ -121,8 +133,7 @@ export default function ForgotPasswordPage() {
                 {forgotPasswordMutation.error && (
                   <Alert variant="destructive">
                     <AlertDescription>
-                      {(forgotPasswordMutation.error as any)?.response?.data
-                        ?.message || tCommon("errorOccurred")}
+                      {getErrorMessage(forgotPasswordMutation.error)}
                     </AlertDescription>
                   </Alert>
                 )}

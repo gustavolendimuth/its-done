@@ -1,9 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, TrendingUp } from "lucide-react";
-import { useWorkHoursStats } from "@/services/work-hours-stats";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
+import { useWorkHoursStats } from "@/services/work-hours-stats";
 
 interface TotalHoursSummaryProps {
   className?: string;

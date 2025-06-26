@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
@@ -155,8 +151,6 @@ export class AddressesService {
   }
 
   async remove(userId: string, id: string) {
-    const address = await this.findOne(userId, id);
-
     await this.prisma.address.delete({
       where: { id },
     });

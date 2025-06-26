@@ -10,7 +10,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const locale = await requestLocale;
 
   // Validar se o locale fornecido é válido
-  if (!locales.includes(locale as any)) notFound();
+  if (!locale || !locales.includes(locale as Locale)) notFound();
 
   return {
     locale,

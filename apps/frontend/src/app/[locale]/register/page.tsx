@@ -1,15 +1,17 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,9 +19,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, CheckCircle2 } from "lucide-react";
-import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
 
 export default function RegisterPage() {
   const t = useTranslations("auth.register");
@@ -96,8 +98,11 @@ export default function RegisterPage() {
 
       router.push("/work-hours");
       router.refresh();
-    } catch (error: any) {
-      setError(error.message || tCommon("errorOccurred"));
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : tCommon("errorOccurred");
+
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

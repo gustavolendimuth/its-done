@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+
 import { Alert, AlertTitle, AlertDescription } from "../alert";
 
 describe("Alert Component", () => {

@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  BigStatsDisplay,
-  BigStatItem,
-} from "@/components/ui/big-stats-display";
+import { TimeEntry } from "@its-done/types";
 import {
   Clock,
   Users,
@@ -12,9 +9,14 @@ import {
   Calendar,
   TrendingUp,
 } from "lucide-react";
-import { useWorkHoursStats } from "@/services/work-hours-stats";
-import { formatHoursToHHMM } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+
+import {
+  BigStatsDisplay,
+  BigStatItem,
+} from "@/components/ui/big-stats-display";
+import { formatHoursToHHMM } from "@/lib/utils";
+import { useWorkHoursStats } from "@/services/work-hours-stats";
 
 interface WorkHoursBigStatsProps {
   dateRange?: {
@@ -24,7 +26,7 @@ interface WorkHoursBigStatsProps {
   clientId?: string;
   hourlyRate?: number;
   className?: string;
-  workHours?: any[];
+  workHours?: TimeEntry[];
   isRefetching?: boolean;
 }
 

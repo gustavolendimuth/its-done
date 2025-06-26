@@ -1,7 +1,9 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
-import { InfoCard } from "../info-card";
 import { Clock } from "lucide-react";
+import React from "react";
+
+import { InfoCard } from "../info-card";
+
 
 describe("InfoCard", () => {
   const defaultProps = {

@@ -1,45 +1,7 @@
+import { TimeEntry, CreateTimeEntryDto } from "@its-done/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
-
-export interface TimeEntry {
-  id: string;
-  date: string;
-  description?: string;
-  hours: number;
-  clientId: string;
-  projectId?: string;
-  client?: {
-    id: string;
-    name?: string;
-    company: string;
-    email: string;
-  };
-  project?: {
-    id: string;
-    name: string;
-    description?: string;
-  };
-  invoiceWorkHours?: {
-    invoice: {
-      id: string;
-      status: string;
-      number?: string;
-      createdAt: string;
-    };
-  }[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateTimeEntryDto {
-  date: string;
-  description?: string;
-  hours: number;
-  clientId: string;
-  projectId?: string;
-}
-
-export interface UpdateTimeEntryDto extends Partial<CreateTimeEntryDto> {}
 
 export const useTimeEntries = (params?: {
   from?: string;
@@ -127,7 +89,7 @@ export const useUpdateTimeEntry = () => {
       data,
     }: {
       id: string;
-      data: UpdateTimeEntryDto;
+      data: Partial<CreateTimeEntryDto>;
     }) => {
       const response = await api.patch<TimeEntry>(`/work-hours/${id}`, data);
 

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useCreateAddress, useClientAddresses } from "@/services/addresses";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -13,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useCreateAddress, useClientAddresses } from "@/services/addresses";
 
 interface AddressFormData {
   street: string;
@@ -160,13 +161,20 @@ export function AddressForm({ clientId, onSuccess }: AddressFormProps) {
         });
         onSuccess?.();
       },
-      onError: (error: any) => {
+      onError: (error: unknown) => {
         console.error("Error creating address:", error);
-        console.error("Error details:", error.response?.data);
-        console.error("Error message:", error.message);
-        if (error.response) {
-          console.error("Response status:", error.response.status);
-          console.error("Response headers:", error.response.headers);
+        if (error && typeof error === "object" && "response" in error) {
+          const axiosError = error as {
+            response?: { data?: unknown; status?: number; headers?: unknown };
+          };
+
+          console.error("Error details:", axiosError.response?.data);
+          if (axiosError.response?.status) {
+            console.error("Response status:", axiosError.response.status);
+          }
+          if (axiosError.response?.headers) {
+            console.error("Response headers:", axiosError.response.headers);
+          }
         }
       },
     });
@@ -334,9 +342,22 @@ export function AddressForm({ clientId, onSuccess }: AddressFormProps) {
       {createAddressMutation.isError && (
         <Alert variant="destructive">
           <AlertDescription>
-            {(createAddressMutation.error as any)?.response?.data?.message ||
-              createAddressMutation.error?.message ||
-              "Error creating address. Please try again."}
+            {(() => {
+              const error = createAddressMutation.error;
+
+              if (error && typeof error === "object" && "response" in error) {
+                const response = (
+                  error as { response?: { data?: { message?: string } } }
+                ).response;
+
+                return response?.data?.message;
+              }
+              if (error && typeof error === "object" && "message" in error) {
+                return (error as { message: string }).message;
+              }
+
+              return "Error creating address. Please try again.";
+            })()}
           </AlertDescription>
         </Alert>
       )}

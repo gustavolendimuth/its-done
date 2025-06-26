@@ -1,5 +1,6 @@
+import { jest } from "@jest/globals";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { vi } from "vitest";
+
 import { UserAvatar } from "../user-avatar";
 
 // Mock Image loading behavior
@@ -10,11 +11,11 @@ const mockImage = {
 };
 
 // Mock Image constructor
-global.Image = vi.fn().mockImplementation(() => mockImage);
+global.Image = jest.fn().mockImplementation(() => mockImage);
 
 describe("UserAvatar", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // Reset the mock image properties
     mockImage.onload = null;
     mockImage.onerror = null;

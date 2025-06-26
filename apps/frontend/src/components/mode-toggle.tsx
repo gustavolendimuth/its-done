@@ -1,8 +1,8 @@
 "use client";
 
 import { Moon, Sun, LucideIcon } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import { useSafeHydration } from "@/hooks/use-safe-hydration";
+import { cn } from "@/lib/utils";
 
 // Component to handle icon rendering without hydration issues
 function SafeIcon({

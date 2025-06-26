@@ -3,17 +3,38 @@
  * estão sendo exibidas corretamente na interface do usuário
  */
 
-import { render, screen } from "@testing-library/react";
-import { NextIntlClientProvider } from "next-intl";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { FormModal } from "@/components/ui/form-modal";
+import { render, screen } from "@testing-library/react";
 import { Users } from "lucide-react";
+import { NextIntlClientProvider, useTranslations } from "next-intl";
+import React, { ReactNode } from "react";
+
+import { FormModal } from "@/components/ui/form-modal";
 
 // Importar mensagens reais do sistema
 import enMessages from "@/messages/en.json";
 import ptMessages from "@/messages/pt-BR.json";
 
-const createTestWrapper = (locale: string, messages: any) => {
+// Função helper para acessar valores aninhados com segurança
+function getNestedValue(
+  obj: Record<string, unknown>,
+  path: string
+): string | undefined {
+  const keys = path.split(".");
+  let current: unknown = obj;
+
+  for (const key of keys) {
+    if (current && typeof current === "object" && key in current) {
+      current = (current as Record<string, unknown>)[key];
+    } else {
+      return undefined;
+    }
+  }
+
+  return typeof current === "string" ? current : undefined;
+}
+
+const createTestWrapper = (locale: string, messages: unknown) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -30,6 +51,21 @@ const createTestWrapper = (locale: string, messages: any) => {
   );
 };
 
+const TestComponent = ({ children }: { children: ReactNode }) => {
+  const t = useTranslations("clients");
+  return (
+    <FormModal
+      title={t("editClient")}
+      description={t("editClientFormSubtitle")}
+      icon={null}
+    >
+      {children}
+    </FormModal>
+  );
+};
+
+TestComponent.displayName = "TestComponent";
+
 const TestFormModal = ({ subtitle }: { subtitle: string }) => (
   <FormModal
     open={true}
@@ -42,6 +78,8 @@ const TestFormModal = ({ subtitle }: { subtitle: string }) => (
   </FormModal>
 );
 
+TestFormModal.displayName = "TestFormModal";
+
 describe("FormModal Translations E2E", () => {
   describe("English Interface", () => {
     const TestWrapper = createTestWrapper("en", enMessages);
@@ -49,7 +87,9 @@ describe("FormModal Translations E2E", () => {
     it("should display specific form subtitle for edit client modal", () => {
       render(
         <TestWrapper>
-          <TestFormModal subtitle={enMessages.clients.editClientFormSubtitle} />
+          <TestComponent>
+            {enMessages.clients.editClientFormSubtitle}
+          </TestComponent>
         </TestWrapper>
       );
 
@@ -68,9 +108,9 @@ describe("FormModal Translations E2E", () => {
     it("should display specific form subtitle for add client modal", () => {
       render(
         <TestWrapper>
-          <TestFormModal
-            subtitle={enMessages.clients.addNewClientFormSubtitle}
-          />
+          <TestComponent>
+            {enMessages.clients.addNewClientFormSubtitle}
+          </TestComponent>
         </TestWrapper>
       );
 
@@ -89,7 +129,9 @@ describe("FormModal Translations E2E", () => {
     it("should display specific form subtitle for work hours", () => {
       render(
         <TestWrapper>
-          <TestFormModal subtitle={enMessages.workHours.addHoursFormSubtitle} />
+          <TestComponent>
+            {enMessages.workHours.addHoursFormSubtitle}
+          </TestComponent>
         </TestWrapper>
       );
 
@@ -101,9 +143,9 @@ describe("FormModal Translations E2E", () => {
     it("should display specific form subtitle for project creation", () => {
       render(
         <TestWrapper>
-          <TestFormModal
-            subtitle={enMessages.projects.addProjectFormSubtitle}
-          />
+          <TestComponent>
+            {enMessages.projects.addProjectFormSubtitle}
+          </TestComponent>
         </TestWrapper>
       );
 
@@ -115,9 +157,9 @@ describe("FormModal Translations E2E", () => {
     it("should display specific form subtitle for invoice creation", () => {
       render(
         <TestWrapper>
-          <TestFormModal
-            subtitle={enMessages.invoices.createInvoiceFormSubtitle}
-          />
+          <TestComponent>
+            {enMessages.invoices.createInvoiceFormSubtitle}
+          </TestComponent>
         </TestWrapper>
       );
 
@@ -133,7 +175,9 @@ describe("FormModal Translations E2E", () => {
     it("should display specific form subtitle for edit client modal in Portuguese", () => {
       render(
         <TestWrapper>
-          <TestFormModal subtitle={ptMessages.clients.editClientFormSubtitle} />
+          <TestComponent>
+            {ptMessages.clients.editClientFormSubtitle}
+          </TestComponent>
         </TestWrapper>
       );
 
@@ -154,9 +198,9 @@ describe("FormModal Translations E2E", () => {
     it("should display specific form subtitle for add client modal in Portuguese", () => {
       render(
         <TestWrapper>
-          <TestFormModal
-            subtitle={ptMessages.clients.addNewClientFormSubtitle}
-          />
+          <TestComponent>
+            {ptMessages.clients.addNewClientFormSubtitle}
+          </TestComponent>
         </TestWrapper>
       );
 
@@ -170,7 +214,9 @@ describe("FormModal Translations E2E", () => {
     it("should display specific form subtitle for work hours in Portuguese", () => {
       render(
         <TestWrapper>
-          <TestFormModal subtitle={ptMessages.workHours.addHoursFormSubtitle} />
+          <TestComponent>
+            {ptMessages.workHours.addHoursFormSubtitle}
+          </TestComponent>
         </TestWrapper>
       );
 
@@ -192,27 +238,26 @@ describe("FormModal Translations E2E", () => {
       ];
 
       requiredKeys.forEach((key) => {
-        const keyParts = key.split(".");
-        const enValue = keyParts.reduce(
-          (obj, part) => obj[part],
-          enMessages as any
+        const enValue = getNestedValue(
+          enMessages as Record<string, unknown>,
+          key
         );
-        const ptValue = keyParts.reduce(
-          (obj, part) => obj[part],
-          ptMessages as any
+        const ptValue = getNestedValue(
+          ptMessages as Record<string, unknown>,
+          key
         );
 
         expect(enValue).toBeDefined();
         expect(ptValue).toBeDefined();
         expect(typeof enValue).toBe("string");
         expect(typeof ptValue).toBe("string");
-        expect(enValue.length).toBeGreaterThan(0);
-        expect(ptValue.length).toBeGreaterThan(0);
+        expect(enValue!.length).toBeGreaterThan(0);
+        expect(ptValue!.length).toBeGreaterThan(0);
       });
     });
 
-    it("should have different texts for form subtitles vs page descriptions", () => {
-      // Verifica inglês
+    it("should ensure form subtitles are different from page descriptions", () => {
+      // Verificar que as traduções de formulário são diferentes das descrições da página
       expect(enMessages.clients.editClientFormSubtitle).not.toBe(
         enMessages.clients.editClientDescription
       );
@@ -220,12 +265,28 @@ describe("FormModal Translations E2E", () => {
         enMessages.clients.addNewClientDescription
       );
 
-      // Verifica português
       expect(ptMessages.clients.editClientFormSubtitle).not.toBe(
         ptMessages.clients.editClientDescription
       );
       expect(ptMessages.clients.addNewClientFormSubtitle).not.toBe(
         ptMessages.clients.addNewClientDescription
+      );
+    });
+
+    it("should verify specific form translations exist", () => {
+      // Verificar chaves específicas de formulários
+      expect(enMessages.clients.editClientFormSubtitle).toBe(
+        "Modify client details and contact information"
+      );
+      expect(enMessages.workHours.addHoursFormSubtitle).toBe(
+        "Record time spent on client projects"
+      );
+
+      expect(ptMessages.clients.editClientFormSubtitle).toBe(
+        "Modifique os detalhes e informações de contato do cliente"
+      );
+      expect(ptMessages.workHours.addHoursFormSubtitle).toBe(
+        "Registre o tempo gasto em projetos de clientes"
       );
     });
   });

@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { InvoiceFileUpload } from "./invoice-file-upload";
+import { toast } from "sonner";
+
 import {
   useUploadInvoiceFile,
   useUpdateInvoice,
   Invoice,
 } from "@/services/invoices";
-import { toast } from "sonner";
+
+import { InvoiceFileUpload } from "./invoice-file-upload";
 
 interface InvoiceUploadModalProps {
   invoice: Invoice;
@@ -64,9 +66,14 @@ export function InvoiceUploadModal({
       onClose();
     } catch (error) {
       console.error("Error uploading file:", error);
-      toast.error(
-        `Failed to upload file: ${(error as any)?.message || "Unknown error"}`
-      );
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : error && typeof error === "object" && "message" in error
+            ? String((error as { message: unknown }).message)
+            : "Unknown error";
+
+      toast.error(`Failed to upload file: ${errorMessage}`);
     } finally {
       setIsUploading(false);
     }

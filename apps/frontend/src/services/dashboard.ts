@@ -1,5 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
+
+// Tipos para valores de descrição das atividades
+type ActivityDescriptionValue = string | number | boolean | null | undefined;
 
 export interface DashboardStats {
   totalHours: number;
@@ -13,7 +17,7 @@ export interface DashboardStats {
     type: "work_hour" | "invoice" | "client";
     description: {
       key: string;
-      values: Record<string, any>;
+      values: Record<string, ActivityDescriptionValue>;
     };
     date: string;
     client?: string;

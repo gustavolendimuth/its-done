@@ -1,55 +1,59 @@
-# Dockerfile para deploy standalone do backend
+# Production Dockerfile for backend
 FROM node:18-alpine
 
-# Instalar dependências do sistema
+# Install system dependencies
 RUN apk add --no-cache libc6-compat curl && \
     npm install -g pnpm@8.15.4
 
-# Definir diretório de trabalho
+# Set working directory
 WORKDIR /app
 
-# Copiar arquivos de configuração
+# Copy workspace configuration
 COPY package.json ./
-COPY tsconfig*.json ./
-COPY nest-cli.json ./
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
 
-# Instalar dependências
-RUN pnpm config set network-timeout 300000 && \
-    pnpm install --prod=true && \
-    pnpm add prisma@latest --save-dev
+# Copy shared packages
+COPY packages/types ./packages/types/
 
-# Copiar código fonte e prisma
-COPY src ./src
-COPY prisma ./prisma
+# Copy backend files
+COPY apps/backend/package.json ./apps/backend/
+COPY apps/backend/tsconfig*.json ./apps/backend/
+COPY apps/backend/nest-cli.json ./apps/backend/
+COPY apps/backend/prisma ./apps/backend/prisma/
+COPY apps/backend/src ./apps/backend/src/
 
-# Build da aplicação
-RUN echo "🔧 Gerando Prisma client..." && \
-    pnpm prisma generate
+# Install dependencies
+RUN pnpm install --frozen-lockfile
 
-RUN echo "🔨 Executando build NestJS..." && \
-    pnpm run build
+# Generate Prisma client
+WORKDIR /app/apps/backend
+RUN pnpm prisma generate
 
-# Verificar resultado do build
-RUN echo "📦 Verificando build:" && \
+# Build the application
+RUN pnpm build
+
+# Verify build result
+RUN echo "📦 Verifying build:" && \
     ls -la dist/ && \
-    echo "✅ Main file encontrado:" && \
+    echo "✅ Main file found:" && \
     ls -la dist/main.js
 
-# Criar usuário não-root e diretórios
+# Create non-root user and directories
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nestjs && \
     mkdir -p /app/data/uploads && \
     chown -R nestjs:nodejs /app
 
-# Mudar para usuário não-root
+# Switch to non-root user
 USER nestjs
 
-# Expor porta
+# Expose port
 EXPOSE 3002
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://127.0.0.1:3002/health || exit 1
 
-# Comando para iniciar com migrações
-CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm db:seed:prod && node dist/main.js"] 
+# Start command with database setup
+CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm prisma db seed && node dist/main.js"] 

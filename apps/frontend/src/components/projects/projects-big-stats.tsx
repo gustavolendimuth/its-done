@@ -1,10 +1,6 @@
 "use client";
 
 import {
-  BigStatsDisplay,
-  BigStatItem,
-} from "@/components/ui/big-stats-display";
-import {
   Folder,
   Users,
   Clock,
@@ -12,9 +8,14 @@ import {
   TrendingUp,
   Target,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
+
+import {
+  BigStatsDisplay,
+  BigStatItem,
+} from "@/components/ui/big-stats-display";
 import { useProjects } from "@/services/projects";
 
-import { useTranslations } from "next-intl";
 
 interface ProjectsBigStatsProps {
   className?: string;

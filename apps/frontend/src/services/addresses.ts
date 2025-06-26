@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
 import { getApiUrl } from "@/lib/utils";
 
@@ -79,12 +80,8 @@ export const useClientAddresses = (clientId: string) => {
         console.log("Addresses fetched successfully:", data);
 
         return data;
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error fetching client addresses:", error);
-        console.error("Error status:", error.response?.status);
-        console.error("Error data:", error.response?.data);
-        console.error("Request URL:", error.config?.url);
-        console.error("Request headers:", error.config?.headers);
         throw error;
       }
     },

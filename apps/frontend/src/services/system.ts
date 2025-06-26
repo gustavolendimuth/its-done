@@ -1,5 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
+
+// Tipos para metadata de logs do sistema
+type LogMetadataValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | { [key: string]: LogMetadataValue }
+  | LogMetadataValue[];
 
 export interface SystemInfo {
   version: string;
@@ -120,7 +131,7 @@ export const useSystemLogs = (params?: {
           timestamp: string;
           level: string;
           message: string;
-          metadata: Record<string, any>;
+          metadata: Record<string, LogMetadataValue>;
         }[];
       }>("/system/logs", {
         params,

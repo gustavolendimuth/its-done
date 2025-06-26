@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
 import { Plus, Folder } from "lucide-react";
-import { useProjects, useDeleteProject } from "@/services/projects";
-import { useClients } from "@/services/clients";
-import { ProjectCreateDialog } from "@/components/projects/project-create-dialog";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+
+import { EmptyState } from "@/components/layout/empty-state";
+import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
 import { ProjectCard } from "@/components/projects/project-card";
+import { ProjectCreateDialog } from "@/components/projects/project-create-dialog";
 import { ProjectsBigStats } from "@/components/projects/projects-big-stats";
+import { InfoCard } from "@/components/ui/info-card";
 import {
   Select,
   SelectContent,
@@ -15,11 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PageContainer } from "@/components/layout/page-container";
-import { PageHeader } from "@/components/layout/page-header";
-import { EmptyState } from "@/components/layout/empty-state";
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
-import { InfoCard } from "@/components/ui/info-card";
+import { useClients } from "@/services/clients";
+import { useProjects, useDeleteProject } from "@/services/projects";
 
 export default function ProjectsPage() {
   const t = useTranslations("projects");

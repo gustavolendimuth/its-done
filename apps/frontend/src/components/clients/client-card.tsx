@@ -1,9 +1,6 @@
 "use client";
 
-import { Client } from "@/types/client";
-import { useClientSpecificStats } from "@/services/client-stats";
-import { FormModal } from "@/components/ui/form-modal";
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Building2,
   Mail,
@@ -20,6 +17,12 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import {
   BigCardStat,
   BigCardContactInfo,
@@ -34,12 +37,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import { formatHoursToHHMM } from "@/lib/utils";
-import { toast } from "sonner";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -48,11 +45,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { cn , formatHoursToHHMM } from "@/lib/utils";
+import { useClientSpecificStats } from "@/services/client-stats";
 import { useUpdateClient, UpdateClientDto } from "@/services/clients";
+import { Client } from "@/types/client";
+
 import { ClientAddresses } from "./client-addresses";
-import { useTranslations } from "next-intl";
+
 
 interface ClientCardProps {
   client: Client;

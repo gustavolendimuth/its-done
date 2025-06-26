@@ -1,8 +1,9 @@
 "use client";
 
-import * as React from "react";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import * as React from "react";
+
+import { ProjectCreateDialog } from "@/components/projects/project-create-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -17,9 +18,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useProjects, type Project } from "@/services/projects";
-
-import { ProjectCreateDialog } from "@/components/projects/project-create-dialog";
 
 interface ProjectComboboxProps {
   clientId?: string;

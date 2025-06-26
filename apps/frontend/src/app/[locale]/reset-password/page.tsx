@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { Loader2, ArrowLeft, CheckCircle, AlertTriangle } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useState, Suspense } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -16,9 +18,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, ArrowLeft, CheckCircle, AlertTriangle } from "lucide-react";
-import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useResetPassword } from "@/services/auth";
 
 function ResetPasswordContent() {
@@ -65,6 +66,17 @@ function ResetPasswordContent() {
     } catch (error) {
       // Error é tratado pelo mutation
     }
+  };
+
+  const getErrorMessage = (error: unknown): string => {
+    if (error && typeof error === "object" && "response" in error) {
+      const response = (error as { response?: { data?: { message?: string } } })
+        .response;
+
+      return response?.data?.message || tCommon("errorOccurred");
+    }
+
+    return tCommon("errorOccurred");
   };
 
   if (!token) {
@@ -125,8 +137,7 @@ function ResetPasswordContent() {
                 {resetPasswordMutation.error && (
                   <Alert variant="destructive">
                     <AlertDescription>
-                      {(resetPasswordMutation.error as any)?.response?.data
-                        ?.message || tCommon("errorOccurred")}
+                      {getErrorMessage(resetPasswordMutation.error)}
                     </AlertDescription>
                   </Alert>
                 )}

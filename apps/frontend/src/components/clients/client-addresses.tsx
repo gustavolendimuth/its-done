@@ -1,9 +1,11 @@
 "use client";
 
-import { useClientAddresses } from "@/services/addresses";
+import { useQueryClient } from "@tanstack/react-query";
+
 import { AddressCombobox } from "@/components/ui/address-combobox";
 import { Label } from "@/components/ui/label";
-import { useQueryClient } from "@tanstack/react-query";
+import { useClientAddresses } from "@/services/addresses";
+
 
 interface ClientAddressesProps {
   clientId: string;

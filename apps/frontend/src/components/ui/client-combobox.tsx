@@ -1,8 +1,10 @@
 "use client";
 
+import { Check, ChevronsUpDown, Plus , Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+
+import { ClientForm } from "@/components/clients/client-form";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -12,16 +14,15 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { FormModal } from "@/components/ui/form-modal";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FormModal } from "@/components/ui/form-modal";
-import { ClientForm } from "@/components/clients/client-form";
+import { cn } from "@/lib/utils";
 import { Client } from "@/types/client";
-import { Users } from "lucide-react";
-import { useTranslations } from "next-intl";
+
 
 interface ClientComboboxProps {
   clients: Client[];

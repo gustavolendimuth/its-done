@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useSafeHydration } from "@/hooks/use-safe-hydration";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
+
+import { useSafeHydration } from "@/hooks/use-safe-hydration";
 
 export function Nav() {
   const t = useTranslations("navigation");

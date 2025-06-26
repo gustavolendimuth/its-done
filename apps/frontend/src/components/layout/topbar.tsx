@@ -1,11 +1,12 @@
 "use client";
 
-import { ModeToggle } from "@/components/mode-toggle";
-import { UserAvatar } from "@/components/ui/user-avatar";
-import { LanguageSwitcher } from "@/components/ui/language-switcher";
-import { Button } from "@/components/ui/button";
 import { Clock, LogOut, PlusCircle } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
+
+import { ModeToggle } from "@/components/mode-toggle";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,17 +14,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FormModal } from "@/components/ui/form-modal";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import { WorkHourForm } from "@/components/work-hours/work-hour-form";
 
-import { signOut, useSession } from "next-auth/react";
+interface TopbarProps {
+  children?: React.ReactNode;
+}
 
-import { useState } from "react";
-import { FormModal } from "../ui/form-modal";
-import { WorkHourForm } from "../work-hours/work-hour-form";
-
-export function Topbar() {
-  const t = useTranslations();
+export function Topbar({ children }: TopbarProps) {
+  const t = useTranslations("navigation");
   const tWorkHours = useTranslations("workHours");
-
   const { data: session } = useSession();
   const [isAddHoursOpen, setIsAddHoursOpen] = useState(false);
 
@@ -35,11 +37,20 @@ export function Topbar() {
     setIsAddHoursOpen(false);
   };
 
+  const displayName = session?.user?.name || session?.user?.email || "";
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+  const avatarUrl = session?.user?.image || "";
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <div className="w-full flex justify-end items-center space-x-2">
+            {children}
             {session && (
               <Button
                 variant="outline"
@@ -61,14 +72,10 @@ export function Topbar() {
                     className="relative h-8 w-8 rounded-full"
                   >
                     <UserAvatar
-                      src={session.user?.image}
-                      alt={`@${session.user?.name || session.user?.email}`}
+                      src={avatarUrl}
+                      alt={`@${displayName}`}
                       className="h-8 w-8"
-                      fallbackText={
-                        session.user?.name?.[0] ||
-                        session.user?.email?.[0] ||
-                        "?"
-                      }
+                      fallbackText={initials}
                     />
                   </Button>
                 </DropdownMenuTrigger>
@@ -88,7 +95,7 @@ export function Topbar() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>{t("auth.logout")}</span>
+                    <span>{t("logout")}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -1,30 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { TimeEntry } from "@its-done/types";
 import { format } from "date-fns";
-import { Clock, Calendar, User, Briefcase } from "lucide-react";
-import { TimeEntry } from "@/services/time-entries";
+import { Clock } from "lucide-react";
+import { useState } from "react";
+
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { formatHoursToHHMM } from "@/lib/utils";
 
 interface WorkHoursSelectorProps {
   timeEntries: TimeEntry[];
-  onSelectionChange: (selectedIds: string[], totalAmount: number) => void;
+  _selectedTimeEntries?: TimeEntry[];
+  onTimeEntriesChange: (timeEntries: TimeEntry[]) => void;
   hourlyRate?: number;
 }
 
 export function WorkHoursSelector({
   timeEntries,
-  onSelectionChange,
+  _selectedTimeEntries,
+  onTimeEntriesChange,
   hourlyRate = 50,
 }: WorkHoursSelectorProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [groupBy, setGroupBy] = useState<"client" | "project" | "none">(
-    "client"
-  );
+  const [_groupBy] = useState<"client" | "project" | "none">("client");
 
   // Filter only entries that don't have an invoice yet
   const availableEntries = timeEntries.filter(
@@ -33,7 +32,7 @@ export function WorkHoursSelector({
 
   // Group entries based on selected grouping
   const groupedEntries = () => {
-    if (groupBy === "none") {
+    if (_groupBy === "none") {
       return { "All Entries": availableEntries };
     }
 
@@ -41,9 +40,9 @@ export function WorkHoursSelector({
       (groups, entry) => {
         let key: string;
 
-        if (groupBy === "client") {
+        if (_groupBy === "client") {
           key = entry.client?.name || entry.client?.email || "Unknown Client";
-        } else if (groupBy === "project") {
+        } else if (_groupBy === "project") {
           key = entry.project?.name || "No Project";
         } else {
           key = "All Entries";
@@ -60,7 +59,7 @@ export function WorkHoursSelector({
     );
   };
 
-  const handleEntryToggle = (entryId: string, checked: boolean) => {
+  const _handleEntryToggle = (entryId: string, checked: boolean) => {
     const newSelectedIds = new Set(selectedIds);
 
     if (checked) {
@@ -75,16 +74,10 @@ export function WorkHoursSelector({
     const selectedEntries = availableEntries.filter((entry) =>
       newSelectedIds.has(entry.id)
     );
-    const totalHours = selectedEntries.reduce(
-      (sum, entry) => sum + entry.hours,
-      0
-    );
-    const totalAmount = totalHours * hourlyRate;
-
-    onSelectionChange(Array.from(newSelectedIds), totalAmount);
+    onTimeEntriesChange(selectedEntries);
   };
 
-  const handleGroupToggle = (groupEntries: TimeEntry[], checked: boolean) => {
+  const _handleGroupToggle = (groupEntries: TimeEntry[], checked: boolean) => {
     const newSelectedIds = new Set(selectedIds);
 
     groupEntries.forEach((entry) => {
@@ -101,13 +94,7 @@ export function WorkHoursSelector({
     const selectedEntries = availableEntries.filter((entry) =>
       newSelectedIds.has(entry.id)
     );
-    const totalHours = selectedEntries.reduce(
-      (sum, entry) => sum + entry.hours,
-      0
-    );
-    const totalAmount = totalHours * hourlyRate;
-
-    onSelectionChange(Array.from(newSelectedIds), totalAmount);
+    onTimeEntriesChange(selectedEntries);
   };
 
   // Calculate totals for display
@@ -118,9 +105,18 @@ export function WorkHoursSelector({
     (sum, entry) => sum + entry.hours,
     0
   );
-  const totalAmount = totalHours * hourlyRate;
+  const _totalAmount = totalHours * hourlyRate;
 
-  const grouped = groupedEntries();
+  const _grouped = groupedEntries();
+
+  const handleSelectAll = () => {
+    const selectedEntries = timeEntries;
+    onTimeEntriesChange(selectedEntries);
+  };
+
+  const handleUnselectAll = () => {
+    onTimeEntriesChange([]);
+  };
 
   if (availableEntries.length === 0) {
     return (
@@ -139,149 +135,42 @@ export function WorkHoursSelector({
 
   return (
     <div className="space-y-4">
-      {/* Group by selector */}
-      <div className="flex items-center space-x-4">
-        <Label htmlFor="groupBy">Group by:</Label>
-        <select
-          id="groupBy"
-          value={groupBy}
-          onChange={(e) =>
-            setGroupBy(e.target.value as "client" | "project" | "none")
-          }
-          className="border rounded px-3 py-1"
-        >
-          <option value="client">Client</option>
-          <option value="project">Project</option>
-          <option value="none">None</option>
-        </select>
+      <div className="flex items-center justify-between">
+        <Label>Work Hours</Label>
+        <div className="space-x-2">
+          <button
+            type="button"
+            className="text-sm text-muted-foreground hover:text-foreground"
+            onClick={handleSelectAll}
+          >
+            Select All
+          </button>
+          <button
+            type="button"
+            className="text-sm text-muted-foreground hover:text-foreground"
+            onClick={handleUnselectAll}
+          >
+            Unselect All
+          </button>
+        </div>
       </div>
-
-      {/* Summary */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <span className="text-sm text-muted-foreground">Selected:</span>
-              <span className="ml-2 font-medium">
-                {selectedIds.size} entries
-              </span>
+      <div className="space-y-2">
+        {timeEntries.map((timeEntry) => (
+          <div
+            key={timeEntry.id}
+            className="flex items-center justify-between rounded-lg border p-4"
+          >
+            <div className="space-y-1">
+              <div className="text-sm font-medium">{timeEntry.description}</div>
+              <div className="text-sm text-muted-foreground">
+                {format(new Date(timeEntry.date), "PPP")}
+              </div>
             </div>
-            <div>
-              <span className="text-sm text-muted-foreground">
-                Total Hours:
-              </span>
-              <span className="ml-2 font-medium">
-                {formatHoursToHHMM(totalHours)}
-              </span>
-            </div>
-            <div>
-              <span className="text-sm text-muted-foreground">
-                Total Amount:
-              </span>
-              <span className="ml-2 font-medium text-lg">
-                ${totalAmount.toFixed(2)}
-              </span>
+            <div className="text-sm font-medium">
+              {formatHoursToHHMM(timeEntry.hours)}
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Grouped entries */}
-      <div className="space-y-4">
-        {Object.entries(grouped).map(([groupName, groupEntries]) => {
-          const groupSelected = groupEntries.every((entry) =>
-            selectedIds.has(entry.id)
-          );
-          const groupPartiallySelected =
-            groupEntries.some((entry) => selectedIds.has(entry.id)) &&
-            !groupSelected;
-
-          return (
-            <Card key={groupName}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center">
-                    <Checkbox
-                      checked={groupSelected}
-                      onCheckedChange={(checked: boolean) =>
-                        handleGroupToggle(groupEntries, checked)
-                      }
-                      className="mr-3"
-                    />
-                    {groupBy === "client" && <User className="w-4 h-4 mr-2" />}
-                    {groupBy === "project" && (
-                      <Briefcase className="w-4 h-4 mr-2" />
-                    )}
-                    {groupName}
-                    {groupPartiallySelected && (
-                      <span className="ml-2 text-xs text-blue-600">
-                        (partial)
-                      </span>
-                    )}
-                  </CardTitle>
-                  <Badge variant="info">
-                    {groupEntries.length} entries •{" "}
-                    {groupEntries
-                      .reduce((sum, entry) => sum + entry.hours, 0)
-                      .toFixed(1)}
-                    h
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {groupEntries.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                        selectedIds.has(entry.id)
-                          ? "bg-primary/10 border-primary/20"
-                          : "bg-background hover:bg-muted/50"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          checked={selectedIds.has(entry.id)}
-                          onCheckedChange={(checked: boolean) =>
-                            handleEntryToggle(entry.id, checked)
-                          }
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span>
-                              {format(new Date(entry.date), "MMM dd, yyyy")}
-                            </span>
-                            <Clock className="w-4 h-4 text-muted-foreground ml-4" />
-                            <span>{formatHoursToHHMM(entry.hours)}</span>
-                          </div>
-                          {entry.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {entry.description}
-                            </p>
-                          )}
-                          {entry.project && (
-                            <Badge variant="secondary" className="mt-1">
-                              {entry.project.name}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium">
-                          ${(entry.hours * hourlyRate).toFixed(2)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          @ ${hourlyRate}/hr
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+        ))}
       </div>
     </div>
   );

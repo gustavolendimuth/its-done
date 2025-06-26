@@ -1,10 +1,6 @@
 "use client";
 
 import {
-  BigStatsDisplay,
-  BigStatItem,
-} from "@/components/ui/big-stats-display";
-import {
   FileText,
   DollarSign,
   CheckCircle,
@@ -12,8 +8,14 @@ import {
   TrendingUp,
   Target,
 } from "lucide-react";
-import { useInvoiceStats } from "@/services/invoice-stats";
 import { useTranslations } from "next-intl";
+
+import {
+  BigStatsDisplay,
+  BigStatItem,
+} from "@/components/ui/big-stats-display";
+import { useInvoiceStats } from "@/services/invoice-stats";
+
 
 interface InvoicesBigStatsProps {
   className?: string;

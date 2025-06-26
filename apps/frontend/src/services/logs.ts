@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
+
+// Tipo para metadados de log - estrutura flexível mas tipada
+type LogMetadata = Record<string, string | number | boolean | null | undefined>;
 
 export interface Log {
   id: string;
   level: "info" | "warn" | "error";
   message: string;
-  metadata: Record<string, any>;
+  metadata: LogMetadata;
   createdAt: string;
 }
 

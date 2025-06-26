@@ -1,18 +1,22 @@
 import { useMutation } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
+
+// Tipo para dados de template SMS - valores que podem ser interpolados
+type SmsTemplateData = Record<string, string | number | boolean>;
 
 export interface SendSmsDto {
   to: string;
   message: string;
   template?: string;
-  data?: Record<string, any>;
+  data?: SmsTemplateData;
 }
 
 export interface SendBulkSmsDto {
   to: string[];
   message: string;
   template?: string;
-  data?: Record<string, any>;
+  data?: SmsTemplateData;
 }
 
 export const useSendSms = () => {

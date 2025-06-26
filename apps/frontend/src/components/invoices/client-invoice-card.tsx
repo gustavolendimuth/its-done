@@ -1,10 +1,11 @@
-import React from "react";
+import { format } from "date-fns";
 import { FileText, Clock, Calendar, Download, Eye } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import React from "react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
-import { format } from "date-fns";
 import { Invoice } from "@/services/invoices";
 
 export interface ClientInvoiceCardProps {

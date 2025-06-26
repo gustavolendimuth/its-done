@@ -1,5 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
+
+// Tipo para representar mudanças em auditoria de forma mais específica
+type AuditChanges = Record<
+  string,
+  | {
+      old?: unknown;
+      new?: unknown;
+    }
+  | string
+  | number
+  | boolean
+  | null
+>;
 
 export interface AuditLog {
   id: string;
@@ -12,7 +26,7 @@ export interface AuditLog {
     name: string;
     email: string;
   };
-  changes: Record<string, any>;
+  changes: AuditChanges;
   createdAt: string;
 }
 

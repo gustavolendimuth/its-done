@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { recordAvatarMetric } from "@/services/avatar";
@@ -83,7 +84,7 @@ export function UserAvatar({
     }
 
     if (!hasTriedFallbackRef.current && fallbackUrls.length > 0) {
-      // Try first fallback URL if we haven't tried any fallbacks yet
+      // Try first fallback URL if we haven't tried fallbacks yet
       tryNextFallback();
     } else if (fallbackIndexRef.current < fallbackUrls.length - 1) {
       // Try next fallback URL

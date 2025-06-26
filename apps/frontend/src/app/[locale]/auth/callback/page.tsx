@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
+import { useEffect, Suspense } from "react";
 
 function AuthCallbackContent() {
   const t = useTranslations("auth.callback");

@@ -1,7 +1,40 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import {
+  Download,
+  BarChart3,
+  FileText,
+  Clock,
+  Users,
+  Calendar,
+  Filter,
+  RefreshCw,
+  Activity,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState, useMemo } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import { toast } from "sonner";
+
+import { AnalyticsBigStats } from "@/components/analytics/analytics-big-stats";
+import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,7 +42,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { DatePickerComponent } from "@/components/ui/date-picker";
+import { InfoCard } from "@/components/ui/info-card";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -27,50 +61,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
-import {
-  Download,
-  BarChart3,
-  FileText,
-  Clock,
-  Users,
-  Calendar,
-  Filter,
-  RefreshCw,
-  Activity,
-} from "lucide-react";
-import { DatePickerComponent } from "@/components/ui/date-picker";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
-import { useDashboardStats } from "@/services/dashboard";
-import { useTimeEntries } from "@/services/time-entries";
 import { useClients } from "@/services/clients";
+import { useDashboardStats } from "@/services/dashboard";
 import {
   useHoursReport,
   useInvoiceReport,
   useSummaryReport,
   type ReportFilters,
 } from "@/services/reports";
-import { toast } from "sonner";
-import { AnalyticsBigStats } from "@/components/analytics/analytics-big-stats";
+import { useTimeEntries } from "@/services/time-entries";
 
-import { InfoCard } from "@/components/ui/info-card";
-import { PageContainer } from "@/components/layout/page-container";
-import { PageHeader } from "@/components/layout/page-header";
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+
 
 const COLORS = [
   "#0088FE",

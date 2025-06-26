@@ -1,5 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { sha256 } from "js-sha256";
+import { useGravatarHealth } from "@/services/gravatar";
 
 interface AvatarConfig {
   enableGravatar: boolean;
@@ -17,10 +16,6 @@ interface AvatarMetrics {
   diceBearSuccess: number;
   fallbackUsed: number;
 }
-
-// Gravatar API Key (mesmo usado no hook)
-const GRAVATAR_API_KEY =
-  "4691:gk-dGh1eZYP2WnY3scq1Bx9yQ6gOtLu0NvZkFRGu_lNNclTij0k8t4fltPfvbTw5";
 
 // Default configuration
 const DEFAULT_CONFIG: AvatarConfig = {
@@ -68,44 +63,6 @@ export async function testAvatarUrl(
     };
 
     img.src = url;
-  });
-}
-
-/**
- * Check Gravatar availability and cache result
- */
-export function useGravatarHealth() {
-  return useQuery({
-    queryKey: ["gravatar-health"],
-    queryFn: async () => {
-      // Usar um email conhecido para teste (test@example.com)
-      const testEmail = "test@example.com";
-      const emailHash = sha256(testEmail.toLowerCase().trim());
-
-      // Teste com hash SHA256 correto e API key
-      let testUrl = `https://gravatar.com/avatar/${emailHash}?d=404&s=40`;
-
-      if (GRAVATAR_API_KEY) {
-        testUrl += `&api_key=${GRAVATAR_API_KEY}`;
-      }
-
-      console.log("🔍 Testing Gravatar with URL:", testUrl);
-
-      const isAvailable = await testAvatarUrl(testUrl, 3000);
-
-      if (isAvailable) {
-        avatarMetrics.gravatarSuccess++;
-        console.log("✅ Gravatar is working!");
-      } else {
-        avatarMetrics.gravatarFails++;
-        console.log("❌ Gravatar test failed");
-      }
-
-      return isAvailable;
-    },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    retry: false,
-    refetchOnWindowFocus: false,
   });
 }
 
@@ -159,3 +116,9 @@ export function shouldDisableGravatar(): boolean {
 
   return failureRate > 0.8; // Disable if failure rate > 80%
 }
+
+/**
+ * @deprecated Use useGravatarHealth from @/services/gravatar instead
+ * This function is kept for backward compatibility
+ */
+export const useGravatarHealthDeprecated = useGravatarHealth;

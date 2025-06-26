@@ -1,10 +1,6 @@
 "use client";
 
 import {
-  BigStatsDisplay,
-  BigStatItem,
-} from "@/components/ui/big-stats-display";
-import {
   BarChart3,
   TrendingUp,
   Target,
@@ -14,9 +10,15 @@ import {
   Clock,
   FileText,
 } from "lucide-react";
-import { useDashboardStats } from "@/services/dashboard";
-import { formatHoursToHHMM } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+
+import {
+  BigStatsDisplay,
+  BigStatItem,
+} from "@/components/ui/big-stats-display";
+import { formatHoursToHHMM } from "@/lib/utils";
+import { useDashboardStats } from "@/services/dashboard";
+
 
 interface AnalyticsBigStatsProps {
   className?: string;

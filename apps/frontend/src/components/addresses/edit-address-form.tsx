@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useUpdateAddress } from "@/services/addresses";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -13,8 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Address } from "@/services/addresses";
+import { useUpdateAddress , Address } from "@/services/addresses";
 
 interface AddressFormData {
   street: string;
@@ -132,9 +132,13 @@ export function EditAddressForm({ address, onSuccess }: EditAddressFormProps) {
           console.log("Address updated successfully:", data);
           onSuccess?.();
         },
-        onError: (error: any) => {
+        onError: (error: unknown) => {
           console.error("Error updating address:", error);
-          console.error("Error details:", error.response?.data);
+          if (error && typeof error === "object" && "response" in error) {
+            const axiosError = error as { response?: { data?: unknown } };
+
+            console.error("Error details:", axiosError.response?.data);
+          }
         },
       }
     );
@@ -296,9 +300,21 @@ export function EditAddressForm({ address, onSuccess }: EditAddressFormProps) {
       {updateAddressMutation.isError && (
         <Alert variant="destructive">
           <AlertDescription>
-            {(updateAddressMutation.error as any)?.response?.data?.message ||
-              updateAddressMutation.error?.message ||
-              "Error updating address. Please try again."}
+            {(() => {
+              const error = updateAddressMutation.error;
+
+              if (error && typeof error === "object" && "response" in error) {
+                const response = (
+                  error as { response?: { data?: { message?: string } } }
+                ).response;
+
+                return response?.data?.message;
+              }
+
+              return (
+                error?.message || "Error updating address. Please try again."
+              );
+            })()}
           </AlertDescription>
         </Alert>
       )}

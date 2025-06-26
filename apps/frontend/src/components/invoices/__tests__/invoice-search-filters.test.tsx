@@ -1,5 +1,6 @@
+import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import {
   InvoiceSearchFilters,
   useInvoiceFilters,
@@ -42,62 +43,61 @@ const mockInvoices = [
 ];
 
 describe("InvoiceSearchFilters", () => {
-  const defaultProps = {
+  const mockProps = {
     searchTerm: "",
     sortBy: "date" as SortBy,
     filterStatus: "ALL" as FilterStatus,
-    onSearchChange: vi.fn(),
-    onSortChange: vi.fn(),
-    onStatusChange: vi.fn(),
+    onSearchChange: jest.fn(),
+    onSortChange: jest.fn(),
+    onStatusChange: jest.fn(),
     totalResults: 10,
     totalInvoices: 15,
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it("should render search input with correct placeholder", () => {
-    render(<InvoiceSearchFilters {...defaultProps} />);
+    render(<InvoiceSearchFilters {...mockProps} />);
 
-    const searchInput = screen.getByPlaceholderText(
-      "Search invoices by number or description..."
-    );
+    const searchInput = screen.getByPlaceholderText("Search invoices...");
 
     expect(searchInput).toBeInTheDocument();
   });
 
   it("should render status and sort selectors", () => {
-    render(<InvoiceSearchFilters {...defaultProps} />);
+    render(<InvoiceSearchFilters {...mockProps} />);
 
     // Check for select triggers (combobox role)
-    const selectElements = screen.getAllByRole("combobox");
-
-    expect(selectElements).toHaveLength(2);
+    expect(
+      screen.getByRole("combobox", { name: /status/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: /sort by/i })
+    ).toBeInTheDocument();
   });
 
   it("should display results summary correctly", () => {
-    render(<InvoiceSearchFilters {...defaultProps} />);
+    render(<InvoiceSearchFilters {...mockProps} />);
 
     expect(screen.getByText("Showing 10 of 15 invoices")).toBeInTheDocument();
   });
 
   it("should display search term when present", () => {
-    render(<InvoiceSearchFilters {...defaultProps} searchTerm="test search" />);
+    render(<InvoiceSearchFilters {...mockProps} searchTerm="test search" />);
 
     expect(screen.getByText('Search: "test search"')).toBeInTheDocument();
   });
 
   it("should call onSearchChange when search input changes", () => {
-    const onSearchChange = vi.fn();
+    const onSearchChange = jest.fn();
 
     render(
-      <InvoiceSearchFilters {...defaultProps} onSearchChange={onSearchChange} />
+      <InvoiceSearchFilters {...mockProps} onSearchChange={onSearchChange} />
     );
 
-    const searchInput = screen.getByPlaceholderText(
-      "Search invoices by number or description..."
-    );
+    const searchInput = screen.getByPlaceholderText("Search invoices...");
 
     fireEvent.change(searchInput, { target: { value: "new search" } });
 
@@ -106,12 +106,12 @@ describe("InvoiceSearchFilters", () => {
 
   it("should show current search term in input", () => {
     render(
-      <InvoiceSearchFilters {...defaultProps} searchTerm="existing search" />
+      <InvoiceSearchFilters {...mockProps} searchTerm="existing search" />
     );
 
-    const searchInput = screen.getByDisplayValue("existing search");
+    const searchInput = screen.getByPlaceholderText("Search invoices...");
 
-    expect(searchInput).toBeInTheDocument();
+    expect(searchInput).toHaveValue("existing search");
   });
 });
 

@@ -1,11 +1,12 @@
 "use client";
 
-import { SettingsForm } from "@/components/settings/settings-form";
-import { useTranslations } from "next-intl";
 import { Settings } from "lucide-react";
-import { InfoCard } from "@/components/ui/info-card";
+import { useTranslations } from "next-intl";
+
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
+import { SettingsForm } from "@/components/settings/settings-form";
+import { InfoCard } from "@/components/ui/info-card";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");

@@ -13,6 +13,7 @@
     "description": "Professional time tracking for contractors and teams. Manage projects, track hours, and get paid for your work.",
     "getStarted": "Get Started",
     "login": "Login",
+    "openMenu": "Open menu",
     "features": {
       "timeTracking": {
         "title": "Time Tracking",

@@ -1,0 +1,51 @@
+# Use Node.js as base image
+FROM node:18-alpine
+
+# Install dependencies required for Cypress
+RUN apk add --no-cache \
+    xvfb \
+    chromium \
+    chromium-chromedriver \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    nodejs \
+    npm
+
+# Set working directory
+WORKDIR /app
+
+# Copy root package.json and workspace files
+COPY package.json ./
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+
+# Copy the shared types package
+COPY packages/types ./packages/types/
+
+# Copy frontend files
+COPY apps/frontend ./apps/frontend/
+
+# Install dependencies
+RUN npm install -g pnpm@8.15.4
+RUN pnpm install --no-frozen-lockfile
+
+# Install Cypress globally
+RUN npm install -g cypress@13.6.4
+
+# Set environment variables
+ENV CYPRESS_VIDEO=false
+ENV CYPRESS_SCREENSHOTS=true
+
+# Set working directory to frontend app
+WORKDIR /app/apps/frontend
+
+# Create a shell script to run Cypress
+RUN echo '#!/bin/sh\necho "Current directory: $(pwd)"\necho "Contents of current directory:"\nls -la\necho "Running Cypress..."\ncypress run --browser chromium --config-file cypress.config.ts' > run-tests.sh && \
+    chmod +x run-tests.sh
+
+# Command to run tests
+CMD ["./run-tests.sh"] 

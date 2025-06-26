@@ -1,7 +1,4 @@
-import React from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import {
   Clock,
   User,
@@ -11,7 +8,9 @@ import {
   Trash2,
   FileText,
 } from "lucide-react";
-import { format } from "date-fns";
+import { useTranslations } from "next-intl";
+import React from "react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,8 +22,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useTranslations } from "next-intl";
-import { formatTimeAgo } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { cn, formatTimeAgo } from "@/lib/utils";
 
 /**
  * WorkHourCard Component

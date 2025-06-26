@@ -1,12 +1,13 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/ui/button";
-import { FormModal } from "@/components/ui/form-modal";
 import {
   Form,
   FormControl,
@@ -15,12 +16,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useUpdateClient } from "@/services/clients";
 import { Client, UpdateClientDto } from "@/types/client";
+
 import { ClientAddresses } from "./client-addresses";
-import { Users } from "lucide-react";
+
 
 interface EditClientModalProps {
   client: Client;

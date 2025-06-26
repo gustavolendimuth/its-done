@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
+
+// Tipo para payloads de webhook - pode conter dados estruturados variados
+type WebhookPayload = Record<string, unknown>;
 
 export interface WebhookEvent {
   id: string;
   webhookId: string;
   event: string;
-  payload: Record<string, any>;
+  payload: WebhookPayload;
   status: "pending" | "processing" | "completed" | "failed";
   response?: {
     status: number;

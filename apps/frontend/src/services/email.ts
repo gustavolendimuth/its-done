@@ -1,5 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
+
 import api from "@/lib/axios";
+
+// Tipo para dados de template de email - valores que podem ser interpolados
+type EmailTemplateData = Record<string, string | number | boolean>;
 
 export interface SendEmailDto {
   to: string;
@@ -7,7 +11,7 @@ export interface SendEmailDto {
   text?: string;
   html?: string;
   template?: string;
-  data?: Record<string, any>;
+  data?: EmailTemplateData;
   attachments?: {
     filename: string;
     content: string;
@@ -21,7 +25,7 @@ export interface SendBulkEmailDto {
   text?: string;
   html?: string;
   template?: string;
-  data?: Record<string, any>;
+  data?: EmailTemplateData;
   attachments?: {
     filename: string;
     content: string;

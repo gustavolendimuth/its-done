@@ -1,5 +1,7 @@
+import { Clock, ClipboardList, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Clock, ClipboardList, BarChart3 } from "lucide-react";
 
 export default function Home() {
   const t = useTranslations("home");

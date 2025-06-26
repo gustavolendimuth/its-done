@@ -1,6 +1,7 @@
-import { generateMetadata } from "../layout";
-import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+
+import { generateMetadata } from "../layout";
 
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(),
@@ -29,7 +30,13 @@ describe("Layout", () => {
     expect(metadata.description).toBe(
       "A professional time tracking application for contractors and teams"
     );
-    expect((metadata as any).icons?.icon).toEqual([
+
+    // Check if metadata has icons property with proper type checking
+    const metadataWithIcons = metadata as Metadata & {
+      icons?: { icon?: Array<{ url: string; type: string }> };
+    };
+
+    expect(metadataWithIcons.icons?.icon).toEqual([
       { url: "/favicon.svg", type: "image/svg+xml" },
     ]);
   });

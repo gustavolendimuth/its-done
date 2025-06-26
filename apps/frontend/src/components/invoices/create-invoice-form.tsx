@@ -1,10 +1,16 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { TimeEntry } from "@its-done/types";
+import { FileText, Calculator, Clock, Upload } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ClientCombobox } from "@/components/ui/client-combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,18 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { WorkHoursSelector } from "./work-hours-selector";
-import { ClientCombobox } from "@/components/ui/client-combobox";
-import { InvoiceFileUpload } from "./invoice-file-upload";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "sonner";
-import { Client } from "@/services/clients";
-import { TimeEntry, useAvailableTimeEntries } from "@/services/time-entries";
-import { FileText, Calculator, Clock, Upload } from "lucide-react";
-import { useCreateInvoice, useUploadInvoiceFile } from "@/services/invoices";
+import { Textarea } from "@/components/ui/textarea";
 import { formatHoursToHHMM } from "@/lib/utils";
+import { Client } from "@/services/clients";
+import { useCreateInvoice, useUploadInvoiceFile } from "@/services/invoices";
+import { useAvailableTimeEntries } from "@/services/time-entries";
+
+import { InvoiceFileUpload } from "./invoice-file-upload";
+import { WorkHoursSelector } from "./work-hours-selector";
 
 const invoiceSchema = z.object({
   clientId: z.string().min(1, "Client is required"),
@@ -86,7 +88,14 @@ export function CreateInvoiceForm({
   });
 
   // As horas já vêm filtradas pelo clientId se fornecido
-  const filteredTimeEntries = availableTimeEntries;
+  const filteredTimeEntries =
+    availableTimeEntries.filter(
+      (entry: TimeEntry) => !entry.invoiceWorkHours?.length
+    ) || [];
+
+  const selectedEntries = filteredTimeEntries.filter((entry) =>
+    selectedWorkHourIds.includes(entry.id)
+  );
 
   const handleWorkHoursSelection = (
     workHourIds: string[],
@@ -180,10 +189,6 @@ export function CreateInvoiceForm({
     }
   };
 
-  const selectedEntries = availableTimeEntries.filter((entry: TimeEntry) =>
-    selectedWorkHourIds.includes(entry.id)
-  );
-
   const totalHours = selectedEntries.reduce(
     (sum: number, entry: TimeEntry) => sum + entry.hours,
     0
@@ -234,7 +239,17 @@ export function CreateInvoiceForm({
           <div className="space-y-4">
             <WorkHoursSelector
               timeEntries={filteredTimeEntries}
-              onSelectionChange={handleWorkHoursSelection}
+              _selectedTimeEntries={selectedEntries}
+              onTimeEntriesChange={(timeEntries) => {
+                const totalAmount = timeEntries.reduce(
+                  (sum, entry) => sum + entry.hours * (watchedHourlyRate || 50),
+                  0
+                );
+                handleWorkHoursSelection(
+                  timeEntries.map((entry) => entry.id),
+                  totalAmount
+                );
+              }}
               hourlyRate={watchedHourlyRate || 50}
             />
 

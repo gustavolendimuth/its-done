@@ -1,13 +1,5 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 import { format } from "date-fns";
 import {
@@ -23,16 +15,26 @@ import {
   AlertCircle,
   XCircle,
 } from "lucide-react";
-import { StatsCard } from "@/components/ui/stats-card";
-import { EmptyState } from "@/components/layout/empty-state";
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import { useState, useMemo } from "react";
+
 import { ClientInvoiceCard } from "@/components/invoices/client-invoice-card";
 import {
   InvoiceSearchFilters,
   SortBy,
   FilterStatus,
 } from "@/components/invoices/invoice-search-filters";
+import { EmptyState } from "@/components/layout/empty-state";
+import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { StatsCard } from "@/components/ui/stats-card";
 import { formatHoursToHHMM, cn } from "@/lib/utils";
+import { Invoice } from "@/services/invoices";
 
 // Types
 export interface OverviewStats {
@@ -49,7 +51,7 @@ export interface OverviewStats {
 }
 
 export interface OverviewData {
-  invoices: any[];
+  invoices: Invoice[];
   stats: OverviewStats;
   clientInfo?: {
     name: string;
@@ -111,12 +113,14 @@ export function Overview({ data, isLoading, error, className }: OverviewProps) {
         case "hours":
           const aHours =
             a.invoiceWorkHours?.reduce(
-              (sum: number, iwh: any) => sum + (iwh.workHour?.hours || 0),
+              (sum: number, iwh: { workHour?: { hours: number } }) =>
+                sum + (iwh.workHour?.hours || 0),
               0
             ) || 0;
           const bHours =
             b.invoiceWorkHours?.reduce(
-              (sum: number, iwh: any) => sum + (iwh.workHour?.hours || 0),
+              (sum: number, iwh: { workHour?: { hours: number } }) =>
+                sum + (iwh.workHour?.hours || 0),
               0
             ) || 0;
 

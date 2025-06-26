@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, jest, beforeEach } from "@jest/globals";
+
 import {
   testAvatarUrl,
   getAvatarMetrics,
@@ -8,7 +9,7 @@ import {
 } from "../avatar";
 
 // Mock Image
-global.Image = vi.fn().mockImplementation(() => ({
+global.Image = jest.fn().mockImplementation(() => ({
   onload: null,
   onerror: null,
   src: "",
@@ -17,7 +18,7 @@ global.Image = vi.fn().mockImplementation(() => ({
 describe("Avatar Service", () => {
   beforeEach(() => {
     resetAvatarMetrics();
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe("testAvatarUrl", () => {
@@ -28,7 +29,7 @@ describe("Avatar Service", () => {
         src: "",
       };
 
-      global.Image = vi.fn().mockImplementation(() => mockImage);
+      global.Image = jest.fn().mockImplementation(() => mockImage);
 
       const testPromise = testAvatarUrl("https://example.com/avatar.jpg", 1000);
 
@@ -51,7 +52,7 @@ describe("Avatar Service", () => {
         src: "",
       };
 
-      global.Image = vi.fn().mockImplementation(() => mockImage);
+      global.Image = jest.fn().mockImplementation(() => mockImage);
 
       const testPromise = testAvatarUrl(
         "https://invalid-url.com/avatar.jpg",
@@ -77,7 +78,7 @@ describe("Avatar Service", () => {
         src: "",
       };
 
-      global.Image = vi.fn().mockImplementation(() => mockImage);
+      global.Image = jest.fn().mockImplementation(() => mockImage);
 
       const startTime = Date.now();
       const result = await testAvatarUrl(

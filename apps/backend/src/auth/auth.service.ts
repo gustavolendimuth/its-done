@@ -15,7 +15,7 @@ import {
 } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
-import { UserResponse } from '../users/types/user.types';
+import { UserResponse } from '../types';
 
 @Injectable()
 export class AuthService {

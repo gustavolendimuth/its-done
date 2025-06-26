@@ -1,14 +1,12 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { DatePickerComponent } from "@/components/ui/date-picker";
-import { ClientCombobox } from "@/components/ui/client-combobox";
-import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useCreateInvoice, useUploadInvoiceFile } from "@/services/invoices";
+import { useQueryClient } from "@tanstack/react-query";
 import { Upload, FileText, CheckCircle } from "lucide-react";
+import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -16,9 +14,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { ClientCombobox } from "@/components/ui/client-combobox";
+import { DatePickerComponent } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Client } from "@/services/clients";
+import { useCreateInvoice, useUploadInvoiceFile } from "@/services/invoices";
+
 
 const invoiceSchema = z.object({
   number: z.string().min(1, "Invoice number is required"),
@@ -27,7 +29,7 @@ const invoiceSchema = z.object({
   dueDate: z.date({
     required_error: "Please select a due date",
   }),
-  file: z.any().optional(),
+  file: z.instanceof(FileList).optional(),
 });
 
 type InvoiceFormData = z.infer<typeof invoiceSchema>;

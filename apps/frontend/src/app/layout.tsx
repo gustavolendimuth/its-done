@@ -2,9 +2,10 @@
 // Since we match all pathnames starting from the root in our middleware,
 // this case should never occur.
 
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { getTranslations } from "next-intl/server";
+
+import type { Metadata } from "next";
 
 const inter = Inter({ subsets: ["latin"] });
 
