@@ -1,85 +1,83 @@
-# Production Dockerfile for backend
-FROM node:18-alpine AS base
+# Use Node 18 slim instead of alpine for better compatibility
+FROM node:18-slim AS base
 
-# Install system dependencies
-RUN apk add --no-cache libc6-compat curl && \
-    npm install -g pnpm@8.15.4
+# Set environment variables
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=1536"
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+# Install pnpm
+RUN corepack enable && \
+    corepack prepare pnpm@8.15.4 --activate
 
 # Set working directory
 WORKDIR /app
 
-# Stage 1: Dependencies
+# Stage 1: Install dependencies
 FROM base AS deps
+WORKDIR /app
 
-# Copy workspace configuration
-COPY package.json ./
-COPY pnpm-workspace.yaml ./
-COPY pnpm-lock.yaml ./
-
-# Copy shared packages
-COPY packages/types ./packages/types/
-
-# Copy backend package files
+# Copy only package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/types/package.json ./packages/types/
 COPY apps/backend/package.json ./apps/backend/
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies with production only
+RUN pnpm install --prod --frozen-lockfile --workspace-root
 
-# Stage 2: Build
+# Stage 2: Build the application
 FROM base AS builder
 WORKDIR /app
 
-# Copy workspace files and dependencies
+# Copy files needed for build
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/package.json ./
-COPY --from=deps /app/pnpm-workspace.yaml ./
-COPY --from=deps /app/pnpm-lock.yaml ./
 COPY --from=deps /app/packages ./packages
 COPY --from=deps /app/apps/backend/node_modules ./apps/backend/node_modules
-COPY --from=deps /app/apps/backend/package.json ./apps/backend/
 
-# Copy backend source code
-COPY apps/backend/tsconfig*.json ./apps/backend/
-COPY apps/backend/nest-cli.json ./apps/backend/
-COPY apps/backend/prisma ./apps/backend/prisma/
-COPY apps/backend/src ./apps/backend/src/
+# Copy source files
+COPY . .
 
-# Generate Prisma client and build
+# Generate Prisma Client
 WORKDIR /app/apps/backend
-RUN pnpm prisma generate && \
-    pnpm build
+RUN pnpm prisma generate
 
-# Verify build result
-RUN echo "📦 Verifying build:" && \
-    ls -la dist/ && \
-    echo "✅ Main file found:" && \
-    ls -la dist/main.js
+# Build the app
+RUN pnpm build
 
-# Stage 3: Production
-FROM base AS runner
+# Stage 3: Production image
+FROM node:18-slim AS runner
 WORKDIR /app
 
-# Create non-root user and directories
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nestjs && \
-    mkdir -p /app/data/uploads && \
-    chown -R nestjs:nodejs /app
+# Set production environment
+ENV NODE_ENV=production
+ENV PORT=3002
 
-# Copy necessary files from builder
-COPY --from=builder --chown=nestjs:nodejs /app/apps/backend/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/apps/backend/prisma ./prisma
-COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nestjs:nodejs /app/apps/backend/node_modules ./node_modules
+# Install production dependencies
+RUN apt-get update -y && \
+    apt-get install -y openssl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -r nodejs -g 1001 && \
+    useradd -r -g nodejs -u 1001 nestjs
+
+# Copy only the necessary files
+COPY --from=builder /app/apps/backend/dist ./dist
+COPY --from=builder /app/apps/backend/prisma ./prisma
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/backend/node_modules ./node_modules
+
+# Create uploads directory and set permissions
+RUN mkdir -p /app/data/uploads && \
+    chown -R nestjs:nodejs /app
 
 # Switch to non-root user
 USER nestjs
 
-# Expose port
+# Expose the port
 EXPOSE 3002
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://127.0.0.1:3002/health || exit 1
-
-# Start command with database setup
-CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed && node dist/main.js"] 
+# Start the application
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"] 
