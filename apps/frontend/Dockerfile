@@ -109,11 +109,17 @@ CMD ["sh", "-c", "cd apps/frontend && pnpm install && pnpm dev"]
 # Production Dockerfile for frontend
 FROM node:18-alpine AS base
 
-# Install dependencies in a separate layer to better utilize cache
-RUN apk add --no-cache libc6-compat curl
+# Set environment variables to reduce memory usage
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# Install pnpm in a separate layer
-RUN npm install -g pnpm@8.15.4
+# Install dependencies in a single layer to reduce image size
+RUN apk update && \
+    apk add --no-cache --virtual .build-deps curl && \
+    apk add --no-cache libc6-compat && \
+    npm install -g pnpm@8.15.4 && \
+    apk del .build-deps
 
 # Set working directory
 WORKDIR /app
@@ -131,7 +137,8 @@ COPY packages/types ./packages/types/
 COPY apps/frontend/package.json apps/frontend/components.json ./apps/frontend/
 
 # Install dependencies with specific network timeout and retry settings
-RUN pnpm install --frozen-lockfile --network-timeout 600000 --retry 3
+RUN pnpm install --frozen-lockfile --network-timeout 600000 --retry 3 \
+    --prod --no-optional
 
 # Stage 2: Builder
 FROM base AS builder
@@ -155,16 +162,13 @@ COPY apps/frontend/tailwind.config.ts ./apps/frontend/
 COPY apps/frontend/tsconfig.json ./apps/frontend/
 COPY apps/frontend/postcss.config.* ./apps/frontend/
 
-# Set max old space size for build process
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-
 # Build the application with increased timeout
 WORKDIR /app/apps/frontend
 RUN echo "🔨 Building Next.js application..." && \
     pnpm build
 
 # Stage 3: Runner
-FROM base AS runner
+FROM node:18-alpine AS runner
 WORKDIR /app
 
 # Create non-root user
@@ -188,9 +192,9 @@ USER nextjs
 # Expose port
 EXPOSE 3000
 
-# Health check
+# Health check with minimal dependencies
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:3000/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
 # Start command
 CMD ["node", "server.js"] 
