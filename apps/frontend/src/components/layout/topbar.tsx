@@ -47,10 +47,13 @@ export function Topbar({ children }: TopbarProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex justify-end items-center space-x-2">
-            {children}
+      <div className="flex h-14 items-center px-4 md:px-10">
+        <div className="flex flex-1 items-center justify-between max-w-7xl mx-auto w-full">
+          {/* Mobile navigation on the left */}
+          <div className="flex items-center md:hidden">{children}</div>
+
+          {/* Desktop/right side elements */}
+          <div className="flex items-center space-x-2 md:ml-auto">
             {session && (
               <Button
                 variant="outline"
