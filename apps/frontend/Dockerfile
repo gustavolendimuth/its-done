@@ -11,7 +11,7 @@ WORKDIR /app
 # Stage 1: Dependencies
 FROM base AS deps
 
-# Copiar arquivos de configuração do workspace
+# Copiar arquivos de configuração do workspace (contexto é a raiz do projeto)
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 
@@ -20,7 +20,13 @@ RUN mkdir -p apps/frontend packages
 
 # Copiar arquivos de configuração do frontend
 COPY apps/frontend/package.json ./apps/frontend/
-COPY apps/frontend/components.json ./
+COPY apps/frontend/components.json ./apps/frontend/
+COPY apps/frontend/src ./apps/frontend/src
+COPY apps/frontend/public ./apps/frontend/public
+COPY apps/frontend/next.config.js ./apps/frontend/
+COPY apps/frontend/tailwind.config.ts ./apps/frontend/
+COPY apps/frontend/tsconfig.json ./apps/frontend/
+COPY apps/frontend/postcss.config.* ./apps/frontend/
 
 # Copiar os pacotes necessários do workspace
 COPY packages/types ./packages/types
@@ -42,20 +48,14 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
 COPY --from=deps /app/pnpm-workspace.yaml ./
 COPY --from=deps /app/packages ./packages
-COPY --from=deps /app/apps/frontend/package.json ./apps/frontend/package.json
+COPY --from=deps /app/apps/frontend ./apps/frontend
 
-# Copiar código fonte
-COPY apps/frontend/src ./src
-COPY apps/frontend/public ./public
-COPY apps/frontend/next.config.js ./
-COPY apps/frontend/tailwind.config.ts ./
-COPY apps/frontend/tsconfig.json ./
-COPY apps/frontend/postcss.config.* ./
-COPY apps/frontend/components.json ./
-
-# Build da aplicação
+# Build da aplicação (construir types primeiro, depois frontend)
+WORKDIR /app
+RUN echo "🔧 Building types package..." && \
+    pnpm --filter @its-done/types build
 RUN echo "🔨 Building Next.js application..." && \
-    pnpm build
+    pnpm --filter frontend build
 
 # Stage 3: Production
 FROM base AS runner
@@ -66,12 +66,12 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Copiar arquivos necessários
-COPY --from=builder /app/next.config.js ./
-COPY --from=builder /app/public ./public
+COPY --from=builder /app/apps/frontend/next.config.js ./
+COPY --from=builder /app/apps/frontend/public ./public
 
 # Copiar aplicação buildada
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./.next/static
 
 # Mudar para usuário não-root
 USER nextjs

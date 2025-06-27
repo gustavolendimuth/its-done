@@ -1,42 +1,20 @@
-# Dependencies
+# Node modules
 node_modules
+*/node_modules
 **/node_modules
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
 
 # Build outputs
-dist
-build
 .next
-.turbo
-out
-
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# IDE files
-.vscode
-.idea
-*.swp
-*.swo
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+*/. next
+**/.next
+dist
+*/dist
+**/dist
+build
+*/build
+**/build
 
 # Logs
-logs
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -51,17 +29,33 @@ pids
 
 # Coverage directory used by tools like istanbul
 coverage
-*.lcov
+*/coverage
+**/coverage
+
+# Compiled binary addons
+build/Release
 
 # Dependency directories
-node_modules/
-jspm_packages/
+.pnpm-store
+*/.pnpm-store
+**/.pnpm-store
+
+# TypeScript cache
+*.tsbuildinfo
+*/*.tsbuildinfo
+**/*.tsbuildinfo
 
 # Optional npm cache directory
 .npm
 
 # Optional eslint cache
 .eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
 
 # Optional REPL history
 .node_repl_history
@@ -74,7 +68,10 @@ jspm_packages/
 
 # dotenv environment variables file
 .env
-.env.test
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -82,14 +79,12 @@ jspm_packages/
 
 # Next.js build output
 .next
-out
 
 # Nuxt.js build / generate output
 .nuxt
 
 # Gatsby files
 .cache/
-public
 
 # Storybook build outputs
 .out
@@ -98,26 +93,49 @@ public
 # Temporary folders
 tmp/
 temp/
+.tmp/
+.temp/
 
 # Editor directories and files
-.vscode/*
+.vscode/
 !.vscode/extensions.json
 .idea
+.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Testing
-coverage
-
-# Prisma
-prisma/migrations
-uploads/
+# OS generated files
+Thumbs.db
 
 # Git
 .git
 .gitignore
+
+# Documentation
 README.md
-.github 
+*.md
+!README.md
+
+# Test files
+test/
+tests/
+*.test.*
+*.spec.*
+
+# Cypress
+cypress/
+e2e/
+
+# Turbo
+.turbo
+
+# Development Docker files
+*.dev
+Dockerfile.dev
+Dockerfile.cypress
+
+# Logs directory
+logs/ 
