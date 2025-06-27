@@ -37,8 +37,10 @@ RUN pnpm run build
 # Verificar resultado do build
 RUN echo "📦 Verificando build:" && \
     ls -la dist/ && \
+    echo "📁 Conteúdo do dist/src:" && \
+    ls -la dist/src/ && \
     echo "✅ Main file encontrado:" && \
-    ls -la dist/main.js
+    ls -la dist/src/main.js
 
 # Production stage
 FROM base AS runner
@@ -67,4 +69,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://127.0.0.1:3002/health || exit 1
 
 # Comando para iniciar com migrações
-CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm db:seed:prod && node dist/main.js"] 
+CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm db:seed:prod && node dist/src/main.js"] 
