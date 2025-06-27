@@ -1,6 +1,5 @@
 "use client";
 
-import { TimeEntry } from "@its-done/types";
 import { format } from "date-fns";
 import { Clock } from "lucide-react";
 import { useState } from "react";
@@ -8,6 +7,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { formatHoursToHHMM } from "@/lib/utils";
+import { TimeEntry } from "@/types";
 
 interface WorkHoursSelectorProps {
   timeEntries: TimeEntry[];

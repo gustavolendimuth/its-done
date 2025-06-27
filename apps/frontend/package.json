@@ -14,8 +14,7 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test:e2e": "start-server-and-test start:dev http://localhost:3000 cypress:run",
-    "test:e2e:docker": "docker build -f Dockerfile.cypress -t its-done-cypress . && docker run --network=host its-done-cypress",
-    "types:build": "cd packages-types && npm run build"
+    "test:e2e:docker": "docker build -f Dockerfile.cypress -t its-done-cypress . && docker run --network=host its-done-cypress"
   },
   "dependencies": {
     "@auth/core": "^0.34.2",

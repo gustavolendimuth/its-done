@@ -1,4 +1,13 @@
-// Re-exporta todos os types do package centralizado
-export * from "@its-done/types";
+// ===== EXPORTAÇÕES PRINCIPAIS =====
 
-// Types específicos do frontend que não devem estar no package compartilhado podem ser adicionados aqui
+// Entidades do banco de dados
+export * from "./entities";
+
+// Tipos de API e serviços
+export * from "./api";
+
+// Tipos de interface do usuário
+export * from "./ui";
+
+// Tipos para testes
+export * from "./test";

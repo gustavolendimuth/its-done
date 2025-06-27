@@ -1,7 +1,7 @@
-import { TimeEntry, CreateTimeEntryDto } from "@its-done/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
+import { TimeEntry, CreateTimeEntryDto } from "@/types";
 
 export const useTimeEntries = (params?: {
   from?: string;

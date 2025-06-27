@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TimeEntry } from "@its-done/types";
 import { FileText, Calculator, Clock, Upload } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -23,6 +22,7 @@ import { formatHoursToHHMM } from "@/lib/utils";
 import { Client } from "@/services/clients";
 import { useCreateInvoice, useUploadInvoiceFile } from "@/services/invoices";
 import { useAvailableTimeEntries } from "@/services/time-entries";
+import { TimeEntry } from "@/types";
 
 import { InvoiceFileUpload } from "./invoice-file-upload";
 import { WorkHoursSelector } from "./work-hours-selector";
@@ -33,9 +33,9 @@ const invoiceSchema = z.object({
     .array(z.string())
     .min(1, "At least one work hour must be selected"),
   amount: z.number().min(0.01, "Amount must be greater than 0"),
-  hourlyRate: z.number().min(0, "Hourly rate must be 0 or greater").default(50),
+  hourlyRate: z.number().min(0, "Hourly rate must be 0 or greater").optional(),
   description: z.string().optional(),
-  status: z.enum(["PENDING", "PAID", "CANCELED"]).default("PENDING"),
+  status: z.enum(["PENDING", "PAID", "CANCELED"]).optional(),
   invoiceNumber: z.string().optional(),
 });
 

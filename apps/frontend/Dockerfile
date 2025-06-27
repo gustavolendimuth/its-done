@@ -10,12 +10,11 @@ WORKDIR /app
 # Dependencies stage
 FROM base AS deps
 
-# Copiar package.json e pnpm-lock.yaml
+# Copiar package.json
 COPY package.json ./
-COPY pnpm-lock.yaml* ./
 
 # Instalar dependências
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Builder stage
 FROM base AS builder
@@ -28,9 +27,6 @@ COPY --from=deps /app/package.json ./package.json
 
 # Copiar código fonte
 COPY . .
-
-# Build do pacote types primeiro
-RUN cd packages-types && pnpm run build
 
 # Build da aplicação Next.js
 RUN pnpm run build

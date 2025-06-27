@@ -18,9 +18,9 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@its-done/types": ["./packages-types/src"]
+      "@/types": ["./src/types"]
     }
   },
-  "include": ["src/**/*", "scripts/**/*", "packages-types/src/**/*"],
+  "include": ["src/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { ApiError } from "@its-done/types";
 import { format } from "date-fns";
 import { MoreHorizontal, Shield, ShieldOff, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -40,6 +39,7 @@ import {
   useUpdateUserRole,
   useDeleteUser,
 } from "@/services/admin";
+import { ApiError } from "@/types";
 
 export default function AdminUsers() {
   const { data: users, isLoading } = useAllUsers();

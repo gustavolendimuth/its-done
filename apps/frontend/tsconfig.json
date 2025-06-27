@@ -20,7 +20,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@its-done/types": ["./packages-types/src"]
+      "@/types": ["./src/types"]
     },
     "types": ["jest", "@jest/globals", "@testing-library/react"]
   },
@@ -29,8 +29,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/test/setup.ts",
-    "packages-types/src/**/*.ts"
+    "src/test/setup.ts"
   ],
   "exclude": ["node_modules"]
 }

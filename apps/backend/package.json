@@ -28,8 +28,7 @@
     "db:studio": "npx prisma studio",
     "db:reset": "npx prisma migrate reset --force",
     "db:push": "npx prisma db push",
-    "db:generate": "npx prisma generate",
-    "types:build": "cd packages-types && npm run build"
+    "db:generate": "npx prisma generate"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.826.0",
