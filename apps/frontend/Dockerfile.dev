@@ -1,27 +1,52 @@
-# Development Dockerfile for frontend
-FROM node:18-alpine
+# Development Dockerfile for frontend optimized for Railway
+FROM node:18-slim
 
-# Install system dependencies
-RUN apk add --no-cache libc6-compat && \
-    npm install -g pnpm@8.15.4
+# Set environment variables
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies with better error handling
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    procps \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install pnpm with enhanced network configuration
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retry-maxtime 300000 && \
+    npm config set fetch-retry-factor 10 && \
+    npm config set fetch-retry-delay 10000 && \
+    corepack enable && \
+    corepack prepare pnpm@8.15.4 --activate
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+# Create non-root user and set permissions
+RUN groupadd -r nodejs -g 1001 && \
+    useradd -r -g nodejs -u 1001 nextjs && \
+    chown -R nextjs:nodejs /app
 
-# Copy all shared packages
-COPY packages ./packages/
-
-# Copy frontend files
-COPY apps/frontend ./apps/frontend/
-
-# Install dependencies
-RUN pnpm install
+# Switch to non-root user
+USER nextjs
 
 # Expose port
 EXPOSE 3000
 
-# Start development server
-CMD ["sh", "-c", "cd apps/frontend && pnpm dev"] 
+# Configure pnpm for development
+RUN pnpm config set network-timeout 600000 && \
+    pnpm config set fetch-retry-mintimeout 20000 && \
+    pnpm config set fetch-retry-maxtimeout 120000 && \
+    pnpm config set fetch-retry-factor 10
+
+# Start development server with proper error handling
+CMD ["sh", "-c", "cd apps/frontend && pnpm install --prefer-offline && pnpm dev"] 

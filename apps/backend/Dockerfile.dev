@@ -1,16 +1,39 @@
-# Development Dockerfile for backend
-FROM node:18-alpine
+# Development Dockerfile for backend optimized for Railway
+FROM node:18-slim
 
-# Install system dependencies
-RUN apk add --no-cache libc6-compat curl && \
-    npm install -g pnpm@8.15.4
+# Set environment variables
+ENV NODE_ENV=development
+ENV NODE_OPTIONS="--max-old-space-size=1536"
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies with better error handling
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    openssl \
+    ca-certificates \
+    curl \
+    procps \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install pnpm with enhanced network configuration
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retry-maxtime 300000 && \
+    npm config set fetch-retry-factor 10 && \
+    npm config set fetch-retry-delay 10000 && \
+    corepack enable && \
+    corepack prepare pnpm@8.15.4 --activate
 
 # Set working directory
 WORKDIR /app
 
-# Create non-root user and directories
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nestjs && \
+# Create non-root user and set permissions
+RUN groupadd -r nodejs -g 1001 && \
+    useradd -r -g nodejs -u 1001 nestjs && \
     mkdir -p /app/data/uploads && \
     chown -R nestjs:nodejs /app
 
@@ -20,5 +43,11 @@ USER nestjs
 # Expose port
 EXPOSE 3002
 
-# Start development server with database setup
-CMD ["sh", "-c", "cd apps/backend && pnpm install && pnpm prisma generate && pnpm prisma migrate dev && pnpm prisma db seed && pnpm start:dev"] 
+# Configure pnpm for development
+RUN pnpm config set network-timeout 600000 && \
+    pnpm config set fetch-retry-mintimeout 20000 && \
+    pnpm config set fetch-retry-maxtimeout 120000 && \
+    pnpm config set fetch-retry-factor 10
+
+# Start development server with proper error handling
+CMD ["sh", "-c", "cd apps/backend && pnpm install --prefer-offline && pnpm prisma generate && pnpm prisma migrate dev --name init && pnpm prisma db seed && pnpm start:dev"] 

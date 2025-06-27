@@ -1,83 +1,110 @@
-# Use Node 18 slim instead of alpine for better compatibility
+# Railway optimized Dockerfile for backend
 FROM node:18-slim AS base
 
-# Set environment variables
+# Set environment variables for better performance and stability
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=1536"
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+ENV PYTHONUNBUFFERED=1
 
-# Install pnpm
-RUN corepack enable && \
+# Install system dependencies with retry logic
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    openssl \
+    ca-certificates \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install pnpm with retry
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retry-maxtime 300000 && \
+    npm config set fetch-retry-factor 10 && \
+    npm config set fetch-retry-delay 10000 && \
+    corepack enable && \
     corepack prepare pnpm@8.15.4 --activate
 
-# Set working directory
 WORKDIR /app
 
-# Stage 1: Install dependencies
+# ==============================================================================
+# Dependencies Stage
+# ==============================================================================
 FROM base AS deps
-WORKDIR /app
 
-# Copy only package files
+# Copy package files for better layer caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/types/package.json ./packages/types/
 COPY apps/backend/package.json ./apps/backend/
 
-# Install dependencies with production only
-RUN pnpm install --prod --frozen-lockfile --workspace-root
+# Configure pnpm for better network handling
+RUN pnpm config set network-timeout 300000 && \
+    pnpm config set fetch-retry-mintimeout 20000 && \
+    pnpm config set fetch-retry-maxtimeout 120000 && \
+    pnpm config set fetch-retry-factor 10
 
-# Stage 2: Build the application
+# Install dependencies with enhanced retry logic
+RUN pnpm install --frozen-lockfile --prefer-offline --prod
+
+# ==============================================================================
+# Builder Stage
+# ==============================================================================
 FROM base AS builder
-WORKDIR /app
 
-# Copy files needed for build
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages ./packages
-COPY --from=deps /app/apps/backend/node_modules ./apps/backend/node_modules
 
-# Copy source files
+# Copy source code
 COPY . .
 
-# Generate Prisma Client
+# Generate Prisma client and build
 WORKDIR /app/apps/backend
-RUN pnpm prisma generate
+RUN pnpm prisma generate && \
+    pnpm build
 
-# Build the app
-RUN pnpm build
-
-# Stage 3: Production image
+# ==============================================================================
+# Production Stage
+# ==============================================================================
 FROM node:18-slim AS runner
-WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV=production
-ENV PORT=3002
-
-# Install production dependencies
+# Install only required system dependencies
 RUN apt-get update -y && \
-    apt-get install -y openssl && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends \
+    openssl \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN groupadd -r nodejs -g 1001 && \
     useradd -r -g nodejs -u 1001 nestjs
 
-# Copy only the necessary files
-COPY --from=builder /app/apps/backend/dist ./dist
-COPY --from=builder /app/apps/backend/prisma ./prisma
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/backend/node_modules ./node_modules
+WORKDIR /app
 
-# Create uploads directory and set permissions
+# Copy built application
+COPY --from=builder --chown=nestjs:nodejs /app/apps/backend/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/apps/backend/prisma ./prisma
+COPY --from=deps --chown=nestjs:nodejs /app/node_modules ./node_modules
+
+# Create uploads directory
 RUN mkdir -p /app/data/uploads && \
     chown -R nestjs:nodejs /app
 
 # Switch to non-root user
 USER nestjs
 
-# Expose the port
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=3002
+
+# Expose port
 EXPOSE 3002
 
-# Start the application
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:3002/health || exit 1
+
+# Start application with database migration
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"] 

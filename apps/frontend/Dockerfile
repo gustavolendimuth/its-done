@@ -1,76 +1,110 @@
-# Use Node 18 slim instead of alpine for better compatibility
+# Railway optimized Dockerfile for frontend
 FROM node:18-slim AS base
 
-# Set environment variables
+# Set environment variables for better performance
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_OPTIONS="--max-old-space-size=1536"
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+ENV PYTHONUNBUFFERED=1
 
-# Install pnpm
-RUN corepack enable && \
+# Install system dependencies with retry logic
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install pnpm with enhanced network configuration
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retry-maxtime 300000 && \
+    npm config set fetch-retry-factor 10 && \
+    npm config set fetch-retry-delay 10000 && \
+    corepack enable && \
     corepack prepare pnpm@8.15.4 --activate
 
-# Set working directory
 WORKDIR /app
 
-# Stage 1: Install dependencies
+# ==============================================================================
+# Dependencies Stage
+# ==============================================================================
 FROM base AS deps
-WORKDIR /app
 
-# Copy only package files
+# Copy package files for better layer caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/types/package.json ./packages/types/
 COPY apps/frontend/package.json ./apps/frontend/
+COPY apps/frontend/components.json ./apps/frontend/
 
-# Install dependencies with production only
-RUN pnpm install --prod --frozen-lockfile --workspace-root
+# Configure pnpm for better network handling
+RUN pnpm config set network-timeout 600000 && \
+    pnpm config set fetch-retry-mintimeout 20000 && \
+    pnpm config set fetch-retry-maxtimeout 120000 && \
+    pnpm config set fetch-retry-factor 10
 
-# Stage 2: Build the application
+# Install dependencies with enhanced retry logic
+RUN pnpm install --frozen-lockfile --prefer-offline --prod
+
+# ==============================================================================
+# Builder Stage
+# ==============================================================================
 FROM base AS builder
-WORKDIR /app
 
-# Copy files needed for build
+# Copy dependencies and packages
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages ./packages
-COPY --from=deps /app/apps/frontend/node_modules ./apps/frontend/node_modules
 
-# Copy source files
+# Copy source code
 COPY . .
 
-# Build the app
+# Build the application
 WORKDIR /app/apps/frontend
 RUN pnpm build
 
-# Stage 3: Production image
+# ==============================================================================
+# Production Stage
+# ==============================================================================
 FROM node:18-slim AS runner
+
+# Install only required system dependencies
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -r nodejs -g 1001 && \
+    useradd -r -g nodejs -u 1001 nextjs
+
 WORKDIR /app
 
-# Set production environment
+# Set environment
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
-
-# Copy only the necessary files
-COPY --from=builder /app/apps/frontend/public ./public
-COPY --from=builder /app/apps/frontend/.next/standalone ./
-COPY --from=builder /app/apps/frontend/.next/static ./.next/static
-
-# Set permissions
-RUN chown -R nextjs:nodejs /app
+# Copy built application
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./.next/static
 
 # Switch to non-root user
 USER nextjs
 
-# Expose the port
+# Expose port
 EXPOSE 3000
 
-# Start the application
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Start application
 CMD ["node", "server.js"]
 
 # Development Dockerfile for frontend
