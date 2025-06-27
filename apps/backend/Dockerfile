@@ -15,7 +15,7 @@ COPY package.json ./
 COPY pnpm-lock.yaml* ./
 
 # Instalar dependências
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Builder stage
 FROM base AS builder
