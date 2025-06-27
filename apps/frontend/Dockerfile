@@ -11,9 +11,20 @@ WORKDIR /app
 # Stage 1: Dependencies
 FROM base AS deps
 
-# Copiar arquivos de configuração
+# Copiar arquivos de configuração do workspace
+COPY pnpm-workspace.yaml ./
 COPY package.json ./
-COPY components.json ./
+
+# Criar estrutura de diretórios
+RUN mkdir -p apps/frontend packages
+
+# Copiar arquivos de configuração do frontend
+COPY apps/frontend/package.json ./apps/frontend/
+COPY apps/frontend/components.json ./
+
+# Copiar os pacotes necessários do workspace
+COPY packages/types ./packages/types
+COPY packages/tsconfig ./packages/tsconfig
 
 # Instalar dependências
 RUN pnpm config set network-timeout 300000 && \
@@ -23,18 +34,24 @@ RUN pnpm config set network-timeout 300000 && \
 FROM base AS builder
 WORKDIR /app
 
-# Copiar node_modules
+# Criar estrutura de diretórios
+RUN mkdir -p apps/frontend packages
+
+# Copiar node_modules e estrutura do workspace
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
+COPY --from=deps /app/pnpm-workspace.yaml ./
+COPY --from=deps /app/packages ./packages
+COPY --from=deps /app/apps/frontend/package.json ./apps/frontend/package.json
 
 # Copiar código fonte
-COPY src ./src
-COPY public ./public
-COPY next.config.js ./
-COPY tailwind.config.ts ./
-COPY tsconfig.json ./
-COPY postcss.config.* ./
-COPY components.json ./
+COPY apps/frontend/src ./src
+COPY apps/frontend/public ./public
+COPY apps/frontend/next.config.js ./
+COPY apps/frontend/tailwind.config.ts ./
+COPY apps/frontend/tsconfig.json ./
+COPY apps/frontend/postcss.config.* ./
+COPY apps/frontend/components.json ./
 
 # Build da aplicação
 RUN echo "🔨 Building Next.js application..." && \
