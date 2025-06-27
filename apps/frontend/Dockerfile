@@ -1,87 +1,58 @@
-# Dockerfile para deploy standalone do frontend
+# Dockerfile independente para o frontend
 FROM node:18-alpine AS base
 
-# Instalar dependências do sistema
-RUN apk add --no-cache libc6-compat && \
-    npm install -g pnpm@8.15.4
+# Instalar dependências necessárias
+RUN apk add --no-cache libc6-compat
+RUN npm install -g pnpm@8.15.4
 
-# Definir diretório de trabalho
 WORKDIR /app
 
-# Stage 1: Dependencies
+# Dependencies stage
 FROM base AS deps
 
-# Copiar arquivos de configuração do workspace (contexto é a raiz do projeto)
-COPY pnpm-workspace.yaml ./
+# Copiar package.json e pnpm-lock.yaml
 COPY package.json ./
-
-# Criar estrutura de diretórios
-RUN mkdir -p apps/frontend packages
-
-# Copiar arquivos de configuração do frontend
-COPY apps/frontend/package.json ./apps/frontend/
-COPY apps/frontend/components.json ./apps/frontend/
-COPY apps/frontend/src ./apps/frontend/src
-COPY apps/frontend/public ./apps/frontend/public
-COPY apps/frontend/next.config.js ./apps/frontend/
-COPY apps/frontend/tailwind.config.ts ./apps/frontend/
-COPY apps/frontend/tsconfig.json ./apps/frontend/
-COPY apps/frontend/postcss.config.* ./apps/frontend/
-
-# Copiar os pacotes necessários do workspace
-COPY packages/types ./packages/types
-COPY packages/tsconfig ./packages/tsconfig
+COPY pnpm-lock.yaml* ./
 
 # Instalar dependências
-RUN pnpm config set network-timeout 300000 && \
-    pnpm install --prod=false
+RUN pnpm install --frozen-lockfile
 
-# Stage 2: Build
+# Builder stage
 FROM base AS builder
+
 WORKDIR /app
 
-# Criar estrutura de diretórios
-RUN mkdir -p apps/frontend packages
-
-# Copiar node_modules e estrutura do workspace
+# Copiar node_modules do stage anterior
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
-COPY --from=deps /app/pnpm-workspace.yaml ./
-COPY --from=deps /app/packages ./packages
-COPY --from=deps /app/apps/frontend ./apps/frontend
 
-# Build da aplicação (construir types primeiro, depois frontend)
-WORKDIR /app
-RUN echo "🔧 Building types package..." && \
-    pnpm --filter @its-done/types build
-RUN echo "🔨 Building Next.js application..." && \
-    pnpm --filter frontend build
+# Copiar código fonte
+COPY . .
 
-# Stage 3: Production
+# Build do pacote types primeiro
+RUN cd packages-types && pnpm run build
+
+# Build da aplicação Next.js
+RUN pnpm run build
+
+# Production stage
 FROM base AS runner
 WORKDIR /app
 
 # Criar usuário não-root
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Copiar arquivos necessários
-COPY --from=builder /app/apps/frontend/next.config.js ./
-COPY --from=builder /app/apps/frontend/public ./public
+# Copiar arquivos necessários para produção
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copiar aplicação buildada
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./.next/static
-
-# Mudar para usuário não-root
 USER nextjs
 
-# Expor porta
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
 
-# Comando para iniciar
 CMD ["node", "server.js"] 

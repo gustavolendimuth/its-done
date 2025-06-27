@@ -1,0 +1,20 @@
+{
+  "name": "@its-done/types",
+  "version": "0.1.0",
+  "description": "Shared TypeScript types for Its Done application",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

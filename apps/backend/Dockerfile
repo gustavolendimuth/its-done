@@ -1,44 +1,42 @@
-# Dockerfile para deploy standalone do backend
-FROM node:18-alpine
+# Dockerfile independente para o backend
+FROM node:18-alpine AS base
 
-# Instalar dependências do sistema
-RUN apk add --no-cache libc6-compat curl && \
-    npm install -g pnpm@8.15.4
+# Instalar dependências necessárias
+RUN apk add --no-cache libc6-compat curl
+RUN npm install -g pnpm@8.15.4
 
-# Definir diretório de trabalho
 WORKDIR /app
 
-# Copiar arquivos de configuração do workspace
-COPY pnpm-workspace.yaml ./
+# Dependencies stage
+FROM base AS deps
+
+# Copiar package.json e pnpm-lock.yaml
 COPY package.json ./
-
-# Criar estrutura de diretórios
-RUN mkdir -p apps/backend packages
-
-# Copiar arquivos de configuração do backend
-COPY apps/backend/package.json ./apps/backend/
-COPY apps/backend/tsconfig*.json ./
-COPY apps/backend/nest-cli.json ./
-
-# Copiar os pacotes necessários do workspace
-COPY packages/types ./packages/types
-COPY packages/tsconfig ./packages/tsconfig
+COPY pnpm-lock.yaml* ./
 
 # Instalar dependências
-RUN pnpm config set network-timeout 300000 && \
-    pnpm install --prod=true && \
-    pnpm add prisma@latest --save-dev
+RUN pnpm install --frozen-lockfile
 
-# Copiar código fonte e prisma
-COPY apps/backend/src ./src
-COPY apps/backend/prisma ./prisma
+# Builder stage
+FROM base AS builder
 
-# Build da aplicação
-RUN echo "🔧 Gerando Prisma client..." && \
-    pnpm prisma generate
+WORKDIR /app
 
-RUN echo "🔨 Executando build NestJS..." && \
-    pnpm run build
+# Copiar node_modules do stage anterior
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package.json ./package.json
+
+# Copiar código fonte
+COPY . .
+
+# Build do pacote types primeiro
+RUN cd packages-types && pnpm run build
+
+# Gerar Prisma client
+RUN pnpm prisma generate
+
+# Build da aplicação NestJS
+RUN pnpm run build
 
 # Verificar resultado do build
 RUN echo "📦 Verificando build:" && \
@@ -46,16 +44,26 @@ RUN echo "📦 Verificando build:" && \
     echo "✅ Main file encontrado:" && \
     ls -la dist/main.js
 
-# Criar usuário não-root e diretórios
+# Production stage
+FROM base AS runner
+WORKDIR /app
+
+# Criar usuário não-root
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nestjs && \
-    mkdir -p /app/data/uploads && \
-    chown -R nestjs:nodejs /app
+    mkdir -p /app/data/uploads
 
-# Mudar para usuário não-root
+# Copiar arquivos necessários para produção
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/package.json ./package.json
+
+# Definir permissões
+RUN chown -R nestjs:nodejs /app
+
 USER nestjs
 
-# Expor porta
 EXPOSE 3002
 
 # Health check

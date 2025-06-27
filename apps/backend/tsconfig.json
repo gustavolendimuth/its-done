@@ -16,8 +16,11 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@its-done/types": ["./packages-types/src"]
+    }
   },
-  "include": ["src/**/*", "scripts/**/*"],
+  "include": ["src/**/*", "scripts/**/*", "packages-types/src/**/*"],
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
 }
