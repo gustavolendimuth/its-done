@@ -1,11 +1,4 @@
-import {
-  Upload,
-  FileText,
-  CheckCircle,
-  X,
-  File,
-  Loader2,
-} from "lucide-react";
+import { Upload, FileText, CheckCircle, X, File, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -14,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDownloadInvoice } from "@/services/invoices";
 
 interface InvoiceFileUploadProps {
   /** Número da nota fiscal */
@@ -63,6 +57,7 @@ export function InvoiceFileUpload({
   disabled = false,
 }: InvoiceFileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
+  const downloadInvoiceMutation = useDownloadInvoice();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -157,6 +152,25 @@ export function InvoiceFileUpload({
     onFileSelect(null);
   };
 
+  const handleDownload = async () => {
+    if (!existingFileUrl) return;
+
+    try {
+      const blob = await downloadInvoiceMutation.mutateAsync(existingFileUrl);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `invoice-${invoiceNumber || "document"}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast.error("Failed to download file");
+    }
+  };
+
   if (compact) {
     return (
       <div className="space-y-4">
@@ -210,14 +224,13 @@ export function InvoiceFileUpload({
             <div className="flex items-center space-x-2 text-sm">
               <FileText className="h-4 w-4 text-green-600" />
               <span>Current file: </span>
-              <a
-                href={existingFileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+              <Button
+                variant="link"
+                className="h-auto p-0 text-blue-600 hover:underline"
+                onClick={handleDownload}
               >
-                View document
-              </a>
+                Download document
+              </Button>
             </div>
           )}
         </div>
@@ -362,14 +375,13 @@ export function InvoiceFileUpload({
                 <p className="text-sm font-medium text-green-800 dark:text-green-200">
                   Current document uploaded
                 </p>
-                <a
-                  href={existingFileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-green-600 dark:text-green-400 hover:underline"
+                <Button
+                  variant="link"
+                  className="h-auto p-0 text-green-600 dark:text-green-400 hover:underline"
+                  onClick={handleDownload}
                 >
-                  View uploaded document →
-                </a>
+                  Download document →
+                </Button>
               </div>
               <Badge variant="success">Uploaded</Badge>
             </div>

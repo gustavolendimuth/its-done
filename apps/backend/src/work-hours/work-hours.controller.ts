@@ -22,7 +22,7 @@ export class WorkHoursController {
 
   @Post()
   create(@Request() req, @Body() createWorkHourDto: CreateWorkHourDto) {
-    return this.workHoursService.create(req.user.userId, createWorkHourDto);
+    return this.workHoursService.create(req.user.id, createWorkHourDto);
   }
 
   @Get()
@@ -33,7 +33,7 @@ export class WorkHoursController {
     @Query('clientId') clientId?: string,
   ) {
     return this.workHoursService.findAll(
-      req.user.userId,
+      req.user.id,
       from ? new Date(from) : undefined,
       to ? new Date(to) : undefined,
       clientId,
@@ -47,7 +47,7 @@ export class WorkHoursController {
     @Query('endDate') endDate?: string,
   ) {
     return this.workHoursService.getTotalHours(
-      req.user.userId,
+      req.user.id,
       startDate ? new Date(startDate) : undefined,
       endDate ? new Date(endDate) : undefined,
     );
@@ -61,7 +61,7 @@ export class WorkHoursController {
     @Query('clientId') clientId?: string,
   ) {
     return this.workHoursService.getStats(
-      req.user.userId,
+      req.user.id,
       from ? new Date(from) : undefined,
       to ? new Date(to) : undefined,
       clientId,
@@ -76,7 +76,7 @@ export class WorkHoursController {
     @Query('clientId') clientId?: string,
   ) {
     return this.workHoursService.findAvailable(
-      req.user.userId,
+      req.user.id,
       from ? new Date(from) : undefined,
       to ? new Date(to) : undefined,
       clientId,
@@ -85,7 +85,7 @@ export class WorkHoursController {
 
   @Get(':id')
   findOne(@Request() req, @Param('id') id: string) {
-    return this.workHoursService.findOne(req.user.userId, id);
+    return this.workHoursService.findOne(req.user.id, id);
   }
 
   @Patch(':id')
@@ -94,11 +94,11 @@ export class WorkHoursController {
     @Param('id') id: string,
     @Body() updateWorkHourDto: UpdateWorkHourDto,
   ) {
-    return this.workHoursService.update(req.user.userId, id, updateWorkHourDto);
+    return this.workHoursService.update(req.user.id, id, updateWorkHourDto);
   }
 
   @Delete(':id')
   remove(@Request() req, @Param('id') id: string) {
-    return this.workHoursService.remove(req.user.userId, id);
+    return this.workHoursService.remove(req.user.id, id);
   }
 }

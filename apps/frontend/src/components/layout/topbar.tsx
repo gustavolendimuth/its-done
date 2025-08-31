@@ -18,6 +18,7 @@ import { FormModal } from "@/components/ui/form-modal";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { WorkHourForm } from "@/components/work-hours/work-hour-form";
+import { useClients } from "@/services/clients";
 
 interface TopbarProps {
   children?: React.ReactNode;
@@ -26,8 +27,12 @@ interface TopbarProps {
 export function Topbar({ children }: TopbarProps) {
   const t = useTranslations("navigation");
   const tWorkHours = useTranslations("workHours");
+  const tCommon = useTranslations("common");
   const { data: session } = useSession();
   const [isAddHoursOpen, setIsAddHoursOpen] = useState(false);
+
+  // Fetch clients for the work hour form
+  const { data: clients, isLoading: isLoadingClients } = useClients();
 
   const handleLogout = () => {
     signOut();
@@ -113,7 +118,18 @@ export function Topbar({ children }: TopbarProps) {
         description={tWorkHours("addHoursFormSubtitle")}
         icon={Clock}
       >
-        <WorkHourForm onSuccess={handleAddHoursSuccess} clients={[]} />
+        {!isLoadingClients && clients && clients.length > 0 ? (
+          <WorkHourForm onSuccess={handleAddHoursSuccess} clients={clients} />
+        ) : (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-sm text-muted-foreground">
+                {isLoadingClients ? tCommon("loading") : "No clients found"}...
+              </p>
+            </div>
+          </div>
+        )}
       </FormModal>
     </header>
   );

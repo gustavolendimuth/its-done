@@ -32,10 +32,13 @@ export default function WorkHoursPage() {
   const initialDateRange = useMemo(() => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    // Use end of day to ensure new entries created today are included
+    const endOfToday = new Date(today);
+    endOfToday.setHours(23, 59, 59, 999);
 
     return {
       startDate: firstDayOfMonth,
-      endDate: today,
+      endDate: endOfToday,
     };
   }, []);
 
@@ -89,7 +92,11 @@ export default function WorkHoursPage() {
   }
 
   const handleWorkHourAdded = () => {
+    console.log("🎯 handleWorkHourAdded called - closing modal");
+    // Close the modal
     setIsModalOpen(false);
+    // The toast is already shown in the WorkHourForm component
+    console.log("✅ Modal closed");
   };
 
   const handleEdit = (id: string) => {
@@ -254,7 +261,18 @@ export default function WorkHoursPage() {
         description={t("addHoursFormSubtitle")}
         icon={Clock}
       >
-        <WorkHourForm onSuccess={handleWorkHourAdded} clients={clients || []} />
+        {!isLoadingClients && clients ? (
+          <WorkHourForm onSuccess={handleWorkHourAdded} clients={clients} />
+        ) : (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-sm text-muted-foreground">
+                {tCommon("loading")}...
+              </p>
+            </div>
+          </div>
+        )}
       </FormModal>
     </PageContainer>
   );

@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "It's Done - Controle Profissional de Horas",
+    "title": "Está Feito - Controle Profissional de Horas",
     "description": "Um aplicativo profissional de controle de horas para contratados e equipes"
   },
   "theme": {
@@ -9,7 +9,7 @@
     "system": "Sistema"
   },
   "home": {
-    "title": "Controle Tempo, Aumente Produtividade",
+    "title": "Controle o Tempo, Aumente a Produtividade",
     "description": "Controle de tempo profissional para contratados e equipes. Gerencie projetos, registre horas e seja pago pelo seu trabalho.",
     "getStarted": "Começar",
     "login": "Entrar",
@@ -128,6 +128,8 @@
     "selectProject": "Selecione o projeto (opcional)",
     "enterHours": "Digite as horas trabalhadas",
     "enterDescription": "Digite a descrição do trabalho",
+    "descriptionPlaceholder": "Descreva as atividades realizadas (opcional)",
+    "hourDescription": "Descrição",
     "confirmDelete": "Tem certeza que deseja excluir este registro de horas?",
     "deleteSuccess": "Registro de horas excluído com sucesso",
     "saveSuccess": "Registro de horas salvo com sucesso",
@@ -272,13 +274,12 @@
     "addresses": "Endereços",
     "errorClientIdNotAvailable": "Erro: ID do cliente não disponível",
     "finish": "Finalizar",
-    "testApi": "Testar API",
-    "checkSession": "Verificar Sessão",
     "contactName": "Nome do Contato",
     "enterContactNameOptional": "Digite o nome da pessoa de contato (opcional)",
     "errorCreatingClient": "Erro ao criar cliente. Tente novamente.",
     "creating": "Criando",
-    "createClient": "Criar Cliente"
+    "createClient": "Criar Cliente",
+    "selectClient": "Selecione o cliente"
   },
   "projects": {
     "title": "Projetos",
@@ -338,7 +339,10 @@
     "focusBalanced": "Foco balanceado",
     "focusClientDiversity": "Diversidade de clientes",
     "totalWorkHours": "horas de trabalho",
-    "clientsInvolved": "clientes envolvidos"
+    "clientsInvolved": "clientes envolvidos",
+    "searchProjects": "Buscar projetos...",
+    "addNewProject": "Adicionar Novo Projeto",
+    "selectProject": "Selecione o projeto"
   },
   "invoices": {
     "title": "Faturas",
@@ -561,7 +565,7 @@
     "add": "Adicionar",
     "create": "Criar",
     "update": "Atualizar",
-    "search": "Buscar",
+    "search": "Buscar...",
     "filter": "Filtrar",
     "sort": "Ordenar",
     "actions": "Ações",
@@ -652,7 +656,9 @@
       "year": "1 ano",
       "years": "{count} anos"
     },
-    "on": "em"
+    "on": "em",
+    "noItemsFound": "Nenhum item encontrado",
+    "addNew": "Adicionar Novo"
   },
   "notifications": {
     "hoursLimitReached": "Você atingiu seu limite mensal de {limit} horas",

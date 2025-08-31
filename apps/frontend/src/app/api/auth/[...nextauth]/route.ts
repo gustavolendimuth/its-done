@@ -2,7 +2,7 @@ import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
-import { getApiUrl , normalizeUrl } from "@/lib/utils";
+import { getApiUrl, normalizeUrl } from "@/lib/utils";
 
 const authOptions: AuthOptions = {
   providers: [
@@ -27,7 +27,6 @@ const authOptions: AuthOptions = {
 
         if (!credentials?.email || !credentials?.password) {
           console.log("Missing credentials");
-
           return null;
         }
 
@@ -65,11 +64,9 @@ const authOptions: AuthOptions = {
           }
 
           console.log("Login failed - Response:", response.status, data);
-
           return null;
         } catch (error) {
           console.error("Error during login:", error);
-
           return null;
         }
       },
@@ -100,7 +97,6 @@ const authOptions: AuthOptions = {
 
           if (!response.ok) {
             console.error("Backend response not ok:", response.status);
-
             return false;
           }
 
@@ -122,54 +118,43 @@ const authOptions: AuthOptions = {
           return false;
         } catch (error) {
           console.error("Google sign in error:", error);
-
           return false;
         }
       }
 
       console.log("SignIn returning true");
-
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       console.log("=== JWT CALLBACK ===");
       console.log("Token before:", token);
       console.log("User:", user);
-      console.log("Account:", account);
 
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
         token.role = user.role;
-        // Se tiver accessToken no user (login com credentials ou google), usar ele
-        if (user.accessToken) {
-          token.accessToken = user.accessToken;
-        }
-      }
-
-      // Se for Google OAuth, o access token vem do account
-      if (account?.provider === "google" && account.access_token) {
-        // Mas nós não queremos usar o token do Google, queremos usar o token do nosso backend
-        // que foi armazenado em user.accessToken durante o signIn callback
-        console.log(
-          "Google OAuth detected, but using backend token from user object"
-        );
+        token.accessToken = user.accessToken;
       }
 
       console.log("Token after:", token);
-
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
-        session.user.role = token.role as "USER" | "ADMIN";
-      }
-      session.accessToken = token.accessToken as string;
+      console.log("=== SESSION CALLBACK ===");
+      console.log("Session before:", session);
+      console.log("Token:", token);
 
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.role = token.role;
+      }
+      session.accessToken = token.accessToken;
+
+      console.log("Session after:", session);
       return session;
     },
     async redirect({ url, baseUrl }) {

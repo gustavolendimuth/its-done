@@ -1,12 +1,13 @@
 import { format } from "date-fns";
 import { FileText, Clock, Calendar, Download, Eye } from "lucide-react";
 import React from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
-import { Invoice } from "@/services/invoices";
+import { Invoice, useDownloadInvoice } from "@/services/invoices";
 
 export interface ClientInvoiceCardProps {
   invoice: Invoice;
@@ -37,6 +38,7 @@ export function ClientInvoiceCard({
   invoice,
   className,
 }: ClientInvoiceCardProps) {
+  const downloadInvoiceMutation = useDownloadInvoice();
   const accentColor = getStatusColor(invoice.status);
   const invoiceNumber = invoice.number || `INV-${invoice.id.slice(-8)}`;
 
@@ -60,24 +62,28 @@ export function ClientInvoiceCard({
         : `${format(new Date(workDates[0]), "MMM dd")} - ${format(new Date(workDates[workDates.length - 1]), "MMM dd, yyyy")}`
       : "No work period";
 
-  const handleDownload = () => {
-    if (invoice.fileUrl) {
-      // Create a temporary link to download the file
-      const link = document.createElement("a");
+  const handleDownload = async () => {
+    if (!invoice.fileUrl) return;
 
-      link.href = invoice.fileUrl;
-      link.download = `${invoiceNumber}.pdf`;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
+    try {
+      const blob = await downloadInvoiceMutation.mutateAsync(invoice.fileUrl);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `invoice-${invoiceNumber}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast.error("Failed to download file");
     }
   };
 
   const handleView = () => {
     if (invoice.fileUrl) {
-      window.open(invoice.fileUrl, "_blank", "noopener,noreferrer");
+      handleDownload();
     }
   };
 

@@ -3,11 +3,8 @@ import {
   IsNumber,
   IsString,
   IsUUID,
-  IsNotEmpty,
   Min,
   Max,
-  MaxLength,
-  MinLength,
   IsOptional,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
@@ -19,12 +16,6 @@ export class CreateWorkHourDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(3, {
-    message: 'Description must be at least 3 characters long',
-  })
-  @MaxLength(500, {
-    message: 'Description must not exceed 500 characters',
-  })
   description?: string;
 
   @IsNumber(

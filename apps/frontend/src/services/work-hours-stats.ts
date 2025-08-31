@@ -25,17 +25,22 @@ export const useWorkHoursStats = (params?: {
   to?: string;
   clientId?: string;
 }) => {
+  console.log("📈 useWorkHoursStats called with params:", params);
+
   return useQuery({
     queryKey: ["workHours", "stats", params],
     queryFn: async () => {
+      console.log("📈 useWorkHoursStats fetching data with params:", params);
       const { data } = await api.get<WorkHoursStats>("/work-hours/stats", {
         params,
       });
-
+      console.log("📈 useWorkHoursStats received data:", data);
       return data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache data (renamed from cacheTime)
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
   });
 };

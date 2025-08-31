@@ -50,13 +50,38 @@ export function WorkHoursBigStats({
         }
       : undefined;
 
+  console.log("📊 WorkHoursBigStats render - queryParams:", queryParams);
+
   // Selected period stats
-  const { data: periodStats } = useWorkHoursStats(queryParams);
+  const {
+    data: periodStats,
+    isLoading: isPeriodLoading,
+    isFetching: isPeriodFetching,
+  } = useWorkHoursStats(queryParams);
 
   // Total stats (without date filters)
-  const { data: totalStats } = useWorkHoursStats({
+  const {
+    data: totalStats,
+    isLoading: isTotalLoading,
+    isFetching: isTotalFetching,
+  } = useWorkHoursStats({
     clientId: clientId !== "all" ? clientId : undefined,
   });
+
+  console.log("📊 WorkHoursBigStats - periodStats:", periodStats);
+  console.log("📊 WorkHoursBigStats - totalStats:", totalStats);
+  console.log(
+    "📊 WorkHoursBigStats - isPeriodLoading:",
+    isPeriodLoading,
+    "isPeriodFetching:",
+    isPeriodFetching
+  );
+  console.log(
+    "📊 WorkHoursBigStats - isTotalLoading:",
+    isTotalLoading,
+    "isTotalFetching:",
+    isTotalFetching
+  );
 
   // Values for display
   const periodHours = periodStats?.totalHours || 0;
@@ -64,6 +89,14 @@ export function WorkHoursBigStats({
   const estimatedValue = periodHours * hourlyRate;
   const averagePerDay = periodStats?.averageHoursPerDay || 0;
   const activeClients = periodStats?.activeClients || 0;
+
+  console.log("📊 WorkHoursBigStats - calculated values:", {
+    periodHours,
+    allTimeHours,
+    estimatedValue,
+    averagePerDay,
+    activeClients,
+  });
 
   // Calculate unique worked days
   const workedDays =

@@ -28,5 +28,6 @@ declare module "next-auth/jwt" {
     email: string;
     name: string;
     role: "USER" | "ADMIN";
+    accessToken?: string;
   }
 }

@@ -22,27 +22,27 @@ export class AddressesController {
 
   @Post()
   create(@Request() req, @Body() createAddressDto: CreateAddressDto) {
-    return this.addressesService.create(req.user.userId, createAddressDto);
+    return this.addressesService.create(req.user.id, createAddressDto);
   }
 
   @Get()
   findAll(@Request() req, @Query('clientId') clientId?: string) {
-    return this.addressesService.findAll(req.user.userId, clientId);
+    return this.addressesService.findAll(req.user.id, clientId);
   }
 
   @Get('client/:clientId')
   findByClient(@Request() req, @Param('clientId') clientId: string) {
-    return this.addressesService.findByClient(req.user.userId, clientId);
+    return this.addressesService.findByClient(req.user.id, clientId);
   }
 
   @Get(':id')
   findOne(@Request() req, @Param('id') id: string) {
-    return this.addressesService.findOne(req.user.userId, id);
+    return this.addressesService.findOne(req.user.id, id);
   }
 
   @Patch(':id/set-primary')
   setPrimary(@Request() req, @Param('id') id: string) {
-    return this.addressesService.setPrimary(req.user.userId, id);
+    return this.addressesService.setPrimary(req.user.id, id);
   }
 
   @Patch(':id')
@@ -51,11 +51,11 @@ export class AddressesController {
     @Param('id') id: string,
     @Body() updateAddressDto: UpdateAddressDto,
   ) {
-    return this.addressesService.update(req.user.userId, id, updateAddressDto);
+    return this.addressesService.update(req.user.id, id, updateAddressDto);
   }
 
   @Delete(':id')
   remove(@Request() req, @Param('id') id: string) {
-    return this.addressesService.remove(req.user.userId, id);
+    return this.addressesService.remove(req.user.id, id);
   }
 }

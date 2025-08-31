@@ -21,7 +21,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSystemStats } from "@/services/admin";
 
-
 import AdminActivity from "./activity";
 import AdminUsers from "./users";
 

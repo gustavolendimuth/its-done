@@ -26,37 +26,34 @@ export class ClientsController {
 
   @Post()
   create(@Request() req, @Body() createClientDto: CreateClientDto) {
-    return this.clientsService.create(req.user.userId, createClientDto);
+    return this.clientsService.create(req.user.id, createClientDto);
   }
 
   @Get()
   findAll(@Request() req) {
-    return this.clientsService.findAll(req.user.userId);
+    return this.clientsService.findAll(req.user.id);
   }
 
   @Get('stats')
   getStats(@Request() req) {
-    return this.clientsService.getStats(req.user.userId);
+    return this.clientsService.getStats(req.user.id);
   }
 
   @Get(':id')
   findOne(@Request() req, @Param('id') id: string) {
-    return this.clientsService.findOne(req.user.userId, id);
+    return this.clientsService.findOne(req.user.id, id);
   }
 
   @Get(':id/stats')
   getClientStats(@Request() req, @Param('id') id: string) {
-    return this.clientsService.getClientStats(req.user.userId, id);
+    return this.clientsService.getClientStats(req.user.id, id);
   }
 
   @Get(':id/invoices')
   async getClientInvoices(@Request() req, @Param('id') clientId: string) {
     try {
       // Verify client belongs to user first
-      const client = await this.clientsService.findOne(
-        req.user.userId,
-        clientId,
-      );
+      const client = await this.clientsService.findOne(req.user.id, clientId);
       if (!client) {
         throw new NotFoundException(`Client with id ${clientId} not found`);
       }
@@ -80,20 +77,20 @@ export class ClientsController {
     @Param('id') id: string,
     @Body() updateClientDto: UpdateClientDto,
   ) {
-    return this.clientsService.update(req.user.userId, id, updateClientDto);
+    return this.clientsService.update(req.user.id, id, updateClientDto);
   }
 
   @Delete(':id')
   remove(@Request() req, @Param('id') id: string) {
-    return this.clientsService.remove(req.user.userId, id);
+    return this.clientsService.remove(req.user.id, id);
   }
 
   @Get('debug/all')
   async debugGetAllClients(@Request() req) {
     try {
-      const clients = await this.clientsService.findAll(req.user.userId);
+      const clients = await this.clientsService.findAll(req.user.id);
       return {
-        userId: req.user.userId,
+        userId: req.user.id,
         clientCount: clients.length,
         clients: clients.map((c) => ({
           id: c.id,

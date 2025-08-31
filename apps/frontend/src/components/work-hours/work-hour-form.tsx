@@ -1,8 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
+import InputMask from "react-input-mask";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -12,19 +15,23 @@ import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
+import { Textarea } from "@/components/ui/textarea";
 import { Client } from "@/services/clients";
 import { useCreateTimeEntry } from "@/services/time-entries";
 
-const workHourSchema = z.object({
+const workHourFormSchema = z.object({
   date: z.date({
     required_error: "Please select a date",
   }),
-  projectId: z.string().min(1, "Project is required"),
-  hours: z.number().min(0.1, "Hours must be greater than 0"),
+  projectId: z.string().optional(),
+  hours: z
+    .string()
+    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
   clientId: z.string().min(1, "Client is required"),
+  description: z.string().optional(),
 });
 
-type WorkHourFormData = z.infer<typeof workHourSchema>;
+type WorkHourFormData = z.infer<typeof workHourFormSchema>;
 
 interface WorkHourFormProps {
   onSuccess?: () => void;
@@ -50,12 +57,13 @@ export function WorkHourForm({
     watch,
     formState: { errors },
   } = useForm<WorkHourFormData>({
-    resolver: zodResolver(workHourSchema),
+    resolver: zodResolver(workHourFormSchema),
     defaultValues: {
       date: new Date(),
       projectId: "",
-      hours: 0,
+      hours: "",
       clientId: defaultClientId || "",
+      description: "",
     },
   });
 
@@ -68,16 +76,36 @@ export function WorkHourForm({
 
   const createTimeEntry = useCreateTimeEntry();
 
-  const onSubmit = async (data: WorkHourFormData) => {
+  const onSubmit = async (formData: WorkHourFormData) => {
     try {
-      await createTimeEntry.mutateAsync({
-        ...data,
-        date: data.date.toISOString(),
-      });
+      const [hours, minutes] = formData.hours.split(":");
+      const decimalHours = Number(hours) + Number(minutes) / 60;
+
+      const payload = {
+        ...formData,
+        hours: decimalHours,
+        date: formData.date.toISOString(),
+        projectId: formData.projectId || undefined,
+        description: formData.description || undefined,
+      };
+
+      console.log("📝 Submitting work hour form with payload:", payload);
+
+      const result = await createTimeEntry.mutateAsync(payload);
+      console.log("✅ Work hour created successfully:", result);
+
+      toast.success(t("savedSuccessfully", { type: t("workHour") }));
       reset();
+
+      console.log("🔄 Calling onSuccess callback...");
       onSuccess?.();
+      console.log("✅ onSuccess callback completed");
     } catch (error) {
-      console.error("Error creating work hour:", error);
+      console.error("❌ Error creating work hour:", error);
+      if (error instanceof AxiosError && error.response) {
+        console.error("❌ Error response:", error.response.data);
+        toast.error(t("errorSaving", { type: t("workHour") }));
+      }
     }
   };
 
@@ -139,7 +167,7 @@ export function WorkHourForm({
 
       <div className="space-y-2">
         <Label className="text-sm font-medium text-foreground">
-          {t("project")} *
+          {t("project")}
         </Label>
         <Controller
           name="projectId"
@@ -172,17 +200,47 @@ export function WorkHourForm({
           name="hours"
           control={control}
           render={({ field }) => (
-            <Input
-              type="number"
-              step="0.1"
-              placeholder="0.0"
-              {...field}
-              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-            />
+            <InputMask
+              mask="99:99"
+              value={field.value}
+              onChange={field.onChange}
+              maskChar={null}
+            >
+              {(inputProps: any) => (
+                <Input
+                  {...inputProps}
+                  type="text"
+                  placeholder="HH:mm"
+                  className="font-mono"
+                />
+              )}
+            </InputMask>
           )}
         />
         {errors.hours && (
           <p className="text-sm text-destructive">{errors.hours.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-foreground">
+          {t("hourDescription")}
+        </Label>
+        <Controller
+          name="description"
+          control={control}
+          render={({ field }) => (
+            <Textarea
+              {...field}
+              placeholder={t("descriptionPlaceholder")}
+              className="min-h-[100px]"
+            />
+          )}
+        />
+        {errors.description && (
+          <p className="text-sm text-destructive">
+            {errors.description.message}
+          </p>
         )}
       </div>
 

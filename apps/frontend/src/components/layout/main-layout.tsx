@@ -62,10 +62,11 @@ export function Navigation() {
           <Link
             href={item.href}
             className={cn(
-              "flex items-center gap-3 py-2 rounded-lg transition-colors",
+              "flex items-center gap-3 py-2 rounded-lg transition-colors relative",
               "hover:bg-muted/50",
               isActive && "bg-muted",
-              isGrouped ? "px-10" : "px-5"
+              isGrouped ? "px-10" : "px-5",
+              isActive && "border-l-4 border-brand-green-500"
             )}
           >
             <SafeIcon icon={item.icon} className="h-5 w-5" />

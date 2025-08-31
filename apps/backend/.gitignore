@@ -56,7 +56,7 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Database seeds with production data (security)
-prisma/seed.ts
+# prisma/seed.ts
 prisma/seed-production.ts.backup.*
 prisma/seed-generated.ts
 

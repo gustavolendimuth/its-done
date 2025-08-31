@@ -15,7 +15,6 @@ import { useClientAddresses } from "@/services/addresses";
 import { useCreateClient } from "@/services/clients";
 import { Client } from "@/types/client";
 
-
 interface ClientFormData {
   name?: string;
   email: string;
@@ -117,54 +116,6 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
     onSuccess?.();
   };
 
-  const testApiConnection = async () => {
-    try {
-      console.log("Testing API connection...");
-      if (!createdClient) {
-        console.error("No client created yet");
-
-        return;
-      }
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/addresses/client/${createdClient.id}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-
-      console.log("API test response status:", response.status);
-      console.log("API test response headers:", response.headers);
-      const data = await response.text();
-
-      console.log("API test response data:", data);
-    } catch (error) {
-      console.error("API test failed:", error);
-    }
-  };
-
-  const checkSession = async () => {
-    try {
-      console.log("🔍 Checking NextAuth session...");
-      const { getSession } = await import("next-auth/react");
-      const session = await getSession();
-
-      console.log("📱 Current session:", session);
-
-      if (!session) {
-        console.warn("⚠️ No session found - user is not logged in");
-      } else if (!session.accessToken) {
-        console.warn("⚠️ Session found but no access token");
-      } else {
-        console.log("✅ Session and token are valid");
-      }
-    } catch (error) {
-      console.error("❌ Error checking session:", error);
-    }
-  };
-
   // Se o cliente foi criado, mostrar a seção de endereços
   if (createdClient) {
     console.log("Created client:", createdClient);
@@ -208,12 +159,6 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           </Button>
           <Button variant="outline" onClick={() => setCreatedClient(null)}>
             {t("addAnotherClient")}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={testApiConnection}>
-            {t("testApi")}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={checkSession}>
-            {t("checkSession")}
           </Button>
         </div>
       </div>

@@ -16,7 +16,6 @@ import { InfoCard } from "@/components/ui/info-card";
 import { SearchInput } from "@/components/ui/search-input";
 import { useClients } from "@/services/clients";
 
-
 export default function ClientsPage() {
   const t = useTranslations("clients");
   const tCommon = useTranslations("common");

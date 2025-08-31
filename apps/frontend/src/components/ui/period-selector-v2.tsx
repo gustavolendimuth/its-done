@@ -1,6 +1,7 @@
 import {
   format,
   startOfToday,
+  endOfDay,
   startOfWeek,
   endOfWeek,
   startOfMonth,
@@ -12,7 +13,6 @@ import React, { useState, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-
 
 interface DateRange {
   startDate: Date | null;
@@ -38,9 +38,10 @@ export function PeriodSelectorV2({
     {
       label: t("today"),
       getRange: () => {
-        const today = startOfToday();
+        const start = startOfToday();
+        const end = endOfDay(new Date());
 
-        return { startDate: today, endDate: today };
+        return { startDate: start, endDate: end };
       },
     },
     {
@@ -64,7 +65,7 @@ export function PeriodSelectorV2({
     {
       label: t("last7Days"),
       getRange: () => {
-        const end = startOfToday();
+        const end = endOfDay(new Date());
         const start = subDays(end, 6);
 
         return { startDate: start, endDate: end };
@@ -73,7 +74,7 @@ export function PeriodSelectorV2({
     {
       label: t("last30Days"),
       getRange: () => {
-        const end = startOfToday();
+        const end = endOfDay(new Date());
         const start = subDays(end, 29);
 
         return { startDate: start, endDate: end };

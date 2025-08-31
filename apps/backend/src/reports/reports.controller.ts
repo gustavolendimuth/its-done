@@ -20,7 +20,7 @@ export class ReportsController {
       clientId: clientId || undefined,
     };
 
-    return this.reportsService.generateHoursReport(req.user.userId, filters);
+    return this.reportsService.generateHoursReport(req.user.id, filters);
   }
 
   @Get('invoices')
@@ -36,7 +36,7 @@ export class ReportsController {
       clientId: clientId || undefined,
     };
 
-    return this.reportsService.generateInvoiceReport(req.user.userId, filters);
+    return this.reportsService.generateInvoiceReport(req.user.id, filters);
   }
 
   @Get('summary')
@@ -51,8 +51,8 @@ export class ReportsController {
     };
 
     const [hoursReport, invoiceReport] = await Promise.all([
-      this.reportsService.generateHoursReport(req.user.userId, filters),
-      this.reportsService.generateInvoiceReport(req.user.userId, filters),
+      this.reportsService.generateHoursReport(req.user.id, filters),
+      this.reportsService.generateInvoiceReport(req.user.id, filters),
     ]);
 
     return {

@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as fs from 'fs';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   try {
@@ -27,6 +28,7 @@ async function bootstrap() {
     );
 
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    const configService = app.get(ConfigService);
 
     // Global validation pipe
     app.useGlobalPipes(
@@ -73,7 +75,9 @@ async function bootstrap() {
       credentials: true,
     });
 
-    const port = process.env.PORT ?? 3002;
+    app.setGlobalPrefix('api');
+
+    const port = configService.get('PORT') || 3002;
     await app.listen(port);
     console.log(`✅ Application is running on port: ${port}`);
     console.log(

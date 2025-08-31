@@ -8,7 +8,7 @@ export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Get('stats')
-  async getDashboardStats(@Request() req) {
-    return this.dashboardService.getDashboardStats(req.user.userId);
+  getDashboardStats(@Request() req) {
+    return this.dashboardService.getDashboardStats(req.user.id);
   }
 }

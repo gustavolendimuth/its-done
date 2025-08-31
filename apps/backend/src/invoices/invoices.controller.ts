@@ -16,6 +16,7 @@ import {
   Res,
   NotFoundException,
   Query,
+  Header,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -27,6 +28,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as mime from 'mime-types';
 import { diskStorage } from 'multer';
 
 @Controller('invoices')
@@ -45,7 +47,7 @@ export class InvoicesController {
     @Query('to') to?: string,
     @Query('clientId') clientId?: string,
   ) {
-    return this.invoicesService.getStats(req.user.userId, {
+    return this.invoicesService.getStats(req.user.id, {
       from: from ? new Date(from) : undefined,
       to: to ? new Date(to) : undefined,
       clientId,
@@ -91,7 +93,7 @@ export class InvoicesController {
       amount: parseFloat(body.amount) || 0,
     };
 
-    return this.invoicesService.create(createInvoiceDto, req.user.userId);
+    return this.invoicesService.create(createInvoiceDto, req.user.id);
   }
 
   @Post('create-with-file')
@@ -133,14 +135,14 @@ export class InvoicesController {
 
     const invoice = await this.invoicesService.create(
       createInvoiceDto,
-      req.user.userId,
+      req.user.id,
     );
 
     // Upload file to the created invoice
     const result = await this.invoicesService.uploadFileToInvoice(
       invoice.id,
       file,
-      req.user.userId,
+      req.user.id,
     );
 
     return result;
@@ -148,17 +150,17 @@ export class InvoicesController {
 
   @Post()
   async create(@Body() createInvoiceDto: CreateInvoiceDto, @Request() req) {
-    return this.invoicesService.create(createInvoiceDto, req.user.userId);
+    return this.invoicesService.create(createInvoiceDto, req.user.id);
   }
 
   @Get()
   async findAll(@Request() req) {
-    return this.invoicesService.findAll(req.user.userId);
+    return this.invoicesService.findAll(req.user.id);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string, @Request() req) {
-    return this.invoicesService.findOne(id, req.user.userId);
+    return this.invoicesService.findOne(id, req.user.id);
   }
 
   @Patch(':id')
@@ -167,7 +169,7 @@ export class InvoicesController {
     @Body() updateInvoiceDto: UpdateInvoiceDto,
     @Request() req,
   ) {
-    return this.invoicesService.update(id, updateInvoiceDto, req.user.userId);
+    return this.invoicesService.update(id, updateInvoiceDto, req.user.id);
   }
 
   @Post(':id/upload')
@@ -197,7 +199,7 @@ export class InvoicesController {
       const result = await this.invoicesService.uploadFileToInvoice(
         id,
         file,
-        req.user.userId,
+        req.user.id,
       );
       console.log(`✅ Upload successful for invoice ${id}`);
       return result;
@@ -208,6 +210,7 @@ export class InvoicesController {
   }
 
   @Get('file/:userId/:filename')
+  @Header('Cache-Control', 'no-cache')
   async serveFile(
     @Param('userId') userId: string,
     @Param('filename') filename: string,
@@ -252,9 +255,20 @@ export class InvoicesController {
         throw new NotFoundException('File not found');
       }
 
+      // Get file mime type
+      const mimeType = mime.lookup(filepath) || 'application/octet-stream';
+
+      // Set response headers
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${filename}"`,
+      );
+
       // Send file
       res.sendFile(filepath);
     } catch (error) {
+      console.error('Error serving file:', error);
       throw new NotFoundException('File not found');
     }
   }
@@ -266,6 +280,6 @@ export class InvoicesController {
 
   @Delete(':id')
   async remove(@Param('id') id: string, @Request() req) {
-    return this.invoicesService.remove(id, req.user.userId);
+    return this.invoicesService.remove(id, req.user.id);
   }
 }

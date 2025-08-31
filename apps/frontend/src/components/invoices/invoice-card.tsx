@@ -12,12 +12,13 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
-
+import { useDownloadInvoice } from "@/services/invoices";
 
 export interface InvoiceCardAction {
   icon: LucideIcon;
@@ -85,6 +86,7 @@ export function InvoiceCard({
   className,
 }: InvoiceCardProps) {
   const t = useTranslations("invoices");
+  const downloadInvoiceMutation = useDownloadInvoice();
 
   const accentColor = getStatusColor(status);
   const displayClient = clientName || clientEmail || t("noClient");
@@ -99,10 +101,29 @@ export function InvoiceCard({
     }
   };
 
+  const handleDownload = async () => {
+    if (!fileUrl) return;
+
+    try {
+      const blob = await downloadInvoiceMutation.mutateAsync(fileUrl);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `invoice-${number || id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast.error("Failed to download file");
+    }
+  };
+
   const handleDownloadOrUpload = () => {
     if (fileUrl) {
-      window.open(fileUrl, "_blank");
-    } else if (id) {
+      handleDownload();
+    } else if (onUpload && id) {
       onUpload(id);
     }
   };

@@ -4,7 +4,6 @@ import {
   Post,
   Body,
   Patch,
-  Param,
   Delete,
   UseGuards,
   Request,
@@ -21,21 +20,21 @@ export class SettingsController {
 
   @Post()
   create(@Request() req, @Body() createSettingsDto: CreateSettingsDto) {
-    return this.settingsService.create(req.user.userId, createSettingsDto);
+    return this.settingsService.create(req.user.id, createSettingsDto);
   }
 
   @Get()
   findOne(@Request() req) {
-    return this.settingsService.findByUserId(req.user.userId);
+    return this.settingsService.findByUserId(req.user.id);
   }
 
   @Patch()
   update(@Request() req, @Body() updateSettingsDto: UpdateSettingsDto) {
-    return this.settingsService.update(req.user.userId, updateSettingsDto);
+    return this.settingsService.update(req.user.id, updateSettingsDto);
   }
 
   @Delete()
   remove(@Request() req) {
-    return this.settingsService.remove(req.user.userId);
+    return this.settingsService.remove(req.user.id);
   }
 }

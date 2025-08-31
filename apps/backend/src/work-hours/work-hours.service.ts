@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWorkHourDto } from './dto/create-work-hour.dto';
 import { UpdateWorkHourDto } from './dto/update-work-hour.dto';
@@ -12,10 +16,36 @@ export class WorkHoursService {
   ) {}
 
   async create(userId: string, createWorkHourDto: CreateWorkHourDto) {
+    if (!userId) {
+      throw new BadRequestException('User ID is required');
+    }
+
     const workHour = await this.prisma.workHour.create({
       data: {
-        ...createWorkHourDto,
-        userId,
+        date: createWorkHourDto.date,
+        hours: createWorkHourDto.hours,
+        description: createWorkHourDto.description,
+        client: {
+          connect: {
+            id: createWorkHourDto.clientId,
+          },
+        },
+        project: createWorkHourDto.projectId
+          ? {
+              connect: {
+                id: createWorkHourDto.projectId,
+              },
+            }
+          : undefined,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+      include: {
+        client: true,
+        project: true,
       },
     });
 

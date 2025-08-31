@@ -22,17 +22,17 @@ export class ProjectsController {
 
   @Post()
   create(@Body() createProjectDto: CreateProjectDto, @Request() req) {
-    return this.projectsService.create(createProjectDto, req.user.userId);
+    return this.projectsService.create(createProjectDto, req.user.id);
   }
 
   @Get()
   findAll(@Request() req, @Query('clientId') clientId?: string) {
-    return this.projectsService.findAll(req.user.userId, clientId);
+    return this.projectsService.findAll(req.user.id, clientId);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req) {
-    return this.projectsService.findOne(id, req.user.userId);
+    return this.projectsService.findOne(id, req.user.id);
   }
 
   @Patch(':id')
@@ -41,11 +41,11 @@ export class ProjectsController {
     @Body() updateProjectDto: UpdateProjectDto,
     @Request() req,
   ) {
-    return this.projectsService.update(id, updateProjectDto, req.user.userId);
+    return this.projectsService.update(id, updateProjectDto, req.user.id);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Request() req) {
-    return this.projectsService.remove(id, req.user.userId);
+    return this.projectsService.remove(id, req.user.id);
   }
 }

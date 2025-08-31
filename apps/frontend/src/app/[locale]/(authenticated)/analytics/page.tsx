@@ -72,8 +72,6 @@ import {
 } from "@/services/reports";
 import { useTimeEntries } from "@/services/time-entries";
 
-
-
 const COLORS = [
   "#0088FE",
   "#00C49F",

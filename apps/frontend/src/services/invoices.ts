@@ -237,6 +237,36 @@ export const useClientInvoices = (clientId: string) => {
   });
 };
 
+export const useDownloadInvoice = () => {
+  return useMutation({
+    mutationFn: async (fileUrl: string) => {
+      const response = await api.get(fileUrl, {
+        responseType: "blob",
+        headers: {
+          "Content-Type": "application/pdf",
+        },
+      });
+
+      // Create a URL for the blob
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+
+      // Create a temporary link and trigger download
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileUrl.split("/").pop() || "invoice.pdf");
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      return response.data;
+    },
+  });
+};
+
 // Legacy service object for compatibility
 export const invoicesService = {
   async findByClient(clientId: string): Promise<Invoice[]> {
