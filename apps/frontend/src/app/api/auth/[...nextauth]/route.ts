@@ -2,7 +2,7 @@ import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
-import { getApiUrl, normalizeUrl } from "@/lib/utils";
+import { getApiUrl } from "@/lib/utils";
 
 const authOptions: AuthOptions = {
   providers: [
@@ -31,13 +31,11 @@ const authOptions: AuthOptions = {
         }
 
         try {
-          const normalizedBackendUrl = normalizeUrl(
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002"
-          );
+          const apiUrl = getApiUrl();
 
-          console.log("Backend URL:", normalizedBackendUrl);
+          console.log("Backend API URL:", apiUrl);
 
-          const response = await fetch(`${normalizedBackendUrl}/auth/login`, {
+          const response = await fetch(`${apiUrl}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

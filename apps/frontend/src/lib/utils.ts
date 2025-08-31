@@ -33,19 +33,28 @@ export function normalizeUrl(url: string | undefined): string {
  */
 export function getApiUrl(): string {
   const { publicRuntimeConfig } = getConfig() || {};
-  const apiUrl =
+  const rawApiUrl =
     publicRuntimeConfig?.apiUrl ||
     process.env.NEXT_PUBLIC_API_URL ||
-    "https://backend-its-done.up.railway.app";
+    "https://backend-its-done.up.railway.app/api";
+
+  // Ensure we always target the backend API prefix (/api)
+  const ensureApiPrefix = (url: string): string => {
+    // Strip trailing slash to simplify checks
+    const cleaned = url.replace(/\/$/, "");
+    // If already ends with /api, keep it; otherwise append
+    if (/\/api$/i.test(cleaned)) return cleaned;
+    return `${cleaned}/api`;
+  };
 
   console.log("🔧 Getting API URL:", {
     publicRuntimeConfig,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    apiUrl,
+    apiUrl: rawApiUrl,
     NODE_ENV: process.env.NODE_ENV,
   });
 
-  return normalizeUrl(apiUrl);
+  return ensureApiPrefix(normalizeUrl(rawApiUrl));
 }
 
 /**
