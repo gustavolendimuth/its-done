@@ -33,28 +33,35 @@ export function normalizeUrl(url: string | undefined): string {
  */
 export function getApiUrl(): string {
   const { publicRuntimeConfig } = getConfig() || {};
-  const rawApiUrl =
-    publicRuntimeConfig?.apiUrl ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    "https://backend-its-done.up.railway.app/api";
+  // Helper to detect invalid or placeholder values (e.g., ${{Backend}})
+  const isInvalid = (val: unknown): boolean => {
+    if (typeof val !== "string") return true;
+    const v = val.trim();
+    if (!v || v === "undefined" || v === "null") return true;
+    if (/\$\{\{.*\}\}/.test(v)) return true;
+    return false;
+  };
+
+  // Prefer environment variable, then runtime config, then default host
+  const candidates = [process.env.NEXT_PUBLIC_API_URL, publicRuntimeConfig?.apiUrl];
+  let chosen = candidates.find((c) => !isInvalid(c)) as string | undefined;
+  if (!chosen) chosen = "https://backend-its-done.up.railway.app";
 
   // Ensure we always target the backend API prefix (/api)
   const ensureApiPrefix = (url: string): string => {
-    // Strip trailing slash to simplify checks
     const cleaned = url.replace(/\/$/, "");
-    // If already ends with /api, keep it; otherwise append
     if (/\/api$/i.test(cleaned)) return cleaned;
     return `${cleaned}/api`;
   };
 
-  console.log("🔧 Getting API URL:", {
-    publicRuntimeConfig,
+  const normalized = ensureApiPrefix(normalizeUrl(chosen));
+
+  console.log("🌐 API URL Configuration:", {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    apiUrl: rawApiUrl,
-    NODE_ENV: process.env.NODE_ENV,
+    normalizedApiUrl: normalized,
   });
 
-  return ensureApiPrefix(normalizeUrl(rawApiUrl));
+  return normalized;
 }
 
 /**

@@ -23,7 +23,7 @@ export function WorkHoursSelector({
   timeEntries,
   _selectedTimeEntries,
   onTimeEntriesChange,
-  hourlyRate = 50,
+  hourlyRate: _hourlyRate = 50,
   clientId,
 }: WorkHoursSelectorProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
