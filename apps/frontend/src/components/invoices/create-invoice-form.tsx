@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileText, Calculator, Clock, Upload } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -239,17 +239,9 @@ export function CreateInvoiceForm({
           <div className="space-y-4">
             <WorkHoursSelector
               timeEntries={filteredTimeEntries}
-              _selectedTimeEntries={selectedEntries}
-              onTimeEntriesChange={(timeEntries) => {
-                const totalAmount = timeEntries.reduce(
-                  (sum, entry) => sum + entry.hours * (watchedHourlyRate || 50),
-                  0
-                );
-                handleWorkHoursSelection(
-                  timeEntries.map((entry) => entry.id),
-                  totalAmount
-                );
-              }}
+              onSelectionChange={(workHourIds, totalAmount) =>
+                handleWorkHoursSelection(workHourIds, totalAmount)
+              }
               hourlyRate={watchedHourlyRate || 50}
             />
 

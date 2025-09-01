@@ -1,40 +1,63 @@
 "use client";
 
 import { format } from "date-fns";
-import { Clock } from "lucide-react";
+import { Clock, Calendar, User, Briefcase } from "lucide-react";
 import { useState } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { formatHoursToHHMM } from "@/lib/utils";
 import { TimeEntry } from "@/types";
 
 interface WorkHoursSelectorProps {
   timeEntries: TimeEntry[];
-  _selectedTimeEntries?: TimeEntry[];
-  onTimeEntriesChange: (timeEntries: TimeEntry[]) => void;
+  onSelectionChange: (selectedIds: string[], totalAmount: number) => void;
   hourlyRate?: number;
-  clientId?: string;
 }
 
 export function WorkHoursSelector({
   timeEntries,
-  _selectedTimeEntries,
-  onTimeEntriesChange,
-  hourlyRate: _hourlyRate = 50,
-  clientId,
+  onSelectionChange,
+  hourlyRate = 50,
 }: WorkHoursSelectorProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const [groupBy, setGroupBy] = useState<"client" | "project" | "none">(
+    "client"
+  );
 
-  // Filter entries by project if one is selected
-  const availableEntries = selectedProjectId
-    ? timeEntries.filter((entry) => entry.projectId === selectedProjectId)
-    : timeEntries;
+  // Available entries (already filtered upstream if needed)
+  const availableEntries = timeEntries;
 
-  // Handle individual entry selection
+  // Group entries based on selected grouping
+  const groupedEntries = () => {
+    if (groupBy === "none") {
+      return { "All Entries": availableEntries } as Record<string, TimeEntry[]>;
+    }
+
+    return availableEntries.reduce(
+      (groups, entry) => {
+        let key: string;
+
+        if (groupBy === "client") {
+          key = entry.client?.name || entry.client?.email || "Unknown Client";
+        } else if (groupBy === "project") {
+          key = entry.project?.name || "No Project";
+        } else {
+          key = "All Entries";
+        }
+
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+        groups[key].push(entry);
+        return groups;
+      },
+      {} as Record<string, TimeEntry[]>
+    );
+  };
+
   const handleEntryToggle = (entryId: string, checked: boolean) => {
     const newSelectedIds = new Set(selectedIds);
 
@@ -50,37 +73,43 @@ export function WorkHoursSelector({
     const selectedEntries = availableEntries.filter((entry) =>
       newSelectedIds.has(entry.id)
     );
-    onTimeEntriesChange(selectedEntries);
+    const totalHours = selectedEntries.reduce((sum, entry) => sum + entry.hours, 0);
+    const totalAmount = totalHours * hourlyRate;
+    onSelectionChange(Array.from(newSelectedIds), totalAmount);
   };
 
-  // Handle project selection
-  const handleProjectChange = (projectId: string | null) => {
-    setSelectedProjectId(projectId || "");
-    setSelectedIds(new Set()); // Reset selections when project changes
-    onTimeEntriesChange([]); // Clear selected entries
+  const handleGroupToggle = (groupEntries: TimeEntry[], checked: boolean) => {
+    const newSelectedIds = new Set(selectedIds);
+
+    groupEntries.forEach((entry) => {
+      if (checked) {
+        newSelectedIds.add(entry.id);
+      } else {
+        newSelectedIds.delete(entry.id);
+      }
+    });
+
+    setSelectedIds(newSelectedIds);
+
+    // Calculate and notify immediately
+    const selectedEntries = availableEntries.filter((entry) =>
+      newSelectedIds.has(entry.id)
+    );
+    const totalHours = selectedEntries.reduce((sum, entry) => sum + entry.hours, 0);
+    const totalAmount = totalHours * hourlyRate;
+    onSelectionChange(Array.from(newSelectedIds), totalAmount);
   };
 
   // Calculate totals for display
   const selectedEntries = availableEntries.filter((entry) =>
     selectedIds.has(entry.id)
   );
-  const totalHours = selectedEntries.reduce(
-    (sum, entry) => sum + entry.hours,
-    0
-  );
+  const totalHours = selectedEntries.reduce((sum, entry) => sum + entry.hours, 0);
+  const totalAmount = totalHours * hourlyRate;
 
-  const handleSelectAll = () => {
-    const allIds = new Set(availableEntries.map((entry) => entry.id));
-    setSelectedIds(allIds);
-    onTimeEntriesChange(availableEntries);
-  };
+  const grouped = groupedEntries();
 
-  const handleUnselectAll = () => {
-    setSelectedIds(new Set());
-    onTimeEntriesChange([]);
-  };
-
-  if (timeEntries.length === 0) {
+  if (availableEntries.length === 0) {
     return (
       <Card>
         <CardContent className="p-6 text-center">
@@ -97,82 +126,125 @@ export function WorkHoursSelector({
 
   return (
     <div className="space-y-4">
-      {/* Project Selection */}
-      <div className="space-y-2">
-        <Label>Filter by Project</Label>
-        <ProjectCombobox
-          clientId={clientId}
-          value={selectedProjectId}
-          onSelect={handleProjectChange}
-          placeholder="All Projects"
-          allowClear
-        />
+      {/* Group by selector */}
+      <div className="flex items-center space-x-4">
+        <Label htmlFor="groupBy">Group by:</Label>
+        <select
+          id="groupBy"
+          value={groupBy}
+          onChange={(e) =>
+            setGroupBy(e.target.value as "client" | "project" | "none")
+          }
+          className="border rounded px-3 py-1"
+        >
+          <option value="client">Client</option>
+          <option value="project">Project</option>
+          <option value="none">None</option>
+        </select>
       </div>
 
-      {/* Work Hours Selection */}
-      <div className="flex items-center justify-between">
-        <div className="space-x-2">
-          <button
-            type="button"
-            className="text-sm text-muted-foreground hover:text-foreground"
-            onClick={handleSelectAll}
-          >
-            Select All
-          </button>
-          <button
-            type="button"
-            className="text-sm text-muted-foreground hover:text-foreground"
-            onClick={handleUnselectAll}
-          >
-            Unselect All
-          </button>
-        </div>
-        {selectedEntries.length > 0 && (
-          <div className="text-sm text-muted-foreground">
-            Total: {formatHoursToHHMM(totalHours)}
-          </div>
-        )}
-      </div>
-
-      {/* Work Hours List */}
-      <div className="space-y-2">
-        {availableEntries.map((entry) => (
-          <div
-            key={entry.id}
-            className="flex items-center space-x-2 p-2 rounded-lg border"
-          >
-            <Checkbox
-              id={entry.id}
-              checked={selectedIds.has(entry.id)}
-              onCheckedChange={(checked) =>
-                handleEntryToggle(entry.id, checked as boolean)
-              }
-            />
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <Label
-                  htmlFor={entry.id}
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  {format(new Date(entry.date), "dd/MM/yyyy")}
-                </Label>
-                <span className="text-sm font-mono">
-                  {formatHoursToHHMM(entry.hours)}
-                </span>
-              </div>
-              {entry.description && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {entry.description}
-                </p>
-              )}
-              {entry.project && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Project: {entry.project.name}
-                </p>
-              )}
+      {/* Summary */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <span className="text-sm text-muted-foreground">Selected:</span>
+              <span className="ml-2 font-medium">{selectedIds.size} entries</span>
+            </div>
+            <div>
+              <span className="text-sm text-muted-foreground">Total Hours:</span>
+              <span className="ml-2 font-medium">{formatHoursToHHMM(totalHours)}</span>
+            </div>
+            <div>
+              <span className="text-sm text-muted-foreground">Total Amount:</span>
+              <span className="ml-2 font-medium text-lg">${totalAmount.toFixed(2)}</span>
             </div>
           </div>
-        ))}
+        </CardContent>
+      </Card>
+
+      {/* Grouped entries */}
+      <div className="space-y-4">
+        {Object.entries(grouped).map(([groupName, groupEntries]) => {
+          const groupSelected = groupEntries.every((entry) => selectedIds.has(entry.id));
+          const groupPartiallySelected =
+            groupEntries.some((entry) => selectedIds.has(entry.id)) && !groupSelected;
+
+          return (
+            <Card key={groupName}>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center">
+                    <Checkbox
+                      checked={groupSelected}
+                      onCheckedChange={(checked: boolean) =>
+                        handleGroupToggle(groupEntries, checked)
+                      }
+                      className="mr-3"
+                    />
+                    {groupBy === "client" && <User className="w-4 h-4 mr-2" />}
+                    {groupBy === "project" && <Briefcase className="w-4 h-4 mr-2" />}
+                    {groupName}
+                    {groupPartiallySelected && (
+                      <span className="ml-2 text-xs text-blue-600">(partial)</span>
+                    )}
+                  </CardTitle>
+                  <Badge variant="info">
+                    {groupEntries.length} entries • {groupEntries
+                      .reduce((sum, entry) => sum + entry.hours, 0)
+                      .toFixed(1)}
+                    h
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {groupEntries.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+                        selectedIds.has(entry.id)
+                          ? "bg-primary/10 border-primary/20"
+                          : "bg-background hover:bg-muted/50"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Checkbox
+                          checked={selectedIds.has(entry.id)}
+                          onCheckedChange={(checked: boolean) =>
+                            handleEntryToggle(entry.id, checked)
+                          }
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 text-sm">
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
+                            <span>{format(new Date(entry.date), "MMM dd, yyyy")}</span>
+                            <Clock className="w-4 h-4 text-muted-foreground ml-4" />
+                            <span>{formatHoursToHHMM(entry.hours)}</span>
+                          </div>
+                          {entry.description && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {entry.description}
+                            </p>
+                          )}
+                          {entry.project && (
+                            <Badge variant="secondary" className="mt-1">
+                              {entry.project.name}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">${(entry.hours * hourlyRate).toFixed(2)}</div>
+                        <div className="text-xs text-muted-foreground">@ ${hourlyRate}/hr</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
