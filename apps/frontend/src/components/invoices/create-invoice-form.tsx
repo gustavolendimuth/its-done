@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileText, Calculator, Clock, Upload } from "lucide-react";
+import { FileText, Clock, Upload } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ import { useAvailableTimeEntries } from "@/services/time-entries";
 import { TimeEntry } from "@/types";
 
 import { InvoiceFileUpload } from "./invoice-file-upload";
+import { WorkHoursSelectionSummary } from "./work-hours-selection-summary";
 import { WorkHoursSelector } from "./work-hours-selector";
 
 const invoiceSchema = z.object({
@@ -232,11 +233,21 @@ export function CreateInvoiceForm({
         )}
       </div>
 
+      
+
       {/* Work Hours Selection */}
       <div className="space-y-2">
         <Label>Work Hours</Label>
         {watchedClientId ? (
           <div className="space-y-4">
+            {/* Selection Summary (top) */}
+            {selectedWorkHourIds.length > 0 && (
+              <WorkHoursSelectionSummary
+                totalHours={totalHours}
+                hourlyRate={watchedHourlyRate || 50}
+                totalAmount={calculatedAmount}
+              />
+            )}
             <WorkHoursSelector
               timeEntries={filteredTimeEntries}
               onSelectionChange={(workHourIds, totalAmount) =>
@@ -247,39 +258,11 @@ export function CreateInvoiceForm({
 
             {/* Selection Summary */}
             {selectedWorkHourIds.length > 0 && (
-              <Card className="bg-primary/5">
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-primary" />
-                      <div>
-                        <p className="text-sm font-medium">Total Hours</p>
-                        <p className="text-lg font-bold">
-                          {formatHoursToHHMM(totalHours)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Calculator className="h-4 w-4 text-primary" />
-                      <div>
-                        <p className="text-sm font-medium">Hourly Rate</p>
-                        <p className="text-lg font-bold">
-                          ${watchedHourlyRate || 50}/hr
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <FileText className="h-4 w-4 text-primary" />
-                      <div>
-                        <p className="text-sm font-medium">Total Amount</p>
-                        <p className="text-xl font-bold text-primary">
-                          ${calculatedAmount.toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <WorkHoursSelectionSummary
+                totalHours={totalHours}
+                hourlyRate={watchedHourlyRate || 50}
+                totalAmount={calculatedAmount}
+              />
             )}
           </div>
         ) : (

@@ -143,7 +143,7 @@ export function WorkHoursSelector({
         </select>
       </div>
 
-      {/* Summary */}
+      {/* Summary
       <Card>
         <CardContent className="p-4">
           <div className="flex justify-between items-center">
@@ -161,7 +161,7 @@ export function WorkHoursSelector({
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Grouped entries */}
       <div className="space-y-4">
