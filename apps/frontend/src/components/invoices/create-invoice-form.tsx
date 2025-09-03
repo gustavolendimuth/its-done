@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { ClientCombobox } from "@/components/ui/client-combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +17,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { formatHoursToHHMM } from "@/lib/utils";
 import { Client } from "@/services/clients";
 import { useCreateInvoice, useUploadInvoiceFile } from "@/services/invoices";
 import { useAvailableTimeEntries } from "@/services/time-entries";
@@ -97,6 +95,16 @@ export function CreateInvoiceForm({
   const selectedEntries = filteredTimeEntries.filter((entry) =>
     selectedWorkHourIds.includes(entry.id)
   );
+
+  // Clear selected work hours whenever the client changes
+  useEffect(() => {
+    // Reset local selection and calculated values
+    setSelectedWorkHourIds([]);
+    setCalculatedAmount(0);
+    // Reset form values tied to the selection
+    setValue("workHourIds", []);
+    setValue("amount", 0);
+  }, [watchedClientId, setValue]);
 
   const handleWorkHoursSelection = (
     workHourIds: string[],
@@ -240,15 +248,17 @@ export function CreateInvoiceForm({
         <Label>Work Hours</Label>
         {watchedClientId ? (
           <div className="space-y-4">
+
             {/* Selection Summary (top) */}
-            {selectedWorkHourIds.length > 0 && (
               <WorkHoursSelectionSummary
                 totalHours={totalHours}
                 hourlyRate={watchedHourlyRate || 50}
                 totalAmount={calculatedAmount}
               />
-            )}
+
+            {/* Work Hours Selector */}
             <WorkHoursSelector
+              key={watchedClientId || "no-client"}
               timeEntries={filteredTimeEntries}
               onSelectionChange={(workHourIds, totalAmount) =>
                 handleWorkHoursSelection(workHourIds, totalAmount)

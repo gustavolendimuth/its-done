@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { format } from "date-fns";
 import { Clock, Calendar, User, Briefcase } from "lucide-react";
 import { useState } from "react";
@@ -8,6 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatHoursToHHMM } from "@/lib/utils";
 import { TimeEntry } from "@/types";
 
@@ -100,12 +108,7 @@ export function WorkHoursSelector({
     onSelectionChange(Array.from(newSelectedIds), totalAmount);
   };
 
-  // Calculate totals for display
-  const selectedEntries = availableEntries.filter((entry) =>
-    selectedIds.has(entry.id)
-  );
-  const totalHours = selectedEntries.reduce((sum, entry) => sum + entry.hours, 0);
-  const totalAmount = totalHours * hourlyRate;
+  // Totals for display are handled by the parent summary component
 
   const grouped = groupedEntries();
 
@@ -125,22 +128,32 @@ export function WorkHoursSelector({
   }
 
   return (
+    <Sentry.ErrorBoundary
+      fallback={
+        <div className="p-4 text-sm text-red-600 border border-red-200 rounded">
+          Something went wrong while rendering work hours. The issue was reported.
+        </div>
+      }
+    >
     <div className="space-y-4">
       {/* Group by selector */}
-      <div className="flex items-center space-x-4">
-        <Label htmlFor="groupBy">Group by:</Label>
-        <select
-          id="groupBy"
+      <div className="space-y-2">
+        <Label htmlFor="groupBy">Group by</Label>
+        <Select
           value={groupBy}
-          onChange={(e) =>
-            setGroupBy(e.target.value as "client" | "project" | "none")
+          onValueChange={(val) =>
+            setGroupBy(val as "client" | "project" | "none")
           }
-          className="border rounded px-3 py-1"
         >
-          <option value="client">Client</option>
-          <option value="project">Project</option>
-          <option value="none">None</option>
-        </select>
+          <SelectTrigger id="groupBy">
+            <SelectValue placeholder="Select grouping" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="client">Client</SelectItem>
+            <SelectItem value="project">Project</SelectItem>
+            <SelectItem value="none">None</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Summary
@@ -190,10 +203,9 @@ export function WorkHoursSelector({
                     )}
                   </CardTitle>
                   <Badge variant="info">
-                    {groupEntries.length} entries • {groupEntries
-                      .reduce((sum, entry) => sum + entry.hours, 0)
-                      .toFixed(1)}
-                    h
+                    {groupEntries.length} entries • {formatHoursToHHMM(
+                      groupEntries.reduce((sum, entry) => sum + entry.hours, 0)
+                    )}
                   </Badge>
                 </div>
               </CardHeader>
@@ -247,5 +259,6 @@ export function WorkHoursSelector({
         })}
       </div>
     </div>
+    </Sentry.ErrorBoundary>
   );
 }

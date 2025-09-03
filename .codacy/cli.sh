@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
+set -Eeuo pipefail
 
-set -e +o pipefail
+# Simple fatal helper
+fatal() {
+    echo "$*" >&2
+    exit 1
+}
 
 # Set up paths first
 bin_name="codacy-cli-v2"
@@ -22,7 +27,7 @@ case "$arch" in
   ;;
 esac
 
-if [ -z "$CODACY_CLI_V2_TMP_FOLDER" ]; then
+if [ -z "${CODACY_CLI_V2_TMP_FOLDER:-}" ]; then
     if [ "$(uname)" = "Linux" ]; then
         CODACY_CLI_V2_TMP_FOLDER="$HOME/.cache/codacy/codacy-cli-v2"
     elif [ "$(uname)" = "Darwin" ]; then
@@ -71,7 +76,8 @@ download_file() {
 
     echo "Downloading from URL: ${url}"
     if command -v curl > /dev/null 2>&1; then
-        curl -# -LS "$url" -O
+    # -f: fail on HTTP errors, -S: show errors, -L: follow redirects, -#: progress bar
+    curl -f# -LS "$url" -O
     elif command -v wget > /dev/null 2>&1; then
         wget "$url"
     else
@@ -106,13 +112,13 @@ download_cli() {
 }
 
 # Warn if CODACY_CLI_V2_VERSION is set and update is requested
-if [ -n "$CODACY_CLI_V2_VERSION" ] && [ "$1" = "update" ]; then
+if [ -n "${CODACY_CLI_V2_VERSION:-}" ] && [ "${1:-}" = "update" ]; then
     echo "⚠️  Warning: Performing update with forced version $CODACY_CLI_V2_VERSION"
     echo "    Unset CODACY_CLI_V2_VERSION to use the latest version"
 fi
 
 # Ensure version.yaml exists and is up to date
-if [ ! -f "$version_file" ] || [ "$1" = "update" ]; then
+if [ ! -f "$version_file" ] || [ "${1:-}" = "update" ]; then
     echo "ℹ️  Fetching latest version..."
     version=$(get_latest_version)
     mkdir -p "$CODACY_CLI_V2_TMP_FOLDER"
@@ -120,8 +126,8 @@ if [ ! -f "$version_file" ] || [ "$1" = "update" ]; then
 fi
 
 # Set the version to use
-if [ -n "$CODACY_CLI_V2_VERSION" ]; then
-    version="$CODACY_CLI_V2_VERSION"
+if [ -n "${CODACY_CLI_V2_VERSION:-}" ]; then
+    version="${CODACY_CLI_V2_VERSION}"
 else
     version=$(get_version_from_yaml)
 fi
@@ -145,5 +151,5 @@ fi
 if [ "$#" -eq 1 ] && [ "$1" = "download" ]; then
     echo "Codacy cli v2 download succeeded"
 else
-    eval "$run_command $*"
+    exec "$run_command" "$@"
 fi

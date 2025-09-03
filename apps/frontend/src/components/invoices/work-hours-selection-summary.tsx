@@ -12,7 +12,7 @@ export function WorkHoursSelectionSummary({
   totalAmount,
   className,
 }: WorkHoursSelectionSummaryProps) {
-  if (totalAmount <= 0 && totalHours <= 0) return null;
+  // if (totalAmount <= 0 && totalHours <= 0) return null;
 
   return (
     <Card className={className ? className : "bg-primary/5"}>

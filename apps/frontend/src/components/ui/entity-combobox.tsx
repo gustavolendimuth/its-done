@@ -7,6 +7,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
+  CommandList,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -99,7 +100,7 @@ export function EntityCombobox<T>({
         className="p-0"
         align="start"
       >
-        <Command className="max-h-[300px] overflow-hidden">
+        <Command className="max-h-96">
           <CommandInput
             placeholder={searchPlaceholder || t("search")}
             className="h-9"
@@ -123,7 +124,7 @@ export function EntityCombobox<T>({
               <span>{noItemsFoundMessage || t("noItemsFound")}</span>
             </div>
           </CommandEmpty>
-          <div className="max-h-[200px] overflow-y-auto">
+          <CommandList className="max-h-80 overflow-y-auto">
             <CommandGroup>
               {items.map((item) => (
                 <CommandItem
@@ -148,7 +149,7 @@ export function EntityCombobox<T>({
                 </CommandItem>
               ))}
             </CommandGroup>
-          </div>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
