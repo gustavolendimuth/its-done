@@ -47,4 +47,9 @@ export class AppController {
       },
     };
   }
+
+  @Get('debug-sentry')
+  getError(): void {
+    throw new Error('My first Sentry error!');
+  }
 }

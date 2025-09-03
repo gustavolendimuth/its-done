@@ -14,6 +14,7 @@ services:
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - BACKEND_URL=http://backend:3002
+      - NEXT_PUBLIC_SENTRY_DSN=${FRONTEND_SENTRY_DSN}
     depends_on:
       - backend
     restart: unless-stopped
@@ -27,6 +28,7 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/its_done_prod
+      - SENTRY_DSN=${BACKEND_SENTRY_DSN}
     volumes:
       - uploads:/app/data/uploads
     depends_on:
