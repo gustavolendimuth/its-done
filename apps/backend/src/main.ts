@@ -1,10 +1,12 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as fs from 'fs';
 import { ConfigService } from '@nestjs/config';
+import * as Sentry from '@sentry/node';
+import { SentryGlobalFilter } from './utils/sentry.filter';
 
 async function bootstrap() {
   try {
@@ -27,8 +29,17 @@ async function bootstrap() {
       process.env.RAILWAY_ENVIRONMENT || 'not-set',
     );
 
+    // Initialize Sentry (only if DSN is provided)
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN || '',
+      enabled: Boolean(process.env.SENTRY_DSN),
+      environment: process.env.NODE_ENV,
+      tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    });
+
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
     const configService = app.get(ConfigService);
+    const httpAdapterHost = app.get(HttpAdapterHost);
 
     // Global validation pipe
     app.useGlobalPipes(
@@ -83,6 +94,9 @@ async function bootstrap() {
     console.log(
       `🌐 Health check available at: http://localhost:${port}/health`,
     );
+    // Attach Sentry global error filter for Nest
+    app.useGlobalFilters(new SentryGlobalFilter(httpAdapterHost));
+    console.log('✅ Sentry global exception filter configured.');
   } catch (error) {
     console.error('❌ Failed to start application:', error);
     process.exit(1);

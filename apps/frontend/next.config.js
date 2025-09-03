@@ -1,4 +1,6 @@
+/* eslint-env node */
 const createNextIntlPlugin = require("next-intl/plugin");
+const { withSentryConfig } = require("@sentry/nextjs");
 
 const withNextIntl = createNextIntlPlugin();
 
@@ -29,4 +31,10 @@ const nextConfig = {
   },
 };
 
-module.exports = withNextIntl(nextConfig);
+const sentryWebpackPluginOptions = {
+  // Only enable when DSN is present
+  // authToken is read from SENTRY_AUTH_TOKEN if present
+  silent: true,
+};
+
+module.exports = withSentryConfig(withNextIntl(nextConfig), sentryWebpackPluginOptions);

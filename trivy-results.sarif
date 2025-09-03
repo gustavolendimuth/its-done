@@ -1,0 +1,268 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "columnKind": "utf16CodeUnits",
+      "originalUriBaseIds": {
+        "ROOTPATH": {
+          "uri": "file:///home/gustavolendimuth/projetos/its-done/"
+        }
+      },
+      "results": [
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "pnpm-lock.yaml: brace-expansion@2.0.1"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "pnpm-lock.yaml",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Package: brace-expansion\nInstalled Version: 2.0.1\nVulnerability CVE-2025-5889\nSeverity: LOW\nFixed Version: 2.0.2, 1.1.12, 3.0.1, 4.0.1\nLink: [CVE-2025-5889](https://avd.aquasec.com/nvd/cve-2025-5889)"
+          },
+          "ruleId": "CVE-2025-5889",
+          "ruleIndex": 0
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "pnpm-lock.yaml: cookie@0.6.0"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "pnpm-lock.yaml",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Package: cookie\nInstalled Version: 0.6.0\nVulnerability CVE-2024-47764\nSeverity: LOW\nFixed Version: 0.7.0\nLink: [CVE-2024-47764](https://avd.aquasec.com/nvd/cve-2024-47764)"
+          },
+          "ruleId": "CVE-2024-47764",
+          "ruleIndex": 1
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "message": {
+                "text": "pnpm-lock.yaml: form-data@4.0.3"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "pnpm-lock.yaml",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Package: form-data\nInstalled Version: 4.0.3\nVulnerability CVE-2025-7783\nSeverity: CRITICAL\nFixed Version: 2.5.4, 3.0.4, 4.0.4\nLink: [CVE-2025-7783](https://avd.aquasec.com/nvd/cve-2025-7783)"
+          },
+          "ruleId": "CVE-2025-7783",
+          "ruleIndex": 2
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "message": {
+                "text": "pnpm-lock.yaml: multer@2.0.1"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "pnpm-lock.yaml",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Package: multer\nInstalled Version: 2.0.1\nVulnerability CVE-2025-7338\nSeverity: HIGH\nFixed Version: 2.0.2\nLink: [CVE-2025-7338](https://avd.aquasec.com/nvd/cve-2025-7338)"
+          },
+          "ruleId": "CVE-2025-7338",
+          "ruleIndex": 3
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "pnpm-lock.yaml: next@14.2.25"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "pnpm-lock.yaml",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Package: next\nInstalled Version: 14.2.25\nVulnerability CVE-2025-55173\nSeverity: MEDIUM\nFixed Version: 14.2.31, 15.4.5\nLink: [CVE-2025-55173](https://avd.aquasec.com/nvd/cve-2025-55173)"
+          },
+          "ruleId": "CVE-2025-55173",
+          "ruleIndex": 4
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "pnpm-lock.yaml: next@14.2.25"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "pnpm-lock.yaml",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Package: next\nInstalled Version: 14.2.25\nVulnerability CVE-2025-57752\nSeverity: MEDIUM\nFixed Version: 14.2.31, 15.4.5\nLink: [CVE-2025-57752](https://avd.aquasec.com/nvd/cve-2025-57752)"
+          },
+          "ruleId": "CVE-2025-57752",
+          "ruleIndex": 5
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "pnpm-lock.yaml: next@14.2.25"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "pnpm-lock.yaml",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Package: next\nInstalled Version: 14.2.25\nVulnerability CVE-2025-57822\nSeverity: MEDIUM\nFixed Version: 14.2.32, 15.4.7\nLink: [CVE-2025-57822](https://avd.aquasec.com/nvd/cve-2025-57822)"
+          },
+          "ruleId": "CVE-2025-57822",
+          "ruleIndex": 6
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "pnpm-lock.yaml: next@14.2.25"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "pnpm-lock.yaml",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Package: next\nInstalled Version: 14.2.25\nVulnerability CVE-2025-30218\nSeverity: LOW\nFixed Version: 12.3.6, 13.5.10, 14.2.26, 15.2.4\nLink: [CVE-2025-30218](https://avd.aquasec.com/nvd/cve-2025-30218)"
+          },
+          "ruleId": "CVE-2025-30218",
+          "ruleIndex": 7
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "pnpm-lock.yaml: next@14.2.25"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "pnpm-lock.yaml",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Package: next\nInstalled Version: 14.2.25\nVulnerability CVE-2025-48068\nSeverity: LOW\nFixed Version: 15.2.2, 14.2.30\nLink: [CVE-2025-48068](https://avd.aquasec.com/nvd/cve-2025-48068)"
+          },
+          "ruleId": "CVE-2025-48068",
+          "ruleIndex": 8
+        }
+      ],
+      "tool": {
+        "driver": {
+          "fullName": "Trivy Vulnerability Scanner",
+          "informationUri": "https://github.com/aquasecurity/trivy",
+          "name": "Trivy",
+          "rules": null,
+          "version": "0.65.0"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}
