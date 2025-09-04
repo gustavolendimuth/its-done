@@ -11,8 +11,13 @@
     "dev:backend": "pnpm --filter backend dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "studio": "cd apps/backend && npx prisma studio"
+  "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+  "studio": "cd apps/backend && npx prisma studio",
+  "codacy:install": ".codacy/cli.sh install",
+  "codacy:analyze": ".codacy/cli.sh analyze",
+  "codacy:analyze:eslint": ".codacy/cli.sh analyze --tool eslint",
+  "codacy:analyze:trivy": ".codacy/cli.sh analyze --tool trivy",
+  "codacy:analyze:sarif": ".codacy/cli.sh analyze --format sarif -o codacy.sarif"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.7",

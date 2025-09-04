@@ -11,9 +11,9 @@ export interface ApiError {
 }
 
 export interface Activity {
-  workHours: import("./entities").WorkHour[];
-  invoices: import("./entities").Invoice[];
-  newUsers: import("./entities").User[];
+  workHours: import('./entities').WorkHour[];
+  invoices: import('./entities').Invoice[];
+  newUsers: import('./entities').User[];
 }
 
 export interface AdminStats {
@@ -45,7 +45,7 @@ export interface HoursReport {
   totalHours: number;
   billableHours: number;
   nonBillableHours: number;
-  workHours: import("./entities").WorkHour[];
+  workHours: import('./entities').WorkHour[];
 }
 
 export interface InvoiceReport {
@@ -53,7 +53,7 @@ export interface InvoiceReport {
   totalAmount: number;
   paidAmount: number;
   pendingAmount: number;
-  invoices: import("./entities").Invoice[];
+  invoices: import('./entities').Invoice[];
 }
 
 export interface UploadResult {
@@ -72,7 +72,7 @@ export interface UserResponse {
   id: string;
   email: string;
   name: string;
-  role: "USER" | "ADMIN";
-  createdAt: import("./entities").DateField;
-  updatedAt: import("./entities").DateField;
+  role: 'USER' | 'ADMIN';
+  createdAt: import('./entities').DateField;
+  updatedAt: import('./entities').DateField;
 }

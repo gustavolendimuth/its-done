@@ -1,17 +1,53 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "Start Frontend",
-			"type": "shell",
-			"command": "pnpm",
-			"args": [
-				"--filter",
-				"frontend",
-				"dev"
-			],
-			"group": "build",
-			"isBackground": true
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Frontend",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["--filter", "frontend", "dev"],
+      "group": "build",
+      "isBackground": true
+    },
+    {
+      "label": "Codacy: Install",
+      "type": "shell",
+      "command": ".codacy/cli.sh",
+      "args": ["install"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Codacy: Analyze",
+      "type": "shell",
+      "command": ".codacy/cli.sh",
+      "args": ["analyze"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Codacy: Analyze (ESLint)",
+      "type": "shell",
+      "command": ".codacy/cli.sh",
+      "args": ["analyze", "--tool", "eslint"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Codacy: Analyze (Trivy)",
+      "type": "shell",
+      "command": ".codacy/cli.sh",
+      "args": ["analyze", "--tool", "trivy"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Codacy: Analyze (SARIF -> codacy.sarif)",
+      "type": "shell",
+      "command": ".codacy/cli.sh",
+      "args": ["analyze", "--format", "sarif", "-o", "codacy.sarif"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    }
+  ]
 }

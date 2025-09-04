@@ -1,17 +1,38 @@
 exclude_paths:
     - node_modules/**
     - '**/node_modules/**'
+    - '**/.pnpm-store/**'
+    - '**/.cache/**'
     - dist/**
+    - '**/dist/**'
     - build/**
+    - '**/build/**'
     - .next/**
+    - '**/.next/**'
     - out/**
+    - '**/out/**'
+    - .turbo/**
+    - '**/.turbo/**'
+    - .vercel/**
+    - '**/.vercel/**'
+    - .git/**
+    - .vscode/**
+    - '**/.vscode/**'
+    - '**/.idea/**'
     - coverage/**
+    - '**/coverage/**'
     - logs/**
+    - '**/logs/**'
     - '**/*.log'
     - cypress/videos/**
+    - '**/cypress/videos/**'
     - cypress/screenshots/**
-    - prisma/migrations/**
+    - '**/cypress/screenshots/**'
+    - '**/*.tsbuildinfo'
+    - apps/backend/uploads/**
+    - '**/prisma/migrations/**'
     - '*.config.js'
+    - '**/*.config.js'
     - '**/config.js'
     - .eslintrc.js
     - '**/.eslintrc.js'
