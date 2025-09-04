@@ -24,14 +24,12 @@ module.exports = {
     'apps/backend/uploads/',
   ],
   overrides: [
+    // Apply TypeScript rules where the plugin is available (backend)
     {
-      files: ['*.ts', '*.tsx'],
+      files: ['apps/backend/**/*.ts', 'apps/backend/**/*.tsx'],
       parser: '@typescript-eslint/parser',
       plugins: ['@typescript-eslint'],
-      extends: [
-        'eslint:recommended',
-        '@typescript-eslint/recommended',
-      ],
+      extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
     },
     {
       files: ['apps/backend/**/*'],
@@ -46,7 +44,7 @@ module.exports = {
         browser: true,
         es2020: true,
       },
-      extends: ['next/core-web-vitals'],
+  extends: ['next/core-web-vitals'],
     },
   ],
 };

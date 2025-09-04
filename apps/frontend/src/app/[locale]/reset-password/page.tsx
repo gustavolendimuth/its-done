@@ -63,7 +63,7 @@ function ResetPasswordContent() {
       setTimeout(() => {
         router.push("/login");
       }, 3000);
-    } catch (error) {
+  } catch (_error) {
       // Error é tratado pelo mutation
     }
   };

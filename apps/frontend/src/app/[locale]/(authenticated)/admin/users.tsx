@@ -57,7 +57,7 @@ export default function AdminUsers() {
         title: "Role updated",
         description: `User role has been updated to ${newRole}`,
       });
-    } catch (error) {
+  } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to update user role",

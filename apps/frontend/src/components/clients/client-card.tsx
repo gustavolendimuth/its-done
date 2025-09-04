@@ -109,8 +109,8 @@ export function ClientCard({ client }: ClientCardProps) {
       });
       setIsEditModalOpen(false);
       toast.success(t("clientUpdatedSuccessfully"));
-    } catch (error) {
-      console.error("Failed to update client:", error);
+  } catch (_error) {
+      console.error("Failed to update client:", _error);
       toast.error(t("failedToUpdateClient"));
     }
   };
@@ -130,7 +130,7 @@ export function ClientCard({ client }: ClientCardProps) {
 
       await navigator.clipboard.writeText(url);
       toast.success(t("linkCopiedToClipboard"));
-    } catch (error) {
+  } catch (_error) {
       toast.error(t("failedToCopyLink"));
     }
   };
