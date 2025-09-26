@@ -6,6 +6,7 @@ export interface Project {
   id: string;
   name: string;
   description?: string;
+  hourlyRate?: number;
   clientId: string;
   userId: string;
   createdAt: string;
@@ -24,12 +25,14 @@ export interface Project {
 export interface CreateProjectData {
   name: string;
   description?: string;
+  hourlyRate?: number;
   clientId: string;
 }
 
 export interface UpdateProjectData {
   name?: string;
   description?: string;
+  hourlyRate?: number;
   clientId?: string;
 }
 

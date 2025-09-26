@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsNumber, Min } from 'class-validator';
 
 export class CreateProjectDto {
   @IsString()
@@ -10,4 +10,9 @@ export class CreateProjectDto {
 
   @IsUUID()
   clientId: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  hourlyRate?: number;
 }

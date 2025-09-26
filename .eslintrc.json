@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json.schemastore.org/eslintrc",
+  "root": true,
+  "ignorePatterns": [
+    "node_modules/**",
+    "**/node_modules/**",
+    "dist/**",
+    "**/dist/**",
+    "build/**",
+    "**/build/**",
+    ".turbo/**",
+    "**/.turbo/**",
+    ".next/**",
+    "**/.next/**",
+    "out/**",
+    "**/out/**",
+    "coverage/**",
+    "**/coverage/**",
+    "logs/**",
+    "**/logs/**",
+    "**/*.log",
+    "cypress/videos/**",
+    "**/cypress/videos/**",
+    "cypress/screenshots/**",
+    "**/cypress/screenshots/**",
+    "apps/backend/uploads/**",
+    "**/*.tsbuildinfo",
+    "packages/eslint/index.js",
+    "jest.config.js",
+    "**/jest.config.js",
+    "**/*.config.js",
+    "**/.eslintrc.js"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.config.{js,ts}",
+        "**/jest.config.{js,ts}",
+        "**/.eslintrc.js",
+        "**/eslint.config.js",
+        "packages/eslint/index.js"
+      ],
+      "env": { "node": true }
+    }
+  ]
+}

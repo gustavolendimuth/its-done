@@ -300,7 +300,7 @@ export function ClientCard({ client }: ClientCardProps) {
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         title={t("editClient")}
-        description={t("editClientFormSubtitle")}
+        description={t("formSubtitle")}
         icon={Users}
         className="sm:max-w-[600px]"
       >

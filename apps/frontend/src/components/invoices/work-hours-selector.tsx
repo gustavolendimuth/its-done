@@ -22,13 +22,11 @@ import { TimeEntry } from "@/types";
 interface WorkHoursSelectorProps {
   timeEntries: TimeEntry[];
   onSelectionChange: (selectedIds: string[], totalAmount: number) => void;
-  hourlyRate?: number;
 }
 
 export function WorkHoursSelector({
   timeEntries,
   onSelectionChange,
-  hourlyRate = 50,
 }: WorkHoursSelectorProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [groupBy, setGroupBy] = useState<"client" | "project" | "none">(
@@ -81,8 +79,10 @@ export function WorkHoursSelector({
     const selectedEntries = availableEntries.filter((entry) =>
       newSelectedIds.has(entry.id)
     );
-    const totalHours = selectedEntries.reduce((sum, entry) => sum + entry.hours, 0);
-    const totalAmount = totalHours * hourlyRate;
+    const totalAmount = selectedEntries.reduce((sum, entry) => {
+      const rate = entry.project?.hourlyRate ?? 0;
+      return sum + entry.hours * rate;
+    }, 0);
     onSelectionChange(Array.from(newSelectedIds), totalAmount);
   };
 
@@ -103,8 +103,10 @@ export function WorkHoursSelector({
     const selectedEntries = availableEntries.filter((entry) =>
       newSelectedIds.has(entry.id)
     );
-    const totalHours = selectedEntries.reduce((sum, entry) => sum + entry.hours, 0);
-    const totalAmount = totalHours * hourlyRate;
+    const totalAmount = selectedEntries.reduce((sum, entry) => {
+      const rate = entry.project?.hourlyRate ?? 0;
+      return sum + entry.hours * rate;
+    }, 0);
     onSelectionChange(Array.from(newSelectedIds), totalAmount);
   };
 
@@ -247,8 +249,8 @@ export function WorkHoursSelector({
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium">${(entry.hours * hourlyRate).toFixed(2)}</div>
-                        <div className="text-xs text-muted-foreground">@ ${hourlyRate}/hr</div>
+                        <div className="font-medium">${(entry.hours * (entry.project?.hourlyRate ?? 0)).toFixed(2)}</div>
+                        <div className="text-xs text-muted-foreground">@ ${entry.project?.hourlyRate ?? 0}/hr</div>
                       </div>
                     </div>
                   ))}

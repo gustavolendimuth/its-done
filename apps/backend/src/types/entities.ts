@@ -9,7 +9,7 @@ export interface User {
   name: string;
   password: string;
   googleId?: string;
-  role: "USER" | "ADMIN";
+  role: 'USER' | 'ADMIN';
   createdAt: DateField;
   updatedAt: DateField;
   _count?: {
@@ -46,6 +46,7 @@ export interface Project {
   description?: string;
   clientId: string;
   userId: string;
+  hourlyRate?: number;
   createdAt: DateField;
   updatedAt: DateField;
   client?: Client;
@@ -102,7 +103,7 @@ export interface Invoice {
   clientId: string;
   fileUrl?: string;
   amount: number;
-  status: "PENDING" | "PAID" | "CANCELED";
+  status: 'PENDING' | 'PAID' | 'CANCELED';
   description?: string;
   createdAt: DateField;
   updatedAt: DateField;
@@ -122,7 +123,7 @@ export interface InvoiceWorkHour {
 export interface NotificationLog {
   id: string;
   userId: string;
-  type: "HOURS_THRESHOLD" | "INVOICE_UPLOADED" | "WELCOME";
+  type: 'HOURS_THRESHOLD' | 'INVOICE_UPLOADED' | 'WELCOME';
   threshold: number;
   totalHours: number;
   sentAt: DateField;
@@ -146,6 +147,7 @@ export interface TimeEntry {
     id: string;
     name: string;
     description?: string;
+    hourlyRate?: number;
   };
   invoiceWorkHours?: {
     invoice: {

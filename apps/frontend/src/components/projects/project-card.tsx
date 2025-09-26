@@ -13,7 +13,9 @@ import {
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { toast } from "sonner";
 
+import { ProjectEditDialog } from "@/components/projects/project-edit-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +39,7 @@ interface ProjectCardProps {
     description?: string;
     createdAt: string;
     clientId: string;
+    hourlyRate?: number;
     client: {
       company: string;
     };
@@ -57,6 +60,7 @@ export function ProjectCard({
   const tCommon = useTranslations("common");
   const router = useRouter();
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const handleViewClient = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,8 +69,7 @@ export function ProjectCard({
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: Implementar modal de edição de projeto
-    console.log("Edit project:", project.id);
+    setShowEditDialog(true);
   };
 
   const handleDelete = () => {
@@ -222,6 +225,19 @@ export function ProjectCard({
           </div>
         </div>
       </div>
+
+      {/* Edit Project Dialog */}
+      {showEditDialog && (
+        <ProjectEditDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          project={project}
+          onSuccess={(_updatedProject) => {
+            setShowEditDialog(false);
+            toast.success(t("saveSuccess"));
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -111,7 +111,7 @@ export default function ClientsPage() {
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         title={t("addNewClient")}
-        description={t("addNewClientFormSubtitle")}
+        description={t("createClientFormSubtitle")}
         icon={Users}
         className="sm:max-w-[600px]"
       >

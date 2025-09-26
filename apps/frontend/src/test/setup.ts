@@ -1,15 +1,7 @@
 import "@testing-library/jest-dom";
-import { expect } from "@jest/globals";
 import { configure } from "@testing-library/react";
 
-import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
-
-declare global {
-  namespace jest {
-    interface Matchers<R = void>
-      extends TestingLibraryMatchers<typeof expect.stringContaining, R> {}
-  }
-}
+// Keep default Jest matchers; jest-dom augments them automatically.
 
 interface MockImageProps {
   src: string;
@@ -100,12 +92,4 @@ Object.defineProperty(window, "matchMedia", {
   })),
 });
 
-// Extend Jest matchers
-declare global {
-  namespace jest {
-    interface Matchers<R> {
-      toBeInTheDocument(): R;
-      toHaveTextContent(text: string | RegExp): R;
-    }
-  }
-}
+// No additional global type overrides

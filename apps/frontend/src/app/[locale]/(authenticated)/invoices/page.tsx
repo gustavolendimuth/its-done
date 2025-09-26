@@ -175,7 +175,7 @@ export default function InvoicesPage() {
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         title={t("createInvoice")}
-        description={t("createInvoiceFormSubtitle")}
+        description={t("createFormSubtitle")}
         icon={FileText}
         className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto"
       >
@@ -191,7 +191,7 @@ export default function InvoicesPage() {
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           title={t("edit")}
-          description={t("editInvoiceFormSubtitle")}
+          description={t("editFormSubtitle")}
           icon={FileText}
           className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto"
         >

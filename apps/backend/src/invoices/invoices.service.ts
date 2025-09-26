@@ -32,9 +32,7 @@ export class InvoicesService {
         },
         userId,
       },
-      include: {
-        client: true,
-      },
+      // No include here to keep types simple
     });
 
     if (workHours.length !== createInvoiceDto.workHourIds.length) {
@@ -81,11 +79,43 @@ export class InvoicesService {
 
     const clientId = workHours[0].clientId;
 
+    // Compute amount based on project hourly rates when possible
+    const projectIds = Array.from(
+      new Set(
+        workHours
+          .map((wh) => wh.projectId)
+          .filter((id): id is string => typeof id === 'string'),
+      ),
+    );
+
+    const projects = projectIds.length
+      ? await this.prisma.project.findMany({
+          where: { id: { in: projectIds } },
+        })
+      : [];
+
+    type ProjectRate = { id: string; hourlyRate?: number };
+    const rateMap = new Map(
+      (projects as unknown as ProjectRate[]).map((p) => [
+        p.id,
+        p.hourlyRate ?? 0,
+      ]),
+    );
+
+    const computedAmount = workHours.reduce((sum, wh) => {
+      const rate = wh.projectId ? (rateMap.get(wh.projectId) ?? 0) : 0;
+      return sum + wh.hours * rate;
+    }, 0);
+
     // Criar a invoice
     const invoice = await this.prisma.invoice.create({
       data: {
         clientId,
-        amount: createInvoiceDto.amount,
+        // If client sent amount explicitly, use it; otherwise use computed
+        amount:
+          typeof createInvoiceDto.amount === 'number'
+            ? createInvoiceDto.amount
+            : computedAmount,
         status: (createInvoiceDto.status as any) || 'PENDING',
         fileUrl: createInvoiceDto.fileUrl,
         description: createInvoiceDto.description,
@@ -97,24 +127,20 @@ export class InvoicesService {
       },
       include: {
         client: true,
-        invoiceWorkHours: {
-          include: {
-            workHour: {
-              include: {
-                client: true,
-                project: true,
-              },
-            },
-          },
-        },
+        invoiceWorkHours: true,
       },
     });
 
     // Enviar notificação ao cliente sobre a nova invoice
-    if (workHours[0].client?.email) {
+    const client = await this.prisma.client.findUnique({
+      where: { id: clientId },
+      select: { email: true },
+    });
+
+    if (client?.email) {
       try {
         await this.notificationsService.sendInvoiceUploadNotification(
-          workHours[0].client.email,
+          client.email,
           invoice.id,
         );
       } catch (error) {

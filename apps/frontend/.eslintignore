@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+build/
+
+# Cypress artifacts
+cypress/screenshots/
+cypress/videos/
+
+# Coverage
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Generated/static assets
+public/
+
+# Node.js config files (handled by Node env or ignored)
+jest.config.js
+next.config.js
+postcss.config.js
+
+# Misc
+*.d.ts

@@ -32,7 +32,6 @@ const invoiceSchema = z.object({
     .array(z.string())
     .min(1, "At least one work hour must be selected"),
   amount: z.number().min(0.01, "Amount must be greater than 0"),
-  hourlyRate: z.number().min(0, "Hourly rate must be 0 or greater").optional(),
   description: z.string().optional(),
   status: z.enum(["PENDING", "PAID", "CANCELED"]).optional(),
   invoiceNumber: z.string().optional(),
@@ -72,14 +71,12 @@ export function CreateInvoiceForm({
   } = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
-      hourlyRate: 50,
       amount: 0,
       invoiceNumber: "",
     },
   });
 
   const watchedClientId = watch("clientId");
-  const watchedHourlyRate = watch("hourlyRate");
 
   // Buscar horas disponíveis (não faturadas ou de faturas canceladas)
   const { data: availableTimeEntries = [] } = useAvailableTimeEntries({
@@ -225,23 +222,7 @@ export function CreateInvoiceForm({
         )}
       </div>
 
-      {/* Hourly Rate */}
-      <div className="space-y-2">
-        <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
-        <Input
-          id="hourlyRate"
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="50.00"
-          {...register("hourlyRate", { valueAsNumber: true })}
-        />
-        {errors.hourlyRate && (
-          <p className="text-sm text-red-500">{errors.hourlyRate.message}</p>
-        )}
-      </div>
-
-      
+  {/* Project hourly rate is defined per Project; no invoice-level rate field */}
 
       {/* Work Hours Selection */}
       <div className="space-y-2">
@@ -252,7 +233,6 @@ export function CreateInvoiceForm({
             {/* Selection Summary (top) */}
               <WorkHoursSelectionSummary
                 totalHours={totalHours}
-                hourlyRate={watchedHourlyRate || 50}
                 totalAmount={calculatedAmount}
               />
 
@@ -263,14 +243,12 @@ export function CreateInvoiceForm({
               onSelectionChange={(workHourIds, totalAmount) =>
                 handleWorkHoursSelection(workHourIds, totalAmount)
               }
-              hourlyRate={watchedHourlyRate || 50}
             />
 
             {/* Selection Summary */}
             {selectedWorkHourIds.length > 0 && (
               <WorkHoursSelectionSummary
                 totalHours={totalHours}
-                hourlyRate={watchedHourlyRate || 50}
                 totalAmount={calculatedAmount}
               />
             )}

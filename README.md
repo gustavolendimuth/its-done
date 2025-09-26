@@ -65,12 +65,16 @@ O **It`s Done** é um sistema completo de controle de horas de trabalho que ofer
 - **Compartilhamento Inteligente**: Sistema de compartilhamento do dashboard do cliente via WhatsApp, Email ou cópia de link
 - **Organização por Projetos**: Estruturação hierárquica de trabalhos
 - **Histórico Detalhado**: Acompanhamento completo de horas e faturas por cliente
+- **Taxa por Hora por Projeto**: Definição opcional de "Hourly Rate ($)" em cada projeto, usada para cálculo automático de faturas
 - **Endereços Múltiplos**: Suporte a endereços de cobrança, entrega e escritório
 - **Página Detalhada do Cliente**: Interface completa com estatísticas, gráficos e histórico de atividades
 
 ### 💰 Sistema de Faturas (Invoices)
 
 - **Geração Automática**: Criação de faturas baseadas nas horas trabalhadas
+- **Cálculo Automático de Valor**: Total da fatura calculado automaticamente a partir das horas selecionadas multiplicadas pela taxa por hora de cada projeto associado
+  
+  > Nota: A partir desta atualização a taxa "Hourly Rate ($)" é definida por projeto. O valor da fatura é calculado como a soma de (hours * project.hourlyRate) para cada work hour selecionada. Historicamente a aplicação permitia configurar a taxa por fatura; isto foi movido para o nível do projeto para maior consistência.
 - **Upload de Arquivos**: Anexação de notas fiscais e documentos (PDF, DOC, IMG)
 - **Status de Acompanhamento**: Controle de faturas pendentes, pagas e canceladas
 - **Armazenamento Inteligente**: Sistema com prioridade Railway Volume > AWS S3 > Storage local
@@ -584,21 +588,22 @@ O sistema utiliza uma estratégia de armazenamento inteligente com três níveis
 O frontend usa Jest com Testing Library para testes:
 
 ```bash
-# Rodar testes em modo watch
-npm test
+# Rodar testes de componentes
+cd apps/frontend
+pnpm test
 
 # Rodar testes em CI
-npm run test:ci
+pnpm test:ci
 
 # Rodar testes com cobertura
-npm run test:coverage
+pnpm test:coverage
 ```
 
 #### Estrutura de Testes
 
 - **Framework**: Jest com JSDOM
 - **Biblioteca**: React Testing Library
-- **Configuração**: `jest.config.ts`
+ - **Configuração**: `jest.config.js`
 - **Arquivos**:
 
 ```
@@ -668,7 +673,14 @@ docker-compose up -d
 # Gerar cliente Prisma e aplicar migrações
 cd apps/backend
 pnpm prisma generate
-pnpm prisma db push
+pnpm prisma migrate dev
+
+# Se você precisa aplicar a migração que adiciona `project.hourlyRate` (usado para cálculo de invoices), execute:
+pnpm prisma migrate dev --name add_project_hourly_rate
+
+# Testes (adicionados recentemente)
+cd apps/backend && pnpm test
+cd apps/frontend && pnpm test
 ```
 
 #### Configurar Variáveis de Ambiente
@@ -842,6 +854,7 @@ pnpm start
 2. Clique em "Novo Projeto"
 3. Associe o projeto a um cliente existente
 4. Adicione nome e descrição
+5. (Opcional) Defina a taxa por hora (Hourly Rate $) do projeto — usada para cálculo automático de faturas
 5. Salve o projeto
 
 ### 5. Registrar Horas de Trabalho
@@ -870,7 +883,7 @@ pnpm start
 2. Clique em "Nova Fatura"
 3. Selecione o cliente
 4. Escolha as horas a serem faturadas
-5. Defina o valor (se aplicável)
+5. Revise o valor calculado automaticamente com base nas horas e nas taxas por projeto (você pode ajustar antes de salvar, se necessário)
 6. Faça upload da nota fiscal (PDF/IMG)
 7. O sistema enviará email automaticamente ao cliente
 

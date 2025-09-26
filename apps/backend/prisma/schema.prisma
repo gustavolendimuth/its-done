@@ -64,6 +64,7 @@ model Project {
   description String?
   clientId    String
   userId      String
+  hourlyRate  Float      @default(0)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   client      Client     @relation(fields: [clientId], references: [id])

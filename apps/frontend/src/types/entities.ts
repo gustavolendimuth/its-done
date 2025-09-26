@@ -44,6 +44,7 @@ export interface Project {
   id: string;
   name: string;
   description?: string;
+  hourlyRate?: number;
   clientId: string;
   userId: string;
   createdAt: DateField;
@@ -146,6 +147,7 @@ export interface TimeEntry {
     id: string;
     name: string;
     description?: string;
+  hourlyRate?: number;
   };
   invoiceWorkHours?: {
     invoice: {

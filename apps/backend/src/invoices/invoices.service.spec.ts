@@ -1,44 +1,115 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { InvoicesService } from './invoices.service';
 
-describe('InvoicesService', () => {
+// Minimal mocks for dependencies
+const prismaMock = {
+  workHour: {
+    findMany: jest.fn(),
+  },
+  invoiceWorkHour: {
+    findMany: jest.fn(),
+  },
+  project: {
+    findMany: jest.fn(),
+  },
+  invoice: {
+    create: jest.fn(),
+  },
+  client: {
+    findUnique: jest.fn(),
+  },
+} as any;
+
+const notificationsMock = {
+  sendInvoiceUploadNotification: jest.fn(),
+} as any;
+
+const configMock = {
+  get: jest.fn(),
+} as any;
+
+const uploadMock = {} as any;
+
+describe('InvoicesService - create()', () => {
   let service: InvoicesService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [InvoicesService],
-    }).compile();
-
-    service = module.get<InvoicesService>(InvoicesService);
+  beforeEach(() => {
+    jest.resetAllMocks();
+    service = new InvoicesService(
+      prismaMock,
+      notificationsMock,
+      configMock,
+      uploadMock,
+    );
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  it('computes amount from project hourly rates when amount is not provided', async () => {
+    const userId = 'user-1';
+    const dto = {
+      workHourIds: ['wh1', 'wh2'],
+      // amount omitted to force computation
+    } as any;
+
+    prismaMock.workHour.findMany.mockResolvedValueOnce([
+      { id: 'wh1', userId, clientId: 'c1', projectId: 'p1', hours: 2 },
+      { id: 'wh2', userId, clientId: 'c1', projectId: 'p2', hours: 3 },
+    ]);
+
+    prismaMock.invoiceWorkHour.findMany.mockResolvedValueOnce([]);
+
+    prismaMock.project.findMany.mockResolvedValueOnce([
+      { id: 'p1', hourlyRate: 100 },
+      { id: 'p2', hourlyRate: 80 },
+    ]);
+
+    prismaMock.invoice.create.mockResolvedValueOnce({
+      id: 'inv1',
+      amount: 440,
+    });
+    prismaMock.client.findUnique.mockResolvedValueOnce({ email: undefined });
+
+    const result = await service.create(dto, userId);
+
+    // Expected computed = 2*100 + 3*80 = 440
+    expect(prismaMock.invoice.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ amount: 440 }),
+      }),
+    );
+    expect(result).toEqual({ id: 'inv1', amount: 440 });
   });
 
-  describe('Invoice Search Filters Integration', () => {
-    it('should support filtering by status', () => {
-      // Test to validate that the service supports filtering by status
-      // This ensures the backend is ready for the frontend filter component
-      expect(service).toBeDefined();
-    });
+  it('throws if hours belong to different clients', async () => {
+    const userId = 'user-1';
+    const dto = { workHourIds: ['wh1', 'wh2'] } as any;
 
-    it('should support date range filtering', () => {
-      // Test to validate date range filtering capability
-      // This ensures the service can handle the date filtering from the frontend
-      expect(service).toBeDefined();
-    });
+    prismaMock.workHour.findMany.mockResolvedValueOnce([
+      { id: 'wh1', userId, clientId: 'c1', projectId: 'p1', hours: 1 },
+      { id: 'wh2', userId, clientId: 'c2', projectId: 'p1', hours: 1 },
+    ]);
+    prismaMock.invoiceWorkHour.findMany.mockResolvedValueOnce([]);
 
-    it('should support search by number and description', () => {
-      // Test to validate search functionality
-      // This ensures the service can handle search queries from the frontend
-      expect(service).toBeDefined();
-    });
+    await expect(service.create(dto, userId)).rejects.toThrow(
+      'All work hours must belong to the same client',
+    );
+  });
 
-    it('should support sorting by different fields', () => {
-      // Test to validate sorting capability
-      // This ensures the service can handle sorting from the frontend
-      expect(service).toBeDefined();
-    });
+  it('prevents reuse of work hours if already invoiced in non-canceled invoices', async () => {
+    const userId = 'user-1';
+    const dto = { workHourIds: ['wh1'] } as any;
+
+    prismaMock.workHour.findMany.mockResolvedValueOnce([
+      { id: 'wh1', userId, clientId: 'c1', projectId: 'p1', hours: 1 },
+    ]);
+
+    prismaMock.invoiceWorkHour.findMany.mockResolvedValueOnce([
+      {
+        workHourId: 'wh1',
+        invoice: { id: 'i1', number: '0001', status: 'PENDING' },
+      },
+    ]);
+
+    await expect(service.create(dto, userId)).rejects.toThrow(
+      /already invoiced/i,
+    );
   });
 });

@@ -12,6 +12,14 @@ jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
+// Mock sonner
+jest.mock("sonner", () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+  }
+}));
+
 // Mock services
 const mockCreateProject = jest.fn(
   (data: CreateProjectData): Promise<Project> => {
@@ -105,17 +113,17 @@ describe("ProjectCreateDialog", () => {
     render(<ProjectCreateDialog {...defaultProps} />);
 
     expect(screen.getByText("title")).toBeInTheDocument();
-    expect(screen.getByText("description")).toBeInTheDocument();
+    expect(screen.getByText("subtitle")).toBeInTheDocument();
     expect(screen.getByTestId("client-combobox")).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText("Enter project name")
+      screen.getByPlaceholderText("enterName")
     ).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText("Enter project description (optional)")
+      screen.getByPlaceholderText("enterDescription")
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "cancel" })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Create Project" })
+      screen.getByRole("button", { name: "create" })
     ).toBeInTheDocument();
   });
 
@@ -129,7 +137,7 @@ describe("ProjectCreateDialog", () => {
     render(<ProjectCreateDialog {...defaultProps} />);
 
     // Submit without filling required fields
-    fireEvent.click(screen.getByRole("button", { name: "Create Project" }));
+    fireEvent.click(screen.getByRole("button", { name: "create" }));
 
     // Wait for validation messages
     await waitFor(() => {
@@ -158,11 +166,11 @@ describe("ProjectCreateDialog", () => {
 
     // Fill form
     await userEvent.type(
-      screen.getByPlaceholderText("Enter project name"),
+      screen.getByPlaceholderText("enterName"),
       "Test Project"
     );
     await userEvent.type(
-      screen.getByPlaceholderText("Enter project description (optional)"),
+      screen.getByPlaceholderText("enterDescription"),
       "Test Description"
     );
     fireEvent.change(screen.getByTestId("client-combobox"), {
@@ -170,7 +178,7 @@ describe("ProjectCreateDialog", () => {
     });
 
     // Submit form
-    fireEvent.click(screen.getByRole("button", { name: "Create Project" }));
+    fireEvent.click(screen.getByRole("button", { name: "create" }));
 
     // Wait for submission and callback
     await waitFor(() => {
@@ -178,8 +186,11 @@ describe("ProjectCreateDialog", () => {
         name: "Test Project",
         description: "Test Description",
         clientId: "1",
+        hourlyRate: undefined
       });
       expect(defaultProps.onSuccess).toHaveBeenCalledWith(mockProject);
+      const { toast } = require("sonner");
+      expect(toast.success).toHaveBeenCalledWith("success");
     });
   });
 
@@ -193,7 +204,7 @@ describe("ProjectCreateDialog", () => {
 
     // Fill form
     await userEvent.type(
-      screen.getByPlaceholderText("Enter project name"),
+      screen.getByPlaceholderText("enterName"),
       "Test Project"
     );
     fireEvent.change(screen.getByTestId("client-combobox"), {
@@ -201,7 +212,7 @@ describe("ProjectCreateDialog", () => {
     });
 
     // Submit form
-    fireEvent.click(screen.getByRole("button", { name: "Create Project" }));
+    fireEvent.click(screen.getByRole("button", { name: "create" }));
 
     // Wait for error handling
     await waitFor(() => {
@@ -210,6 +221,8 @@ describe("ProjectCreateDialog", () => {
         expect.any(Error)
       );
       expect(defaultProps.onSuccess).not.toHaveBeenCalled();
+      const { toast } = require("sonner");
+      expect(toast.error).toHaveBeenCalledWith("error");
     });
 
     consoleError.mockRestore();
@@ -219,7 +232,7 @@ describe("ProjectCreateDialog", () => {
     render(<ProjectCreateDialog {...defaultProps} />);
 
     // Click cancel button
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: "cancel" }));
 
     expect(defaultProps.onOpenChange).toHaveBeenCalledWith(false);
   });
@@ -229,7 +242,7 @@ describe("ProjectCreateDialog", () => {
 
     // Initial state
     expect(
-      screen.getByRole("button", { name: "Create Project" })
+      screen.getByRole("button", { name: "create" })
     ).not.toBeDisabled();
 
     // Mock pending state
@@ -243,7 +256,7 @@ describe("ProjectCreateDialog", () => {
     // Re-render with pending state
     rerender(<ProjectCreateDialog {...defaultProps} />);
 
-    expect(screen.getByRole("button", { name: "Creating..." })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "creating" })).toBeDisabled();
   });
 
   it("resets form on successful submission", async () => {
@@ -266,11 +279,11 @@ describe("ProjectCreateDialog", () => {
 
     // Fill form
     await userEvent.type(
-      screen.getByPlaceholderText("Enter project name"),
+      screen.getByPlaceholderText("enterName"),
       "Test Project"
     );
     await userEvent.type(
-      screen.getByPlaceholderText("Enter project description (optional)"),
+      screen.getByPlaceholderText("enterDescription"),
       "Test Description"
     );
     fireEvent.change(screen.getByTestId("client-combobox"), {
@@ -278,13 +291,13 @@ describe("ProjectCreateDialog", () => {
     });
 
     // Submit form
-    fireEvent.click(screen.getByRole("button", { name: "Create Project" }));
+    fireEvent.click(screen.getByRole("button", { name: "create" }));
 
     // Wait for form reset
     await waitFor(() => {
-      expect(screen.getByPlaceholderText("Enter project name")).toHaveValue("");
+      expect(screen.getByPlaceholderText("enterName")).toHaveValue("");
       expect(
-        screen.getByPlaceholderText("Enter project description (optional)")
+        screen.getByPlaceholderText("enterDescription")
       ).toHaveValue("");
       expect(screen.getByTestId("client-combobox")).toHaveValue("");
     });
