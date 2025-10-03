@@ -28,16 +28,17 @@ export default function WorkHoursPage() {
   const t = useTranslations("workHours");
   const tCommon = useTranslations("common");
 
-  // Inicializar com datas estáveis
+  // Inicializar com "All Time" (todo período)
   const initialDateRange = useMemo(() => {
+    // Define uma data muito antiga como início (1 de janeiro de 2000)
+    const start = new Date(2000, 0, 1);
     const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     // Use end of day to ensure new entries created today are included
     const endOfToday = new Date(today);
     endOfToday.setHours(23, 59, 59, 999);
 
     return {
-      startDate: firstDayOfMonth,
+      startDate: start,
       endDate: endOfToday,
     };
   }, []);
@@ -50,7 +51,7 @@ export default function WorkHoursPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Memoizar as datas para evitar recriações desnecessárias
+  // Memorizar as datas para evitar recriações desnecessárias
   const queryParams = useMemo(() => {
     if (!dateRange.startDate || !dateRange.endDate) return null;
 

@@ -23,7 +23,7 @@ const workHourFormSchema = z.object({
   date: z.date({
     required_error: "Please select a date",
   }),
-  projectId: z.string().optional(),
+  projectId: z.string().min(1, "Project is required"),
   hours: z
     .string()
     .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
@@ -167,7 +167,7 @@ export function WorkHourForm({
 
       <div className="space-y-2">
         <Label className="text-sm font-medium text-foreground">
-          {t("project")}
+          {t("project")} *
         </Label>
         <Controller
           name="projectId"

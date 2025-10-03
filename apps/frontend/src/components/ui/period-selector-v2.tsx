@@ -32,9 +32,20 @@ export function PeriodSelectorV2({
 }: PeriodSelectorV2Props) {
   const t = useTranslations("common");
   const [showCustom, setShowCustom] = useState(false);
+  const [tempRange, setTempRange] = useState<DateRange>(value);
   const customBtnRef = useRef<HTMLButtonElement>(null);
 
   const PRESETS = [
+    {
+      label: t("allTime"),
+      getRange: () => {
+        // Define uma data muito antiga como início (1 de janeiro de 2000)
+        const start = new Date(2000, 0, 1);
+        const end = endOfDay(new Date());
+
+        return { startDate: start, endDate: end };
+      },
+    },
     {
       label: t("today"),
       getRange: () => {
@@ -104,10 +115,19 @@ export function PeriodSelectorV2({
 
   // Fecha o calendário customizado ao selecionar um range válido
   const handleCustomChange = (range: DateRange) => {
-    onChange(range);
+    setTempRange(range);
     if (range.startDate && range.endDate) {
+      onChange(range);
       setShowCustom(false);
     }
+  };
+
+  // Reseta a seleção quando abre o calendário
+  const handleToggleCustom = () => {
+    if (!showCustom) {
+      setTempRange({ startDate: null, endDate: null });
+    }
+    setShowCustom((v) => !v);
   };
 
   return (
@@ -118,13 +138,13 @@ export function PeriodSelectorV2({
         type="button"
         variant="outline"
         className="w-full h-11 bg-gradient-to-r from-background to-muted/20 border-2 border-muted hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-200 justify-start text-left font-normal"
-        onClick={() => setShowCustom((v) => !v)}
+        onClick={handleToggleCustom}
       >
         {formatLabel()}
       </Button>
 
       {/* Botões de preset em linha separada */}
-      <div className="grid grid-cols-5 gap-2 mt-3">
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-3 sm:[grid-template-columns:1fr_0.8fr_1fr_1fr_1.2fr_1.3fr]">
         {PRESETS.map((preset) => {
           const presetRange = preset.getRange();
           const isSelected =
@@ -140,7 +160,7 @@ export function PeriodSelectorV2({
               type="button"
               variant={isSelected ? "default" : "outline"}
               size="sm"
-              className="text-xs rounded-md"
+              className="text-xs rounded-md px-2 whitespace-nowrap"
               onClick={() => onChange(preset.getRange())}
             >
               {preset.label}
@@ -154,7 +174,7 @@ export function PeriodSelectorV2({
         <div className="absolute z-50 mt-2 left-0 w-full min-w-[320px]">
           <div className="border rounded-lg p-4 bg-background shadow-xl">
             <DateRangePicker
-              value={value}
+              value={tempRange}
               onChange={handleCustomChange}
               inlinePopup
             />
