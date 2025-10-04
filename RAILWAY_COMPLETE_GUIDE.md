@@ -297,21 +297,55 @@ Endpoint de diagnóstico: `GET /invoices/upload-info`
 
 ---
 
-## 🔄 **8. Migrações**
+## 🔄 **8. Migrações e Backups**
 
-### **Executar via Railway Shell**
+### **🔥 Sistema de Backup Automático**
+
+O backend está configurado para criar **backups automáticos** antes de cada migration:
+
+#### **O que acontece automaticamente:**
+
+1. ✅ **Backup do banco** antes de cada deploy
+2. 🔄 **Execução da migration** (prisma migrate deploy)
+3. 🧹 **Limpeza automática** (mantém últimos 5 backups)
+4. 💾 **Armazenamento** em `/app/data/backups/` (Railway Volume)
+
+#### **Verificar backups criados:**
+
+```bash
+railway run --service backend ls -lh /app/data/backups/
+```
+
+### **🔄 Restaurar um Backup**
+
+Se algo der errado após uma migration:
+
+```bash
+# 1. Listar backups disponíveis
+railway run --service backend ls -lh /app/data/backups/
+
+# 2. Restaurar backup específico
+railway run --service backend /app/scripts/restore-backup.sh /app/data/backups/backup_YYYYMMDD_HHMMSS.sql
+```
+
+### **📝 Executar Migrations Manualmente**
+
+Se precisar executar migrations sem o deploy automático:
+
+#### **Via Railway Shell:**
 
 ```bash
 # Conectar ao terminal do backend
 railway shell --service backend
 
-# Executar migrações
-cd apps/backend
+# Executar migrations (COM backup automático)
+/app/scripts/migrate-with-backup.sh
+
+# Ou sem backup (não recomendado)
 pnpm prisma migrate deploy
-pnpm prisma db seed
 ```
 
-### **Executar via CLI**
+#### **Via Railway CLI:**
 
 ```bash
 # Instalar Railway CLI
@@ -321,10 +355,23 @@ npm install -g @railway/cli
 railway login
 railway link
 
-# Executar comandos
-railway run --service backend pnpm prisma migrate deploy
+# Executar migration com backup
+railway run --service backend /app/scripts/migrate-with-backup.sh
+
+# Seed do banco (opcional)
 railway run --service backend pnpm prisma db seed
 ```
+
+### **⚠️ Importante sobre Backups**
+
+- **Retenção**: Últimos 5 backups (automático)
+- **Formato**: PostgreSQL SQL dump
+- **Local**: Railway Volume (persistente entre deploys)
+- **Espaço**: ~2-10MB por backup (varia com tamanho do banco)
+
+**Se o Volume estiver cheio:**
+- Aumente o tamanho no Railway Dashboard
+- Ou reduza retenção editando `migrate-with-backup.sh` (linha `tail -n +6`)
 
 ---
 

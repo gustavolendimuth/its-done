@@ -62,3 +62,7 @@ prisma/seed-generated.ts
 
 # Upload files
 uploads/
+
+# Database backups
+scripts/backups/
+data/backups/

@@ -1,8 +1,8 @@
 # Dockerfile independente para o backend
 FROM node:18-alpine AS base
 
-# Instalar dependências necessárias
-RUN apk add --no-cache libc6-compat curl
+# Instalar dependências necessárias (incluindo postgresql-client para backups)
+RUN apk add --no-cache libc6-compat curl postgresql-client
 RUN npm install -g pnpm@8.15.4
 
 WORKDIR /app
@@ -56,9 +56,11 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/scripts ./scripts
 
-# Definir permissões
-RUN chown -R nestjs:nodejs /app
+# Definir permissões e tornar scripts executáveis
+RUN chown -R nestjs:nodejs /app && \
+    chmod +x /app/scripts/*.sh
 
 USER nestjs
 
@@ -68,5 +70,5 @@ EXPOSE 3002
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://127.0.0.1:3002/health || exit 1
 
-# Comando para iniciar com migrações
-CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm db:reset && node dist/src/main.js"] 
+# Comando para iniciar com migrações e backup automático
+CMD ["sh", "-c", "/app/scripts/migrate-with-backup.sh && node dist/src/main.js"] 
