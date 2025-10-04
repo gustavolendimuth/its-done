@@ -38,9 +38,14 @@ interface ProjectCardProps {
     name: string;
     description?: string;
     createdAt: string;
+    updatedAt: string;
     clientId: string;
+    userId: string;
     hourlyRate?: number;
     client: {
+      id: string;
+      name?: string;
+      email: string;
       company: string;
     };
     _count: {
