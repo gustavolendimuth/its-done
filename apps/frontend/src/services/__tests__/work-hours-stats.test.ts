@@ -1,15 +1,13 @@
-import { renderHook } from "@testing-library/react";
-import { QueryClient } from "@tanstack/react-query";
+import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
 import { useWorkHoursStats } from "../work-hours-stats";
 
 // Mock axios
-jest.mock("@/lib/axios", () => ({
-  default: {
-    get: jest.fn(),
-  },
-}));
+jest.mock("@/lib/axios");
+
+const mockedApi = api as jest.Mocked<typeof api>;
 
 describe("Work Hours Stats Service", () => {
   it("should fetch work hours stats", async () => {
@@ -19,15 +17,23 @@ describe("Work Hours Stats Service", () => {
       totalClients: 3,
     };
 
-    (api.get as jest.Mock).mockResolvedValueOnce({ data: mockStats });
+    mockedApi.get.mockResolvedValueOnce({ data: mockStats });
 
-    const queryClient = new QueryClient();
-    const { result } = renderHook(() => useWorkHoursStats(), {
-      wrapper: ({ children }) => {
-        return children;
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
       },
     });
 
-    expect(api.get).toHaveBeenCalledWith("/work-hours/stats");
+    const { result } = renderHook(() => useWorkHoursStats(), {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      ),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockedApi.get).toHaveBeenCalledWith("/work-hours/stats");
   });
 });

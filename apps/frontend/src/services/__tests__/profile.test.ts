@@ -1,15 +1,13 @@
-import { renderHook } from "@testing-library/react";
-import { QueryClient } from "@tanstack/react-query";
+import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
 import { useProfile } from "../profile";
 
 // Mock axios
-jest.mock("@/lib/axios", () => ({
-  default: {
-    get: jest.fn(),
-  },
-}));
+jest.mock("@/lib/axios");
+
+const mockedApi = api as jest.Mocked<typeof api>;
 
 describe("Profile Service", () => {
   it("should fetch profile data", async () => {
@@ -19,16 +17,24 @@ describe("Profile Service", () => {
       email: "john@example.com",
     };
 
-    (api.get as jest.Mock).mockResolvedValueOnce({ data: mockProfile });
+    mockedApi.get.mockResolvedValueOnce({ data: mockProfile });
 
-    const queryClient = new QueryClient();
-    const { result } = renderHook(() => useProfile(), {
-      wrapper: ({ children }) => {
-        return children;
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
       },
     });
 
-    expect(api.get).toHaveBeenCalledWith("/profile");
+    const { result } = renderHook(() => useProfile(), {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      ),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockedApi.get).toHaveBeenCalledWith("/profile");
   });
 
   // ... rest of the tests ...
