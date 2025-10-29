@@ -11,7 +11,7 @@ WORKDIR /app
 FROM base AS deps
 
 # Copiar package.json do frontend
-COPY apps/frontend/package.json ./
+COPY package.json ./
 
 # Instalar dependências
 RUN pnpm install
@@ -26,7 +26,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
 
 # Copiar código fonte (será substituído por volume)
-COPY apps/frontend/ ./
+COPY ./ ./
 
 # Expor porta
 EXPOSE 3000
@@ -48,7 +48,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
 
 # Copiar código fonte do frontend
-COPY apps/frontend/ ./
+COPY ./ ./
 
 # Build da aplicação Next.js
 RUN pnpm run build

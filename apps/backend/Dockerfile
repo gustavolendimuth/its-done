@@ -11,7 +11,7 @@ WORKDIR /app
 FROM base AS deps
 
 # Copiar package.json do backend
-COPY apps/backend/package.json ./
+COPY package.json ./
 
 # Instalar dependências
 RUN pnpm install
@@ -26,7 +26,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
 
 # Copiar código fonte (será substituído por volume)
-COPY apps/backend/ ./
+COPY ./ ./
 
 # Gerar Prisma client
 RUN npx prisma generate
@@ -47,7 +47,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
 
 # Copiar código fonte do backend (incluindo prisma)
-COPY apps/backend/ ./
+COPY ./ ./
 
 # Gerar Prisma client
 RUN npx prisma generate
