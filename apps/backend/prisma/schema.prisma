@@ -24,6 +24,7 @@ model User {
   projects        Project[]
   settings        Settings?
   notificationLogs NotificationLog[]
+  inAppNotifications InAppNotification[]
 }
 
 model WorkHour {
@@ -65,6 +66,7 @@ model Project {
   clientId    String
   userId      String
   hourlyRate  Float      @default(0)
+  alertHours  Float?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   client      Client     @relation(fields: [clientId], references: [id])
@@ -125,6 +127,7 @@ model InvoiceWorkHour {
 model NotificationLog {
   id           String           @id @default(uuid())
   userId       String
+  clientId     String?
   type         NotificationType
   threshold    Float
   totalHours   Float
@@ -132,6 +135,30 @@ model NotificationLog {
   user         User             @relation(fields: [userId], references: [id])
 
   @@index([userId, type, threshold])
+  @@index([userId, clientId, type, threshold])
+}
+
+model InAppNotification {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String
+  message     String
+  type        InAppNotificationType @default(INFO)
+  read        Boolean  @default(false)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+
+enum InAppNotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
 }
 
 enum NotificationType {
@@ -141,6 +168,7 @@ enum NotificationType {
 }
 
 enum InvoiceStatus {
+  DRAFT
   PENDING
   PAID
   CANCELED
