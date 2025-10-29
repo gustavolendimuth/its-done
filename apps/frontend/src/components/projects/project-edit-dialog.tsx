@@ -21,6 +21,7 @@ const projectSchema = z.object({
   name: z.string().min(1, { message: "Project name is required" }),
   description: z.string().optional(),
   hourlyRate: z.number().min(0, { message: "Hourly rate must be 0 or greater" }).optional().nullable(),
+  alertHours: z.number().min(0, { message: "Alert hours must be 0 or greater" }).optional().nullable(),
   clientId: z.string().min(1, { message: "Client is required" }),
 });
 
@@ -55,6 +56,7 @@ export function ProjectEditDialog({
       name: project.name,
       description: project.description || "",
       hourlyRate: project.hourlyRate || null,
+      alertHours: (project as any).alertHours || null,
       clientId: project.clientId,
     },
   });
@@ -66,6 +68,7 @@ export function ProjectEditDialog({
         name: project.name,
         description: project.description || "",
         hourlyRate: project.hourlyRate || null,
+        alertHours: (project as any).alertHours || null,
         clientId: project.clientId,
       });
     }
@@ -73,10 +76,11 @@ export function ProjectEditDialog({
 
   const onSubmit = async (data: ProjectFormData) => {
     try {
-      // Convert null to undefined for hourlyRate to match UpdateProjectData type
+      // Convert null to undefined for hourlyRate and alertHours to match UpdateProjectData type
       const formattedData = {
         ...data,
-        hourlyRate: data.hourlyRate === null ? undefined : data.hourlyRate
+        hourlyRate: data.hourlyRate === null ? undefined : data.hourlyRate,
+        alertHours: data.alertHours === null ? undefined : data.alertHours
       };
 
       const updatedProject = await updateProject.mutateAsync({
@@ -156,6 +160,29 @@ export function ProjectEditDialog({
           {errors && (errors as any).hourlyRate && (
             <p className="text-sm text-destructive">
               {(errors as any).hourlyRate?.message as string}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="alertHours">{t("alertHours")}</Label>
+          <Input
+            id="alertHours"
+            type="number"
+            step="1"
+            min="0"
+            {...register("alertHours", {
+              valueAsNumber: true,
+              setValueAs: v => v === "" ? null : Number(v)
+            })}
+            placeholder={t("alertHoursPlaceholder", { defaultMessage: "e.g., 160" })}
+          />
+          <p className="text-sm text-muted-foreground">
+            {t("alertHoursDescription")}
+          </p>
+          {errors && (errors as any).alertHours && (
+            <p className="text-sm text-destructive">
+              {(errors as any).alertHours?.message as string}
             </p>
           )}
         </div>

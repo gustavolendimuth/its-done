@@ -15,4 +15,9 @@ export class CreateProjectDto {
   @IsNumber()
   @Min(0)
   hourlyRate?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  alertHours?: number;
 }

@@ -1,11 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSettingsDto } from './dto/create-settings.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
+import { WorkHoursService } from '../work-hours/work-hours.service';
 
 @Injectable()
 export class SettingsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => WorkHoursService))
+    private workHoursService: WorkHoursService,
+  ) {}
 
   async create(userId: string, createSettingsDto: CreateSettingsDto) {
     return this.prisma.settings.create({
@@ -38,19 +43,31 @@ export class SettingsService {
       where: { userId },
     });
 
+    let updatedSettings;
+
     if (!settings) {
       // Cria se não existir, usando valores padrão para propriedades obrigatórias
       const createData: CreateSettingsDto = {
         alertHours: updateSettingsDto.alertHours ?? 160,
         notificationEmail: updateSettingsDto.notificationEmail,
       };
-      return this.create(userId, createData);
+      updatedSettings = await this.create(userId, createData);
+    } else {
+      updatedSettings = await this.prisma.settings.update({
+        where: { userId },
+        data: updateSettingsDto,
+      });
     }
 
-    return this.prisma.settings.update({
-      where: { userId },
-      data: updateSettingsDto,
-    });
+    // Check if alertHours was changed and trigger notification check
+    if (updateSettingsDto.alertHours !== undefined) {
+      // Run notification check in background (don't wait)
+      this.workHoursService.checkNotificationManually(userId).catch((error) => {
+        console.error('Error checking notification after settings update:', error);
+      });
+    }
+
+    return updatedSettings;
   }
 
   async remove(userId: string) {
