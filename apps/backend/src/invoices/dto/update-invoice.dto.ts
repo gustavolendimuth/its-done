@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, Min, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsNumber, Min, IsEnum, IsArray } from 'class-validator';
 
 export class UpdateInvoiceDto {
   @IsOptional()
@@ -6,7 +6,7 @@ export class UpdateInvoiceDto {
   number?: string;
 
   @IsOptional()
-  @IsEnum(['PENDING', 'PAID', 'CANCELED'])
+  @IsEnum(['DRAFT', 'PENDING', 'PAID', 'CANCELED'])
   status?: string;
 
   @IsOptional()
@@ -21,4 +21,9 @@ export class UpdateInvoiceDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  workHourIds?: string[];
 }

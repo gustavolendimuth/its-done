@@ -2,7 +2,8 @@
 
 import { Plus, FileText } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { CreateInvoiceForm } from "@/components/invoices/create-invoice-form";
@@ -26,6 +27,7 @@ import { useInvoices, useDeleteInvoice, Invoice } from "@/services/invoices";
 export default function InvoicesPage() {
   const t = useTranslations("invoices");
   const tCommon = useTranslations("common");
+  const searchParams = useSearchParams();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -34,6 +36,18 @@ export default function InvoicesPage() {
 
   const { data: invoices = [], isLoading, error } = useInvoices();
   const { data: clients = [], isLoading: clientsLoading } = useClients();
+
+  // Open invoice from URL parameter
+  useEffect(() => {
+    const invoiceId = searchParams.get("id");
+    if (invoiceId && invoices.length > 0) {
+      const invoice = invoices.find((inv) => inv.id === invoiceId);
+      if (invoice) {
+        setSelectedInvoice(invoice);
+        setIsEditDialogOpen(true);
+      }
+    }
+  }, [searchParams, invoices]);
 
   // Invoice filters
   const {

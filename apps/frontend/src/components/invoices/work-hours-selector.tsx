@@ -21,14 +21,18 @@ import { TimeEntry } from "@/types";
 
 interface WorkHoursSelectorProps {
   timeEntries: TimeEntry[];
+  initialSelectedIds?: string[];
   onSelectionChange: (selectedIds: string[], totalAmount: number) => void;
 }
 
 export function WorkHoursSelector({
   timeEntries,
+  initialSelectedIds = [],
   onSelectionChange,
 }: WorkHoursSelectorProps) {
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(
+    new Set(initialSelectedIds)
+  );
   const [groupBy, setGroupBy] = useState<"client" | "project" | "none">(
     "client"
   );

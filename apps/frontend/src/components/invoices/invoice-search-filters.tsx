@@ -14,7 +14,7 @@ import {
 import { Invoice } from "@/services/invoices";
 
 export type SortBy = "date" | "amount" | "status" | "hours";
-export type FilterStatus = "ALL" | "PAID" | "PENDING" | "CANCELED";
+export type FilterStatus = "ALL" | "DRAFT" | "PAID" | "PENDING" | "CANCELED";
 
 export interface InvoiceFilters {
   searchTerm: string;
@@ -70,6 +70,7 @@ export function InvoiceSearchFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">All Status</SelectItem>
+            <SelectItem value="DRAFT">Draft</SelectItem>
             <SelectItem value="PAID">Paid</SelectItem>
             <SelectItem value="PENDING">Pending</SelectItem>
             <SelectItem value="CANCELED">Canceled</SelectItem>

@@ -39,7 +39,7 @@ export interface InvoiceCardProps {
   clientName?: string;
   clientEmail?: string;
   amount: number;
-  status?: "PAID" | "PENDING" | "CANCELED" | "paid" | "pending" | "canceled";
+  status?: "DRAFT" | "PAID" | "PENDING" | "CANCELED" | "draft" | "paid" | "pending" | "canceled";
   createdAt: string | Date;
   fileUrl?: string;
   onEdit: (id: string) => void;
@@ -58,6 +58,8 @@ const getStatusColor = (status: InvoiceCardProps["status"]) => {
       return "red";
     case "PENDING":
       return "yellow";
+    case "DRAFT":
+      return "blue";
     default:
       return "blue";
   }
@@ -158,6 +160,7 @@ export function InvoiceCard({
               <StatusBadge
                 status={
                   (status?.toUpperCase() || "PENDING") as
+                    | "DRAFT"
                     | "PENDING"
                     | "PAID"
                     | "CANCELED"
@@ -191,7 +194,7 @@ export function InvoiceCard({
                 {t("status")}
               </p>
               <p className="text-sm font-bold">
-                {status?.toUpperCase() || "PENDING"}
+                {status ? t(status.toLowerCase() as "draft" | "pending" | "paid" | "cancelled") : t("pending")}
               </p>
             </div>
           </div>

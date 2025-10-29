@@ -55,6 +55,7 @@ export interface UpdateInvoiceDto {
   fileUrl?: string;
   amount?: number;
   description?: string;
+  workHourIds?: string[];
 }
 
 export const useInvoices = (params?: {

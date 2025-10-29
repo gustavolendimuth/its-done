@@ -1,5 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { Clock } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -19,14 +21,20 @@ import {
   useUpdateInvoice,
   useUploadInvoiceFile,
 } from "@/services/invoices";
+import { useAvailableTimeEntries } from "@/services/time-entries";
+import { TimeEntry } from "@/types";
 
 import { InvoiceFileUpload } from "./invoice-file-upload";
+import { WorkHoursSelectionSummary } from "./work-hours-selection-summary";
+import { WorkHoursSelector } from "./work-hours-selector";
 
 
 
 const editInvoiceSchema = z.object({
-  status: z.enum(["PENDING", "PAID", "CANCELED"]),
+  status: z.enum(["DRAFT", "PENDING", "PAID", "CANCELED"]),
   description: z.string().optional(),
+  workHourIds: z.array(z.string()).optional(),
+  amount: z.number().min(0).optional(),
 });
 
 type EditInvoiceFormData = z.infer<typeof editInvoiceSchema>;
@@ -42,26 +50,84 @@ export function EditInvoiceForm({
   onSuccess,
   onCancel,
 }: EditInvoiceFormProps) {
+  const t = useTranslations("invoices");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState(invoice.number || "");
 
+  // Work hours selection states
+  const [selectedWorkHourIds, setSelectedWorkHourIds] = useState<string[]>([]);
+  const [calculatedAmount, setCalculatedAmount] = useState<number>(invoice.amount || 0);
+
   const updateInvoiceMutation = useUpdateInvoice();
   const uploadFileMutation = useUploadInvoiceFile();
+
+  // Fetch available time entries for the invoice's client
+  const { data: availableTimeEntries = [] } = useAvailableTimeEntries({
+    clientId: invoice.clientId,
+  });
+
+  // Extract currently associated work hours from invoice
+  const currentWorkHours: TimeEntry[] = (invoice.invoiceWorkHours || []).map(
+    (iwh) => iwh.workHour as TimeEntry
+  );
+
+  // Combine available entries with current ones (removing duplicates)
+  const currentWorkHourIds = currentWorkHours.map((wh) => wh.id);
+  const filteredAvailableEntries = availableTimeEntries.filter(
+    (entry: TimeEntry) =>
+      !currentWorkHourIds.includes(entry.id) && !entry.invoiceWorkHours?.length
+  );
+
+  const allAvailableEntries = [...currentWorkHours, ...filteredAvailableEntries];
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<EditInvoiceFormData>({
     resolver: zodResolver(editInvoiceSchema),
     defaultValues: {
-      status: invoice.status as "PENDING" | "PAID" | "CANCELED",
+      status: invoice.status as "DRAFT" | "PENDING" | "PAID" | "CANCELED",
       description: invoice.description || "",
+      workHourIds: currentWorkHourIds,
+      amount: invoice.amount,
     },
   });
+
+  // Initialize selected work hours from invoice
+  useEffect(() => {
+    const initialIds = currentWorkHours.map((wh) => wh.id);
+    setSelectedWorkHourIds(initialIds);
+
+    const initialAmount = currentWorkHours.reduce((sum, entry) => {
+      const rate = entry.project?.hourlyRate ?? 0;
+      return sum + entry.hours * rate;
+    }, 0);
+    setCalculatedAmount(initialAmount);
+  }, [invoice.id]);
+
+  const handleWorkHoursSelection = (
+    workHourIds: string[],
+    totalAmount: number
+  ) => {
+    setSelectedWorkHourIds(workHourIds);
+    setCalculatedAmount(totalAmount);
+    setValue("workHourIds", workHourIds);
+    setValue("amount", totalAmount);
+  };
+
+  const selectedEntries = allAvailableEntries.filter((entry) =>
+    selectedWorkHourIds.includes(entry.id)
+  );
+
+  const totalHours = selectedEntries.reduce(
+    (sum: number, entry: TimeEntry) => sum + entry.hours,
+    0
+  );
 
   const onSubmit = async (data: EditInvoiceFormData) => {
     setIsSubmitting(true);
@@ -71,6 +137,8 @@ export function EditInvoiceForm({
         data: {
           status: data.status,
           description: data.description,
+          workHourIds: data.workHourIds,
+          amount: data.amount,
         },
       });
 
@@ -133,9 +201,10 @@ export function EditInvoiceForm({
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PENDING">Pending</SelectItem>
-                  <SelectItem value="PAID">Paid</SelectItem>
-                  <SelectItem value="CANCELED">Canceled</SelectItem>
+                  <SelectItem value="DRAFT">{t("draft")}</SelectItem>
+                  <SelectItem value="PENDING">{t("pending")}</SelectItem>
+                  <SelectItem value="PAID">{t("paid")}</SelectItem>
+                  <SelectItem value="CANCELED">{t("cancelled")}</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -153,6 +222,38 @@ export function EditInvoiceForm({
             placeholder="Additional notes or description for this invoice..."
             {...register("description")}
           />
+        </div>
+
+        {/* Work Hours Selection */}
+        <div className="space-y-2">
+          <Label>Work Hours</Label>
+          <div className="space-y-4">
+            {/* Selection Summary (top) */}
+            <WorkHoursSelectionSummary
+              totalHours={totalHours}
+              totalAmount={calculatedAmount}
+            />
+
+            {/* Work Hours Selector */}
+            {allAvailableEntries.length > 0 ? (
+              <WorkHoursSelector
+                key={`${invoice.clientId}-${invoice.id}`}
+                timeEntries={allAvailableEntries}
+                initialSelectedIds={selectedWorkHourIds}
+                onSelectionChange={(workHourIds, totalAmount) =>
+                  handleWorkHoursSelection(workHourIds, totalAmount)
+                }
+              />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Clock className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>No work hours available for this client</p>
+              </div>
+            )}
+          </div>
+          {errors.workHourIds && (
+            <p className="text-sm text-red-500">{errors.workHourIds.message}</p>
+          )}
         </div>
 
         {/* File Upload */}

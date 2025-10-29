@@ -286,11 +286,85 @@ export class InvoicesService {
   async update(id: string, updateInvoiceDto: UpdateInvoiceDto, userId: string) {
     const existingInvoice = await this.findOne(id, userId); // Verify invoice exists and belongs to user
 
+    // Handle workHourIds update if provided
+    if (updateInvoiceDto.workHourIds) {
+      // Verificar se as horas pertencem ao usuário
+      const workHours = await this.prisma.workHour.findMany({
+        where: {
+          id: {
+            in: updateInvoiceDto.workHourIds,
+          },
+          userId,
+        },
+      });
+
+      if (workHours.length !== updateInvoiceDto.workHourIds.length) {
+        throw new NotFoundException('Some work hours not found');
+      }
+
+      // Verificar se todas as horas pertencem ao mesmo cliente
+      const clientIds = [...new Set(workHours.map((wh) => wh.clientId))];
+      if (clientIds.length > 1) {
+        throw new Error('All work hours must belong to the same client');
+      }
+
+      // Verificar se há horas já faturadas em faturas não canceladas (excluindo a fatura atual)
+      const alreadyInvoiced = await this.prisma.invoiceWorkHour.findMany({
+        where: {
+          workHourId: {
+            in: updateInvoiceDto.workHourIds,
+          },
+          invoiceId: {
+            not: id, // Excluir a fatura atual
+          },
+          invoice: {
+            status: {
+              not: 'CANCELED',
+            },
+          },
+        },
+        include: {
+          invoice: {
+            select: {
+              id: true,
+              status: true,
+              number: true,
+            },
+          },
+        },
+      });
+
+      if (alreadyInvoiced.length > 0) {
+        const invoiceNumbers = alreadyInvoiced
+          .map((item) => item.invoice.number || item.invoice.id.slice(0, 8))
+          .join(', ');
+        throw new Error(
+          `Some work hours are already invoiced in non-canceled invoices: ${invoiceNumbers}`,
+        );
+      }
+
+      // Remover associações antigas
+      await this.prisma.invoiceWorkHour.deleteMany({
+        where: { invoiceId: id },
+      });
+
+      // Criar novas associações
+      await this.prisma.invoiceWorkHour.createMany({
+        data: updateInvoiceDto.workHourIds.map((workHourId) => ({
+          invoiceId: id,
+          workHourId,
+        })),
+      });
+    }
+
     const updatedInvoice = await this.prisma.invoice.update({
       where: { id },
       data: {
-        ...updateInvoiceDto,
+        number: updateInvoiceDto.number,
         status: updateInvoiceDto.status as any,
+        fileUrl: updateInvoiceDto.fileUrl,
+        amount: updateInvoiceDto.amount,
+        description: updateInvoiceDto.description,
       },
       include: {
         client: true,
