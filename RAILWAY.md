@@ -39,14 +39,43 @@ O Railway **NÃO suporta bem docker-compose com build contexts customizados**.
 1. Clique em **"+ New"**
 2. Selecione **"GitHub Repo"**
 3. Escolha `its-done`
-4. Vá em **"Settings"**:
-   - **Root Directory:** (deixe vazio - usa raiz)
-   - **Build Command:** (deixe vazio - usa Dockerfile)
-   - **Start Command:** (deixe vazio - usa CMD do Dockerfile)
-5. Vá em **"Settings" → "Build"**:
+4. **IMPORTANTE**: Antes de fazer deploy, configure corretamente:
+
+#### Via Dashboard UI (RECOMENDADO):
+
+1. Vá em **Settings → General**:
+   - **Service Name:** backend
+   - **Root Directory:** (deixe VAZIO - não preencher nada)
+
+2. Vá em **Settings → Build**:
    - **Builder:** Dockerfile
    - **Dockerfile Path:** `apps/backend/Dockerfile`
-   - **Docker Build Context:** `.` (IMPORTANTE: ponto = raiz)
+   - **Build Command:** (deixe vazio)
+
+3. Se houver campo **"Docker Build Arguments"** ou similar:
+   - Adicione: `DOCKER_BUILDKIT=1`
+
+4. **CRÍTICO**: Se houver campo "Docker Build Context" ou "Context Directory":
+   - Configure como: `.` (apenas um ponto)
+   - Se não existir este campo, o Railway usará o Root Directory (que deve estar vazio)
+
+#### Via Railway CLI (Alternativa):
+
+```bash
+railway service --name backend
+
+# Criar arquivo railway.json na RAIZ do projeto:
+{
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "apps/backend/Dockerfile",
+    "dockerContext": "."
+  }
+}
+
+# Depois fazer deploy:
+railway up --service backend
+```
 6. Vá em **"Variables"** e adicione:
 
 ```env
