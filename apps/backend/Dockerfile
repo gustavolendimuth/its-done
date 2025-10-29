@@ -1,4 +1,4 @@
-# Dockerfile independente para o backend
+# Dockerfile para o backend (context da raiz do monorepo)
 FROM node:18-alpine AS base
 
 # Instalar dependências necessárias (incluindo postgresql-client para backups)
@@ -10,13 +10,34 @@ WORKDIR /app
 # Dependencies stage
 FROM base AS deps
 
-# Copiar package.json
-COPY package.json ./
+# Copiar package.json do backend
+COPY apps/backend/package.json ./
 
 # Instalar dependências
 RUN pnpm install
 
-# Builder stage
+# Development stage (para hot reload)
+FROM base AS development
+
+WORKDIR /app
+
+# Copiar node_modules das dependências
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package.json ./package.json
+
+# Copiar código fonte (será substituído por volume)
+COPY apps/backend/ ./
+
+# Gerar Prisma client
+RUN npx prisma generate
+
+# Expor porta
+EXPOSE 3002
+
+# Comando de desenvolvimento (será sobrescrito pelo docker-compose)
+CMD ["pnpm", "run", "start:dev"]
+
+# Builder stage (para produção)
 FROM base AS builder
 
 WORKDIR /app
@@ -25,11 +46,11 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
 
-# Copiar código fonte
-COPY . .
+# Copiar código fonte do backend (incluindo prisma)
+COPY apps/backend/ ./
 
 # Gerar Prisma client
-RUN pnpm prisma generate
+RUN npx prisma generate
 
 # Build da aplicação NestJS
 RUN pnpm run build

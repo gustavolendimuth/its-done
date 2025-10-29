@@ -2,6 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## IMPORTANT: Documentation Rules
+
+**NEVER CREATE NEW .md FILES IF ONE ALREADY EXISTS FOR THAT TOPIC!**
+
+The project maintains a minimal set of documentation files. When updating code:
+
+- **Docker changes** → Update `DOCKER.md` (don't create DOCKER-*.md)
+- **Railway changes** → Update `RAILWAY.md` (don't create RAILWAY-*.md)
+- **Architecture changes** → Update `CLAUDE.md` (this file)
+
+**Rule:** One topic = One file. Always update existing files instead of creating new ones.
+
 ## Project Overview
 
 **It's Done** is a professional time tracking and invoicing system for freelancers and consultants. Built as a monorepo using Turborepo with a NestJS backend and Next.js frontend.
@@ -58,6 +70,19 @@ pnpm db:seed:prod              # Seed production data
 ```bash
 pnpm lint                      # Lint all packages
 pnpm format                    # Format code with Prettier
+```
+
+### Docker (Development & Production)
+```bash
+# Development (hot reload)
+docker compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml logs -f
+
+# Production (test locally before Railway deploy)
+docker compose up -d --build
+docker compose logs -f
+
+# See DOCKER.md for complete guide
 ```
 
 ## Architecture

@@ -1,4 +1,4 @@
-# Dockerfile independente para o frontend
+# Dockerfile para o frontend (context da raiz do monorepo)
 FROM node:18-alpine AS base
 
 # Instalar dependências necessárias
@@ -10,13 +10,35 @@ WORKDIR /app
 # Dependencies stage
 FROM base AS deps
 
-# Copiar package.json
-COPY package.json ./
+# Copiar package.json do frontend
+COPY apps/frontend/package.json ./
 
 # Instalar dependências
 RUN pnpm install
 
-# Builder stage
+# Development stage (para hot reload)
+FROM base AS development
+
+WORKDIR /app
+
+# Copiar node_modules das dependências
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package.json ./package.json
+
+# Copiar código fonte (será substituído por volume)
+COPY apps/frontend/ ./
+
+# Expor porta
+EXPOSE 3000
+
+# Variáveis de ambiente do Next.js
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
+# Comando de desenvolvimento (será sobrescrito pelo docker-compose)
+CMD ["pnpm", "run", "dev"]
+
+# Builder stage (para produção)
 FROM base AS builder
 
 WORKDIR /app
@@ -25,8 +47,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
 
-# Copiar código fonte
-COPY . .
+# Copiar código fonte do frontend
+COPY apps/frontend/ ./
 
 # Build da aplicação Next.js
 RUN pnpm run build

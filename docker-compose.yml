@@ -1,4 +1,6 @@
-version: "3.8"
+# Docker Compose para Produção (Railway)
+# Este arquivo é usado pelo Railway para deploy
+# Para desenvolvimento local, use: docker-compose.dev.yml
 
 services:
   postgres:
@@ -20,6 +22,46 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: runner  # Usa o stage de produção
+    container_name: its-done-backend
+    ports:
+      - "3002:3002"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/its_done
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-in-production}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      FROM_EMAIL: ${FROM_EMAIL:-noreply@itsdone.local}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      NODE_ENV: production
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      target: runner  # Usa o stage de produção
+    container_name: its-done-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-nextauth-secret-change-in-production}
+      API_URL: http://backend:3002
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      NODE_ENV: production
+    depends_on:
+      - backend
+    restart: unless-stopped
 
 volumes:
   postgres_data:

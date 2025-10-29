@@ -1,55 +1,87 @@
-version: "3.8"
-
 services:
-  frontend:
-    build:
-      context: .
-      dockerfile: apps/frontend/Dockerfile.dev
+  postgres:
+    image: postgres:15-alpine
+    container_name: its-done-postgres
     ports:
-      - "3000:3000"
+      - "5432:5432"
     environment:
-      - NODE_ENV=development
-      - NEXTAUTH_URL=http://localhost:3000
-      - NEXTAUTH_SECRET=your-development-secret
-      - GOOGLE_CLIENT_ID=your-dev-client-id
-      - GOOGLE_CLIENT_SECRET=your-dev-client-secret
-      - BACKEND_URL=http://backend:3002
-      - NEXT_PUBLIC_SENTRY_DSN=${FRONTEND_SENTRY_DSN}
-      - SENTRY_DSN=${FRONTEND_SENTRY_DSN}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: its_done
     volumes:
-      - ./apps/frontend:/app/apps/frontend
-      - /app/apps/frontend/node_modules
-      - ./packages:/app/packages
-    depends_on:
-      - backend
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: its-done-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
   backend:
     build:
       context: .
-      dockerfile: apps/backend/Dockerfile.dev
+      dockerfile: apps/backend/Dockerfile
+      target: development
+    container_name: its-done-backend
     ports:
       - "3002:3002"
     environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/its_done_dev
-      - SENTRY_DSN=${BACKEND_SENTRY_DSN}
-    volumes:
-      - ./apps/backend:/app/apps/backend
-      - /app/apps/backend/node_modules
-      - ./packages:/app/packages
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/its_done
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-in-production}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      FROM_EMAIL: ${FROM_EMAIL:-noreply@itsdone.local}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      NODE_ENV: development
     depends_on:
-      - db
-
-  db:
-    image: postgres:16
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=its_done_dev
-    ports:
-      - "5432:5432"
+      - postgres
+      - redis
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # Sincroniza código fonte para hot reload
+      - ./apps/backend/src:/app/src
+      - ./apps/backend/prisma:/app/prisma
+      - ./apps/backend/package.json:/app/package.json
+      - ./apps/backend/tsconfig.json:/app/tsconfig.json
+      - ./apps/backend/nest-cli.json:/app/nest-cli.json
+      # Volume para uploads persistentes
+      - ./apps/backend/uploads:/app/uploads
+      # Exclui node_modules do volume (usa o do container)
+      - /app/node_modules
+    command: pnpm run start:dev
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      target: development
+    container_name: its-done-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-nextauth-secret-change-in-production}
+      API_URL: http://backend:3002
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      NODE_ENV: development
+    depends_on:
+      - backend
+    volumes:
+      # Sincroniza código fonte para hot reload
+      - ./apps/frontend/src:/app/src
+      - ./apps/frontend/public:/app/public
+      - ./apps/frontend/package.json:/app/package.json
+      - ./apps/frontend/next.config.js:/app/next.config.js
+      - ./apps/frontend/tsconfig.json:/app/tsconfig.json
+      - ./apps/frontend/tailwind.config.ts:/app/tailwind.config.ts
+      - ./apps/frontend/postcss.config.js:/app/postcss.config.js
+      # Exclui node_modules e .next do volume (usa o do container)
+      - /app/node_modules
+      - /app/.next
+    command: pnpm run dev
 
 volumes:
   postgres_data:
+  redis_data:
