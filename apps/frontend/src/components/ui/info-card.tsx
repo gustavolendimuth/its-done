@@ -44,16 +44,37 @@ export function InfoCard({
 }: InfoCardProps) {
   const styles = variantStyles[variant];
 
+  // Format description with markdown-like syntax
+  const formatDescription = (text: string) => {
+    return text.split("\n").map((line, index) => {
+      // Handle bold text with **text**
+      const boldFormatted = line.replace(
+        /\*\*(.+?)\*\*/g,
+        '<strong class="font-semibold text-foreground">$1</strong>'
+      );
+
+      return (
+        <span
+          key={index}
+          dangerouslySetInnerHTML={{ __html: boldFormatted }}
+          className="block"
+        />
+      );
+    });
+  };
+
   return (
     <Card className={cn(styles.card, className)}>
       <CardContent className="p-6">
         <div className="flex items-start space-x-4">
-          <div className={cn("p-3 rounded-full", styles.iconBg)}>
+          <div className={cn("p-3 rounded-full flex-shrink-0", styles.iconBg)}>
             <Icon className={cn("h-6 w-6", styles.icon)} />
           </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold mb-2">{title}</h3>
-            <p className="text-muted-foreground">{description}</p>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold mb-3">{title}</h3>
+            <div className="text-muted-foreground space-y-1 leading-relaxed">
+              {formatDescription(description)}
+            </div>
           </div>
         </div>
       </CardContent>

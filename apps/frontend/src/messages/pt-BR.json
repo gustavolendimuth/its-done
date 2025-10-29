@@ -110,8 +110,8 @@
   "workHours": {
     "title": "Controle de Horas",
     "subtitle": "Acompanhe e gerencie suas horas de trabalho com precisão",
-    "infoTitle": "Sistema de Rastreamento de Tempo",
-    "description": "Sistema profissional de controle de tempo projetado para rastreamento preciso e gerenciamento inteligente de horas trabalhadas. O fluxo operacional inclui: seleção de cliente e projeto → registro de data e duração do trabalho → adição de descrição detalhada das atividades → categorização por tipo de trabalho → análise de produtividade e padrões. Monitore métricas essenciais como total de horas por período, valor estimado baseado em taxas horárias, distribuição de trabalho entre clientes e projetos ativos. Use filtros avançados por data, cliente ou projeto para análises específicas. Exporte dados para faturamento e mantenha histórico completo para relatórios de produtividade e planejamento estratégico.",
+    "infoTitle": "⏱️ Registre seu tempo de trabalho",
+    "description": "📋 **Como funciona:**\n• Selecione o cliente e projeto\n• Informe data e horas trabalhadas\n• Adicione descrição das atividades\n• Acompanhe métricas e valor estimado\n\n💡 **Use os filtros** para visualizar períodos específicos e analisar sua produtividade por cliente.",
     "addHours": "Adicionar Horas",
     "addHoursFormSubtitle": "Registre o tempo gasto em projetos de clientes",
     "date": "Data",
@@ -342,7 +342,10 @@
     "clientsInvolved": "clientes envolvidos",
     "searchProjects": "Buscar projetos...",
     "addNewProject": "Adicionar Novo Projeto",
-    "selectProject": "Selecione o projeto"
+    "selectProject": "Selecione o projeto",
+    "alertHours": "Limite de Alerta de Horas",
+    "alertHoursDescription": "Substitui o limite padrão de alerta. Quando as horas trabalhadas atingirem este valor, uma fatura rascunho será criada e você receberá uma notificação. Deixe vazio para usar a configuração padrão.",
+    "alertHoursPlaceholder": "ex: 160"
   },
   "invoices": {
     "title": "Faturas",
@@ -370,6 +373,7 @@
     "enterDescription": "Digite a descrição da fatura",
     "selectWorkHours": "Selecione as horas a incluir",
     "uploadDocument": "Enviar Documento",
+    "draft": "Rascunho",
     "paid": "Pago",
     "pending": "Pendente",
     "cancelled": "Cancelado",
@@ -718,7 +722,10 @@
     "selectClient": "Selecione um cliente",
     "enterName": "Digite o nome do projeto",
     "enterDescription": "Digite a descrição do projeto (opcional)",
-    "enterHourlyRate": "Digite o valor por hora (opcional)"
+    "enterHourlyRate": "Digite o valor por hora (opcional)",
+    "alertHours": "Limite de Alerta de Horas",
+    "alertHoursDescription": "Substitui o limite padrão de alerta. Quando as horas trabalhadas atingirem este valor, uma fatura rascunho será criada e você receberá uma notificação. Deixe vazio para usar a configuração padrão.",
+    "alertHoursPlaceholder": "ex: 160"
   },
   "ProjectEditDialog": {
     "title": "Editar Projeto",
@@ -735,7 +742,10 @@
     "selectClient": "Selecione um cliente",
     "enterName": "Digite o nome do projeto",
     "enterDescription": "Digite a descrição do projeto (opcional)",
-    "enterHourlyRate": "Digite o valor por hora (opcional)"
+    "enterHourlyRate": "Digite o valor por hora (opcional)",
+    "alertHours": "Limite de Alerta de Horas",
+    "alertHoursDescription": "Substitui o limite padrão de alerta. Quando as horas trabalhadas atingirem este valor, uma fatura rascunho será criada e você receberá uma notificação. Deixe vazio para usar a configuração padrão.",
+    "alertHoursPlaceholder": "ex: 160"
   },
   "admin": {
     "title": "Painel de Admin",
@@ -769,5 +779,18 @@
       "saved": "Configurações salvas com sucesso!",
       "error": "Erro ao salvar configurações"
     }
+  },
+  "notifications": {
+    "title": "Notificações",
+    "markAsRead": "Marcar como lida",
+    "markAllAsRead": "Marcar todas como lidas",
+    "noNotifications": "Nenhuma notificação",
+    "loading": "Carregando notificações...",
+    "allMarkedAsRead": "Todas as notificações foram marcadas como lidas",
+    "deleted": "Notificação excluída",
+    "errorMarkingAsRead": "Falha ao marcar notificação como lida",
+    "errorMarkingAllAsRead": "Falha ao marcar todas as notificações como lidas",
+    "errorDeleting": "Falha ao excluir notificação",
+    "viewInvoice": "Ver Rascunho da Invoice"
   }
 }

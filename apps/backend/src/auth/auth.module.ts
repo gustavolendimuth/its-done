@@ -10,6 +10,24 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 
+// Provider condicional para Google OAuth
+const googleStrategyProvider = {
+  provide: 'GOOGLE_STRATEGY',
+  useFactory: (configService: ConfigService) => {
+    const clientId = configService.get('GOOGLE_CLIENT_ID');
+    const clientSecret = configService.get('GOOGLE_CLIENT_SECRET');
+
+    // Só retorna o GoogleStrategy se as credenciais estiverem configuradas
+    if (clientId && clientSecret) {
+      return new GoogleStrategy(configService);
+    }
+
+    console.log('⚠️  Google OAuth não configurado - autenticação via Google desabilitada');
+    return null;
+  },
+  inject: [ConfigService],
+};
+
 @Module({
   imports: [
     UsersModule,
@@ -25,7 +43,12 @@ import { GoogleStrategy } from './strategies/google.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, LocalStrategy, GoogleStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    LocalStrategy,
+    googleStrategyProvider,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

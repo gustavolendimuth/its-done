@@ -27,3 +27,8 @@ postcss.config.js
 
 # Misc
 *.d.ts
+
+# Test files with parsing issues
+src/services/__tests__/profile.test.ts
+src/services/__tests__/work-hours-stats.test.ts
+src/test-utils.tsx

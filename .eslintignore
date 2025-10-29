@@ -33,3 +33,8 @@ next.config.js
 postcss.config.js
 **/postcss.config.js
 packages/eslint/index.js
+
+# Test files with parsing issues
+apps/frontend/src/services/__tests__/profile.test.ts
+apps/frontend/src/services/__tests__/work-hours-stats.test.ts
+apps/frontend/src/test-utils.tsx

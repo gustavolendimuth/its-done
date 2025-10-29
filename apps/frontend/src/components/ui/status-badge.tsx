@@ -18,6 +18,8 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
         return "warning";
       case "CANCELED":
         return "danger";
+      case "DRAFT":
+        return "default";
       default:
         return "default";
     }
@@ -31,6 +33,8 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
         return t("pending");
       case "CANCELED":
         return t("cancelled");
+      case "DRAFT":
+        return t("draft");
       default:
         return status;
     }
