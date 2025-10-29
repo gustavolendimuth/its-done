@@ -2,57 +2,80 @@
 
 Guia completo para fazer deploy do It's Done no Railway usando Docker.
 
+## ⚠️ IMPORTANTE: Configuração Railway
+
+O Railway **NÃO suporta bem docker-compose com build contexts customizados**.
+
+**Solução:** Configure cada serviço manualmente no Railway Dashboard.
+
 ## 📋 Pré-requisitos
 
 - Conta no [Railway](https://railway.app/)
 - Repositório Git do projeto no GitHub
-- Arquivo `docker-compose.yml` configurado (produção)
 
-## 🚀 Deploy via Dashboard (Recomendado)
+## 🚀 Deploy via Dashboard (CORRETO)
 
-### 1. Criar Projeto no Railway
+### 1. Criar Projeto Vazio
 
 1. Acesse [railway.app](https://railway.app/)
 2. Clique em **"New Project"**
-3. Selecione **"Deploy from GitHub repo"**
-4. Escolha o repositório `its-done`
-5. Railway detectará automaticamente o `docker-compose.yml`
+3. Selecione **"Empty Project"**
+4. Dê um nome: `its-done-production`
 
-### 2. Serviços Criados
+### 2. Adicionar PostgreSQL
 
-O Railway criará automaticamente 4 serviços:
+1. No projeto, clique em **"+ New"**
+2. Selecione **"Database" → "Add PostgreSQL"**
+3. Railway criará automaticamente o banco
 
-- **Backend** (NestJS) - `apps/backend/Dockerfile`
-- **Frontend** (Next.js) - `apps/frontend/Dockerfile`
-- **PostgreSQL** - Banco de dados
-- **Redis** - Cache
+### 3. Adicionar Redis
 
-### 3. Configurar Variáveis de Ambiente
+1. Clique em **"+ New"**
+2. Selecione **"Database" → "Add Redis"**
+3. Railway criará automaticamente o Redis
 
-#### Backend Service
+### 4. Adicionar Backend (NestJS)
 
-No Railway Dashboard, adicione as seguintes variáveis:
+1. Clique em **"+ New"**
+2. Selecione **"GitHub Repo"**
+3. Escolha `its-done`
+4. Vá em **"Settings"**:
+   - **Root Directory:** (deixe vazio - usa raiz)
+   - **Build Command:** (deixe vazio - usa Dockerfile)
+   - **Start Command:** (deixe vazio - usa CMD do Dockerfile)
+5. Vá em **"Settings" → "Build"**:
+   - **Builder:** Dockerfile
+   - **Dockerfile Path:** `apps/backend/Dockerfile`
+   - **Docker Build Context:** `.` (IMPORTANTE: ponto = raiz)
+6. Vá em **"Variables"** e adicione:
 
 ```env
-# Database (Railway fornece automaticamente)
 DATABASE_URL=${{Postgres.DATABASE_URL}}
-
-# JWT (ALTERE ESTES VALORES!)
 JWT_SECRET=seu-jwt-secret-super-secreto-change-me
 RESEND_API_KEY=re_xxxxxxxxxxxxx
 FROM_EMAIL=noreply@seudominio.com
-
-# Google OAuth (opcional)
 GOOGLE_CLIENT_ID=seu-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=seu-client-secret
-
-# Railway
 RAILWAY_ENVIRONMENT=production
 NODE_ENV=production
 PORT=3002
 ```
 
-#### Frontend Service
+7. **Adicionar Volume** para uploads:
+   - Settings → Storage → Add Volume
+   - Mount Path: `/app/data`
+   - Size: 1GB
+
+### 5. Adicionar Frontend (Next.js)
+
+1. Clique em **"+ New"**
+2. Selecione **"GitHub Repo"**
+3. Escolha `its-done` (mesmo repo)
+4. Vá em **"Settings" → "Build"**:
+   - **Builder:** Dockerfile
+   - **Dockerfile Path:** `apps/frontend/Dockerfile`
+   - **Docker Build Context:** `.` (IMPORTANTE: ponto = raiz)
+5. Vá em **"Variables"** e adicione:
 
 ```env
 # NextAuth (ALTERE ESTES VALORES!)

@@ -1,0 +1,15 @@
+# Railway Configuration
+# This file tells Railway how to build the project
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "apps/backend/Dockerfile"
+# IMPORTANT: Context must be root of monorepo
+buildContext = "."
+
+[deploy]
+numReplicas = 1
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 10
+healthcheckPath = "/health"
+healthcheckTimeout = 100
