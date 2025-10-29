@@ -15,6 +15,7 @@ import { ReportsModule } from './reports/reports.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { InAppNotificationsModule } from './in-app-notifications/in-app-notifications.module';
 import { AdminModule } from './admin/admin.module';
 
 @Module({
@@ -35,6 +36,7 @@ import { AdminModule } from './admin/admin.module';
     ReportsModule,
     DashboardModule,
     NotificationsModule,
+    InAppNotificationsModule,
     AdminModule,
   ],
   controllers: [AppController],
