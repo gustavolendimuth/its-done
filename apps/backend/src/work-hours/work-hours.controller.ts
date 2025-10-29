@@ -83,6 +83,11 @@ export class WorkHoursController {
     );
   }
 
+  @Post('check-notification')
+  async checkNotification(@Request() req) {
+    return this.workHoursService.checkNotificationManually(req.user.id);
+  }
+
   @Get(':id')
   findOne(@Request() req, @Param('id') id: string) {
     return this.workHoursService.findOne(req.user.id, id);

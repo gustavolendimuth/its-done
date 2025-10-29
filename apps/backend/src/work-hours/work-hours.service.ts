@@ -6,13 +6,13 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWorkHourDto } from './dto/create-work-hour.dto';
 import { UpdateWorkHourDto } from './dto/update-work-hour.dto';
-import { NotificationsService } from '../notifications/notifications.service';
+import { HoursThresholdCheckerService } from './services/hours-threshold-checker.service';
 
 @Injectable()
 export class WorkHoursService {
   constructor(
     private prisma: PrismaService,
-    private notificationsService: NotificationsService,
+    private hoursThresholdChecker: HoursThresholdCheckerService,
   ) {}
 
   async create(userId: string, createWorkHourDto: CreateWorkHourDto) {
@@ -291,68 +291,18 @@ export class WorkHoursService {
   }
 
   /**
-   * Check if user has reached hours threshold and send notification if needed
-   * Prevents spam by checking if notification was already sent for this threshold
+   * Manually check and send notification if threshold is reached
+   * Can be called via API endpoint
+   */
+  async checkNotificationManually(userId: string) {
+    return this.hoursThresholdChecker.checkAndNotify(userId);
+  }
+
+  /**
+   * Check if any client has reached hours threshold
+   * Delegates to HoursThresholdCheckerService
    */
   private async checkAndSendHoursThresholdNotification(userId: string) {
-    try {
-      // Get user settings
-      const settings = await this.prisma.settings.findUnique({
-        where: { userId },
-      });
-
-      if (!settings || !settings.notificationEmail || !settings.alertHours) {
-        return;
-      }
-
-      // Calculate total hours for current month
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-      const totalHours = await this.getTotalHours(
-        userId,
-        startOfMonth,
-        endOfMonth,
-      );
-
-      // Check if threshold is reached
-      if (totalHours >= settings.alertHours) {
-        // Check if notification was already sent for this threshold this month
-        const existingNotification = await (
-          this.prisma as any
-        ).notificationLog.findFirst({
-          where: {
-            userId,
-            type: 'HOURS_THRESHOLD',
-            threshold: settings.alertHours,
-            sentAt: {
-              gte: startOfMonth,
-              lte: endOfMonth,
-            },
-          },
-        });
-
-        // Send notification only if not already sent
-        if (!existingNotification) {
-          await this.notificationsService.sendHoursThresholdAlert(
-            userId,
-            totalHours,
-          );
-
-          // Log the notification
-          await (this.prisma as any).notificationLog.create({
-            data: {
-              userId,
-              type: 'HOURS_THRESHOLD',
-              threshold: settings.alertHours,
-              totalHours,
-            },
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error checking hours threshold notification:', error);
-    }
+    return this.hoursThresholdChecker.checkAndNotify(userId);
   }
 }
