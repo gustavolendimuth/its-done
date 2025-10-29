@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { ModeToggle } from "@/components/mode-toggle";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -70,6 +71,7 @@ export function Topbar({ children }: TopbarProps) {
                 {tWorkHours("addHours")}
               </Button>
             )}
+            {session && <NotificationBell />}
             <ModeToggle />
             <LanguageSwitcher />
             {session && (

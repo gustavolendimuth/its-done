@@ -2,12 +2,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
 
+export type NotificationType = "INFO" | "SUCCESS" | "WARNING" | "ERROR";
+
 export interface Notification {
   id: string;
+  userId: string;
   title: string;
   message: string;
-  type: "info" | "success" | "warning" | "error";
+  type: NotificationType;
   read: boolean;
+  metadata?: Record<string, any> | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -15,7 +19,8 @@ export interface Notification {
 export interface CreateNotificationDto {
   title: string;
   message: string;
-  type: Notification["type"];
+  type?: NotificationType;
+  metadata?: Record<string, any>;
 }
 
 export interface UpdateNotificationDto extends Partial<CreateNotificationDto> {
@@ -33,6 +38,34 @@ export const useNotifications = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+  });
+};
+
+export const useUnreadNotifications = () => {
+  return useQuery({
+    queryKey: ["notifications", "unread"],
+    queryFn: async () => {
+      const { data } = await api.get<Notification[]>("/notifications/unread");
+
+      return data;
+    },
+    staleTime: 1 * 60 * 1000, // 1 minute
+    refetchInterval: 30 * 1000, // Poll every 30 seconds
+    refetchOnWindowFocus: true,
+  });
+};
+
+export const useUnreadNotificationCount = () => {
+  return useQuery({
+    queryKey: ["notifications", "unread", "count"],
+    queryFn: async () => {
+      const { data } = await api.get<number>("/notifications/unread/count");
+
+      return data;
+    },
+    staleTime: 1 * 60 * 1000, // 1 minute
+    refetchInterval: 30 * 1000, // Poll every 30 seconds
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -103,6 +136,23 @@ export const useDeleteNotification = () => {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
       queryClient.invalidateQueries({ queryKey: ["notifications", id] });
+    },
+  });
+};
+
+export const useMarkNotificationAsRead = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.post<Notification>(
+        `/notifications/${id}/mark-as-read`
+      );
+
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 };
