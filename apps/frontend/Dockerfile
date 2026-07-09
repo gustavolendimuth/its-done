@@ -1,5 +1,5 @@
 # Dockerfile para o frontend (context da raiz do monorepo)
-FROM node:18-alpine AS base
+FROM node:22-alpine AS base
 
 # Instalar dependências necessárias
 RUN apk add --no-cache libc6-compat
@@ -11,7 +11,7 @@ WORKDIR /app
 FROM base AS deps
 
 # Copiar package.json do frontend
-COPY package.json ./
+COPY apps/frontend/package.json ./
 
 # Instalar dependências
 RUN pnpm install
@@ -26,7 +26,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
 
 # Copiar código fonte (será substituído por volume)
-COPY ./ ./
+COPY apps/frontend/ ./
 
 # Expor porta
 EXPOSE 3000
@@ -48,7 +48,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
 
 # Copiar código fonte do frontend
-COPY ./ ./
+COPY apps/frontend/ ./
 
 # Build da aplicação Next.js
 RUN pnpm run build

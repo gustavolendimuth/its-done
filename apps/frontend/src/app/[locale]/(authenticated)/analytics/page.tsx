@@ -423,7 +423,14 @@ export default function AnalyticsPage() {
                                   <h3 className="text-xl font-bold truncate">
                                     {t(
                                       activity.description.key,
-                                      activity.description.values
+                                      Object.fromEntries(
+                                        Object.entries(
+                                          activity.description.values
+                                        ).map(([key, value]) => [
+                                          key,
+                                          value ?? "",
+                                        ])
+                                      )
                                     )}
                                   </h3>
                                 </div>

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
 // Tipos para valores de descrição das atividades
-type ActivityDescriptionValue = string | number | boolean | null | undefined;
+type ActivityDescriptionValue = string | number | null | undefined;
 
 export interface DashboardStats {
   totalHours: number;

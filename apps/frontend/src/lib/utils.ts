@@ -1,5 +1,4 @@
 import { type ClassValue, clsx } from "clsx";
-import getConfig from "next/config";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -32,7 +31,6 @@ export function normalizeUrl(url: string | undefined): string {
  * Obtém a URL da API normalizada para uso no frontend
  */
 export function getApiUrl(): string {
-  const { publicRuntimeConfig } = getConfig() || {};
   // Helper to detect invalid or placeholder values (e.g., ${{Backend}})
   const isInvalid = (val: unknown): boolean => {
     if (typeof val !== "string") return true;
@@ -42,10 +40,8 @@ export function getApiUrl(): string {
     return false;
   };
 
-  // Prefer environment variable, then runtime config, then default host
-  const candidates = [process.env.NEXT_PUBLIC_API_URL, publicRuntimeConfig?.apiUrl];
-  let chosen = candidates.find((c) => !isInvalid(c)) as string | undefined;
-  if (!chosen) chosen = "https://backend-its-done.up.railway.app";
+  let chosen = process.env.NEXT_PUBLIC_API_URL;
+  if (isInvalid(chosen)) chosen = "https://backend-its-done.up.railway.app";
 
   // Ensure we always target the backend API prefix (/api)
   const ensureApiPrefix = (url: string): string => {
