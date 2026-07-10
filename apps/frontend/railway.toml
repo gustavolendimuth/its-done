@@ -1,0 +1,13 @@
+# Railway Configuration for the Frontend service
+# This file tells Railway how to build this service
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "apps/frontend/Dockerfile"
+# IMPORTANT: Context must be root of monorepo
+buildContext = "."
+
+[deploy]
+numReplicas = 1
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
