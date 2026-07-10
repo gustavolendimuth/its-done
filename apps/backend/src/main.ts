@@ -88,7 +88,7 @@ async function bootstrap() {
     await app.listen(port);
     console.log(`✅ Application is running on port: ${port}`);
     console.log(
-      `🌐 Health check available at: http://localhost:${port}/health`,
+      `🌐 Health check available at: http://localhost:${port}/api/health`,
     );
   } catch (error) {
     console.error('❌ Failed to start application:', error);

@@ -92,7 +92,7 @@ EXPOSE 3002
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://127.0.0.1:3002/health || exit 1
+  CMD curl -f http://127.0.0.1:3002/api/health || exit 1
 
 # Comando para iniciar com migrações e backup automático
 CMD ["sh", "-c", "mkdir -p /app/data/uploads /app/data/backups && chown -R nestjs:nodejs /app/data && exec su-exec nestjs sh -c '/app/scripts/migrate-with-backup.sh && node dist/src/main.js'"] 
