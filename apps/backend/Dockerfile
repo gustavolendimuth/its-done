@@ -2,7 +2,8 @@
 FROM node:18-alpine AS base
 
 # Instalar dependências necessárias (incluindo postgresql-client para backups)
-RUN apk add --no-cache libc6-compat curl postgresql-client
+# su-exec é usado para dropar privilégios de root após ajustar permissões do volume
+RUN apk add --no-cache libc6-compat curl postgresql-client su-exec
 RUN npm install -g pnpm@8.15.4
 
 WORKDIR /app
@@ -83,7 +84,9 @@ COPY --from=builder /app/scripts ./scripts
 RUN chown -R nestjs:nodejs /app && \
     chmod +x /app/scripts/*.sh
 
-USER nestjs
+# Mantém root aqui: o Railway Volume monta /app/data como root:root em runtime,
+# sobrescrevendo o chown acima. O CMD ajusta a permissão do volume e então
+# dropa para o usuário nestjs via su-exec antes de rodar a aplicação.
 
 EXPOSE 3002
 
@@ -92,4 +95,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://127.0.0.1:3002/health || exit 1
 
 # Comando para iniciar com migrações e backup automático
-CMD ["sh", "-c", "/app/scripts/migrate-with-backup.sh && node dist/src/main.js"] 
+CMD ["sh", "-c", "mkdir -p /app/data/uploads /app/data/backups && chown -R nestjs:nodejs /app/data && exec su-exec nestjs sh -c '/app/scripts/migrate-with-backup.sh && node dist/src/main.js'"] 
