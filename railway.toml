@@ -9,7 +9,7 @@ buildContext = "."
 
 [deploy]
 numReplicas = 1
-restartPolicyType = "on-failure"
+restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 healthcheckPath = "/health"
 healthcheckTimeout = 100
