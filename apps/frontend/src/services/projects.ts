@@ -20,6 +20,8 @@ export interface Project {
   _count: {
     workHours: number;
   };
+  /** Sum of actual hours worked across this project's entries. */
+  totalHours?: number;
 }
 
 export interface CreateProjectData {
