@@ -64,15 +64,21 @@ async function bootstrap() {
       });
     }
 
-    // Enable CORS for frontend communication
+    // Enable CORS for frontend communication.
+    // The frontend origin is driven by the FRONTEND_URL env var (set per
+    // environment on Railway); localhost and *.up.railway.app stay allowed
+    // for local dev and Railway-generated domains.
+    const allowedOrigins: (string | RegExp)[] = [
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      process.env.FRONTEND_URL,
+      /^https:\/\/.*\.up\.railway\.app$/,
+    ].filter((origin): origin is string | RegExp => Boolean(origin));
+
+    console.log('🌐 CORS allowed origins:', allowedOrigins);
+
     app.enableCors({
-      origin: [
-        'http://localhost:3000',
-        'http://127.0.0.1:3000',
-        'https://frontend-its-done.up.railway.app',
-        'https://estafeito.app.br',
-        /^https:\/\/.*\.up\.railway\.app$/,
-      ],
+      origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
       credentials: true,
