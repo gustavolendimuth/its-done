@@ -35,8 +35,9 @@ export function ProjectsBigStats({
 
   // Calculate insights
   const totalProjects = projects.length;
-  const totalWorkHours = projects.reduce(
-    (sum, project) => sum + project._count.workHours,
+  // Sum of actual hours worked (not the number of entries).
+  const totalHours = projects.reduce(
+    (sum, project) => sum + (project.totalHours ?? 0),
     0
   );
   const projectsWithWork = projects.filter(
@@ -46,7 +47,7 @@ export function ProjectsBigStats({
     .size;
 
   const averageHoursPerProject =
-    totalProjects > 0 ? totalWorkHours / totalProjects : 0;
+    totalProjects > 0 ? totalHours / totalProjects : 0;
 
   const projectUtilizationRate =
     totalProjects > 0 ? (projectsWithWork / totalProjects) * 100 : 0;
@@ -151,7 +152,7 @@ export function ProjectsBigStats({
       subtitle={t("subtitle")}
       icon={Folder}
       mainValue={totalProjects}
-      secondaryValue={`${totalWorkHours} ${t("totalWorkHours")} • ${uniqueClients} ${t("clientsInvolved")}`}
+      secondaryValue={`${totalHours.toFixed(1)} ${t("totalWorkHours")} • ${uniqueClients} ${t("clientsInvolved")}`}
       stats={statsItems}
       variant="indigo"
       isRefetching={isRefetching}

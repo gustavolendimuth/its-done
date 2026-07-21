@@ -41,7 +41,7 @@ export class ProjectsService {
   }
 
   async findAll(userId: string, clientId?: string) {
-    return this.prisma.project.findMany({
+    const projects = await this.prisma.project.findMany({
       where: {
         userId,
         ...(clientId && { clientId }),
@@ -58,6 +58,27 @@ export class ProjectsService {
         name: 'asc',
       },
     });
+
+    // `_count.workHours` is the number of entries, not the amount of time
+    // worked. Sum the actual hours per project so the UI can show real totals
+    // and averages instead of entry counts.
+    const hoursByProject = await this.prisma.workHour.groupBy({
+      by: ['projectId'],
+      where: {
+        userId,
+        projectId: { in: projects.map((p) => p.id) },
+      },
+      _sum: { hours: true },
+    });
+
+    const totalHoursByProject = new Map(
+      hoursByProject.map((row) => [row.projectId, row._sum.hours ?? 0]),
+    );
+
+    return projects.map((project) => ({
+      ...project,
+      totalHours: totalHoursByProject.get(project.id) ?? 0,
+    }));
   }
 
   async findOne(id: string, userId: string) {
