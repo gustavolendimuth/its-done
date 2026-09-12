@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
-import { SettingsForm } from "@/components/settings/settings-form";
+import { SettingsForm } from "@/features/settings";
 import { InfoCard } from "@/components/ui/info-card";
 
 export default function SettingsPage() {

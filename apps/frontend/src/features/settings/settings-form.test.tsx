@@ -2,7 +2,7 @@ import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-import { SettingsForm } from "../settings-form";
+import { SettingsForm } from "./settings-form";
 
 // Add type definitions for jest-dom
 declare global {
@@ -42,7 +42,7 @@ interface UpdateSettingsOptions {
 
 const mockUpdateSettings = jest.fn();
 
-jest.mock("@/services/settings", () => ({
+jest.mock("./settings.service", () => ({
   useSettings: jest.fn(() => ({
     data: mockSettings,
     isLoading: false,
@@ -59,7 +59,7 @@ describe("SettingsForm", () => {
   });
 
   it("should render loading state", () => {
-    const { useSettings } = require("@/services/settings");
+    const { useSettings } = require("./settings.service");
     useSettings.mockReturnValue({
       data: null,
       isLoading: true,
@@ -73,7 +73,7 @@ describe("SettingsForm", () => {
   });
 
   it("should render error state", () => {
-    const { useSettings } = require("@/services/settings");
+    const { useSettings } = require("./settings.service");
     useSettings.mockReturnValue({
       data: null,
       isLoading: false,
