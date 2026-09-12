@@ -547,6 +547,8 @@ T24
 
 **Commit**: `feat(work-timer): add React hooks for timer engine and finish mutation`
 
+**Status**: ✅ Done — 7 new tests passing (`work-sessions.test.tsx`, scoped run: `pnpm test:ci -- work-sessions.test`). `@/lib/work-timer-engine` mocked (already covered independently by T15); `useFinishWorkSession` mirrors `useCreateTimeEntry`'s invalidation set (`timeEntries`, `workHours`, `clients`, `dashboard`), verified via an `invalidateQueries` spy per the repo's existing `notifications.test.tsx` pattern. This is the last task of Phase 4 — build gate run: `pnpm build` clean (fixed one real TS error surfaced by this gate: `work-timer-engine.ts`'s `for...of` over a `Set` isn't allowed under this project's `tsconfig` target without `downlevelIteration`, replaced with `Array.from(listeners).forEach(...)` — no behavior change); `next lint` itself is broken in this project under the installed Next 16.2.10 (`next lint` no longer exists as a subcommand — a pre-existing environment issue unrelated to this feature), so lint was verified by running `eslint` directly on every file this batch touched (T11-T17), which found and fixed 2 minor `import/order` issues in this task's own `work-sessions.ts` (pre-existing lint debt in other files, as established in T1/T13, is untouched). `pnpm test:ci` (full suite) baseline unchanged: 33 failed / 10 passed suites, 226 failed / 128 passed tests — same 226 pre-existing failures, +7 new passing.
+
 ---
 
 ### T18: `WorkTimerWidget` component

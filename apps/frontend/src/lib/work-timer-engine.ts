@@ -62,9 +62,7 @@ function roundHoursToQuarter(totalSeconds: number): number {
 }
 
 function notify(): void {
-  for (const listener of listeners) {
-    listener(state);
-  }
+  Array.from(listeners).forEach((listener) => listener(state));
 }
 
 async function ensureLoaded(): Promise<void> {
