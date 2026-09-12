@@ -91,7 +91,16 @@ async function persist(
   await enqueueEvent(event);
 }
 
-export async function start(): Promise<LocalWorkSession> {
+export interface StartDetails {
+  clientId?: string;
+  projectId?: string;
+  description?: string;
+}
+
+// WKT-10 "preencher detalhes antes de iniciar" — `details` is optional so
+// the plain "Iniciar" flow (no upfront details) keeps working exactly as
+// before.
+export async function start(details?: StartDetails): Promise<LocalWorkSession> {
   await ensureLoaded();
 
   if (state && isActive(state)) {
@@ -111,6 +120,9 @@ export async function start(): Promise<LocalWorkSession> {
     lastPromptAt: null,
     lastConfirmedAt: null,
     hours: null,
+    clientId: details?.clientId ?? null,
+    projectId: details?.projectId ?? null,
+    description: details?.description ?? null,
   };
 
   state = session;
@@ -121,6 +133,9 @@ export async function start(): Promise<LocalWorkSession> {
     sessionId,
     type: "start",
     clientTimestamp: now,
+    ...(details?.clientId ? { clientId: details.clientId } : {}),
+    ...(details?.projectId ? { projectId: details.projectId } : {}),
+    ...(details?.description ? { description: details.description } : {}),
   });
 
   return session;

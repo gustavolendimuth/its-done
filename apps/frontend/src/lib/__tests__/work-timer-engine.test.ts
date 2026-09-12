@@ -50,6 +50,29 @@ describe("work-timer-engine", () => {
     );
   });
 
+  it("start(details) sets clientId/projectId/description on the session and enqueues them on the start event (WKT-10)", async () => {
+    const session = await engine.start({
+      clientId: "client-1",
+      projectId: "project-1",
+      description: "Planejado com antecedência",
+    });
+
+    expect(session).toMatchObject({
+      status: "RUNNING",
+      clientId: "client-1",
+      projectId: "project-1",
+      description: "Planejado com antecedência",
+    });
+    expect(dbMock.enqueueEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "start",
+        clientId: "client-1",
+        projectId: "project-1",
+        description: "Planejado com antecedência",
+      })
+    );
+  });
+
   it("start() returns the existing session (from IndexedDB) instead of creating a new one", async () => {
     const existing: LocalWorkSession = {
       id: "existing-session",

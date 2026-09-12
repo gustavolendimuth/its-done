@@ -19,6 +19,12 @@ export interface LocalWorkSession {
   lastPromptAt: string | null;
   lastConfirmedAt: string | null;
   hours?: number | null;
+  // WKT-10 "preencher detalhes antes de iniciar" — set when the session was
+  // started via the upfront details form; null when started plainly and
+  // only filled in later at finish().
+  clientId?: string | null;
+  projectId?: string | null;
+  description?: string | null;
 }
 
 // Mirrors backend SyncEventDto (apps/backend/src/work-sessions/dto/sync-event.dto.ts).
@@ -29,6 +35,10 @@ export interface SyncEvent {
   sessionId: string;
   type: SyncEventType;
   clientTimestamp: string;
+  // Only meaningful on a "start" event (WKT-10) — ignored by every other type.
+  clientId?: string;
+  projectId?: string;
+  description?: string;
 }
 
 interface StoredEvent extends SyncEvent {
