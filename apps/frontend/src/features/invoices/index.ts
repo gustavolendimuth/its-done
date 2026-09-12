@@ -16,6 +16,7 @@ export { InvoiceUploadForm } from "./components/invoice-upload-form";
 export { InvoiceFileUpload } from "./components/invoice-file-upload";
 export { WorkHoursSelector } from "./components/work-hours-selector";
 export { WorkHoursSelectionSummary } from "./components/work-hours-selection-summary";
+export { InvoicesPageSkeleton } from "./components/invoices-page-skeleton";
 
 export {
   useInvoices,

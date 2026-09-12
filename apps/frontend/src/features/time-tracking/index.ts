@@ -12,6 +12,7 @@ export {
   type WorkSessionStartFormProps,
 } from "./components/work-session-start-form";
 export { WorkTimerWidget } from "./components/work-timer-widget";
+export { WorkHoursSkeleton } from "./components/work-hours-skeleton";
 
 export { useWorkHoursStats, type WorkHoursStats } from "./work-hours-stats";
 export {

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { EmptyState } from "@/components/layout/empty-state";
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import { ProjectsPageSkeleton } from "@/features/projects";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
@@ -48,7 +48,7 @@ export default function ProjectsPage() {
   };
 
   if (isLoading) {
-    return <LoadingSkeleton type="projects-page" />;
+    return <ProjectsPageSkeleton />;
   }
 
   return (

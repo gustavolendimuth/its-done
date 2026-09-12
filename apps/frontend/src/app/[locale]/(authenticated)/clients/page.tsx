@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState, useMemo } from "react";
 
 import { EmptyState } from "@/components/layout/empty-state";
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import { ClientsPageSkeleton } from "@/features/clients";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
@@ -37,7 +37,7 @@ export default function ClientsPage() {
   };
 
   if (isLoading) {
-    return <LoadingSkeleton type="clients-page" />;
+    return <ClientsPageSkeleton />;
   }
 
   return (

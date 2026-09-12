@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/layout/empty-state";
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import { InvoicesPageSkeleton } from "@/features/invoices";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
@@ -80,7 +80,7 @@ export default function InvoicesPage() {
   };
 
   if (isLoading || clientsLoading) {
-    return <LoadingSkeleton type="invoices-page" />;
+    return <InvoicesPageSkeleton />;
   }
 
   if (error) {

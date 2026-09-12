@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import { AnalyticsPageSkeleton } from "./analytics-page-skeleton";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
@@ -178,7 +178,7 @@ export function AnalyticsView() {
   };
 
   if (isLoading) {
-    return <LoadingSkeleton type="analytics-page" />;
+    return <AnalyticsPageSkeleton />;
   }
 
   return (

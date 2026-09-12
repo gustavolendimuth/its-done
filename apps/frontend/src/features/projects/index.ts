@@ -2,6 +2,7 @@ export { ProjectCard } from "./project-card";
 export { ProjectCreateDialog } from "./project-create-dialog";
 export { ProjectEditDialog } from "./project-edit-dialog";
 export { ProjectsBigStats } from "./projects-big-stats";
+export { ProjectsPageSkeleton } from "./projects-page-skeleton";
 export {
   useProjects,
   useProject,

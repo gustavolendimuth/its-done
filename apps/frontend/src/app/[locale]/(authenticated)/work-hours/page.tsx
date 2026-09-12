@@ -4,7 +4,7 @@ import { Clock, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useMemo } from "react";
 
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import { WorkHoursSkeleton } from "@/features/time-tracking";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
@@ -91,7 +91,7 @@ export default function WorkHoursPage() {
 
   // Skeleton para carregamento inicial
   if (isInitialLoading) {
-    return <LoadingSkeleton type="work-hours" />;
+    return <WorkHoursSkeleton />;
   }
 
   const handleWorkHourAdded = () => {
