@@ -380,6 +380,8 @@ T24
 
 **Commit**: `feat(push): add web-push service with VAPID and stale-subscription cleanup`
 
+**Status**: ✅ Done — 4 new tests passing (`push.service.spec.ts`). Same 2 pre-existing unrelated `pnpm test` failures as T2/T4/T5 (`app.controller.spec.ts`, `invoices.controller.spec.ts`); no new failures. `@nestjs/schedule@^4.1.0` pinned instead of latest (12.x) to match this project's NestJS 10 peer range — noted for T13.
+
 ---
 
 ### T12: `POST /push/subscriptions` endpoint
