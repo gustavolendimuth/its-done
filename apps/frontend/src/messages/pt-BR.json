@@ -170,7 +170,10 @@
     "weeklyProjection": "Projeção Semanal",
     "week": "semana",
     "dailyTarget": "Meta: 8h/dia • {percentage}% da meta diária",
-    "updating": "Atualizando..."
+    "updating": "Atualizando...",
+    "searchPlaceholder": "Buscar por descrição, cliente ou projeto...",
+    "noResults": "Nenhum registro corresponde à busca",
+    "noResultsDescription": "Tente ajustar os termos da busca."
   },
   "clients": {
     "title": "Clientes",
@@ -802,7 +805,9 @@
     }
   },
   "WorkTimerWidget": {
-    "start": "Iniciar",
+    "idleHeading": "Cronômetro de horas",
+    "idleDescription": "Cronometra seu tempo agora e transforma em horas prontas pra faturar.",
+    "start": "Iniciar sessão",
     "startWithDetails": "Iniciar com detalhes",
     "stop": "Parar",
     "paused": "Pausado",
@@ -818,6 +823,7 @@
     "descriptionRequired": "Descrição é obrigatória",
     "offlineNotice": "Sem conexão — conecte-se para carregar cliente/projeto, ou use o botão \"Iniciar\" simples.",
     "title": "Iniciar com detalhes",
+    "description": "Escolha o cliente e o projeto antes de começar a cronometrar.",
     "clientLabel": "Cliente *",
     "projectLabel": "Projeto",
     "descriptionLabel": "Descrição *",

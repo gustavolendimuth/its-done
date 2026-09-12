@@ -113,35 +113,55 @@ export function WorkTimerWidget() {
         "bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/40 dark:to-green-900/30",
         isLongRunning
           ? "border-amber-400 dark:border-amber-600"
-          : "border-green-200 dark:border-green-800"
+          : "border-green-200 dark:border-green-800",
+        isIdle && "w-80"
       )}
     >
-      <div className="flex items-center gap-3 px-4 py-3">
+      <div
+        className={cn(
+          "flex gap-3 px-4 py-3",
+          isIdle ? "items-start" : "items-center"
+        )}
+      >
         {!isOnline && (
           <span
             data-testid="work-timer-offline-indicator"
             title={t("offlineIndicator")}
-            className="text-muted-foreground"
+            className={cn("text-muted-foreground", isIdle && "mt-0.5")}
           >
             <WifiOff className="h-4 w-4" />
           </span>
         )}
 
         {isIdle && (
-          <div data-testid="work-timer-idle" className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-green-600 dark:text-green-400" />
-            <Button size="sm" onClick={() => handleStart()}>
-              <Play className="mr-1.5 h-3.5 w-3.5" />
-              {t("start")}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              data-testid="work-timer-start-with-details"
-              onClick={() => setShowStartForm(true)}
-            >
-              {t("startWithDetails")}
-            </Button>
+          <div data-testid="work-timer-idle" className="flex-1 space-y-3">
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-600/10 dark:bg-green-400/10">
+                <Clock className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </span>
+              <div className="space-y-0.5 pt-0.5">
+                <p className="text-sm font-semibold leading-none">
+                  {t("idleHeading")}
+                </p>
+                <p className="text-xs leading-snug text-muted-foreground">
+                  {t("idleDescription")}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" className="flex-1" onClick={() => handleStart()}>
+                <Play className="mr-1.5 h-3.5 w-3.5" />
+                {t("start")}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                data-testid="work-timer-start-with-details"
+                onClick={() => setShowStartForm(true)}
+              >
+                {t("startWithDetails")}
+              </Button>
+            </div>
           </div>
         )}
 

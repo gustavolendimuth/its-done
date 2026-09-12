@@ -33,13 +33,23 @@ jest.mock("@/components/work-hours/work-hours-big-stats", () => ({
   ),
 }));
 
-jest.mock("@/components/work-hours/work-hour-card", () => ({
-  WorkHourCard: ({ workHour, isDeleting }: any) => (
-    <div data-testid="work-hour-card">
-      <p>Hours: {workHour.hours}</p>
-      <p>Client: {workHour.client?.name}</p>
-      <p>Project: {workHour.project?.name}</p>
-      <p>Deleting: {isDeleting.toString()}</p>
+jest.mock("@/components/work-hours/work-hours-table", () => ({
+  WorkHoursTable: ({ workHours, deletingId, onDelete }: any) => (
+    <div data-testid="work-hours-table">
+      {workHours.map((workHour: any) => (
+        <div data-testid="work-hour-row" key={workHour.id}>
+          <p>Hours: {workHour.hours}</p>
+          <p>Client: {workHour.client?.name}</p>
+          <p>Project: {workHour.project?.name}</p>
+          <p>Deleting: {(deletingId === workHour.id).toString()}</p>
+          <button
+            aria-label="delete work hour"
+            onClick={() => onDelete(workHour.id)}
+          >
+            delete
+          </button>
+        </div>
+      ))}
     </div>
   ),
 }));
@@ -166,13 +176,13 @@ describe("WorkHoursPage", () => {
     expect(screen.getByTestId("work-hours-big-stats")).toBeInTheDocument();
     expect(screen.getByText("Total Hours: 8")).toBeInTheDocument(); // 5 + 3 hours
 
-    // Check work hour cards
-    const cards = screen.getAllByTestId("work-hour-card");
-    expect(cards).toHaveLength(2);
-    expect(cards[0]).toHaveTextContent("Hours: 5");
-    expect(cards[0]).toHaveTextContent("Client: Client 1");
-    expect(cards[1]).toHaveTextContent("Hours: 3");
-    expect(cards[1]).toHaveTextContent("Client: Client 2");
+    // Check work hour rows
+    const rows = screen.getAllByTestId("work-hour-row");
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toHaveTextContent("Hours: 5");
+    expect(rows[0]).toHaveTextContent("Client: Client 1");
+    expect(rows[1]).toHaveTextContent("Hours: 3");
+    expect(rows[1]).toHaveTextContent("Client: Client 2");
   });
 
   it("should filter work hours by client", async () => {
@@ -226,7 +236,7 @@ describe("WorkHoursPage", () => {
     expect(screen.getByTestId("work-hour-form")).toBeInTheDocument();
   });
 
-  it("should show empty state when no work hours", () => {
+  it("should pass an empty list to the table when there are no work hours", () => {
     const { useTimeEntries } = require("@/services/time-entries");
     useTimeEntries.mockReturnValue({
       data: [],
@@ -237,8 +247,8 @@ describe("WorkHoursPage", () => {
 
     render(<WorkHoursPage />);
 
-    expect(screen.getByText("noWorkHours")).toBeInTheDocument();
-    expect(screen.getByText("noWorkHoursDescription")).toBeInTheDocument();
+    expect(screen.getByTestId("work-hours-table")).toBeInTheDocument();
+    expect(screen.queryAllByTestId("work-hour-row")).toHaveLength(0);
   });
 
   it("should show refetching indicator", () => {

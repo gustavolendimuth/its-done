@@ -32,7 +32,7 @@ describe("Work Hours Page", () => {
 
     // Verify work hour was created
     cy.contains("Test work hour entry").should("be.visible");
-    cy.contains("8h").should("be.visible");
+    cy.contains("08:00").should("be.visible");
   });
 
   it("should filter work hours by date range", () => {
@@ -90,7 +90,7 @@ describe("Work Hours Page", () => {
     });
 
     // Delete the first entry
-    cy.get('[data-testid="work-hour-card"]')
+    cy.get('[data-testid="work-hour-row"]')
       .first()
       .within(() => {
         cy.get('[data-testid="delete-button"]').click();
@@ -105,7 +105,7 @@ describe("Work Hours Page", () => {
 
   it("should show empty state when no work hours", () => {
     // Delete all work hour entries
-    cy.get('[data-testid="work-hour-card"]').each(($card) => {
+    cy.get('[data-testid="work-hour-row"]').each(($card) => {
       cy.wrap($card).within(() => {
         cy.get('[data-testid="delete-button"]').click();
       });

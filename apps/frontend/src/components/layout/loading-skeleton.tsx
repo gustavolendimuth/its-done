@@ -204,26 +204,30 @@ function WorkHoursSkeleton() {
 
       {/* Work Hours List */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <SkeletonBox className="h-6 w-40" />
-          <SkeletonBox className="h-4 w-20" />
-        </div>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <Card key={i}>
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <SkeletonBox className="h-5 w-32" />
-                  <SkeletonBox className="h-4 w-48" />
-                </div>
-                <div className="text-right space-y-1">
-                  <SkeletonBox className="h-5 w-16" />
-                  <SkeletonBox className="h-4 w-20" />
-                </div>
+        <SkeletonBox className="h-6 w-40" />
+        <SkeletonBox className="h-10 w-full max-w-xs" />
+        <div className="border rounded-lg overflow-hidden">
+          <div className="border-b p-3 bg-muted/30">
+            <div className="flex gap-4">
+              <SkeletonBox className="h-4 flex-1" />
+              <SkeletonBox className="h-4 flex-1" />
+              <SkeletonBox className="h-4 flex-1" />
+              <SkeletonBox className="h-4 w-16" />
+              <SkeletonBox className="h-4 w-16" />
+            </div>
+          </div>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="border-b last:border-b-0 p-3">
+              <div className="flex gap-4 items-center">
+                <SkeletonBox className="h-4 flex-1" />
+                <SkeletonBox className="h-4 flex-1" />
+                <SkeletonBox className="h-4 flex-1" />
+                <SkeletonBox className="h-4 w-16" />
+                <SkeletonBox className="h-4 w-16" />
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

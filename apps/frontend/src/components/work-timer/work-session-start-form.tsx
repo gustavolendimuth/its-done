@@ -1,13 +1,20 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ClipboardList } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ClientCombobox } from "@/components/ui/client-combobox";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
@@ -113,8 +120,14 @@ export function WorkSessionStartForm({
       data-testid="work-session-start-form"
       className="fixed bottom-4 right-4 z-50 w-96 border-green-200 dark:border-green-800"
     >
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">{t("title")}</CardTitle>
+      <CardHeader className="space-y-1.5 pb-3">
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-600/10 dark:bg-green-400/10">
+            <ClipboardList className="h-4 w-4 text-green-600 dark:text-green-400" />
+          </span>
+          <CardTitle className="text-base">{t("title")}</CardTitle>
+        </div>
+        <CardDescription className="pl-10">{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

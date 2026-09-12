@@ -170,7 +170,10 @@
     "weeklyProjection": "Weekly Projection",
     "week": "week",
     "dailyTarget": "Target: 8h/day • {percentage}% of daily target",
-    "updating": "Updating..."
+    "updating": "Updating...",
+    "searchPlaceholder": "Search by description, client or project...",
+    "noResults": "No entries match your search",
+    "noResultsDescription": "Try adjusting your search terms."
   },
   "clients": {
     "title": "Clients",
@@ -804,7 +807,9 @@
     "userStats": "{hours} total hours, {clients} clients"
   },
   "WorkTimerWidget": {
-    "start": "Start",
+    "idleHeading": "Time tracker",
+    "idleDescription": "Times your work now and turns it into billable hours.",
+    "start": "Start session",
     "startWithDetails": "Start with details",
     "stop": "Stop",
     "paused": "Paused",
@@ -820,6 +825,7 @@
     "descriptionRequired": "Description is required",
     "offlineNotice": "Offline — connect to load client/project, or use the plain \"Start\" button.",
     "title": "Start with details",
+    "description": "Choose the client and project before you start timing.",
     "clientLabel": "Client *",
     "projectLabel": "Project",
     "descriptionLabel": "Description *",

@@ -168,6 +168,40 @@ Hoje o usuário só registra horas manualmente, digitando quanto trabalhou depoi
 
 ---
 
+### P2: Preencher detalhes antes de iniciar
+
+**User Story**: Como usuário, quero poder preencher cliente, projeto e descrição antes de apertar "Iniciar", caso eu já saiba em que vou trabalhar, para não precisar lembrar de preencher isso só no final.
+
+**Why P2**: É uma conveniência opcional — o fluxo principal (iniciar sem detalhes, preencher no final) continua funcionando exatamente igual; isso só adiciona um atalho a mais.
+
+**Acceptance Criteria**:
+
+1. WHEN o usuário escolhe a opção de iniciar com detalhes (em vez do botão "Iniciar" simples) THEN o sistema SHALL exibir o mesmo formulário de cliente/projeto/descrição do fim de sessão, antes de criar a sessão
+2. WHEN o usuário preenche o formulário e confirma THEN o sistema SHALL iniciar a sessão (local-first, igual ao "Iniciar" simples) já com esses dados associados
+3. WHEN a sessão iniciada dessa forma chega ao formulário final (ao parar) THEN os campos SHALL vir pré-preenchidos com o que foi informado no início, mas continuam editáveis
+4. WHEN o usuário abre o formulário de início e decide cancelar (sem preencher) THEN o sistema SHALL voltar ao estado idle sem criar nenhuma sessão
+
+**Independent Test**: Clicar na opção de iniciar com detalhes, preencher cliente e descrição, confirmar, rodar o timer, parar, e verificar que o formulário final já aparece com os mesmos dados preenchidos.
+
+---
+
+### P2: Registrar a sessão num dia diferente
+
+**User Story**: Como usuário, quero poder ver e ajustar a data da sessão no formulário final, para o caso de eu ter esquecido de registrar uma sessão no dia em que ela realmente aconteceu.
+
+**Why P2**: Correção de esquecimento é um caso legítimo e comum — sem isso, toda sessão fica presa à data em que o formulário foi preenchido, mesmo que a pessoa só tenha lembrado de finalizar dias depois.
+
+**Acceptance Criteria**:
+
+1. WHEN o formulário final é exibido THEN o sistema SHALL mostrar um campo de data, pré-preenchido com o dia em que a sessão foi **iniciada** (não o dia atual)
+2. WHEN o usuário altera a data antes de salvar THEN o sistema SHALL usar a data escolhida (não a data de início) ao criar o `WorkHour`
+3. WHEN o usuário não mexe no campo de data THEN o sistema SHALL usar o dia de início da sessão, exatamente como no comportamento anterior
+4. WHEN o usuário tenta escolher uma data futura THEN o sistema SHALL bloquear a seleção (mesma regra já aplicada no formulário manual de horas)
+
+**Independent Test**: Iniciar uma sessão, parar, mudar a data no formulário final pra um dia anterior, salvar, e confirmar que o `WorkHour` criado tem a data escolhida, não a data de hoje nem a de início.
+
+---
+
 ### P2: Aviso visual de sessão muito longa
 
 **User Story**: Como usuário, quero ver um aviso se minha sessão estiver rodando há muito tempo, para perceber se esqueci de parar.
@@ -218,6 +252,8 @@ Hoje o usuário só registra horas manualmente, digitando quanto trabalhou depoi
 | WKT-07          | P2: Aviso visual de sessão muito longa          | Verified | ✅ Verified |
 | WKT-08          | P3: Gerenciar subscriptions de push obsoletas   | Verified | ✅ Verified |
 | WKT-09          | P1: Funciona offline (local-first)              | Verified | ✅ Verified |
+| WKT-10          | P2: Preencher detalhes antes de iniciar         | Implementing | Pending |
+| WKT-11          | P2: Registrar a sessão num dia diferente        | Implementing | Pending |
 
 **ID format:** `WKT-[NUMBER]`
 
