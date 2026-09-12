@@ -108,7 +108,11 @@ export class WorkSessionsService {
 
     switch (event.type) {
       case SyncEventType.START:
-        return this.applyStart(userId, event.sessionId, clientTimestamp);
+        return this.applyStart(userId, event.sessionId, clientTimestamp, {
+          clientId: event.clientId,
+          projectId: event.projectId,
+          description: event.description,
+        });
       case SyncEventType.CONFIRM:
         return this.applyConfirm(event.sessionId, clientTimestamp);
       case SyncEventType.PAUSE:
@@ -126,6 +130,7 @@ export class WorkSessionsService {
     userId: string,
     sessionId: string,
     clientTimestamp: Date,
+    details?: { clientId?: string; projectId?: string; description?: string },
   ): Promise<{ discarded?: DiscardedInfo } | void> {
     const now = new Date();
 
@@ -137,6 +142,14 @@ export class WorkSessionsService {
     }
 
     const startedAt = clientTimestamp > now ? now : clientTimestamp;
+    // WKT-10 "preencher detalhes antes de iniciar" — carried over from the
+    // start event when the user chose to fill them upfront; left null
+    // otherwise and filled later at finish(), exactly like before.
+    const upfrontDetails = {
+      clientId: details?.clientId ?? null,
+      projectId: details?.projectId ?? null,
+      description: details?.description ?? null,
+    };
 
     const existing = await this.getActiveSession(userId);
     if (!existing) {
@@ -148,6 +161,7 @@ export class WorkSessionsService {
           startedAt,
           currentSegmentStartedAt: startedAt,
           accumulatedSeconds: 0,
+          ...upfrontDetails,
         },
       });
       return;
@@ -174,6 +188,7 @@ export class WorkSessionsService {
           startedAt,
           currentSegmentStartedAt: startedAt,
           accumulatedSeconds: 0,
+          ...upfrontDetails,
         },
       });
       return {

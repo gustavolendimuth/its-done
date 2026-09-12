@@ -57,12 +57,49 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
         startedAt: new Date(clientTimestamp),
         currentSegmentStartedAt: new Date(clientTimestamp),
         accumulatedSeconds: 0,
+        clientId: null,
+        projectId: null,
+        description: null,
       },
     });
     expect(prismaMock.workSessionSyncedEvent.create).toHaveBeenCalledWith({
       data: { eventId: 'e1', sessionId, type: SyncEventType.START },
     });
     expect(result.session).toEqual({ id: sessionId, status: 'RUNNING' });
+  });
+
+  it('start with upfront details (WKT-10) persists clientId/projectId/description on creation', async () => {
+    const clientTimestamp = '2026-01-15T11:00:00.000Z';
+    prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
+    prismaMock.workSession.findFirst
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ id: sessionId, status: 'RUNNING' });
+
+    await service.applyEvents(userId, [
+      {
+        eventId: 'e1b',
+        sessionId,
+        type: SyncEventType.START,
+        clientTimestamp,
+        clientId: 'client-1',
+        projectId: 'project-1',
+        description: 'Planejado com antecedência',
+      },
+    ]);
+
+    expect(prismaMock.workSession.create).toHaveBeenCalledWith({
+      data: {
+        id: sessionId,
+        userId,
+        status: 'RUNNING',
+        startedAt: new Date(clientTimestamp),
+        currentSegmentStartedAt: new Date(clientTimestamp),
+        accumulatedSeconds: 0,
+        clientId: 'client-1',
+        projectId: 'project-1',
+        description: 'Planejado com antecedência',
+      },
+    });
   });
 
   it('confirm on a RUNNING session sets lastConfirmedAt and clears lastPromptAt', async () => {
@@ -552,6 +589,9 @@ describe('WorkSessionsService.applyEvents() - single-active-session conflict on 
         startedAt: new Date(incomingClientTimestamp),
         currentSegmentStartedAt: new Date(incomingClientTimestamp),
         accumulatedSeconds: 0,
+        clientId: null,
+        projectId: null,
+        description: null,
       },
     });
     expect(result.discarded).toEqual({

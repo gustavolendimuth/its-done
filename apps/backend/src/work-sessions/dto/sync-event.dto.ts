@@ -1,4 +1,11 @@
-import { IsEnum, IsISO8601, IsString, IsNotEmpty } from 'class-validator';
+import {
+  IsEnum,
+  IsISO8601,
+  IsOptional,
+  IsString,
+  IsNotEmpty,
+  IsUUID,
+} from 'class-validator';
 
 export enum SyncEventType {
   START = 'start',
@@ -22,4 +29,18 @@ export class SyncEventDto {
 
   @IsISO8601()
   clientTimestamp: string;
+
+  // Only meaningful on a `start` event — WKT-10 "preencher detalhes antes de
+  // iniciar". Ignored by every other event type.
+  @IsOptional()
+  @IsUUID(4, { message: 'Client ID must be a valid UUID' })
+  clientId?: string;
+
+  @IsOptional()
+  @IsUUID(4, { message: 'Project ID must be a valid UUID' })
+  projectId?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
 }
