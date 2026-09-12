@@ -127,6 +127,43 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
     expect(session.status).toBe('ENDED');
   });
 
+  it('uses the explicit date instead of the session startedAt when provided (WKT-11)', async () => {
+    const sessionId = await createStoppingSession();
+    const backdatedDate = '2026-01-01T00:00:00.000Z';
+
+    const res = await request(app.getHttpServer())
+      .post(`/work-sessions/${sessionId}/finish`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        clientId,
+        projectId,
+        description: 'Esqueci de registrar no dia certo',
+        date: backdatedDate,
+      });
+
+    expect(res.status).toBe(201);
+    expect(new Date(res.body.workHour.date).toISOString()).toBe(
+      backdatedDate,
+    );
+  });
+
+  it('falls back to the session startedAt when date is omitted', async () => {
+    const sessionId = await createStoppingSession();
+    const session = await prisma.workSession.findUnique({
+      where: { id: sessionId },
+    });
+
+    const res = await request(app.getHttpServer())
+      .post(`/work-sessions/${sessionId}/finish`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ clientId, projectId, description: 'Sem data explícita' });
+
+    expect(res.status).toBe(201);
+    expect(new Date(res.body.workHour.date).toISOString()).toBe(
+      session.startedAt.toISOString(),
+    );
+  });
+
   it('rejects the request when clientId and description are missing', async () => {
     const sessionId = await createStoppingSession();
 
