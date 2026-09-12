@@ -23,8 +23,10 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 // falls back to the in-app banner (WKT-04's documented assumption for that
 // case), so this never throws for that path — it only reports the state.
 export function usePushSubscription(): UsePushSubscriptionResult {
-  const [permission, setPermission] = useState<NotificationPermission>(
-    () => Notification.permission
+  const [permission, setPermission] = useState<NotificationPermission>(() =>
+    typeof window === "undefined" || !("Notification" in window)
+      ? "default"
+      : Notification.permission
   );
 
   const subscribe = useCallback(async () => {

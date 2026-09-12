@@ -96,6 +96,14 @@ describe("usePushSubscription", () => {
     expect(mockedApi.post).not.toHaveBeenCalled();
   });
 
+  it("initializes to 'default' without throwing when Notification is unavailable (e.g. SSR)", () => {
+    delete (global as unknown as { Notification?: unknown }).Notification;
+
+    const { result } = renderHook(() => usePushSubscription());
+
+    expect(result.current.permission).toBe("default");
+  });
+
   it("does not throw when the POST to /push/subscriptions fails", async () => {
     mockRequestPermission.mockResolvedValue("granted");
     mockedApi.post.mockRejectedValueOnce(new Error("network error"));
