@@ -812,6 +812,19 @@
     "offlineIndicator": "Offline — sincroniza ao reconectar",
     "longRunningAlert": "Sessão rodando há mais de 12 horas"
   },
+  "WorkSessionStartForm": {
+    "clientRequired": "Cliente é obrigatório",
+    "descriptionRequired": "Descrição é obrigatória",
+    "offlineNotice": "Sem conexão — conecte-se para carregar cliente/projeto, ou use o botão \"Iniciar\" simples.",
+    "title": "Iniciar com detalhes",
+    "clientLabel": "Cliente *",
+    "projectLabel": "Projeto",
+    "descriptionLabel": "Descrição *",
+    "descriptionPlaceholder": "O que você vai fazer?",
+    "starting": "Iniciando...",
+    "start": "Iniciar",
+    "cancel": "Cancelar"
+  },
   "WorkSessionFinishForm": {
     "clientRequired": "Cliente é obrigatório",
     "descriptionRequired": "Descrição é obrigatória",

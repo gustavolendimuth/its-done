@@ -814,6 +814,19 @@
     "offlineIndicator": "Offline, syncs once reconnected",
     "longRunningAlert": "Session running for over 12 hours"
   },
+  "WorkSessionStartForm": {
+    "clientRequired": "Client is required",
+    "descriptionRequired": "Description is required",
+    "offlineNotice": "Offline — connect to load client/project, or use the plain \"Start\" button.",
+    "title": "Start with details",
+    "clientLabel": "Client *",
+    "projectLabel": "Project",
+    "descriptionLabel": "Description *",
+    "descriptionPlaceholder": "What are you about to work on?",
+    "starting": "Starting...",
+    "start": "Start",
+    "cancel": "Cancel"
+  },
   "WorkSessionFinishForm": {
     "clientRequired": "Client is required",
     "descriptionRequired": "Description is required",
