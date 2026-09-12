@@ -405,6 +405,32 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
       }),
     );
   });
+
+  it('rounds a very short session (1min) up to the 0.25h minimum instead of 0, per CreateWorkHourDto.hours Min(0.1)', async () => {
+    const segmentStart = new Date('2026-01-15T11:59:00.000Z'); // 1 min before now
+    prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
+    prismaMock.workSession.findUnique.mockResolvedValueOnce({
+      id: sessionId,
+      status: 'RUNNING',
+      startedAt: segmentStart,
+      currentSegmentStartedAt: segmentStart,
+      accumulatedSeconds: 0,
+    });
+    prismaMock.workSession.findFirst.mockResolvedValueOnce(null);
+
+    await service.applyEvents(userId, [
+      {
+        eventId: 'e11',
+        sessionId,
+        type: SyncEventType.STOP,
+        clientTimestamp: NOW.toISOString(),
+      },
+    ]);
+
+    expect(prismaMock.workSession.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ hours: 0.25 }) }),
+    );
+  });
 });
 
 describe('WorkSessionsService.applyEvents() - single-active-session conflict on start', () => {
