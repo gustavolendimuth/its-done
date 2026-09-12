@@ -2,7 +2,7 @@ import { describe, it, expect } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
-import { Overview } from "../overview";
+import { Overview } from "./overview";
 
 import type { Invoice } from "@/features/invoices";
 import type { WorkHour, InvoiceWorkHour } from "@/features/time-tracking";
