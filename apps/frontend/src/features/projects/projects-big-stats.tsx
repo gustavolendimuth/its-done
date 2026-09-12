@@ -14,7 +14,7 @@ import {
   BigStatsDisplay,
   BigStatItem,
 } from "@/components/ui/big-stats-display";
-import { useProjects } from "@/services/projects";
+import { useProjects } from "./projects.service";
 
 
 interface ProjectsBigStatsProps {

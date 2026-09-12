@@ -8,9 +8,6 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
-import { ProjectCard } from "@/components/projects/project-card";
-import { ProjectCreateDialog } from "@/components/projects/project-create-dialog";
-import { ProjectsBigStats } from "@/components/projects/projects-big-stats";
 import { InfoCard } from "@/components/ui/info-card";
 import {
   Select,
@@ -19,8 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  ProjectCard,
+  ProjectCreateDialog,
+  ProjectsBigStats,
+  useProjects,
+  useDeleteProject,
+} from "@/features/projects";
 import { useClients } from "@/services/clients";
-import { useProjects, useDeleteProject } from "@/services/projects";
 
 export default function ProjectsPage() {
   const t = useTranslations("projects");

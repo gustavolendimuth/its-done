@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 import { render, screen } from "@testing-library/react";
 
-import { ProjectsBigStats } from "../projects-big-stats";
+import { ProjectsBigStats } from "./projects-big-stats";
 
 import type { Client } from "@/services/clients";
-import type { Project } from "@/services/projects";
+import type { Project } from "./projects.service";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -88,7 +88,7 @@ const mockProjects: Project[] = [
 ];
 
 // Mock services
-jest.mock("@/services/projects", () => ({
+jest.mock("./projects.service", () => ({
   useProjects: jest.fn((clientId?: string) => ({
     data: clientId
       ? mockProjects.filter((p) => p.clientId === clientId)
@@ -147,7 +147,7 @@ describe("ProjectsBigStats", () => {
       _count: { workHours: 40 },
     }));
 
-    jest.mock("@/services/projects", () => ({
+    jest.mock("./projects.service", () => ({
       useProjects: () => ({
         data: manyProjects,
         isLoading: false,
@@ -159,7 +159,7 @@ describe("ProjectsBigStats", () => {
   });
 
   it("handles empty projects list", () => {
-    jest.mock("@/services/projects", () => ({
+    jest.mock("./projects.service", () => ({
       useProjects: () => ({
         data: [],
         isLoading: false,
@@ -195,7 +195,7 @@ describe("ProjectsBigStats", () => {
       id: `project${i}`,
     }));
 
-    jest.mock("@/services/projects", () => ({
+    jest.mock("./projects.service", () => ({
       useProjects: () => ({
         data: moreProjects,
         isLoading: false,
@@ -211,7 +211,7 @@ describe("ProjectsBigStats", () => {
       id: `project${i}`,
     }));
 
-    jest.mock("@/services/projects", () => ({
+    jest.mock("./projects.service", () => ({
       useProjects: () => ({
         data: manyProjects,
         isLoading: false,

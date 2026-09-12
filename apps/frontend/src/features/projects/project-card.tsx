@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { ProjectEditDialog } from "@/components/projects/project-edit-dialog";
+import { ProjectEditDialog } from "./project-edit-dialog";
 import {
   AlertDialog,
   AlertDialogAction,

@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 
-import { ProjectCard } from "../project-card";
+import { ProjectCard } from "./project-card";
 
 import type { NextRouter } from "next/router";
 

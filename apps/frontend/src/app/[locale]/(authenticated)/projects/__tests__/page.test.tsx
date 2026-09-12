@@ -5,7 +5,7 @@ import "@testing-library/jest-dom";
 import ProjectsPage from "../page";
 
 import type { Client } from "@/services/clients";
-import type { Project } from "@/services/projects";
+import type { Project } from "@/features/projects";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -20,8 +20,8 @@ jest.mock("sonner", () => ({
   },
 }));
 
-// Mock components
-jest.mock("@/components/projects/project-create-dialog", () => ({
+// Mock the projects feature (components + service, single barrel import in page.tsx)
+jest.mock("@/features/projects", () => ({
   ProjectCreateDialog: ({
     onOpenChange,
     clientId,
@@ -38,9 +38,6 @@ jest.mock("@/components/projects/project-create-dialog", () => ({
       <button onClick={() => onOpenChange(false)}>Cancel</button>
     </div>
   ),
-}));
-
-jest.mock("@/components/projects/project-card", () => ({
   ProjectCard: ({
     project,
     onDelete,
@@ -63,14 +60,21 @@ jest.mock("@/components/projects/project-card", () => ({
       </button>
     </div>
   ),
-}));
-
-jest.mock("@/components/projects/projects-big-stats", () => ({
   ProjectsBigStats: ({ selectedClientId }: { selectedClientId: string }) => (
     <div data-testid="projects-big-stats">
       <p>Stats for client: {selectedClientId}</p>
     </div>
   ),
+  useProjects: jest.fn((clientId?: string) => ({
+    data: clientId
+      ? mockProjects.filter((p) => p.clientId === clientId)
+      : mockProjects,
+    isLoading: false,
+  })),
+  useDeleteProject: jest.fn(() => ({
+    mutateAsync: jest.fn(),
+    isPending: false,
+  })),
 }));
 
 jest.mock("@/components/layout/page-container", () => ({
@@ -160,20 +164,6 @@ const mockProjects: Project[] = [
   },
 ];
 
-// Mock services
-jest.mock("@/services/projects", () => ({
-  useProjects: jest.fn((clientId?: string) => ({
-    data: clientId
-      ? mockProjects.filter((p) => p.clientId === clientId)
-      : mockProjects,
-    isLoading: false,
-  })),
-  useDeleteProject: jest.fn(() => ({
-    mutateAsync: jest.fn(),
-    isPending: false,
-  })),
-}));
-
 jest.mock("@/services/clients", () => ({
   useClients: jest.fn(() => ({
     data: mockClients,
@@ -189,7 +179,7 @@ describe("ProjectsPage", () => {
   });
 
   it("should render loading skeleton when loading", () => {
-    const { useProjects } = require("@/services/projects");
+    const { useProjects } = require("@/features/projects");
     useProjects.mockReturnValue({
       data: null,
       isLoading: true,
@@ -240,7 +230,7 @@ describe("ProjectsPage", () => {
   });
 
   it("should show empty state when no projects", () => {
-    const { useProjects } = require("@/services/projects");
+    const { useProjects } = require("@/features/projects");
     useProjects.mockReturnValue({
       data: [],
       isLoading: false,
@@ -254,7 +244,7 @@ describe("ProjectsPage", () => {
   });
 
   it("should show empty state with different message when no projects for selected client", () => {
-    const { useProjects } = require("@/services/projects");
+    const { useProjects } = require("@/features/projects");
     useProjects.mockReturnValue({
       data: [],
       isLoading: false,
@@ -304,7 +294,7 @@ describe("ProjectsPage", () => {
   });
 
   it("should handle project deletion", async () => {
-    const { useDeleteProject } = require("@/services/projects");
+    const { useDeleteProject } = require("@/features/projects");
     const mockMutateAsync = jest.fn();
     useDeleteProject.mockReturnValue({
       mutateAsync: mockMutateAsync,
@@ -325,7 +315,7 @@ describe("ProjectsPage", () => {
   });
 
   it("should not delete project if confirmation is cancelled", async () => {
-    const { useDeleteProject } = require("@/services/projects");
+    const { useDeleteProject } = require("@/features/projects");
     const mockMutateAsync = jest.fn();
     useDeleteProject.mockReturnValue({
       mutateAsync: mockMutateAsync,

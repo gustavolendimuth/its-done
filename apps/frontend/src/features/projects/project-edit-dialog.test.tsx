@@ -2,11 +2,11 @@ import { jest } from "@jest/globals";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { ProjectEditDialog } from "../project-edit-dialog";
+import { ProjectEditDialog } from "./project-edit-dialog";
 import { render } from "@/test-utils";
 
 import type { Client } from "@/services/clients";
-import type { Project, UpdateProjectData } from "@/services/projects";
+import type { Project, UpdateProjectData } from "./projects.service";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -41,7 +41,7 @@ const mockUpdateProject = jest.fn(
   }
 );
 
-jest.mock("@/services/projects", () => ({
+jest.mock("./projects.service", () => ({
   useUpdateProject: () => ({
     mutateAsync: mockUpdateProject,
     isPending: false,
@@ -414,7 +414,7 @@ describe("ProjectEditDialog", () => {
       ...defaultProps,
     };
 
-    jest.mock("@/services/projects", () => ({
+    jest.mock("./projects.service", () => ({
       useUpdateProject: () => ({
         mutateAsync: mockUpdateProject,
         isPending: true,

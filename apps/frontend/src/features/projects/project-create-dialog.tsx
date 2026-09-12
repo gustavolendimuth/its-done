@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FolderPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -15,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useClients } from "@/services/clients";
-import { useUpdateProject, type Project } from "@/services/projects";
+import { useCreateProject, type Project } from "./projects.service";
 
 const projectSchema = z.object({
   name: z.string().min(1, { message: "Project name is required" }),
@@ -27,22 +26,22 @@ const projectSchema = z.object({
 
 type ProjectFormData = z.infer<typeof projectSchema>;
 
-interface ProjectEditDialogProps {
+interface ProjectCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  project: Project;
+  clientId?: string;
   onSuccess?: (project: Project) => void;
 }
 
-export function ProjectEditDialog({
+export function ProjectCreateDialog({
   open,
   onOpenChange,
-  project,
+  clientId,
   onSuccess,
-}: ProjectEditDialogProps) {
-  const updateProject = useUpdateProject();
+}: ProjectCreateDialogProps) {
+  const createProject = useCreateProject();
   const { data: clients = [] } = useClients();
-  const t = useTranslations("ProjectEditDialog");
+  const t = useTranslations("ProjectCreateDialog");
 
   const {
     register,
@@ -53,45 +52,28 @@ export function ProjectEditDialog({
   } = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
-      name: project.name,
-      description: project.description || "",
-      hourlyRate: project.hourlyRate || null,
-      alertHours: (project as any).alertHours || null,
-      clientId: project.clientId,
+      clientId: clientId || "",
+      hourlyRate: null,
+      alertHours: null,
     },
   });
 
-  // Reset form when project changes
-  useEffect(() => {
-    if (project) {
-      reset({
-        name: project.name,
-        description: project.description || "",
-        hourlyRate: project.hourlyRate || null,
-        alertHours: (project as any).alertHours || null,
-        clientId: project.clientId,
-      });
-    }
-  }, [project, reset]);
-
   const onSubmit = async (data: ProjectFormData) => {
     try {
-      // Convert null to undefined for hourlyRate and alertHours to match UpdateProjectData type
+      // Convert null to undefined for hourlyRate and alertHours to match API expectations
       const formattedData = {
         ...data,
         hourlyRate: data.hourlyRate === null ? undefined : data.hourlyRate,
         alertHours: data.alertHours === null ? undefined : data.alertHours
       };
 
-      const updatedProject = await updateProject.mutateAsync({
-        id: project.id,
-        data: formattedData,
-      });
+      const project = await createProject.mutateAsync(formattedData);
 
       toast.success(t("success"));
-      onSuccess?.(updatedProject);
+      reset();
+      onSuccess?.(project);
     } catch (error) {
-      console.error("Error updating project:", error);
+      console.error("Error creating project:", error);
       toast.error(t("error"));
     }
   };
@@ -207,12 +189,12 @@ export function ProjectEditDialog({
             type="button"
             variant="outline"
             onClick={handleClose}
-            disabled={updateProject.isPending}
+            disabled={createProject.isPending}
           >
             {t("cancel")}
           </Button>
-          <Button type="submit" disabled={updateProject.isPending}>
-            {updateProject.isPending ? t("updating") : t("update")}
+          <Button type="submit" disabled={createProject.isPending}>
+            {createProject.isPending ? t("creating") : t("create")}
           </Button>
         </div>
       </form>

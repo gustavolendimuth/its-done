@@ -2,10 +2,10 @@ import { jest } from "@jest/globals";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { ProjectCreateDialog } from "../project-create-dialog";
+import { ProjectCreateDialog } from "./project-create-dialog";
 
 import type { Client } from "@/services/clients";
-import type { Project, CreateProjectData } from "@/services/projects";
+import type { Project, CreateProjectData } from "./projects.service";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -39,7 +39,7 @@ const mockCreateProject = jest.fn(
   }
 );
 
-jest.mock("@/services/projects", () => ({
+jest.mock("./projects.service", () => ({
   useCreateProject: () => ({
     mutateAsync: mockCreateProject,
     isPending: false,
@@ -246,7 +246,7 @@ describe("ProjectCreateDialog", () => {
     ).not.toBeDisabled();
 
     // Mock pending state
-    jest.mock("@/services/projects", () => ({
+    jest.mock("./projects.service", () => ({
       useCreateProject: () => ({
         mutateAsync: mockCreateProject,
         isPending: true,
