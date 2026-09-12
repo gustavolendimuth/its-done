@@ -20,6 +20,18 @@ export class WorkHoursService {
       throw new BadRequestException('User ID is required');
     }
 
+    if (createWorkHourDto.projectId) {
+      const project = await this.prisma.project.findUnique({
+        where: { id: createWorkHourDto.projectId },
+      });
+
+      if (!project || project.clientId !== createWorkHourDto.clientId) {
+        throw new BadRequestException(
+          'Project does not belong to the selected client',
+        );
+      }
+    }
+
     const workHour = await this.prisma.workHour.create({
       data: {
         date: createWorkHourDto.date,

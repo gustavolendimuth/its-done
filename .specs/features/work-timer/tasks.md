@@ -132,6 +132,8 @@ T24
 
 **Commit**: `fix(work-hours): reject project that does not belong to selected client`
 
+**Status**: ✅ Done — 3 new tests added and passing (`work-hours.service.spec.ts`). `pnpm test` gate has 2 pre-existing unrelated failing suites (`app.controller.spec.ts`, `invoices.controller.spec.ts` — DI-config issues, confirmed present before this task via stash comparison); no new failures introduced.
+
 ---
 
 ### T3: `WorkSessionsModule` scaffold + DTOs
