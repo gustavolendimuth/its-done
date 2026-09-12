@@ -6,8 +6,6 @@ import { useState, useRef, useEffect } from "react";
 
 
 
-import { AddressForm } from "@/components/addresses/address-form";
-import { EditAddressForm } from "@/components/addresses/edit-address-form";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -21,6 +19,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { AddressForm } from "@/features/clients/components/addresses/address-form";
+import { EditAddressForm } from "@/features/clients/components/addresses/edit-address-form";
 import { cn } from "@/lib/utils";
 import { Address } from "@/services/addresses";
 
