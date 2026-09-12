@@ -652,6 +652,8 @@ T24
 
 **Commit**: `feat(work-timer): add service worker for push notification actions`
 
+**Status**: ✅ Done — `node --check apps/frontend/public/sw.js` confirms valid syntax; `pnpm build` (root) unaffected (static file under `public/`, not part of the compile graph). Real design decision beyond the task's literal text, needed to make it actually work: the backend's push payload (`WorkSessionSchedulerService`, already committed in T13) only carries `{sessionId, actionToken}` — no API base URL, since the backend can't know what origin the browser will call back on, and the two run on different origins in this project (CORS is configured precisely because of that). This worker persists the API base URL in its own small IndexedDB store (raw `indexedDB`, no `idb` lib, keeping with design.md's "Service Worker puro" decision) via a `postMessage({type:"SET_API_URL", apiUrl})` contract that `use-push-subscription.ts` (T22, next task) sends right after registering — durable storage is required here (not a module variable) because a push can wake this worker long after the app was closed, with no page left to ask again. Full interactive UAT (permission grant, simulated push, clicking each action) is deferred to right after T22/T23 land, since nothing calls `navigator.serviceWorker.register()` yet at this point in the batch — there'd be nothing for Playwright to exercise. Documented as a batch-level note, not a blocker for this task's own (build-only) gate.
+
 ---
 
 ### T22: `use-push-subscription.ts` hook
