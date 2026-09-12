@@ -186,6 +186,8 @@ T24
 
 **Commit**: `feat(work-sessions): implement event application state machine`
 
+**Status**: ✅ Done — 11 new tests passing. `pnpm test` gate has the same 2 pre-existing unrelated failures noted in T2; no new failures.
+
 ---
 
 ### T5: `WorkSessionsService.applyEvents()` — conflict resolution on `start`
