@@ -520,6 +520,8 @@ T24
 
 **Commit**: `feat(work-timer): implement offline sync loop`
 
+**Status**: ✅ Done — 10 new tests passing (`work-timer-sync.test.ts`, scoped run: `pnpm test:ci -- work-timer-sync`). `../axios` and `../work-timer-db` fully mocked (both already covered independently). The discard callback fires only when `discarded.sessionId` matches this device's pre-sync local session id, per design.md's "avisando o dispositivo perdedor" — a device that WON a conflict also gets a `discarded` field in its response (naming the pre-existing session it displaced) but must not show a "you lost" toast, covered by a dedicated negative test. `startSyncLoop`'s `online`-event + periodic-interval + cleanup behavior also covered (traces to spec.md WKT-09 AC3), even though the task's literal "Done when" bullets focus on `syncNow`. Full-suite baseline unchanged (`pnpm test:ci`: 33 failed / 9 passed suites, 226 failed / 121 passed tests — same 226 pre-existing failures, +10 new passing).
+
 ---
 
 ### T17: `work-sessions.ts` service (React hooks)
