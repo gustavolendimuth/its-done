@@ -1,4 +1,11 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { WorkSessionsService } from './work-sessions.service';
 import { SyncRequestDto } from './dto/sync-request.dto';
@@ -31,5 +38,14 @@ export class WorkSessionsController {
       }
       throw error;
     }
+  }
+
+  @Get('active')
+  @UseGuards(JwtAuthGuard)
+  async active(@Request() req) {
+    const session = await this.workSessionsService.getActiveSession(
+      req.user.id,
+    );
+    return { session };
   }
 }

@@ -268,6 +268,8 @@ T24
 
 **Commit**: `feat(work-sessions): add GET /work-sessions/active endpoint`
 
+**Status**: ✅ Done — 2 new e2e tests passing; `pnpm test:e2e` fully green (8/8).
+
 ---
 
 ### T8: `ActionTokenService`
