@@ -133,9 +133,45 @@ export class WorkSessionsService {
       return;
     }
 
-    // Conflict resolution between competing active sessions for the same
-    // user is implemented in a follow-up task (single-active-session rule).
-    return;
+    if (existing.id === sessionId) {
+      // Same session already active locally (e.g. a resent start) — no-op.
+      return;
+    }
+
+    // Single-active-session-per-user conflict: the session with the older
+    // startedAt wins, the other is discarded — even retroactively, if the
+    // later-started session had already become authoritative.
+    if (startedAt.getTime() < existing.startedAt.getTime()) {
+      await this.prisma.workSession.update({
+        where: { id: existing.id },
+        data: { status: WorkSessionStatus.DISCARDED },
+      });
+      await this.prisma.workSession.create({
+        data: {
+          id: sessionId,
+          userId,
+          status: WorkSessionStatus.RUNNING,
+          startedAt,
+          currentSegmentStartedAt: startedAt,
+          accumulatedSeconds: 0,
+        },
+      });
+      return {
+        discarded: {
+          sessionId: existing.id,
+          reason:
+            'conflict: an earlier-started session from another device takes precedence',
+        },
+      };
+    }
+
+    return {
+      discarded: {
+        sessionId,
+        reason:
+          'conflict: an earlier-started session already exists for this user',
+      },
+    };
   }
 
   private async applyConfirm(sessionId: string, clientTimestamp: Date) {

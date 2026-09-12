@@ -214,6 +214,8 @@ T24
 
 **Commit**: `feat(work-sessions): resolve single-active-session conflicts by startedAt`
 
+**Status**: ✅ Done — 4 new tests passing (15 total in file). Same 2 pre-existing unrelated `pnpm test` failures as T2/T4; no new failures.
+
 ---
 
 ### T6: `POST /work-sessions/sync` endpoint

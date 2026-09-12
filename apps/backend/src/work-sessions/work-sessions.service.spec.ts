@@ -342,3 +342,149 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
     );
   });
 });
+
+describe('WorkSessionsService.applyEvents() - single-active-session conflict on start', () => {
+  let service: WorkSessionsService;
+  const otherUserId = userId;
+  const incomingSessionId = 'session-incoming';
+  const existingSessionId = 'session-existing';
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.useFakeTimers();
+    jest.setSystemTime(NOW);
+    service = new WorkSessionsService(prismaMock);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('discards the later-startedAt incoming session, keeping the earlier one authoritative', async () => {
+    const existingStartedAt = new Date('2026-01-15T10:00:00.000Z');
+    const incomingClientTimestamp = '2026-01-15T10:10:00.000Z'; // 10 min later
+
+    prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
+    prismaMock.workSession.findFirst
+      .mockResolvedValueOnce({
+        id: existingSessionId,
+        userId: otherUserId,
+        status: 'RUNNING',
+        startedAt: existingStartedAt,
+      }) // existing-active check inside applyStart
+      .mockResolvedValueOnce({
+        id: existingSessionId,
+        status: 'RUNNING',
+      }); // final getActiveSession
+
+    const result = await service.applyEvents(otherUserId, [
+      {
+        eventId: 'c1',
+        sessionId: incomingSessionId,
+        type: SyncEventType.START,
+        clientTimestamp: incomingClientTimestamp,
+      },
+    ]);
+
+    expect(prismaMock.workSession.create).not.toHaveBeenCalled();
+    expect(prismaMock.workSession.update).not.toHaveBeenCalled();
+    expect(result.discarded).toEqual({
+      sessionId: incomingSessionId,
+      reason: expect.any(String),
+    });
+    expect(result.session).toEqual({
+      id: existingSessionId,
+      status: 'RUNNING',
+    });
+  });
+
+  it('retroactively discards an already-authoritative later session when an earlier-startedAt one arrives', async () => {
+    const existingStartedAt = new Date('2026-01-15T10:10:00.000Z');
+    const incomingClientTimestamp = '2026-01-15T10:00:00.000Z'; // earlier than existing
+
+    prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
+    prismaMock.workSession.findFirst
+      .mockResolvedValueOnce({
+        id: existingSessionId,
+        userId: otherUserId,
+        status: 'RUNNING',
+        startedAt: existingStartedAt,
+      }) // existing-active check inside applyStart
+      .mockResolvedValueOnce({
+        id: incomingSessionId,
+        status: 'RUNNING',
+      }); // final getActiveSession
+
+    const result = await service.applyEvents(otherUserId, [
+      {
+        eventId: 'c2',
+        sessionId: incomingSessionId,
+        type: SyncEventType.START,
+        clientTimestamp: incomingClientTimestamp,
+      },
+    ]);
+
+    expect(prismaMock.workSession.update).toHaveBeenCalledWith({
+      where: { id: existingSessionId },
+      data: { status: 'DISCARDED' },
+    });
+    expect(prismaMock.workSession.create).toHaveBeenCalledWith({
+      data: {
+        id: incomingSessionId,
+        userId: otherUserId,
+        status: 'RUNNING',
+        startedAt: new Date(incomingClientTimestamp),
+        currentSegmentStartedAt: new Date(incomingClientTimestamp),
+        accumulatedSeconds: 0,
+      },
+    });
+    expect(result.discarded).toEqual({
+      sessionId: existingSessionId,
+      reason: expect.any(String),
+    });
+  });
+
+  it('creates the session directly when no active session exists (no-conflict path unaffected)', async () => {
+    prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
+    prismaMock.workSession.findFirst
+      .mockResolvedValueOnce(null) // no existing active session
+      .mockResolvedValueOnce({ id: incomingSessionId, status: 'RUNNING' });
+
+    const result = await service.applyEvents(otherUserId, [
+      {
+        eventId: 'c3',
+        sessionId: incomingSessionId,
+        type: SyncEventType.START,
+        clientTimestamp: '2026-01-15T11:00:00.000Z',
+      },
+    ]);
+
+    expect(prismaMock.workSession.create).toHaveBeenCalled();
+    expect(result.discarded).toBeUndefined();
+  });
+
+  it('is a no-op when the active session already has the same sessionId (same-session, no conflict)', async () => {
+    prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
+    prismaMock.workSession.findFirst
+      .mockResolvedValueOnce({
+        id: incomingSessionId,
+        userId: otherUserId,
+        status: 'RUNNING',
+        startedAt: new Date('2026-01-15T10:00:00.000Z'),
+      })
+      .mockResolvedValueOnce({ id: incomingSessionId, status: 'RUNNING' });
+
+    const result = await service.applyEvents(otherUserId, [
+      {
+        eventId: 'c4',
+        sessionId: incomingSessionId,
+        type: SyncEventType.START,
+        clientTimestamp: '2026-01-15T10:05:00.000Z',
+      },
+    ]);
+
+    expect(prismaMock.workSession.create).not.toHaveBeenCalled();
+    expect(prismaMock.workSession.update).not.toHaveBeenCalled();
+    expect(result.discarded).toBeUndefined();
+  });
+});
