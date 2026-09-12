@@ -11,6 +11,7 @@ import { hydrateFromServer, startSyncLoop } from "@/lib/work-timer-sync";
 import { useWorkTimerEngine } from "@/services/work-sessions";
 
 import { WorkSessionFinishForm } from "./work-session-finish-form";
+import { WorkSessionStartForm } from "./work-session-start-form";
 
 // Mirrors the 12h visual-alert threshold from spec.md P2 "Aviso visual de
 // sessão muito longa" (WKT-07) — a display-only nudge, never auto-pauses.
@@ -55,6 +56,10 @@ export function WorkTimerWidget() {
     useWorkTimerEngine();
   const isOnline = useOnlineStatus();
   const { permission, subscribe } = usePushSubscription();
+  // WKT-10 "preencher detalhes antes de iniciar" — an idle-only UI toggle,
+  // not engine state: once start() succeeds the engine moves to RUNNING and
+  // this form simply stops being relevant (no need to reset it back).
+  const [showStartForm, setShowStartForm] = useState(false);
 
   // Composition root for cross-device sync (WKT-03): on mount, pick up an
   // authoritative session from the server if this device has none locally
@@ -70,6 +75,7 @@ export function WorkTimerWidget() {
     return <WorkSessionFinishForm session={session} onSuccess={() => {}} />;
   }
 
+  const isIdle = status === "IDLE";
   const isRunning = status === "RUNNING";
   const isPaused = status === "PAUSED";
   const bannerDue = isRunning && session?.lastPromptAt != null;
@@ -81,12 +87,23 @@ export function WorkTimerWidget() {
   // task's own "not repeated on subsequent starts" requirement. The browser
   // itself is the source of truth for "already decided" via
   // Notification.permission, so no extra flag needs to be persisted here.
-  const handleStart = () => {
+  // Shared by the plain "Iniciar" button and the "start with details" form
+  // (WKT-10), so both paths trigger the same one-time push prompt.
+  const handleStart = (details?: Parameters<typeof start>[0]) => {
     if (permission === "default") {
       void subscribe();
     }
-    void start();
+    void start(details);
   };
+
+  if (isIdle && showStartForm) {
+    return (
+      <WorkSessionStartForm
+        onCancel={() => setShowStartForm(false)}
+        onStart={handleStart}
+      />
+    );
+  }
 
   return (
     <div
@@ -110,12 +127,20 @@ export function WorkTimerWidget() {
           </span>
         )}
 
-        {status === "IDLE" && (
+        {isIdle && (
           <div data-testid="work-timer-idle" className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-green-600 dark:text-green-400" />
-            <Button size="sm" onClick={handleStart}>
+            <Button size="sm" onClick={() => handleStart()}>
               <Play className="mr-1.5 h-3.5 w-3.5" />
               {t("start")}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              data-testid="work-timer-start-with-details"
+              onClick={() => setShowStartForm(true)}
+            >
+              {t("startWithDetails")}
             </Button>
           </div>
         )}

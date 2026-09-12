@@ -803,6 +803,7 @@
   },
   "WorkTimerWidget": {
     "start": "Iniciar",
+    "startWithDetails": "Iniciar com detalhes",
     "stop": "Parar",
     "paused": "Pausado",
     "resume": "Continuar",

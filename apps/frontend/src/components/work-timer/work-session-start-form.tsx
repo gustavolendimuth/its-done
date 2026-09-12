@@ -12,11 +12,17 @@ import { ClientCombobox } from "@/components/ui/client-combobox";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { start } from "@/lib/work-timer-engine";
 import { useClients } from "@/services/clients";
+
+import type { StartDetails } from "@/lib/work-timer-engine";
 
 export interface WorkSessionStartFormProps {
   onCancel: () => void;
+  // Delegated to the caller (WorkTimerWidget) rather than calling
+  // work-timer-engine's start() directly, so the widget's one-time push
+  // permission prompt (WKT-04 AC1) fires for this path too, exactly like
+  // the plain "Iniciar" button.
+  onStart: (details: StartDetails) => void | Promise<void>;
 }
 
 type TranslateFn = (key: string) => string;
@@ -55,7 +61,10 @@ function useOnlineStatus(): boolean {
 // "Preencher detalhes antes de iniciar", WKT-10). Like the finish form, this
 // isn't local-first: loading client/project options needs a connection —
 // only the timer itself (start/count/stop) is local-first.
-export function WorkSessionStartForm({ onCancel }: WorkSessionStartFormProps) {
+export function WorkSessionStartForm({
+  onCancel,
+  onStart,
+}: WorkSessionStartFormProps) {
   const t = useTranslations("WorkSessionStartForm");
   const isOnline = useOnlineStatus();
   const { data: clients = [] } = useClients();
@@ -74,7 +83,7 @@ export function WorkSessionStartForm({ onCancel }: WorkSessionStartFormProps) {
   const selectedClientId = watch("clientId");
 
   const onSubmit = async (data: StartFormData) => {
-    await start({
+    await onStart({
       clientId: data.clientId,
       projectId: data.projectId || undefined,
       description: data.description,

@@ -4,16 +4,12 @@ import { WorkSessionStartForm } from "../work-session-start-form";
 
 import type { Client } from "@/services/clients";
 
-const mockStart = jest.fn();
+const mockOnStart = jest.fn();
 
 // Mirrors the project's established next-intl test pattern (see
 // project-edit-dialog.test.tsx): the mock returns the raw key.
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
-}));
-
-jest.mock("@/lib/work-timer-engine", () => ({
-  start: (...args: unknown[]) => mockStart(...args),
 }));
 
 const mockClients: Client[] = [
@@ -87,7 +83,7 @@ describe("WorkSessionStartForm", () => {
   });
 
   it("blocks submit and shows the missing-client message when description is filled but client is empty", async () => {
-    render(<WorkSessionStartForm onCancel={jest.fn()} />);
+    render(<WorkSessionStartForm onCancel={jest.fn()} onStart={mockOnStart} />);
 
     fireEvent.change(screen.getByPlaceholderText("descriptionPlaceholder"), {
       target: { value: "About to work on the landing page" },
@@ -97,11 +93,11 @@ describe("WorkSessionStartForm", () => {
     await waitFor(() => {
       expect(screen.getByText("clientRequired")).toBeInTheDocument();
     });
-    expect(mockStart).not.toHaveBeenCalled();
+    expect(mockOnStart).not.toHaveBeenCalled();
   });
 
-  it("calls engine.start() with the filled details on a valid submit", async () => {
-    render(<WorkSessionStartForm onCancel={jest.fn()} />);
+  it("calls onStart with the filled details on a valid submit", async () => {
+    render(<WorkSessionStartForm onCancel={jest.fn()} onStart={mockOnStart} />);
 
     fireEvent.change(screen.getByTestId("client-combobox"), {
       target: { value: "client-1" },
@@ -115,7 +111,7 @@ describe("WorkSessionStartForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "start" }));
 
     await waitFor(() => {
-      expect(mockStart).toHaveBeenCalledWith({
+      expect(mockOnStart).toHaveBeenCalledWith({
         clientId: "client-1",
         projectId: "project-1",
         description: "About to work on the landing page",
@@ -125,12 +121,12 @@ describe("WorkSessionStartForm", () => {
 
   it("calls onCancel without starting a session when cancel is clicked", () => {
     const onCancel = jest.fn();
-    render(<WorkSessionStartForm onCancel={onCancel} />);
+    render(<WorkSessionStartForm onCancel={onCancel} onStart={mockOnStart} />);
 
     fireEvent.click(screen.getByRole("button", { name: "cancel" }));
 
     expect(onCancel).toHaveBeenCalledTimes(1);
-    expect(mockStart).not.toHaveBeenCalled();
+    expect(mockOnStart).not.toHaveBeenCalled();
   });
 
   it("shows an offline placeholder with a cancel button instead of the form when offline", () => {
@@ -140,7 +136,7 @@ describe("WorkSessionStartForm", () => {
     });
     const onCancel = jest.fn();
 
-    render(<WorkSessionStartForm onCancel={onCancel} />);
+    render(<WorkSessionStartForm onCancel={onCancel} onStart={mockOnStart} />);
 
     expect(
       screen.getByTestId("work-session-start-form-offline")

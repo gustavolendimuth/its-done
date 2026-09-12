@@ -46,6 +46,33 @@ jest.mock("../work-session-finish-form", () => ({
   ),
 }));
 
+// Same rationale as the finish-form mock above — WorkSessionStartForm has
+// its own dedicated test file; here only the widget's toggle/wiring matters.
+jest.mock("../work-session-start-form", () => ({
+  WorkSessionStartForm: ({
+    onCancel,
+    onStart,
+  }: {
+    onCancel: () => void;
+    onStart: (details: {
+      clientId?: string;
+      projectId?: string;
+      description?: string;
+    }) => void;
+  }) => (
+    <div data-testid="work-session-start-form-stub">
+      <button onClick={onCancel}>stub-cancel</button>
+      <button
+        onClick={() =>
+          onStart({ clientId: "client-1", description: "Planned ahead" })
+        }
+      >
+        stub-start
+      </button>
+    </div>
+  ),
+}));
+
 function baseSession(
   overrides: Partial<LocalWorkSession> = {}
 ): LocalWorkSession {
@@ -106,6 +133,50 @@ describe("WorkTimerWidget", () => {
     expect(screen.getByTestId("work-timer-idle")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "start" }));
     expect(mockStart).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the start-with-details form when its button is clicked, and hides the plain idle buttons (WKT-10)", () => {
+    mockEngine({ status: "IDLE", session: null });
+
+    render(<WorkTimerWidget />);
+    fireEvent.click(
+      screen.getByTestId("work-timer-start-with-details")
+    );
+
+    expect(screen.getByTestId("work-session-start-form-stub")).toBeInTheDocument();
+    expect(screen.queryByTestId("work-timer-idle")).not.toBeInTheDocument();
+  });
+
+  it("goes back to the plain idle buttons when the start-with-details form is cancelled", () => {
+    mockEngine({ status: "IDLE", session: null });
+
+    render(<WorkTimerWidget />);
+    fireEvent.click(screen.getByTestId("work-timer-start-with-details"));
+    fireEvent.click(screen.getByText("stub-cancel"));
+
+    expect(screen.getByTestId("work-timer-idle")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("work-session-start-form-stub")
+    ).not.toBeInTheDocument();
+    expect(mockStart).not.toHaveBeenCalled();
+  });
+
+  it("calls start() with the details and triggers the same push prompt as the plain start, when the start-with-details form submits", () => {
+    mockUsePushSubscription.mockReturnValue({
+      permission: "default",
+      subscribe: mockSubscribe,
+    });
+    mockEngine({ status: "IDLE", session: null });
+
+    render(<WorkTimerWidget />);
+    fireEvent.click(screen.getByTestId("work-timer-start-with-details"));
+    fireEvent.click(screen.getByText("stub-start"));
+
+    expect(mockSubscribe).toHaveBeenCalledTimes(1);
+    expect(mockStart).toHaveBeenCalledWith({
+      clientId: "client-1",
+      description: "Planned ahead",
+    });
   });
 
   it("renders the running state with the elapsed counter and a stop button that calls stop()", () => {

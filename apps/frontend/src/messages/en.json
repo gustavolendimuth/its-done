@@ -805,6 +805,7 @@
   },
   "WorkTimerWidget": {
     "start": "Start",
+    "startWithDetails": "Start with details",
     "stop": "Stop",
     "paused": "Paused",
     "resume": "Resume",
