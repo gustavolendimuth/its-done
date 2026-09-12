@@ -239,6 +239,9 @@ RAILWAY_VOLUME_PATH="/app/data"  # Production storage
 AWS_ACCESS_KEY_ID="..."      # S3 fallback (optional)
 AWS_SECRET_ACCESS_KEY="..."
 AWS_S3_BUCKET="..."
+VAPID_PUBLIC_KEY="..."       # Web Push (work timer hourly prompt)
+VAPID_PRIVATE_KEY="..."      # Web Push, keep secret
+VAPID_SUBJECT="mailto:you@example.com"  # Web Push contact email
 ```
 
 ### Frontend (.env.local)
@@ -248,6 +251,7 @@ NEXTAUTH_SECRET="..."
 API_URL="http://localhost:3002"
 GOOGLE_CLIENT_ID="..."       # Must match backend
 GOOGLE_CLIENT_SECRET="..."
+NEXT_PUBLIC_VAPID_PUBLIC_KEY="..."  # Must match backend's VAPID_PUBLIC_KEY
 ```
 
 ## Deployment

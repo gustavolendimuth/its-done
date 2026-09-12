@@ -729,6 +729,8 @@ T24
 
 **Commit**: `docs: document work-timer VAPID environment variables`
 
+**Status**: ✅ Done — added `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT` to the Backend `.env` block and `NEXT_PUBLIC_VAPID_PUBLIC_KEY` to the Frontend `.env.local` block in the existing `## Environment Variables` section of the root `CLAUDE.md`, matching the file's existing terse inline-comment style (no new section, per the project's one-topic-one-file rule). Reviewed with the `unslop` skill per the user's global instruction; no AI-writing patterns found beyond one redundant word trimmed from an inline comment. Gate: none (doc-only), per this task's own Gate field.
+
 ---
 
 ## Phase Execution Map
