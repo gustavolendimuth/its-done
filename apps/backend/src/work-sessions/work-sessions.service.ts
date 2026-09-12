@@ -29,13 +29,15 @@ function clamp(ts: Date, lower: Date, upper: Date): Date {
   return ts;
 }
 
-// Rounds a duration to the nearest 15-minute increment (ties round up),
-// per spec.md's "Cálculo das horas" rule. A session with any real recorded
-// time never rounds down to 0 — CreateWorkHourDto enforces hours >= 0.1, so
-// the minimum billable increment (15min = 0.25h) is the floor instead.
+// Always rounds a duration UP to the next 15-minute increment (never to the
+// nearest one), per spec.md's "Cálculo das horas" rule. An exact multiple of
+// 15min is left unchanged. A session with any real recorded time never
+// rounds down to 0 — CreateWorkHourDto enforces hours >= 0.1, so the minimum
+// billable increment (15min = 0.25h) is the floor (naturally implied by
+// rounding up, kept explicit as a safety net for totalSeconds === 0).
 function roundHoursToQuarter(totalSeconds: number): number {
   const minutes = totalSeconds / 60;
-  const roundedMinutes = Math.round(minutes / 15) * 15;
+  const roundedMinutes = Math.ceil(minutes / 15) * 15;
   if (totalSeconds > 0 && roundedMinutes === 0) return 0.25;
   return roundedMinutes / 60;
 }

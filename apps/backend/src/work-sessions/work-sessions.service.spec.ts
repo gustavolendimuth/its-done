@@ -352,7 +352,7 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
     expect(prismaMock.workSessionSyncedEvent.create).toHaveBeenCalledTimes(1); // unchanged
   });
 
-  it('rounds 67 minutes down to 1 hour (60min) on stop', async () => {
+  it('rounds 67 minutes up to 1.25 hours (75min) on stop — always rounds up, never to nearest', async () => {
     const segmentStart = new Date('2026-01-15T10:53:00.000Z'); // 67 min before now
     prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
     prismaMock.workSession.findUnique.mockResolvedValueOnce({
@@ -367,6 +367,32 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
     await service.applyEvents(userId, [
       {
         eventId: 'e9',
+        sessionId,
+        type: SyncEventType.STOP,
+        clientTimestamp: NOW.toISOString(),
+      },
+    ]);
+
+    expect(prismaMock.workSession.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ hours: 1.25 }) }),
+    );
+  });
+
+  it('leaves an exact 15-minute multiple (60min) unchanged at 1 hour on stop', async () => {
+    const segmentStart = new Date('2026-01-15T11:00:00.000Z'); // exactly 60 min before now
+    prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
+    prismaMock.workSession.findUnique.mockResolvedValueOnce({
+      id: sessionId,
+      status: 'RUNNING',
+      startedAt: segmentStart,
+      currentSegmentStartedAt: segmentStart,
+      accumulatedSeconds: 0,
+    });
+    prismaMock.workSession.findFirst.mockResolvedValueOnce(null);
+
+    await service.applyEvents(userId, [
+      {
+        eventId: 'e9b',
         sessionId,
         type: SyncEventType.STOP,
         clientTimestamp: NOW.toISOString(),

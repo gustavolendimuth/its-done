@@ -86,7 +86,7 @@ graph TD
   - `start`: se não há sessão ativa (RUNNING/PAUSED/STOPPING) do usuário → cria com `id` = `sessionId` do evento (gerado no cliente), `startedAt = currentSegmentStartedAt = clientTimestamp`, status RUNNING. Se já existe uma ativa de **outra** sessão: compara `startedAt` — a de `startedAt` maior é descartada (DISCARDED), a de `startedAt` menor vira/continua autoritativa. Isso pode significar descartar retroativamente uma sessão já em uso por outro dispositivo (ver Risco).
   - `confirm`: `lastConfirmedAt = clientTimestamp`, `lastPromptAt = null`; se PAUSED → `status = RUNNING`, `currentSegmentStartedAt = clientTimestamp`
   - `pause`: se RUNNING → `accumulatedSeconds += clientTimestamp - currentSegmentStartedAt`, `currentSegmentStartedAt = null`, `status = PAUSED`
-  - `stop`: mesmo congelamento do `pause`, porém `status = STOPPING` e `hours` calculado e arredondado (múltiplo de 15min)
+  - `stop`: mesmo congelamento do `pause`, porém `status = STOPPING` e `hours` calculado e arredondado **para cima** (próximo múltiplo de 15min — revisado após a primeira entrega, era "mais próximo")
   - `discard`: `status = DISCARDED`
 - **Dependencies**: `PrismaService`
 - **Reuses**: nada existente

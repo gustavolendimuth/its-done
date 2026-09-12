@@ -53,12 +53,13 @@ function secondsBetween(fromIso: string, toIso: string): number {
 }
 
 // Mirrors backend's roundHoursToQuarter
-// (apps/backend/src/work-sessions/work-sessions.service.ts): rounds to the
-// nearest 15-minute increment (ties round up), floored to the 0.25h minimum
-// billable increment for any session with real recorded time (never 0).
+// (apps/backend/src/work-sessions/work-sessions.service.ts): always rounds UP
+// to the next 15-minute increment (never to the nearest one; an exact
+// multiple is left unchanged), floored to the 0.25h minimum billable
+// increment for any session with real recorded time (never 0).
 function roundHoursToQuarter(totalSeconds: number): number {
   const minutes = totalSeconds / 60;
-  const roundedMinutes = Math.round(minutes / 15) * 15;
+  const roundedMinutes = Math.ceil(minutes / 15) * 15;
   if (totalSeconds > 0 && roundedMinutes === 0) return 0.25;
   return roundedMinutes / 60;
 }

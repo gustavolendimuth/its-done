@@ -238,9 +238,9 @@ describe("work-timer-engine", () => {
     unsubscribe();
   });
 
-  it("stop() rounds the duration to the nearest 15min and transitions to STOPPING", async () => {
+  it("stop() always rounds the duration up to the next 15min and transitions to STOPPING", async () => {
     await engine.start();
-    // 68 minutes elapsed -> rounds to 75min (1.25h), per spec.md's rounding rule.
+    // 68 minutes elapsed -> rounds UP to 75min (1.25h), per spec.md's rounding rule.
     jest.setSystemTime(START_TIME + 68 * 60 * 1000);
 
     await engine.stop();
@@ -250,6 +250,17 @@ describe("work-timer-engine", () => {
     );
     expect(dbMock.enqueueEvent).toHaveBeenCalledWith(
       expect.objectContaining({ type: "stop" })
+    );
+  });
+
+  it("stop() leaves an exact 15-minute multiple (60min) unchanged at 1 hour", async () => {
+    await engine.start();
+    jest.setSystemTime(START_TIME + 60 * 60 * 1000);
+
+    await engine.stop();
+
+    expect(dbMock.setActiveSession).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "STOPPING", hours: 1 })
     );
   });
 

@@ -159,7 +159,7 @@ Hoje o usuário só registra horas manualmente, digitando quanto trabalhou depoi
 
 **Acceptance Criteria**:
 
-1. WHEN o usuário clica em "Parar" (manual, ou via ação "Não, encerrar" da notificação) THEN o sistema SHALL congelar o tempo imediatamente (status STOPPING, mesmo offline) e, assim que houver conexão, SHALL exibir um formulário com a duração calculada (soma dos intervalos RUNNING, excluindo tempo PAUSED) arredondada para o múltiplo de 15 minutos mais próximo — o formulário em si exige conexão pra carregar as opções de cliente/projeto
+1. WHEN o usuário clica em "Parar" (manual, ou via ação "Não, encerrar" da notificação) THEN o sistema SHALL congelar o tempo imediatamente (status STOPPING, mesmo offline) e, assim que houver conexão, SHALL exibir um formulário com a duração calculada (soma dos intervalos RUNNING, excluindo tempo PAUSED) arredondada **para cima**, para o próximo múltiplo de 15 minutos (ex.: 1min vira 15min; 61min vira 75min; 60min exatos permanece 60min) — o formulário em si exige conexão pra carregar as opções de cliente/projeto
 2. WHEN o usuário preenche cliente (obrigatório) e descrição (obrigatória), projeto (opcional), e confirma THEN o sistema SHALL criar um `WorkHour` com `hours` = duração arredondada, `clientId`, `projectId` (se informado) e `description`, e SHALL marcar a sessão como ENDED
 4. WHEN o usuário tenta confirmar o formulário sem cliente ou sem descrição THEN o sistema SHALL bloquear o envio e SHALL indicar os campos obrigatórios faltantes
 5. WHEN o usuário opta por descartar a sessão (antes de confirmar o formulário) THEN o sistema SHALL pedir confirmação explícita e, se confirmado, SHALL marcar a sessão como DISCARDED sem criar nenhum `WorkHour`

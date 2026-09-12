@@ -49,7 +49,7 @@ Decisão revisada após identificar o caso de queda de conexão: o timer (iníci
 ### Cálculo das horas
 
 - O tempo pausado não conta. `hours` final é a soma dos intervalos em que a sessão esteve RUNNING.
-- Arredondamento: múltiplo de 15 minutos mais próximo (arredondamento matemático padrão — ex.: 67min → 60min/1h; 68min → 75min/1.25h; empate arredonda pra cima).
+- Arredondamento: **sempre para cima**, para o próximo múltiplo de 15 minutos (ex.: 1min → 15min/0.25h; 61min → 75min/1.25h; 60min exatos permanece 60min/1h). Decisão revisada pelo usuário após a primeira entrega — substitui a decisão original de "arredondamento matemático padrão" (mais próximo, empate pra cima).
 
 ### Formulário final (fim de sessão)
 
