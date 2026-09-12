@@ -238,6 +238,70 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
     });
   });
 
+  it('clamps a clientTimestamp before currentSegmentStartedAt to the segment start on pause (lower bound)', async () => {
+    const segmentStart = new Date('2026-01-15T11:00:00.000Z'); // 1h before now
+    const beforeSegmentStart = '2026-01-15T10:30:00.000Z'; // 30min before the segment even started (e.g. stale/misordered event)
+    prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
+    prismaMock.workSession.findUnique.mockResolvedValueOnce({
+      id: sessionId,
+      status: 'RUNNING',
+      startedAt: segmentStart,
+      currentSegmentStartedAt: segmentStart,
+      accumulatedSeconds: 100,
+    });
+    prismaMock.workSession.findFirst.mockResolvedValueOnce(null);
+
+    await service.applyEvents(userId, [
+      {
+        eventId: 'e9',
+        sessionId,
+        type: SyncEventType.PAUSE,
+        clientTimestamp: beforeSegmentStart,
+      },
+    ]);
+
+    // Clamped to the segment start (11:00), not the earlier 10:30 -> elapsed
+    // for this segment is 0s, so accumulatedSeconds is unchanged.
+    expect(prismaMock.workSession.update).toHaveBeenCalledWith({
+      where: { id: sessionId },
+      data: {
+        accumulatedSeconds: 100,
+        currentSegmentStartedAt: null,
+        status: 'PAUSED',
+      },
+    });
+  });
+
+  it('reconciles a multi-hour offline gap using the original clientTimestamp, not the sync time (WKT-09 AC3)', async () => {
+    const segmentStart = new Date('2026-01-15T07:00:00.000Z'); // 5h before now
+    const clientTimestamp = '2026-01-15T11:30:00.000Z'; // paused offline 4h30m after starting; only synced later
+    prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
+    prismaMock.workSession.findUnique.mockResolvedValueOnce({
+      id: sessionId,
+      status: 'RUNNING',
+      startedAt: segmentStart,
+      currentSegmentStartedAt: segmentStart,
+      accumulatedSeconds: 0,
+    });
+    prismaMock.workSession.findFirst.mockResolvedValueOnce(null);
+
+    await service.applyEvents(userId, [
+      { eventId: 'e10', sessionId, type: SyncEventType.PAUSE, clientTimestamp },
+    ]);
+
+    // Uses the original 4h30m-into-the-segment click time (within bounds, so
+    // not clamped), rather than NOW (12:00) or 0 — the time the device spent
+    // offline before this sync is neither paused away nor lost.
+    expect(prismaMock.workSession.update).toHaveBeenCalledWith({
+      where: { id: sessionId },
+      data: {
+        accumulatedSeconds: 4.5 * 60 * 60,
+        currentSegmentStartedAt: null,
+        status: 'PAUSED',
+      },
+    });
+  });
+
   it('rejects a start event with clientTimestamp more than 7 days in the past', async () => {
     const tooOld = new Date(
       NOW.getTime() - 8 * 24 * 60 * 60 * 1000,

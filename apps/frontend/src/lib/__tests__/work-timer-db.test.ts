@@ -120,4 +120,22 @@ describe("work-timer-db", () => {
     expect(await db.getActiveSession()).toBeNull();
     expect(await db.getPendingEvents()).toEqual([event]);
   });
+
+  it("persists the active session and outbox across a simulated app close/reopen (WKT-09 AC6)", async () => {
+    const before = await freshDbModule();
+    const session = makeSession({ status: "PAUSED" });
+    const event = makeEvent({ eventId: "event-reopen" });
+
+    await before.setActiveSession(session);
+    await before.enqueueEvent(event);
+
+    // Simulate closing and reopening the app: reset the JS module registry
+    // (a fresh module instance and a fresh `dbPromise`, exactly like a page
+    // reload discards the JS heap) WITHOUT touching the underlying
+    // IndexedDB storage — that's the part that's supposed to survive.
+    const after = await freshDbModule();
+
+    expect(await after.getActiveSession()).toEqual(session);
+    expect(await after.getPendingEvents()).toEqual([event]);
+  });
 });

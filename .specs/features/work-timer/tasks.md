@@ -868,6 +868,8 @@ No ❌ violations.
 **Tests**: unit
 **Gate**: quick (BE) + quick (FE)
 
+**Status**: ✅ Resolved — added 2 tests to `work-sessions.service.spec.ts` (lower-bound clamp on `pause`; a 4h30m multi-hour offline-gap reconciliation using the original `clientTimestamp`) and 1 test to `work-timer-db.test.ts` (write via one fresh module instance, `jest.resetModules()` to simulate a close/reopen, read via a second fresh instance against the same underlying `fake-indexeddb` storage). `cd apps/backend && pnpm test`: 41/43 passed (2 pre-existing unrelated failures, same as before); `cd apps/frontend && pnpm test:ci -- work-timer-db`: 6/6 passed (was 5).
+
 ### FIX3 (Major): Reload/reopen elapsed-time path untested
 
 **What**: Add a `work-timer-engine` test that resets modules, seeds `work-timer-db` with a session whose `currentSegmentStartedAt` is e.g. 2 hours in the past, re-imports the engine, and asserts the first `getElapsedSeconds()` read reflects the full gap (no reset to zero).
