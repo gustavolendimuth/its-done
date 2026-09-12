@@ -491,6 +491,8 @@ T24
 
 **Commit**: `feat(work-timer): implement client-side timer state machine`
 
+**Status**: ✅ Done — 12 new tests passing (`work-timer-engine.test.ts`, scoped run: `pnpm test:ci -- work-timer-engine`). `work-timer-db.ts` mocked via `jest.doMock` + `jest.resetModules()` per test (already covered independently by T14). 60min/15min constants named `HOURLY_PROMPT_INTERVAL_MS`/`AUTO_PAUSE_GRACE_MS`, cross-referenced in a comment to `work-session-scheduler.service.ts` per design.md's risk mitigation. One test initially asserted an exact `lastPromptAt` ISO timestamp and was rewritten to assert the 60min boundary (no prompt just before, prompt just after) instead — the original exact-timestamp assertion was an artifact of how Jest's fake-timer `setSystemTime` reschedules a pending `setInterval` (adds one full tick), not a defect in the engine; the boundary-based version is strictly more meaningful (also proves no premature firing) and isn't tied to that fake-timer implementation detail. Full-suite baseline unchanged from T14 (`pnpm test:ci`: 33 failed / 8 passed suites, 226 failed / 111 passed tests — same 226 pre-existing failures, +12 new passing).
+
 ---
 
 ### T16: `work-timer-sync.ts` (sync loop)
