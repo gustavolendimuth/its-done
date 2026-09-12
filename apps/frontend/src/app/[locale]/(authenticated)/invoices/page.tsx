@@ -6,8 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
-import { CreateInvoiceForm } from "@/components/invoices/create-invoice-form";
-import { EditInvoiceForm } from "@/components/invoices/edit-invoice-form";
+import { CreateInvoiceForm } from "@/features/invoices/components/create-invoice-form";
+import { EditInvoiceForm } from "@/features/invoices/components/edit-invoice-form";
 import { InvoiceCard } from "@/features/invoices/components/invoice-card";
 import {
   InvoiceSearchFilters,

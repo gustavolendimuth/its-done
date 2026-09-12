@@ -21,7 +21,7 @@ jest.mock("sonner", () => ({
 }));
 
 // Mock components
-jest.mock("@/components/invoices/create-invoice-form", () => ({
+jest.mock("@/features/invoices/components/create-invoice-form", () => ({
   CreateInvoiceForm: ({ onSuccess }: { onSuccess: () => void }) => (
     <div data-testid="create-invoice-form">
       <button onClick={onSuccess}>Submit</button>
@@ -29,7 +29,7 @@ jest.mock("@/components/invoices/create-invoice-form", () => ({
   ),
 }));
 
-jest.mock("@/components/invoices/edit-invoice-form", () => ({
+jest.mock("@/features/invoices/components/edit-invoice-form", () => ({
   EditInvoiceForm: ({
     invoice,
     onSuccess,
