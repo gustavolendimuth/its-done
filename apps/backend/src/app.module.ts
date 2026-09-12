@@ -17,6 +17,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { InAppNotificationsModule } from './in-app-notifications/in-app-notifications.module';
 import { AdminModule } from './admin/admin.module';
+import { WorkSessionsModule } from './work-sessions/work-sessions.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AdminModule } from './admin/admin.module';
     NotificationsModule,
     InAppNotificationsModule,
     AdminModule,
+    WorkSessionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

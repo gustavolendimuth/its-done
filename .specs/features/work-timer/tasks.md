@@ -158,6 +158,8 @@ T24
 
 **Commit**: `feat(work-sessions): scaffold module and DTOs`
 
+**Status**: ✅ Done — `pnpm build` passes; new files clean under `eslint` (pre-existing lint debt elsewhere unaffected).
+
 ---
 
 ### T4: `WorkSessionsService.applyEvents()` — event transitions (no conflict yet)
