@@ -1,4 +1,4 @@
-import type { LocalWorkSession } from "../work-timer-db";
+import type { LocalWorkSession } from "./work-timer-db";
 
 const HOUR_MS = 60 * 60 * 1000;
 const GRACE_MS = 15 * 60 * 1000;
@@ -12,7 +12,7 @@ describe("work-timer-engine", () => {
     clearActiveSession: jest.Mock;
     enqueueEvent: jest.Mock;
   };
-  let engine: typeof import("../work-timer-engine");
+  let engine: typeof import("./work-timer-engine");
 
   beforeEach(() => {
     jest.resetModules();
@@ -26,9 +26,9 @@ describe("work-timer-engine", () => {
       enqueueEvent: jest.fn().mockResolvedValue(undefined),
     };
 
-    jest.doMock("../work-timer-db", () => dbMock);
+    jest.doMock("./work-timer-db", () => dbMock);
 
-    engine = require("../work-timer-engine");
+    engine = require("./work-timer-engine");
   });
 
   afterEach(() => {

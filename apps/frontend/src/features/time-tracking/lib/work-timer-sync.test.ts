@@ -1,11 +1,11 @@
-import type { SyncEvent, LocalWorkSession } from "../work-timer-db";
+import type { SyncEvent, LocalWorkSession } from "./work-timer-db";
 
-jest.mock("../axios", () => ({
+jest.mock("@/lib/axios", () => ({
   __esModule: true,
   default: { post: jest.fn(), get: jest.fn() },
 }));
 
-jest.mock("../work-timer-db", () => ({
+jest.mock("./work-timer-db", () => ({
   getPendingEvents: jest.fn(),
   ackEvents: jest.fn(),
   getActiveSession: jest.fn(),
@@ -13,14 +13,14 @@ jest.mock("../work-timer-db", () => ({
   clearActiveSession: jest.fn(),
 }));
 
-jest.mock("../work-timer-engine", () => ({
+jest.mock("./work-timer-engine", () => ({
   applyAuthoritativeSession: jest.fn(),
 }));
 
-import api from "../axios";
-import * as db from "../work-timer-db";
-import * as engine from "../work-timer-engine";
-import { syncNow, startSyncLoop, hydrateFromServer } from "../work-timer-sync";
+import api from "@/lib/axios";
+import * as db from "./work-timer-db";
+import * as engine from "./work-timer-engine";
+import { syncNow, startSyncLoop, hydrateFromServer } from "./work-timer-sync";
 
 const mockedApi = api as unknown as { post: jest.Mock; get: jest.Mock };
 const mockedDb = db as unknown as {

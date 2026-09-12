@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { WorkSessionFinishForm } from "../work-session-finish-form";
 
-import type { LocalWorkSession } from "@/lib/work-timer-db";
+import type { LocalWorkSession } from "@/features/time-tracking/lib/work-timer-db";
 import type { Client } from "@/services/clients";
 
 const mockMutateAsync = jest.fn();
@@ -20,7 +20,7 @@ jest.mock("next-intl", () => ({
       values ? `${key}:${JSON.stringify(values)}` : key,
 }));
 
-jest.mock("@/lib/work-timer-engine", () => ({
+jest.mock("@/features/time-tracking/lib/work-timer-engine", () => ({
   reset: (...args: unknown[]) => mockReset(...args),
 }));
 

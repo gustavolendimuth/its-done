@@ -2,7 +2,7 @@ import { screen, fireEvent, render } from "@testing-library/react";
 
 import { WorkTimerWidget } from "../work-timer-widget";
 
-import type { LocalWorkSession } from "@/lib/work-timer-db";
+import type { LocalWorkSession } from "@/features/time-tracking/lib/work-timer-db";
 
 const mockStart = jest.fn();
 const mockConfirm = jest.fn();
@@ -32,7 +32,7 @@ jest.mock("@/hooks/use-push-subscription", () => ({
   usePushSubscription: () => mockUsePushSubscription(),
 }));
 
-jest.mock("@/lib/work-timer-sync", () => ({
+jest.mock("@/features/time-tracking/lib/work-timer-sync", () => ({
   startSyncLoop: (...args: unknown[]) => mockStartSyncLoop(...args),
   hydrateFromServer: (...args: unknown[]) => mockHydrateFromServer(...args),
 }));

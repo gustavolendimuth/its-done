@@ -11,13 +11,13 @@ import "fake-indexeddb/auto";
 import type {
   LocalWorkSession,
   SyncEvent,
-} from "../work-timer-db";
+} from "./work-timer-db";
 
 const DB_NAME = "work-timer";
 
 async function freshDbModule() {
   jest.resetModules();
-  return import("../work-timer-db");
+  return import("./work-timer-db");
 }
 
 function deleteDb(): Promise<void> {
