@@ -11,29 +11,6 @@ jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-// Mock components
-jest.mock("@/features/clients/components/client-form", () => ({
-  ClientForm: ({ onSuccess }: { onSuccess: () => void }) => (
-    <div data-testid="client-form">
-      <button onClick={onSuccess}>Submit</button>
-    </div>
-  ),
-}));
-
-jest.mock("@/features/clients/components/client-card", () => ({
-  ClientCard: ({ client }: { client: Client }) => (
-    <div data-testid="client-card">
-      <p>Company: {client.company}</p>
-      <p>Name: {client.name}</p>
-      <p>Email: {client.email}</p>
-    </div>
-  ),
-}));
-
-jest.mock("@/features/clients/components/clients-big-stats", () => ({
-  ClientsBigStats: () => <div data-testid="clients-big-stats">Stats</div>,
-}));
-
 jest.mock("@/components/layout/page-container", () => ({
   PageContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="page-container">{children}</div>
@@ -92,12 +69,26 @@ const mockClients: Client[] = [
   },
 ];
 
-// Mock services
+// Mock the clients feature barrel (components + hooks), never an internal path
 jest.mock("@/features/clients", () => ({
+  ...jest.requireActual("@/features/clients"),
   useClients: jest.fn(() => ({
     data: mockClients,
     isLoading: false,
   })),
+  ClientForm: ({ onSuccess }: { onSuccess: () => void }) => (
+    <div data-testid="client-form">
+      <button onClick={onSuccess}>Submit</button>
+    </div>
+  ),
+  ClientCard: ({ client }: { client: Client }) => (
+    <div data-testid="client-card">
+      <p>Company: {client.company}</p>
+      <p>Name: {client.name}</p>
+      <p>Email: {client.email}</p>
+    </div>
+  ),
+  ClientsBigStats: () => <div data-testid="clients-big-stats">Stats</div>,
 }));
 
 describe("ClientsPage", () => {
