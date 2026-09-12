@@ -108,24 +108,22 @@ Located in `apps/backend/src/`:
 - `admin/` - Admin panel (first user by ID is auto-admin)
 
 ### Frontend Structure (Next.js App Router)
-Located in `apps/frontend/src/`:
-- `app/[locale]/` - Internationalized routes (pt-BR, en)
-  - `(authenticated)/` - Protected routes requiring login
-    - `dashboard/` - Internal dashboard with tabs (Recent Work, Invoices, Clients)
-    - `clients/` - Client management with search and share functionality
-    - `projects/` - Project management
-    - `work-hours/` - Time entry interface
-    - `invoices/` - Invoice management with search/filters
-    - `analytics/` - Advanced analytics
-    - `settings/` - User settings
-    - `admin/` - Admin panel for user management
-  - `client-dashboard/[clientId]/` - **Public** dashboard for clients to view their invoices
-- `components/` - Reusable components
-  - `ui/` - Base UI components (Radix UI + Shadcn)
-  - Feature-specific components (clients, invoices, work-hours, etc.)
-- `services/` - API client services
-- `hooks/` - Custom React hooks
-- `lib/` - Utility functions
+Located in `apps/frontend/src/`, organized **feature-based** (by business domain, not by technical type):
+
+- `app/[locale]/` - Internationalized routes (pt-BR, en). Route files are thin wrappers — they compose layout (`PageContainer`/`PageHeader`) and render the matching feature's main component; business logic lives in `features/`, not here.
+  - `(authenticated)/` - Protected routes requiring login: `dashboard/`, `clients/`, `projects/`, `work-hours/`, `invoices/`, `analytics/`, `settings/`, `admin/`
+  - `client-dashboard/[clientId]/` - **Public** dashboard for clients to view their invoices (renders the same component as the internal dashboard)
+- `features/<domain>/` - One folder per business domain: `auth`, `clients` (includes client addresses — Address belongs to Client, no own route), `projects`, `time-tracking` (work-hours entries + the local-first work-timer, merged since they're tightly coupled), `invoices`, `dashboard`, `analytics`, `settings`, `notifications`, `profile`, `admin`. Each domain owns its components, hooks, service(s) and types.
+  - **Adaptive internal structure**: a small domain (≤6 component files) keeps everything flat at the feature root; a larger domain (clients, time-tracking, invoices, analytics) gets a `components/` subfolder to avoid cluttering the root — hooks/services/types stay flat either way, since those are never numerous per domain.
+  - **Public API via barrel**: every feature exposes an `index.ts` re-exporting what's consumed from outside — code outside a feature imports only from `@/features/<domain>`, never from an internal file path.
+  - **README per domain**: every feature has a short `README.md` stating its responsibility, entry points, and any documented exception (e.g. a large file kept unsplit, or a component with no current consumer).
+  - **Co-located tests**: tests live next to the file they test (`Component.tsx` + `Component.test.tsx`), not in a separate `__tests__/` folder.
+- `components/` - Only what's genuinely shared across features:
+  - `ui/` - Design system (Radix UI + Shadcn wrappers)
+  - `layout/` - App shell (`PageHeader`, `PageContainer`, `MainLayout`, `Topbar`, `MobileNav`, `EmptyState`, the generic variants of `LoadingSkeleton`)
+- `services/` - Only cross-cutting or currently-unclaimed services remain here (e.g. `avatar.ts`/`gravatar.ts`/`network-status.ts` back the shared avatar UI; a handful of services — `backup`, `export`, `import`, `webhook*`, `system`, `logs`, `audit`, `sms`, `email`, `push`, `user-stats` — have no current UI consumer and are left in place rather than guessed into a feature or deleted). Domain-specific services live inside their feature instead.
+- `hooks/` - Only genuinely cross-cutting hooks (`use-toast`, `use-safe-hydration`, `use-avatar`, `use-push-subscription`)
+- `lib/` - Cross-cutting infra only (`axios.ts`, `utils.ts`); domain-specific logic that used to live here (e.g. the work-timer's local-first engine) now lives inside its feature (`features/time-tracking/lib/`)
 
 ### Database Schema (Prisma)
 Key models in `apps/backend/prisma/schema.prisma`:
@@ -316,8 +314,9 @@ NEXT_PUBLIC_VAPID_PUBLIC_KEY="..."  # Must match backend's VAPID_PUBLIC_KEY
 1. Create route in `app/[locale]/(authenticated)/your-page/page.tsx`
 2. Use PageHeader and PageContainer for layout consistency
 3. Add translations to `messages/en.json` and `messages/pt-BR.json`
-4. Create feature components in `components/your-feature/`
-5. Add navigation link in layout sidebar if needed
+4. Create the feature in `features/your-feature/` (components + hooks + service + `types.ts`), with an `index.ts` barrel and a short `README.md` — see "Frontend Structure" above for the adaptive flat-vs-`components/` rule
+5. Keep the route file a thin wrapper importing from `@/features/your-feature`
+6. Add navigation link in layout sidebar if needed
 
 ### Running a Single Test
 ```bash
