@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 
 import { Client } from "@/types/client";
 
-import { EditClientModal } from "../edit-client-modal";
+import { EditClientModal } from "./edit-client-modal";
 
 // Mock das traduções
 const messages = {

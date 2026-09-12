@@ -4,9 +4,9 @@ import { Building2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { ClientForm } from "@/components/clients/client-form";
 import { EntityCombobox } from "@/components/ui/entity-combobox";
 import { FormModal } from "@/components/ui/form-modal";
+import { ClientForm } from "@/features/clients/components/client-form";
 import { Client } from "@/services/clients";
 
 interface ClientComboboxProps {

@@ -12,7 +12,7 @@ jest.mock("next-intl", () => ({
 }));
 
 // Mock components
-jest.mock("@/components/clients/client-form", () => ({
+jest.mock("@/features/clients/components/client-form", () => ({
   ClientForm: ({ onSuccess }: { onSuccess: () => void }) => (
     <div data-testid="client-form">
       <button onClick={onSuccess}>Submit</button>
@@ -20,7 +20,7 @@ jest.mock("@/components/clients/client-form", () => ({
   ),
 }));
 
-jest.mock("@/components/clients/client-card", () => ({
+jest.mock("@/features/clients/components/client-card", () => ({
   ClientCard: ({ client }: { client: Client }) => (
     <div data-testid="client-card">
       <p>Company: {client.company}</p>
@@ -30,7 +30,7 @@ jest.mock("@/components/clients/client-card", () => ({
   ),
 }));
 
-jest.mock("@/components/clients/clients-big-stats", () => ({
+jest.mock("@/features/clients/components/clients-big-stats", () => ({
   ClientsBigStats: () => <div data-testid="clients-big-stats">Stats</div>,
 }));
 

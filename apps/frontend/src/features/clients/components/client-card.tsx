@@ -9,9 +9,6 @@ import {
   User,
   Edit2,
   Eye,
-  Share2,
-  Copy,
-  MessageCircle,
   CheckCircle,
   Timer,
   Users,
@@ -30,14 +27,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Form,
   FormControl,
   FormField,
@@ -49,11 +38,13 @@ import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { cn , formatHoursToHHMM } from "@/lib/utils";
+
 import { useClientSpecificStats } from "@/services/client-stats";
 import { useUpdateClient, UpdateClientDto } from "@/services/clients";
 import { Client } from "@/types/client";
 
 import { ClientAddresses } from "./client-addresses";
+import { ClientShareMenu } from "./client-share-menu";
 
 
 interface ClientCardProps {
@@ -97,10 +88,6 @@ export function ClientCard({ client }: ClientCardProps) {
     setIsEditModalOpen(true);
   };
 
-  const handleShareClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   const onSubmit = async (data: ClientFormData) => {
     try {
       await updateClient.mutateAsync({
@@ -113,43 +100,6 @@ export function ClientCard({ client }: ClientCardProps) {
       console.error("Failed to update client:", _error);
       toast.error(t("failedToUpdateClient"));
     }
-  };
-
-  const getClientDashboardUrl = () => {
-    const baseUrl =
-      typeof window !== "undefined"
-        ? `${window.location.protocol}//${window.location.host}`
-        : "";
-
-    return `${baseUrl}/client-dashboard/${client.id}`;
-  };
-
-  const handleCopyLink = async () => {
-    try {
-      const url = getClientDashboardUrl();
-
-      await navigator.clipboard.writeText(url);
-      toast.success(t("linkCopiedToClipboard"));
-  } catch (_error) {
-      toast.error(t("failedToCopyLink"));
-    }
-  };
-
-  const handleShareWhatsApp = () => {
-    const url = getClientDashboardUrl();
-    const message = t("whatsappShareMessage", { url });
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-
-    window.open(whatsappUrl, "_blank");
-  };
-
-  const handleShareEmail = () => {
-    const url = getClientDashboardUrl();
-    const subject = t("emailShareSubject", { company: client.company });
-    const body = t("emailShareBody", { url });
-    const emailUrl = `mailto:${client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-    window.open(emailUrl);
   };
 
   // Prepare contact info
@@ -260,37 +210,7 @@ export function ClientCard({ client }: ClientCardProps) {
               <Edit2 className="h-4 w-4 mr-1" />
               {t("edit")}
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={handleShareClick}
-                >
-                  <Share2 className="h-4 w-4 mr-1" />
-                  {t("share")}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  {t("shareClientDashboard")}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleCopyLink}>
-                  <Copy className="mr-2 h-4 w-4" />
-                  <span>{t("copyLink")}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleShareWhatsApp}>
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  <span>{t("shareViaWhatsApp")}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleShareEmail}>
-                  <Mail className="mr-2 h-4 w-4" />
-                  <span>{t("sendViaEmail")}</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ClientShareMenu client={client} />
           </div>
         </div>
       </div>
