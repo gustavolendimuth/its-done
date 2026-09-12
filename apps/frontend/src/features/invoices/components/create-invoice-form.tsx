@@ -22,9 +22,9 @@ import { useCreateInvoice, useUploadInvoiceFile } from "@/services/invoices";
 import { useAvailableTimeEntries } from "@/features/time-tracking";
 import { TimeEntry } from "@/types";
 
-import { InvoiceFileUpload } from "@/components/invoices/invoice-file-upload";
-import { WorkHoursSelectionSummary } from "@/components/invoices/work-hours-selection-summary";
-import { WorkHoursSelector } from "@/components/invoices/work-hours-selector";
+import { InvoiceFileUpload } from "./invoice-file-upload";
+import { WorkHoursSelectionSummary } from "./work-hours-selection-summary";
+import { WorkHoursSelector } from "./work-hours-selector";
 
 const invoiceSchema = z.object({
   clientId: z.string().min(1, "Client is required"),

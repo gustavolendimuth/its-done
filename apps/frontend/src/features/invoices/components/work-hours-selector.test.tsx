@@ -1,7 +1,7 @@
 import { expect, jest } from "@jest/globals";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { WorkHoursSelector } from "@/components/invoices/work-hours-selector";
+import { WorkHoursSelector } from "./work-hours-selector";
 
 const makeEntry = (overrides: Partial<any> = {}) => ({
   id: Math.random().toString(36).slice(2),

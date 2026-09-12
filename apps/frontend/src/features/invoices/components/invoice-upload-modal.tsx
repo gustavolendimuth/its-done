@@ -7,7 +7,7 @@ import {
   Invoice,
 } from "@/services/invoices";
 
-import { InvoiceFileUpload } from "@/components/invoices/invoice-file-upload";
+import { InvoiceFileUpload } from "./invoice-file-upload";
 
 interface InvoiceUploadModalProps {
   invoice: Invoice;

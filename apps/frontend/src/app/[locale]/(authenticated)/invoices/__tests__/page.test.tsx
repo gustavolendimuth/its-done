@@ -87,7 +87,7 @@ jest.mock("@/features/invoices/components/invoice-card", () => ({
   ),
 }));
 
-jest.mock("@/components/invoices/invoices-big-stats", () => ({
+jest.mock("@/features/invoices/components/invoices-big-stats", () => ({
   InvoicesBigStats: () => <div data-testid="invoices-big-stats">Stats</div>,
 }));
 

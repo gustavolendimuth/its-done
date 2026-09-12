@@ -14,7 +14,7 @@ import {
   useInvoiceFilters,
 } from "@/features/invoices/components/invoice-search-filters";
 import { InvoiceUploadModal } from "@/features/invoices/components/invoice-upload-modal";
-import { InvoicesBigStats } from "@/components/invoices/invoices-big-stats";
+import { InvoicesBigStats } from "@/features/invoices/components/invoices-big-stats";
 import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 import { PageContainer } from "@/components/layout/page-container";
