@@ -21,7 +21,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
-import { useClients } from "@/features/clients/clients";
+import { useClients } from "@/features/clients";
 import { useInvoices, useDeleteInvoice, Invoice } from "@/services/invoices";
 
 export default function InvoicesPage() {

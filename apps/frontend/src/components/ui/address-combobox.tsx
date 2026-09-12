@@ -19,10 +19,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { AddressForm } from "@/features/clients/components/addresses/address-form";
-import { EditAddressForm } from "@/features/clients/components/addresses/edit-address-form";
+import { AddressForm, EditAddressForm, Address } from "@/features/clients";
 import { cn } from "@/lib/utils";
-import { Address } from "@/features/clients/addresses";
 
 
 interface AddressComboboxProps {

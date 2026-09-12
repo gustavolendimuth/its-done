@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 
 import { ProjectsBigStats } from "./projects-big-stats";
 
-import type { Client } from "@/features/clients/clients";
+import type { Client } from "@/features/clients";
 import type { Project } from "./projects.service";
 
 // Mock next-intl

@@ -19,7 +19,7 @@ import { ClientCombobox } from "@/components/ui/client-combobox";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { useClients } from "@/features/clients/clients";
+import { useClients } from "@/features/clients";
 
 import type { StartDetails } from "../lib/work-timer-engine";
 

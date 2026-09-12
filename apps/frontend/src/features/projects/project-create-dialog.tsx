@@ -13,7 +13,7 @@ import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useClients } from "@/features/clients/clients";
+import { useClients } from "@/features/clients";
 import { useCreateProject, type Project } from "./projects.service";
 
 const projectSchema = z.object({

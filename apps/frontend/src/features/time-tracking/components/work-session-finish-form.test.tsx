@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { WorkSessionFinishForm } from "./work-session-finish-form";
 
 import type { LocalWorkSession } from "../lib/work-timer-db";
-import type { Client } from "@/features/clients/clients";
+import type { Client } from "@/features/clients";
 
 const mockMutateAsync = jest.fn();
 const mockDiscard = jest.fn();
@@ -44,7 +44,7 @@ const mockClients: Client[] = [
   },
 ];
 
-jest.mock("@/features/clients/clients", () => ({
+jest.mock("@/features/clients", () => ({
   useClients: () => ({ data: mockClients }),
 }));
 

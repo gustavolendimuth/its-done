@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import InvoicesPage from "../page";
 
-import type { Client } from "@/features/clients/clients";
+import type { Client } from "@/features/clients";
 import type { Invoice } from "@/services/invoices";
 
 // Mock next-intl
@@ -186,7 +186,7 @@ jest.mock("@/services/invoices", () => ({
   })),
 }));
 
-jest.mock("@/features/clients/clients", () => ({
+jest.mock("@/features/clients", () => ({
   useClients: jest.fn(() => ({
     data: mockClients,
     isLoading: false,

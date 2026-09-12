@@ -2,19 +2,24 @@
 
 Cadastro e gestão de clientes, incluindo os endereços de cada cliente (`Address` pertence a `Client` 1:N no backend — sem rota própria, por isso `addresses` vive como subpasta aqui em vez de ser uma feature separada).
 
-## Pontos de entrada
+## Pontos de entrada (tudo via `@/features/clients`)
 
-- `ClientCard`, `ClientForm`, `ClientsBigStats`, `EditClientModal`, `ClientAddresses`, `ClientShareMenu` — UI de `app/[locale]/(authenticated)/clients/**`
-- `AddressForm`, `EditAddressForm` (`components/addresses/`) — usados por `components/ui/address-combobox.tsx`
-- `useClients`, `useCreateClient`, `useUpdateClient` (`clients.ts`) — hooks TanStack Query pra `Client`, consumidos por vários outros domínios (projects, invoices, work-hours, dashboard, analytics, topbar) via `@/features/clients`
+- `ClientCard`, `ClientForm`, `ClientsBigStats` — UI de `app/[locale]/(authenticated)/clients/page.tsx`
+- `ClientAddresses`, `ClientShareMenu` — usados internamente por `ClientCard`/`EditClientModal`
+- `AddressForm`, `EditAddressForm` — usados por `components/ui/address-combobox.tsx`
+- `useClients`, `useClient`, `useCreateClient`, `useUpdateClient`, `useDeleteClient`, tipo `Client` (`clients.ts`) — consumidos por vários outros domínios (projects, invoices, work-hours, dashboard, analytics, topbar)
 - `useClientStats`, `useClientSpecificStats` (`client-stats.ts`)
-- `useClientAddresses`, `useCreateAddress`, `useUpdateAddress` (`addresses.ts`)
-- Tipos `Client`, `CreateClientDto`, `UpdateClientDto`, `ClientSpecificStats`, `Address`, `CreateAddressDTO`, `UpdateAddressDTO` (`types.ts`)
+- `useAddresses`, `useAddress`, `useClientAddresses`, `useCreateAddress`, `useUpdateAddress`, `useDeleteAddress`, `useSetPrimaryAddress`, tipo `Address` (`addresses.ts`)
 
-Consumidores fora desta feature devem importar de `@/features/clients`, nunca de um arquivo interno.
+Consumidores fora desta feature devem importar de `@/features/clients`, nunca de um caminho interno (`./components/*`, `./clients`, `./addresses`, `./client-stats`, `./types`).
 
-## Notas
+## Notas de split
 
 - `client-card.tsx` (originalmente 370 linhas) teve o menu de compartilhamento (copiar link, WhatsApp, email) extraído pra `client-share-menu.tsx` — era uma responsabilidade claramente separável do card em si.
 - `address-form.tsx`/`edit-address-form.tsx` (402/359 linhas) tinham as constantes `ADDRESS_TYPES`/`BRAZILIAN_STATES` duplicadas byte-a-byte; extraídas pra `addresses/address-constants.ts`.
-- `services/clients.ts` e `services/addresses.ts` definem seus próprios tipos `Client`/`Address` internamente (mais completos que os de `types.ts`, ex.: incluem `hourlyRate`, `currency`, `number`, `complement`) — inconsistência pré-existente entre esses e `types.ts`, fora do escopo deste refactor corrigir.
+
+## Achados durante a migração (pré-existentes, fora de escopo corrigir aqui)
+
+- `EditClientModal` não tem nenhum consumidor no app hoje (só o próprio teste) — órfão, exportado no barrel por completude mas não usado em nenhuma tela.
+- `clients.ts` e `addresses.ts` definem seus próprios tipos `Client`/`Address` internamente (mais completos que os de `types.ts` — ex.: incluem `hourlyRate`, `currency`, `number`, `complement`). `types.ts` (consolidado de `types/client.ts` + `types/address.ts`) só é usado hoje pelos componentes internos desta feature; o barrel exporta os tipos de `clients.ts`/`addresses.ts` (os realmente consumidos fora da feature), não os de `types.ts`.
+- `clients.ts` também define seu próprio `useClientStats(params)` (com filtro de data) e seu próprio `Address`, nenhum dos dois consumido em lugar nenhum — duplicatas mortas da versão de `client-stats.ts`/`addresses.ts` que é a realmente usada.

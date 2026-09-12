@@ -11,10 +11,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
 import { SearchInput } from "@/components/ui/search-input";
-import { ClientCard } from "@/features/clients/components/client-card";
-import { ClientForm } from "@/features/clients/components/client-form";
-import { ClientsBigStats } from "@/features/clients/components/clients-big-stats";
-import { useClients } from "@/features/clients/clients";
+import { ClientCard, ClientForm, ClientsBigStats, useClients } from "@/features/clients";
 
 export default function ClientsPage() {
   const t = useTranslations("clients");

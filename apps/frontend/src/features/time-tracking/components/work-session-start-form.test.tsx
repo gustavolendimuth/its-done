@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { WorkSessionStartForm } from "./work-session-start-form";
 
-import type { Client } from "@/features/clients/clients";
+import type { Client } from "@/features/clients";
 
 const mockOnStart = jest.fn();
 
@@ -22,7 +22,7 @@ const mockClients: Client[] = [
   },
 ];
 
-jest.mock("@/features/clients/clients", () => ({
+jest.mock("@/features/clients", () => ({
   useClients: () => ({ data: mockClients }),
 }));
 

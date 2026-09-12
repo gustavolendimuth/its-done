@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ClientsPage from "../page";
 
-import type { Client } from "@/features/clients/clients";
+import type { Client } from "@/features/clients";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -93,7 +93,7 @@ const mockClients: Client[] = [
 ];
 
 // Mock services
-jest.mock("@/features/clients/clients", () => ({
+jest.mock("@/features/clients", () => ({
   useClients: jest.fn(() => ({
     data: mockClients,
     isLoading: false,
@@ -102,7 +102,7 @@ jest.mock("@/features/clients/clients", () => ({
 
 describe("ClientsPage", () => {
   it("should render loading skeleton when loading", () => {
-    const { useClients } = require("@/features/clients/clients");
+    const { useClients } = require("@/features/clients");
     useClients.mockReturnValue({
       data: null,
       isLoading: true,
@@ -146,7 +146,7 @@ describe("ClientsPage", () => {
   });
 
   it("should show empty state when no clients", () => {
-    const { useClients } = require("@/features/clients/clients");
+    const { useClients } = require("@/features/clients");
     useClients.mockReturnValue({
       data: [],
       isLoading: false,

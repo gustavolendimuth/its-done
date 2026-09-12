@@ -23,7 +23,7 @@ import {
   useProjects,
   useDeleteProject,
 } from "@/features/projects";
-import { useClients } from "@/features/clients/clients";
+import { useClients } from "@/features/clients";
 
 export default function ProjectsPage() {
   const t = useTranslations("projects");

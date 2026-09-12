@@ -6,8 +6,7 @@ import { useState } from "react";
 
 import { EntityCombobox } from "@/components/ui/entity-combobox";
 import { FormModal } from "@/components/ui/form-modal";
-import { ClientForm } from "@/features/clients/components/client-form";
-import { Client } from "@/features/clients/clients";
+import { ClientForm, Client } from "@/features/clients";
 
 interface ClientComboboxProps {
   clients: Client[];

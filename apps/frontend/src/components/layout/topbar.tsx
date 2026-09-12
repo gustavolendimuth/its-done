@@ -19,7 +19,7 @@ import { FormModal } from "@/components/ui/form-modal";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { WorkHourForm } from "@/features/time-tracking";
-import { useClients } from "@/features/clients/clients";
+import { useClients } from "@/features/clients";
 
 interface TopbarProps {
   children?: React.ReactNode;
