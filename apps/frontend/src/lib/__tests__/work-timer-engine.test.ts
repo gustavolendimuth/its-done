@@ -69,6 +69,33 @@ describe("work-timer-engine", () => {
     expect(dbMock.enqueueEvent).not.toHaveBeenCalled();
   });
 
+  it("reflects the full elapsed time on the first read after a reload/reopen, without resetting to zero (WKT-01 AC4, WKT-02 AC2)", async () => {
+    const twoHoursAgo = new Date(START_TIME - 2 * 60 * 60 * 1000).toISOString();
+    dbMock.getActiveSession.mockResolvedValue({
+      id: "existing-session",
+      status: "RUNNING",
+      startedAt: twoHoursAgo,
+      currentSegmentStartedAt: twoHoursAgo,
+      accumulatedSeconds: 0,
+      lastPromptAt: null,
+      lastConfirmedAt: null,
+      hours: null,
+    });
+
+    // Simulate the module having just been freshly loaded after a page
+    // reload/reopen: the first interaction is subscribe() — exactly what
+    // useWorkTimerEngine() does on mount — not start(); no clock has ticked
+    // forward within this fresh module instance yet.
+    const states: (LocalWorkSession | null)[] = [];
+    const unsubscribe = engine.subscribe((s) => states.push(s));
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(states.at(-1)?.status).toBe("RUNNING");
+    expect(engine.getElapsedSeconds()).toBe(2 * 60 * 60);
+
+    unsubscribe();
+  });
+
   it("start() called twice in-memory returns the same session without a second start event", async () => {
     const first = await engine.start();
     const second = await engine.start();

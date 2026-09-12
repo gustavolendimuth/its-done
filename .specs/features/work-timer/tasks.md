@@ -878,6 +878,8 @@ No ❌ violations.
 **Tests**: unit
 **Gate**: quick (FE)
 
+**Status**: ✅ Resolved — added a test that seeds `work-timer-db`'s mock with a RUNNING session whose `currentSegmentStartedAt` is 2 hours in the past, subscribes to a fresh engine module instance (the same entry point `useWorkTimerEngine()` uses on mount), and asserts the first `getElapsedSeconds()` read is `7200` (not `0`). `cd apps/frontend && pnpm test:ci -- work-timer-engine`: 13/13 passed (was 12).
+
 ### FIX4 (Minor): Route hardcoded pt-BR strings through next-intl
 
 **What**: Add the missing keys to `messages/en.json` and `messages/pt-BR.json`, and route `work-timer-widget.tsx` and `work-session-finish-form.tsx` through `useTranslations` instead of hardcoded Portuguese strings.
