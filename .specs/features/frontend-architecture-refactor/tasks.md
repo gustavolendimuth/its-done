@@ -511,11 +511,12 @@ T32
 - Skill: NONE
 
 **Done when**:
-- [ ] The 4 files (+ tests) exist at the new path and no longer at the old one
-- [ ] Gate check passes: `cd apps/frontend && pnpm test:ci`
+- [x] The 4 files (+ tests) exist at the new path and no longer at the old one
+- [x] Gate check passes: `cd apps/frontend && pnpm test:ci`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Complete — commit `a90a42f`. `invoice-upload-modal.tsx` temporarily points its relative `./invoice-file-upload` import at the old `@/components/invoices/invoice-file-upload` absolute path until T20 moves that file too.
 
 ---
 
@@ -532,11 +533,12 @@ T32
 - Skill: NONE
 
 **Done when**:
-- [ ] The 3 files (+ tests) exist at the new path and no longer at the old one
-- [ ] Gate check passes: `cd apps/frontend && pnpm test:ci`
+- [x] The 3 files (+ tests) exist at the new path and no longer at the old one
+- [x] Gate check passes: `cd apps/frontend && pnpm test:ci`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Complete — commit `084417b`. Same temporary-absolute-path pattern as T18 for the still-unmoved invoice-file-upload/work-hours-selector/work-hours-selection-summary imports.
 
 ---
 
@@ -553,12 +555,13 @@ T32
 - Skill: NONE
 
 **Done when**:
-- [ ] `components/invoices/` no longer exists (all 11 original files accounted for across T18-T20)
-- [ ] `invoice-file-upload.tsx` split or exception noted
-- [ ] Gate check passes: `cd apps/frontend && pnpm test:ci`
+- [x] `components/invoices/` no longer exists (all 11 original files accounted for across T18-T20)
+- [x] `invoice-file-upload.tsx` split or exception noted
+- [x] Gate check passes: `cd apps/frontend && pnpm test:ci`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Complete — commit `eafc8f4`. `invoice-file-upload.tsx` kept as-is (exception documented in the feature README, T22): one cohesive drag-and-drop widget with a compact/full mode sharing handlers, not multi-responsibility.
 
 ---
 
@@ -575,11 +578,12 @@ T32
 - Skill: NONE
 
 **Done when**:
-- [ ] The 2 services no longer exist at old `services/` paths; `types/invoices.ts` moved
-- [ ] Gate check passes: `cd apps/frontend && pnpm test:ci`
+- [x] The 2 services no longer exist at old `services/` paths; `types/invoices.ts` moved
+- [x] Gate check passes: `cd apps/frontend && pnpm test:ci`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Complete — commit `eb943b7`. Updated every consumer (internal + external: dashboard, both client routes, invoices route).
 
 ---
 
@@ -596,13 +600,14 @@ T32
 - Skill: NONE
 
 **Done when**:
-- [ ] Invoices route(s) are thin wrappers importing only from `@/features/invoices`
-- [ ] `grep` confirms no import of `@/features/time-tracking/<internal-path>` (only the barrel) from within `invoices`
-- [ ] Gate check passes: `cd apps/frontend && pnpm test:ci && pnpm build`
-- [ ] No new failures vs. `baseline.md`
+- [x] Invoices route(s) are thin wrappers importing only from `@/features/invoices`
+- [x] `grep` confirms no import of `@/features/time-tracking/<internal-path>` (only the barrel) from within `invoices`
+- [x] Gate check passes: `cd apps/frontend && pnpm test:ci && pnpm build`
+- [x] No new failures vs. `baseline.md`
 
 **Tests**: unit
 **Gate**: full
+**Status**: ✅ Complete — commit `41f48c8`. `pnpm test:ci` (220/167/387, matches baseline) and `pnpm build` both pass.
 
 ---
 
