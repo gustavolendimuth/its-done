@@ -599,6 +599,8 @@ T24
 
 **Commit**: `feat(work-timer): mount timer widget in authenticated layout`
 
+**Status**: ✅ Done — `pnpm build` (root, all 3 workspace packages) succeeds with `WorkTimerWidget` mounted; `eslint` clean on the touched file (`next lint` itself remains broken under this project's Next 16.2.10, same pre-existing environment issue noted in T17). No dedicated interactive `pnpm dev` walkthrough was done for this task specifically (Tools field lists no MCP for T19, and the widget's authenticated-page context requires a login session) — the fixed-position widget's actual on-screen appearance gets its first real interactive check in T21's Playwright UAT pass, which necessarily renders the same authenticated layout.
+
 ---
 
 ### T20: `WorkSessionFinishForm` component
