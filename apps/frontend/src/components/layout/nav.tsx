@@ -1,5 +1,9 @@
 "use client";
 
+// NOTE: unused today — superseded by the `Navigation` component defined
+// inline in `main-layout.tsx`. Moved here as-is (no consumer to update);
+// not deleted, since removing dead code is out of scope for this refactor.
+
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
