@@ -117,6 +117,37 @@ describe('WorkSessions confirm/stop via action token (e2e)', () => {
     expect(session.status).toBe('RUNNING'); // unchanged
   });
 
+  it('reusing the same valid token for confirm a second time (double "Sim, continuar") is a no-op, no visible error', async () => {
+    const nonce = 'nonce-4b';
+    const sessionId = await createRunningSession(nonce);
+    const token = actionTokenService.issue(sessionId, nonce);
+
+    const first = await request(app.getHttpServer())
+      .post(`/work-sessions/${sessionId}/confirm`)
+      .query({ actionToken: token });
+    expect(first.status).toBe(201);
+    expect(first.body.session).toMatchObject({
+      id: sessionId,
+      status: 'RUNNING',
+      lastPromptAt: null,
+    });
+
+    const second = await request(app.getHttpServer())
+      .post(`/work-sessions/${sessionId}/confirm`)
+      .query({ actionToken: token });
+
+    // Same edge case as the stop-double-click test below: the second
+    // confirmation (e.g. a real double click, or clicking the notification
+    // on two devices) must be a no-op with no visible error, per spec.md's
+    // "trata a segunda confirmação como no-op, sem erro visível ao usuário".
+    expect(second.status).toBe(201);
+    expect(second.body.session).toMatchObject({
+      id: sessionId,
+      status: 'RUNNING',
+      lastPromptAt: null,
+    });
+  });
+
   it('reusing the same valid token for stop a second time is a no-op (state already STOPPING)', async () => {
     const nonce = 'nonce-4';
     const sessionId = await createRunningSession(nonce);

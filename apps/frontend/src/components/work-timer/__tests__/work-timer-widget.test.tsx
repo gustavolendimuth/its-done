@@ -144,6 +144,41 @@ describe("WorkTimerWidget", () => {
     expect(mockStop).toHaveBeenCalledTimes(1);
   });
 
+  // WKT-04 AC6 (Fix 5): without notification permission, the session must
+  // keep counting normally and the same local 60/15 banner/pause rule must
+  // still drive the UI — none of it may depend on Notification.permission.
+  it("still renders the hourly banner and the paused-by-auto-pause state when notification permission was denied", () => {
+    mockUsePushSubscription.mockReturnValue({
+      permission: "denied",
+      subscribe: mockSubscribe,
+    });
+    mockEngine({
+      status: "RUNNING",
+      session: baseSession({ lastPromptAt: "2026-01-01T01:00:00.000Z" }),
+      elapsedSeconds: 3600,
+    });
+
+    const { rerender } = render(<WorkTimerWidget />);
+
+    expect(screen.getByTestId("work-timer-banner")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "confirmFinish" }));
+    expect(mockStop).toHaveBeenCalledTimes(1);
+
+    // Simulate the local 15min-grace auto-pause having fired (this is the
+    // engine's job, already covered by work-timer-engine.test.ts) — the
+    // resulting PAUSED UI must render and work regardless of permission.
+    mockEngine({
+      status: "PAUSED",
+      session: baseSession({ status: "PAUSED", currentSegmentStartedAt: null }),
+      elapsedSeconds: 3600,
+    });
+    rerender(<WorkTimerWidget />);
+
+    expect(screen.getByTestId("work-timer-paused")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "resume" }));
+    expect(mockConfirm).toHaveBeenCalledTimes(1);
+  });
+
   it("renders the paused state with a resume button that calls confirm()", () => {
     mockEngine({
       status: "PAUSED",

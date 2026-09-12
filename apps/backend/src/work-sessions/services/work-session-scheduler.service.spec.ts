@@ -63,12 +63,18 @@ describe('WorkSessionSchedulerService', () => {
     await service.tick();
 
     expect(pushServiceMock.sendToUser).toHaveBeenCalledTimes(1);
-    expect(pushServiceMock.sendToUser).toHaveBeenCalledWith(
-      'user-1',
-      expect.objectContaining({
-        data: expect.objectContaining({ sessionId: 'session-1' }),
-      }),
-    );
+    // Full payload match (not objectContaining): WKT-04 AC2 requires BOTH
+    // actions ("Sim, continuar" / "Não, encerrar") on every prompt, so the
+    // whole actions array — not just the sessionId — is what proves it.
+    expect(pushServiceMock.sendToUser).toHaveBeenCalledWith('user-1', {
+      title: 'Ainda está trabalhando?',
+      body: 'Confirme se deseja continuar a sessão de trabalho.',
+      data: { sessionId: 'session-1', actionToken: 'signed-action-token' },
+      actions: [
+        { action: 'confirm', title: 'Sim, continuar' },
+        { action: 'stop', title: 'Não, encerrar' },
+      ],
+    });
     expect(prismaMock.workSession.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'session-1' },

@@ -897,3 +897,10 @@ No ❌ violations.
 **Requirement**: WKT-04 (AC2, AC6, edge case), WKT-06 (AC5)
 **Tests**: unit/e2e
 **Gate**: full (BE) + quick (FE)
+
+**Status**: ✅ Resolved.
+(a) Added a confirm-double-click e2e test (`work-sessions-action-token.e2e-spec.ts`) mirroring the existing stop one — reusing the same valid action token for `confirm` twice returns 201 both times with no error.
+(b) Added an e2e test (`work-sessions.e2e-spec.ts`) that starts then discards a session and asserts `prisma.workHour.findMany({ where: { userId } })` returns zero rows.
+(c) Added a widget test (`work-timer-widget.test.tsx`) with `usePushSubscription` mocked to `permission: "denied"`, asserting the hourly banner renders/works and the paused UI (representing a completed local auto-pause) also renders/works — proving neither is gated on notification permission.
+(d) Strengthened the scheduler's push-payload assertion (`work-session-scheduler.service.spec.ts`) from `objectContaining({ sessionId })` to an exact full-payload match including the complete `actions` array. Multi-subscription fan-out was found already precisely covered in `push.service.spec.ts` ("sends the payload to every subscription of the user") — not duplicated here per the Test Adequacy Review's Check C (no redundant assertions across layers).
+`cd apps/backend && pnpm test`: 41/43 passed (2 pre-existing, unchanged); `pnpm test:e2e`: 20/20 passed (was 18); `cd apps/frontend && pnpm test:ci -- work-timer`: 52/52 passed (was 51).

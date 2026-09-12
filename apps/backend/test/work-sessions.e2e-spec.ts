@@ -164,6 +164,49 @@ describe('WorkSessions sync (e2e)', () => {
     });
   });
 
+  it('applies a discard event, marking the session DISCARDED and creating no WorkHour (WKT-06 AC5)', async () => {
+    const sessionId = uuidv4();
+
+    await request(app.getHttpServer())
+      .post('/work-sessions/sync')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        events: [
+          {
+            eventId: uuidv4(),
+            sessionId,
+            type: 'start',
+            clientTimestamp: new Date().toISOString(),
+          },
+        ],
+      })
+      .expect(201);
+
+    const res = await request(app.getHttpServer())
+      .post('/work-sessions/sync')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        events: [
+          {
+            eventId: uuidv4(),
+            sessionId,
+            type: 'discard',
+            clientTimestamp: new Date().toISOString(),
+          },
+        ],
+      });
+
+    expect(res.status).toBe(201);
+
+    const session = await prisma.workSession.findUnique({
+      where: { id: sessionId },
+    });
+    expect(session.status).toBe('DISCARDED');
+
+    const workHours = await prisma.workHour.findMany({ where: { userId } });
+    expect(workHours).toHaveLength(0);
+  });
+
   it('a concurrent start race only leaves one active session persisted', async () => {
     const sessionA = uuidv4();
     const sessionB = uuidv4();
