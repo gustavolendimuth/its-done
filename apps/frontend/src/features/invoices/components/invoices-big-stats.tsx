@@ -14,7 +14,7 @@ import {
   BigStatsDisplay,
   BigStatItem,
 } from "@/components/ui/big-stats-display";
-import { useInvoiceStats } from "@/services/invoice-stats";
+import { useInvoiceStats } from "@/features/invoices/invoice-stats";
 
 
 interface InvoicesBigStatsProps {

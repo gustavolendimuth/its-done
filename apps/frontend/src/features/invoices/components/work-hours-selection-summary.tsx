@@ -4,7 +4,7 @@ import { Clock, FileText } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { formatHoursToHHMM } from "@/lib/utils";
-import { WorkHoursSelectionSummaryProps } from "@/types/invoices";
+import { WorkHoursSelectionSummaryProps } from "@/features/invoices/types";
 
 export function WorkHoursSelectionSummary({
   totalHours,

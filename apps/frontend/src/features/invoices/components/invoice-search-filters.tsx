@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Invoice } from "@/services/invoices";
+import { Invoice } from "@/features/invoices/invoices";
 
 export type SortBy = "date" | "amount" | "status" | "hours";
 export type FilterStatus = "ALL" | "DRAFT" | "PAID" | "PENDING" | "CANCELED";

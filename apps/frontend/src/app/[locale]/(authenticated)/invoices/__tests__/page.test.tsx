@@ -5,7 +5,7 @@ import "@testing-library/jest-dom";
 import InvoicesPage from "../page";
 
 import type { Client } from "@/features/clients";
-import type { Invoice } from "@/services/invoices";
+import type { Invoice } from "@/features/invoices/invoices";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -175,7 +175,7 @@ const mockInvoices: Invoice[] = [
 ];
 
 // Mock services
-jest.mock("@/services/invoices", () => ({
+jest.mock("@/features/invoices/invoices", () => ({
   useInvoices: jest.fn(() => ({
     data: mockInvoices,
     isLoading: false,
@@ -199,7 +199,7 @@ describe("InvoicesPage", () => {
   });
 
   it("should render loading skeleton when loading", () => {
-    const { useInvoices } = require("@/services/invoices");
+    const { useInvoices } = require("@/features/invoices/invoices");
     useInvoices.mockReturnValue({
       data: null,
       isLoading: true,
@@ -211,7 +211,7 @@ describe("InvoicesPage", () => {
   });
 
   it("should render error state when there is an error", () => {
-    const { useInvoices } = require("@/services/invoices");
+    const { useInvoices } = require("@/features/invoices/invoices");
     useInvoices.mockReturnValue({
       data: null,
       isLoading: false,
@@ -245,7 +245,7 @@ describe("InvoicesPage", () => {
   });
 
   it("should handle invoice deletion", async () => {
-    const { useDeleteInvoice } = require("@/services/invoices");
+    const { useDeleteInvoice } = require("@/features/invoices/invoices");
     const mockMutateAsync = jest.fn();
     useDeleteInvoice.mockReturnValue({
       mutateAsync: mockMutateAsync,
@@ -306,7 +306,7 @@ describe("InvoicesPage", () => {
   });
 
   it("should show empty state when no invoices", () => {
-    const { useInvoices } = require("@/services/invoices");
+    const { useInvoices } = require("@/features/invoices/invoices");
     useInvoices.mockReturnValue({
       data: [],
       isLoading: false,

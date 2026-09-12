@@ -20,7 +20,7 @@ import {
   Invoice,
   useUpdateInvoice,
   useUploadInvoiceFile,
-} from "@/services/invoices";
+} from "@/features/invoices/invoices";
 import { useAvailableTimeEntries } from "@/features/time-tracking";
 import { TimeEntry } from "@/types";
 

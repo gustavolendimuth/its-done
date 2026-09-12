@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Client } from "@/features/clients";
-import { useCreateInvoice, useUploadInvoiceFile } from "@/services/invoices";
+import { useCreateInvoice, useUploadInvoiceFile } from "@/features/invoices/invoices";
 import { useAvailableTimeEntries } from "@/features/time-tracking";
 import { TimeEntry } from "@/types";
 

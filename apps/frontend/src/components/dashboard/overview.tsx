@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/card";
 import { StatsCard } from "@/components/ui/stats-card";
 import { formatHoursToHHMM, cn } from "@/lib/utils";
-import { Invoice } from "@/services/invoices";
+import { Invoice } from "@/features/invoices/invoices";
 
 // Types
 export interface OverviewStats {

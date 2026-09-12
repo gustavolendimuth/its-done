@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useMemo } from "react";
 
 import { Overview, OverviewData } from "@/components/dashboard/overview";
-import { invoicesService } from "@/services/invoices";
+import { invoicesService } from "@/features/invoices/invoices";
 
 export default function ClientDetailPage() {
   const { clientId } = useParams();

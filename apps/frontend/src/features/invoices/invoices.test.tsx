@@ -17,7 +17,7 @@ import {
   type Invoice,
   type CreateInvoiceDto,
   type UpdateInvoiceDto,
-} from "../invoices";
+} from "./invoices";
 
 // Mock axios
 jest.mock("@/lib/axios");

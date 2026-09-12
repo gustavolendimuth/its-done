@@ -5,7 +5,7 @@ import {
   useUploadInvoiceFile,
   useUpdateInvoice,
   Invoice,
-} from "@/services/invoices";
+} from "@/features/invoices/invoices";
 
 import { InvoiceFileUpload } from "./invoice-file-upload";
 

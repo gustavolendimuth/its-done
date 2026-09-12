@@ -19,7 +19,7 @@ import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Client } from "@/features/clients";
-import { useCreateInvoice, useUploadInvoiceFile } from "@/services/invoices";
+import { useCreateInvoice, useUploadInvoiceFile } from "@/features/invoices/invoices";
 
 
 const invoiceSchema = z.object({

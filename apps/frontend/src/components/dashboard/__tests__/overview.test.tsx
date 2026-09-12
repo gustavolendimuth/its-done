@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { Overview } from "../overview";
 
-import type { Invoice } from "@/services/invoices";
+import type { Invoice } from "@/features/invoices/invoices";
 import type { WorkHour, InvoiceWorkHour } from "@/features/time-tracking";
 
 // Mock components

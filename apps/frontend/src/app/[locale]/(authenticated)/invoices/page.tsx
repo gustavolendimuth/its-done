@@ -22,7 +22,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
 import { useClients } from "@/features/clients";
-import { useInvoices, useDeleteInvoice, Invoice } from "@/services/invoices";
+import { useInvoices, useDeleteInvoice, Invoice } from "@/features/invoices/invoices";
 
 export default function InvoicesPage() {
   const t = useTranslations("invoices");

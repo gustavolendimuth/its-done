@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
-import { useDownloadInvoice } from "@/services/invoices";
+import { useDownloadInvoice } from "@/features/invoices/invoices";
 
 export interface InvoiceCardAction {
   icon: LucideIcon;

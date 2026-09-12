@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
 import { useTimeEntries, useWorkHoursStats } from "@/features/time-tracking";
 import { useClients } from "@/features/clients";
-import { useInvoices } from "@/services/invoices";
+import { useInvoices } from "@/features/invoices/invoices";
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
