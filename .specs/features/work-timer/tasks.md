@@ -679,6 +679,8 @@ T24
 
 **Commit**: `feat(work-timer): add push subscription hook`
 
+**Status**: ✅ Done — 3 new tests passing (`use-push-subscription.test.ts`, scoped run: `pnpm test:ci -- use-push-subscription`). Implements the `postMessage({type: "SET_API_URL", apiUrl})` contract T21's `sw.js` expects, using the same `getApiUrl()` helper the axios client already relies on, so the SW's callback URLs always match the same backend the page itself talks to. `eslint` clean on both files.
+
 ---
 
 ### T23: Wire push subscription prompt into app bootstrap
