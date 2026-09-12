@@ -295,6 +295,8 @@ T24
 
 **Commit**: `feat(work-sessions): add action-token service for notification actions`
 
+**Status**: ✅ Done — 4 new tests passing. `verify()` implemented as `Promise<boolean>` (SPEC_DEVIATION noted inline: DB nonce lookup requires async). Registered `ActionTokenService` + `JwtModule` in `work-sessions.module.ts` so it's DI-available for T9. Same 2 pre-existing unrelated `pnpm test` failures; build and lint clean.
+
 ---
 
 ### T9: `POST /work-sessions/:id/confirm` and `/stop` via action token
