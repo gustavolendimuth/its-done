@@ -12,11 +12,11 @@ jest.mock("next-intl", () => ({
 }));
 
 // Mock components
-jest.mock("@/components/work-hours/work-hour-form", () => ({
+jest.mock("@/features/time-tracking/components/work-hour-form", () => ({
   WorkHourForm: () => <div data-testid="work-hour-form">Work Hour Form</div>,
 }));
 
-jest.mock("@/components/work-hours/work-hours-big-stats", () => ({
+jest.mock("@/features/time-tracking/components/work-hours-big-stats", () => ({
   WorkHoursBigStats: ({
     workHours,
     isRefetching,
@@ -33,7 +33,7 @@ jest.mock("@/components/work-hours/work-hours-big-stats", () => ({
   ),
 }));
 
-jest.mock("@/components/work-hours/work-hours-table", () => ({
+jest.mock("@/features/time-tracking/components/work-hours-table", () => ({
   WorkHoursTable: ({ workHours, deletingId, onDelete }: any) => (
     <div data-testid="work-hours-table">
       {workHours.map((workHour: any) => (

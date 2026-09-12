@@ -17,9 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { WorkHourForm } from "@/components/work-hours/work-hour-form";
-import { WorkHoursBigStats } from "@/components/work-hours/work-hours-big-stats";
-import { WorkHoursTable } from "@/components/work-hours/work-hours-table";
+import { WorkHourForm } from "@/features/time-tracking/components/work-hour-form";
+import { WorkHoursBigStats } from "@/features/time-tracking/components/work-hours-big-stats";
+import { WorkHoursTable } from "@/features/time-tracking/components/work-hours-table";
 import { useClients, Client } from "@/services/clients";
 import { useTimeEntries, useDeleteTimeEntry } from "@/services/time-entries";
 
