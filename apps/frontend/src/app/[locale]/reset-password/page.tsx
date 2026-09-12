@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useResetPassword } from "@/services/auth";
+import { useResetPassword } from "@/features/auth";
 
 function ResetPasswordContent() {
   const t = useTranslations("auth.resetPassword");
