@@ -6,15 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
-import { CreateInvoiceForm } from "@/features/invoices/components/create-invoice-form";
-import { EditInvoiceForm } from "@/features/invoices/components/edit-invoice-form";
-import { InvoiceCard } from "@/features/invoices/components/invoice-card";
-import {
-  InvoiceSearchFilters,
-  useInvoiceFilters,
-} from "@/features/invoices/components/invoice-search-filters";
-import { InvoiceUploadModal } from "@/features/invoices/components/invoice-upload-modal";
-import { InvoicesBigStats } from "@/features/invoices/components/invoices-big-stats";
 import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 import { PageContainer } from "@/components/layout/page-container";
@@ -22,7 +13,18 @@ import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
 import { useClients } from "@/features/clients";
-import { useInvoices, useDeleteInvoice, Invoice } from "@/features/invoices/invoices";
+import {
+  CreateInvoiceForm,
+  EditInvoiceForm,
+  InvoiceCard,
+  InvoiceSearchFilters,
+  useInvoiceFilters,
+  InvoiceUploadModal,
+  InvoicesBigStats,
+  useInvoices,
+  useDeleteInvoice,
+  Invoice,
+} from "@/features/invoices";
 
 export default function InvoicesPage() {
   const t = useTranslations("invoices");

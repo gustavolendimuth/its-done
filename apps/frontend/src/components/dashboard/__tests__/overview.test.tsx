@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { Overview } from "../overview";
 
-import type { Invoice } from "@/features/invoices/invoices";
+import type { Invoice } from "@/features/invoices";
 import type { WorkHour, InvoiceWorkHour } from "@/features/time-tracking";
 
 // Mock components
@@ -22,7 +22,8 @@ jest.mock("@/components/layout/loading-skeleton", () => ({
   LoadingSkeleton: () => <div data-testid="loading-skeleton">Loading...</div>,
 }));
 
-jest.mock("@/features/invoices/components/client-invoice-card", () => ({
+jest.mock("@/features/invoices", () => ({
+  ...jest.requireActual("@/features/invoices"),
   ClientInvoiceCard: ({ invoice }: any) => (
     <div data-testid="invoice-card">
       <p>Invoice {invoice.number}</p>

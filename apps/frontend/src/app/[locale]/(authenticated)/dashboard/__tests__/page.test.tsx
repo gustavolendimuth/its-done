@@ -23,7 +23,7 @@ jest.mock("@/features/time-tracking", () => ({
   })),
 }));
 
-jest.mock("@/features/invoices/invoices", () => ({
+jest.mock("@/features/invoices", () => ({
   useInvoices: jest.fn(() => ({
     data: [
       {

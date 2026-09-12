@@ -17,12 +17,6 @@ import {
 } from "lucide-react";
 import { useState, useMemo } from "react";
 
-import { ClientInvoiceCard } from "@/features/invoices/components/client-invoice-card";
-import {
-  InvoiceSearchFilters,
-  SortBy,
-  FilterStatus,
-} from "@/features/invoices/components/invoice-search-filters";
 import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 import {
@@ -33,8 +27,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { StatsCard } from "@/components/ui/stats-card";
+import {
+  ClientInvoiceCard,
+  InvoiceSearchFilters,
+  SortBy,
+  FilterStatus,
+  Invoice,
+} from "@/features/invoices";
 import { formatHoursToHHMM, cn } from "@/lib/utils";
-import { Invoice } from "@/features/invoices/invoices";
 
 // Types
 export interface OverviewStats {

@@ -5,7 +5,7 @@ import "@testing-library/jest-dom";
 import InvoicesPage from "../page";
 
 import type { Client } from "@/features/clients";
-import type { Invoice } from "@/features/invoices/invoices";
+import type { Invoice } from "@/features/invoices";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -18,77 +18,6 @@ jest.mock("sonner", () => ({
     success: jest.fn(),
     error: jest.fn(),
   },
-}));
-
-// Mock components
-jest.mock("@/features/invoices/components/create-invoice-form", () => ({
-  CreateInvoiceForm: ({ onSuccess }: { onSuccess: () => void }) => (
-    <div data-testid="create-invoice-form">
-      <button onClick={onSuccess}>Submit</button>
-    </div>
-  ),
-}));
-
-jest.mock("@/features/invoices/components/edit-invoice-form", () => ({
-  EditInvoiceForm: ({
-    invoice,
-    onSuccess,
-    onCancel,
-  }: {
-    invoice: Invoice;
-    onSuccess: () => void;
-    onCancel: () => void;
-  }) => (
-    <div data-testid="edit-invoice-form">
-      <p>Invoice: {invoice.number}</p>
-      <button onClick={onSuccess}>Save</button>
-      <button onClick={onCancel}>Cancel</button>
-    </div>
-  ),
-}));
-
-jest.mock("@/features/invoices/components/invoice-upload-modal", () => ({
-  InvoiceUploadModal: ({
-    invoice,
-    onSuccess,
-    onClose,
-  }: {
-    invoice: Invoice;
-    onSuccess: () => void;
-    onClose: () => void;
-  }) => (
-    <div data-testid="invoice-upload-modal">
-      <p>Upload for: {invoice.number}</p>
-      <button onClick={onSuccess}>Upload</button>
-      <button onClick={onClose}>Close</button>
-    </div>
-  ),
-}));
-
-jest.mock("@/features/invoices/components/invoice-card", () => ({
-  InvoiceCard: ({
-    number,
-    clientName,
-    amount,
-    status,
-    onEdit,
-    onDelete,
-    onUpload,
-  }: any) => (
-    <div data-testid="invoice-card">
-      <p>Invoice: {number}</p>
-      <p>Client: {clientName}</p>
-      <p>Amount: ${amount}</p>
-      <p>Status: {status}</p>
-      <button onClick={onEdit}>Edit</button>
-      <button onClick={onDelete}>Delete</button>
-      <button onClick={onUpload}>Upload</button>
-    </div>
-  ),
-}));
-
-jest.mock("@/features/invoices/components/invoices-big-stats", () => ({
-  InvoicesBigStats: () => <div data-testid="invoices-big-stats">Stats</div>,
 }));
 
 jest.mock("@/components/layout/page-container", () => ({
@@ -174,8 +103,65 @@ const mockInvoices: Invoice[] = [
   },
 ];
 
-// Mock services
-jest.mock("@/features/invoices/invoices", () => ({
+// Mock the invoices feature barrel: stub the components + services this test
+// controls, keep the real InvoiceSearchFilters/useInvoiceFilters implementation.
+jest.mock("@/features/invoices", () => ({
+  ...jest.requireActual("@/features/invoices"),
+  CreateInvoiceForm: ({ onSuccess }: { onSuccess: () => void }) => (
+    <div data-testid="create-invoice-form">
+      <button onClick={onSuccess}>Submit</button>
+    </div>
+  ),
+  EditInvoiceForm: ({
+    invoice,
+    onSuccess,
+    onCancel,
+  }: {
+    invoice: Invoice;
+    onSuccess: () => void;
+    onCancel: () => void;
+  }) => (
+    <div data-testid="edit-invoice-form">
+      <p>Invoice: {invoice.number}</p>
+      <button onClick={onSuccess}>Save</button>
+      <button onClick={onCancel}>Cancel</button>
+    </div>
+  ),
+  InvoiceUploadModal: ({
+    invoice,
+    onSuccess,
+    onClose,
+  }: {
+    invoice: Invoice;
+    onSuccess: () => void;
+    onClose: () => void;
+  }) => (
+    <div data-testid="invoice-upload-modal">
+      <p>Upload for: {invoice.number}</p>
+      <button onClick={onSuccess}>Upload</button>
+      <button onClick={onClose}>Close</button>
+    </div>
+  ),
+  InvoiceCard: ({
+    number,
+    clientName,
+    amount,
+    status,
+    onEdit,
+    onDelete,
+    onUpload,
+  }: any) => (
+    <div data-testid="invoice-card">
+      <p>Invoice: {number}</p>
+      <p>Client: {clientName}</p>
+      <p>Amount: ${amount}</p>
+      <p>Status: {status}</p>
+      <button onClick={onEdit}>Edit</button>
+      <button onClick={onDelete}>Delete</button>
+      <button onClick={onUpload}>Upload</button>
+    </div>
+  ),
+  InvoicesBigStats: () => <div data-testid="invoices-big-stats">Stats</div>,
   useInvoices: jest.fn(() => ({
     data: mockInvoices,
     isLoading: false,
@@ -199,7 +185,7 @@ describe("InvoicesPage", () => {
   });
 
   it("should render loading skeleton when loading", () => {
-    const { useInvoices } = require("@/features/invoices/invoices");
+    const { useInvoices } = require("@/features/invoices");
     useInvoices.mockReturnValue({
       data: null,
       isLoading: true,
@@ -211,7 +197,7 @@ describe("InvoicesPage", () => {
   });
 
   it("should render error state when there is an error", () => {
-    const { useInvoices } = require("@/features/invoices/invoices");
+    const { useInvoices } = require("@/features/invoices");
     useInvoices.mockReturnValue({
       data: null,
       isLoading: false,
@@ -245,7 +231,7 @@ describe("InvoicesPage", () => {
   });
 
   it("should handle invoice deletion", async () => {
-    const { useDeleteInvoice } = require("@/features/invoices/invoices");
+    const { useDeleteInvoice } = require("@/features/invoices");
     const mockMutateAsync = jest.fn();
     useDeleteInvoice.mockReturnValue({
       mutateAsync: mockMutateAsync,
@@ -306,7 +292,7 @@ describe("InvoicesPage", () => {
   });
 
   it("should show empty state when no invoices", () => {
-    const { useInvoices } = require("@/features/invoices/invoices");
+    const { useInvoices } = require("@/features/invoices");
     useInvoices.mockReturnValue({
       data: [],
       isLoading: false,
