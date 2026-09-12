@@ -93,7 +93,7 @@ jest.mock("@/components/ui/info-card", () => ({
   ),
 }));
 
-jest.mock("@/components/dashboard/overview", () => ({
+jest.mock("@/features/dashboard", () => ({
   Overview: ({ data, isLoading }: { data: any; isLoading: boolean }) => (
     <div data-testid="overview">
       <span>Loading: {isLoading.toString()}</span>

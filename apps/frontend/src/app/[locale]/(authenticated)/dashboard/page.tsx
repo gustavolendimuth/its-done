@@ -5,7 +5,7 @@ import { BarChart3 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useMemo } from "react";
 
-import { Overview, OverviewData } from "@/components/dashboard/overview";
+import { Overview, OverviewData } from "@/features/dashboard";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
