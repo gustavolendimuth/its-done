@@ -4,54 +4,11 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import WorkHoursPage from "../page";
 
-import type { WorkHour } from "@/features/time-tracking/types";
+import type { WorkHour } from "@/features/time-tracking";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
-}));
-
-// Mock components
-jest.mock("@/features/time-tracking/components/work-hour-form", () => ({
-  WorkHourForm: () => <div data-testid="work-hour-form">Work Hour Form</div>,
-}));
-
-jest.mock("@/features/time-tracking/components/work-hours-big-stats", () => ({
-  WorkHoursBigStats: ({
-    workHours,
-    isRefetching,
-  }: {
-    workHours: WorkHour[];
-    isRefetching: boolean;
-  }) => (
-    <div data-testid="work-hours-big-stats">
-      <span>
-        Total Hours: {workHours.reduce((sum, wh) => sum + wh.hours, 0)}
-      </span>
-      <span>Loading: {isRefetching.toString()}</span>
-    </div>
-  ),
-}));
-
-jest.mock("@/features/time-tracking/components/work-hours-table", () => ({
-  WorkHoursTable: ({ workHours, deletingId, onDelete }: any) => (
-    <div data-testid="work-hours-table">
-      {workHours.map((workHour: any) => (
-        <div data-testid="work-hour-row" key={workHour.id}>
-          <p>Hours: {workHour.hours}</p>
-          <p>Client: {workHour.client?.name}</p>
-          <p>Project: {workHour.project?.name}</p>
-          <p>Deleting: {(deletingId === workHour.id).toString()}</p>
-          <button
-            aria-label="delete work hour"
-            onClick={() => onDelete(workHour.id)}
-          >
-            delete
-          </button>
-        </div>
-      ))}
-    </div>
-  ),
 }));
 
 jest.mock("@/components/layout/page-container", () => ({
@@ -127,7 +84,41 @@ const mockClients = [
   },
 ];
 
-jest.mock("@/features/time-tracking/time-entries", () => ({
+// Mock the time-tracking feature (components + service, single barrel import in page.tsx)
+jest.mock("@/features/time-tracking", () => ({
+  WorkHourForm: () => <div data-testid="work-hour-form">Work Hour Form</div>,
+  WorkHoursBigStats: ({
+    workHours,
+    isRefetching,
+  }: {
+    workHours: WorkHour[];
+    isRefetching: boolean;
+  }) => (
+    <div data-testid="work-hours-big-stats">
+      <span>
+        Total Hours: {workHours.reduce((sum, wh) => sum + wh.hours, 0)}
+      </span>
+      <span>Loading: {isRefetching.toString()}</span>
+    </div>
+  ),
+  WorkHoursTable: ({ workHours, deletingId, onDelete }: any) => (
+    <div data-testid="work-hours-table">
+      {workHours.map((workHour: any) => (
+        <div data-testid="work-hour-row" key={workHour.id}>
+          <p>Hours: {workHour.hours}</p>
+          <p>Client: {workHour.client?.name}</p>
+          <p>Project: {workHour.project?.name}</p>
+          <p>Deleting: {(deletingId === workHour.id).toString()}</p>
+          <button
+            aria-label="delete work hour"
+            onClick={() => onDelete(workHour.id)}
+          >
+            delete
+          </button>
+        </div>
+      ))}
+    </div>
+  ),
   useTimeEntries: jest.fn(() => ({
     data: mockWorkHours,
     isLoading: false,
@@ -153,7 +144,7 @@ describe("WorkHoursPage", () => {
   });
 
   it("should render loading skeleton when loading", () => {
-    const { useTimeEntries } = require("@/features/time-tracking/time-entries");
+    const { useTimeEntries } = require("@/features/time-tracking");
     useTimeEntries.mockReturnValue({
       data: null,
       isLoading: true,
@@ -186,7 +177,7 @@ describe("WorkHoursPage", () => {
   });
 
   it("should filter work hours by client", async () => {
-    const { useTimeEntries } = require("@/features/time-tracking/time-entries");
+    const { useTimeEntries } = require("@/features/time-tracking");
     render(<WorkHoursPage />);
 
     // Open client filter
@@ -206,7 +197,7 @@ describe("WorkHoursPage", () => {
   });
 
   it("should handle work hour deletion", async () => {
-    const { useDeleteTimeEntry } = require("@/features/time-tracking/time-entries");
+    const { useDeleteTimeEntry } = require("@/features/time-tracking");
     const mockMutateAsync = jest.fn();
     useDeleteTimeEntry.mockReturnValue({
       mutateAsync: mockMutateAsync,
@@ -237,7 +228,7 @@ describe("WorkHoursPage", () => {
   });
 
   it("should pass an empty list to the table when there are no work hours", () => {
-    const { useTimeEntries } = require("@/features/time-tracking/time-entries");
+    const { useTimeEntries } = require("@/features/time-tracking");
     useTimeEntries.mockReturnValue({
       data: [],
       isLoading: false,
@@ -252,7 +243,7 @@ describe("WorkHoursPage", () => {
   });
 
   it("should show refetching indicator", () => {
-    const { useTimeEntries } = require("@/features/time-tracking/time-entries");
+    const { useTimeEntries } = require("@/features/time-tracking");
     useTimeEntries.mockReturnValue({
       data: mockWorkHours,
       isLoading: false,

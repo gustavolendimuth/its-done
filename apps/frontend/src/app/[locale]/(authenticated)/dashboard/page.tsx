@@ -9,10 +9,9 @@ import { Overview, OverviewData } from "@/components/dashboard/overview";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
+import { useTimeEntries, useWorkHoursStats } from "@/features/time-tracking";
 import { useClients } from "@/services/clients";
 import { useInvoices } from "@/services/invoices";
-import { useTimeEntries } from "@/features/time-tracking/time-entries";
-import { useWorkHoursStats } from "@/features/time-tracking/work-hours-stats";
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");

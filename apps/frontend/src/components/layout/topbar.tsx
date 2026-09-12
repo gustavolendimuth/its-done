@@ -18,7 +18,7 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { WorkHourForm } from "@/features/time-tracking/components/work-hour-form";
+import { WorkHourForm } from "@/features/time-tracking";
 import { useClients } from "@/services/clients";
 
 interface TopbarProps {

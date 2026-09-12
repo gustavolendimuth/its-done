@@ -5,7 +5,7 @@ import "@testing-library/jest-dom";
 import { Overview } from "../overview";
 
 import type { Invoice } from "@/services/invoices";
-import type { WorkHour, InvoiceWorkHour } from "@/features/time-tracking/types";
+import type { WorkHour, InvoiceWorkHour } from "@/features/time-tracking";
 
 // Mock components
 jest.mock("@/components/ui/stats-card", () => ({
