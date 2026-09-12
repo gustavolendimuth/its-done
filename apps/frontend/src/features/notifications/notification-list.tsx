@@ -24,7 +24,7 @@ import {
   useUnreadNotifications,
   type Notification,
   type NotificationType,
-} from "@/services/notifications";
+} from "./notifications.service";
 
 const notificationIcons: Record<NotificationType, React.ReactNode> = {
   INFO: <Info className="h-4 w-4 text-blue-500" />,

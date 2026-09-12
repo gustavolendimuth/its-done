@@ -10,9 +10,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useUnreadNotificationCount } from "@/services/notifications";
-
-import { NotificationList } from "./NotificationList";
+import { useUnreadNotificationCount } from "./notifications.service";
+import { NotificationList } from "./notification-list";
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);

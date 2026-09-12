@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { ModeToggle } from "@/components/mode-toggle";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { NotificationBell } from "@/features/notifications";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
