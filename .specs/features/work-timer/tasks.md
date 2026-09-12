@@ -574,6 +574,8 @@ T24
 
 **Commit**: `feat(work-timer): add WorkTimerWidget component`
 
+**Status**: ✅ Done — 7 new tests passing (`work-timer-widget.test.tsx`, scoped run: `pnpm test:ci -- work-timer-widget`). Applied `frontend-design` skill guidance: widget uses the existing green "work hours" theme (matches `WorkHourCard`, since a finished session becomes a `WorkHour`) as a fixed bottom-right pill/card rather than a new full-width banner, with a single restrained motion accent (a pulsing dot next to the live counter signaling "still counting") and an amber border override for the 12h alert — no new color system introduced. Necessary minimal addition beyond this task's single-file listing (same rationale as T9/T10/T12): created a placeholder `work-session-finish-form.tsx` (not yet functional — just enough to compile and be mocked in this task's own tests) because the widget's own "What" explicitly requires rendering it inline when STOPPING; T20 replaces its content with the full implementation and its own dedicated tests. Text is hardcoded (pt-BR) rather than routed through `next-intl`, since no message-file keys were in this task's listed files and adding them would have expanded scope beyond "Where" — flagged here for the orchestrator's awareness rather than silently done. `eslint` clean on all 3 touched/added files.
+
 ---
 
 ### T19: Wire `WorkTimerWidget` into the authenticated layout
