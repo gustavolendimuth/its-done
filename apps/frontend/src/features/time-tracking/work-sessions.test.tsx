@@ -3,7 +3,7 @@ import { renderHook, waitFor, act } from "@testing-library/react";
 import { ReactNode } from "react";
 
 import api from "@/lib/axios";
-import type { LocalWorkSession } from "@/features/time-tracking/lib/work-timer-db";
+import type { LocalWorkSession } from "./lib/work-timer-db";
 
 jest.mock("@/lib/axios");
 const mockedApi = api as jest.Mocked<typeof api>;
@@ -12,7 +12,7 @@ let subscribedListener: ((session: LocalWorkSession | null) => void) | null =
   null;
 const unsubscribeMock = jest.fn();
 
-jest.mock("@/features/time-tracking/lib/work-timer-engine", () => ({
+jest.mock("./lib/work-timer-engine", () => ({
   subscribe: jest.fn((listener) => {
     subscribedListener = listener;
     return unsubscribeMock;
@@ -25,8 +25,8 @@ jest.mock("@/features/time-tracking/lib/work-timer-engine", () => ({
   discard: jest.fn(),
 }));
 
-import * as engine from "@/features/time-tracking/lib/work-timer-engine";
-import { useWorkTimerEngine, useFinishWorkSession } from "../work-sessions";
+import * as engine from "./lib/work-timer-engine";
+import { useWorkTimerEngine, useFinishWorkSession } from "./work-sessions";
 
 const mockedEngine = engine as unknown as {
   subscribe: jest.Mock;

@@ -13,7 +13,7 @@ import { useTranslations } from "next-intl";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
-import { useWorkHoursStats } from "@/services/work-hours-stats";
+import { useWorkHoursStats } from "../work-hours-stats";
 import { WorkHour } from "@/types";
 
 interface StatCardProps {

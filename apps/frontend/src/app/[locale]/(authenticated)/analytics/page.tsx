@@ -70,7 +70,7 @@ import {
   useSummaryReport,
   type ReportFilters,
 } from "@/services/reports";
-import { useTimeEntries } from "@/services/time-entries";
+import { useTimeEntries } from "@/features/time-tracking/time-entries";
 
 const COLORS = [
   "#0088FE",

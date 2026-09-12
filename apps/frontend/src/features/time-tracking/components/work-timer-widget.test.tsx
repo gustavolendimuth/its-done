@@ -24,7 +24,7 @@ jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-jest.mock("@/services/work-sessions", () => ({
+jest.mock("../work-sessions", () => ({
   useWorkTimerEngine: () => mockUseWorkTimerEngine(),
 }));
 

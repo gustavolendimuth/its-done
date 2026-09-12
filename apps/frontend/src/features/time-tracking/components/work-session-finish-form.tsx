@@ -29,7 +29,7 @@ import { useClients } from "@/services/clients";
 import {
   useFinishWorkSession,
   useWorkTimerEngine,
-} from "@/services/work-sessions";
+} from "../work-sessions";
 
 import type { LocalWorkSession } from "../lib/work-timer-db";
 

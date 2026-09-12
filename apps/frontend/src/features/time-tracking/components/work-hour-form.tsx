@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { Client } from "@/services/clients";
-import { useCreateTimeEntry } from "@/services/time-entries";
+import { useCreateTimeEntry } from "../time-entries";
 
 /**
  * Máscara de tempo "HH:mm" a partir dos dígitos digitados. Substitui o antigo

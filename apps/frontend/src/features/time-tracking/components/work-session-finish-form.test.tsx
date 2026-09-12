@@ -24,7 +24,7 @@ jest.mock("../lib/work-timer-engine", () => ({
   reset: (...args: unknown[]) => mockReset(...args),
 }));
 
-jest.mock("@/services/work-sessions", () => ({
+jest.mock("../work-sessions", () => ({
   useFinishWorkSession: () => ({
     mutateAsync: mockMutateAsync,
     isPending: false,

@@ -21,7 +21,7 @@ import {
   useUpdateInvoice,
   useUploadInvoiceFile,
 } from "@/services/invoices";
-import { useAvailableTimeEntries } from "@/services/time-entries";
+import { useAvailableTimeEntries } from "@/features/time-tracking/time-entries";
 import { TimeEntry } from "@/types";
 
 import { InvoiceFileUpload } from "./invoice-file-upload";

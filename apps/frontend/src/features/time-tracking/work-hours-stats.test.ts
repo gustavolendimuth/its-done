@@ -2,7 +2,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
-import { useWorkHoursStats } from "../work-hours-stats";
+import { useWorkHoursStats } from "./work-hours-stats";
 
 // Mock axios
 jest.mock("@/lib/axios");

@@ -21,7 +21,7 @@ import { WorkHourForm } from "@/features/time-tracking/components/work-hour-form
 import { WorkHoursBigStats } from "@/features/time-tracking/components/work-hours-big-stats";
 import { WorkHoursTable } from "@/features/time-tracking/components/work-hours-table";
 import { useClients, Client } from "@/services/clients";
-import { useTimeEntries, useDeleteTimeEntry } from "@/services/time-entries";
+import { useTimeEntries, useDeleteTimeEntry } from "@/features/time-tracking/time-entries";
 
 export default function WorkHoursPage() {
   const t = useTranslations("workHours");

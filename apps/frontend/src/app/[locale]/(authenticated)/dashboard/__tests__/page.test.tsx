@@ -10,7 +10,7 @@ jest.mock("next-intl", () => ({
 }));
 
 // Mock services
-jest.mock("@/services/time-entries", () => ({
+jest.mock("@/features/time-tracking/time-entries", () => ({
   useTimeEntries: jest.fn(() => ({
     data: [
       { id: "1", hours: 5, clientId: "client1" },
@@ -59,7 +59,7 @@ jest.mock("@/services/clients", () => ({
   })),
 }));
 
-jest.mock("@/services/work-hours-stats", () => ({
+jest.mock("@/features/time-tracking/work-hours-stats", () => ({
   useWorkHoursStats: jest.fn(() => ({
     isLoading: false,
   })),
@@ -147,7 +147,7 @@ describe("DashboardPage", () => {
   it("should show loading state when data is being fetched", () => {
     // Mock loading state
     jest
-      .spyOn(require("@/services/time-entries"), "useTimeEntries")
+      .spyOn(require("@/features/time-tracking/time-entries"), "useTimeEntries")
       .mockReturnValue({
         data: [],
         isLoading: true,

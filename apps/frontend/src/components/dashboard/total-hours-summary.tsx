@@ -4,7 +4,7 @@ import { Clock, TrendingUp } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
-import { useWorkHoursStats } from "@/services/work-hours-stats";
+import { useWorkHoursStats } from "@/features/time-tracking/work-hours-stats";
 
 interface TotalHoursSummaryProps {
   className?: string;

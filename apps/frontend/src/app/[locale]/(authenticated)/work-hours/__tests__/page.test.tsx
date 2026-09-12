@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import WorkHoursPage from "../page";
 
-import type { WorkHour } from "@/services/work-hours";
+import type { WorkHour } from "@/features/time-tracking/types";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -127,7 +127,7 @@ const mockClients = [
   },
 ];
 
-jest.mock("@/services/time-entries", () => ({
+jest.mock("@/features/time-tracking/time-entries", () => ({
   useTimeEntries: jest.fn(() => ({
     data: mockWorkHours,
     isLoading: false,
@@ -153,7 +153,7 @@ describe("WorkHoursPage", () => {
   });
 
   it("should render loading skeleton when loading", () => {
-    const { useTimeEntries } = require("@/services/time-entries");
+    const { useTimeEntries } = require("@/features/time-tracking/time-entries");
     useTimeEntries.mockReturnValue({
       data: null,
       isLoading: true,
@@ -186,7 +186,7 @@ describe("WorkHoursPage", () => {
   });
 
   it("should filter work hours by client", async () => {
-    const { useTimeEntries } = require("@/services/time-entries");
+    const { useTimeEntries } = require("@/features/time-tracking/time-entries");
     render(<WorkHoursPage />);
 
     // Open client filter
@@ -206,7 +206,7 @@ describe("WorkHoursPage", () => {
   });
 
   it("should handle work hour deletion", async () => {
-    const { useDeleteTimeEntry } = require("@/services/time-entries");
+    const { useDeleteTimeEntry } = require("@/features/time-tracking/time-entries");
     const mockMutateAsync = jest.fn();
     useDeleteTimeEntry.mockReturnValue({
       mutateAsync: mockMutateAsync,
@@ -237,7 +237,7 @@ describe("WorkHoursPage", () => {
   });
 
   it("should pass an empty list to the table when there are no work hours", () => {
-    const { useTimeEntries } = require("@/services/time-entries");
+    const { useTimeEntries } = require("@/features/time-tracking/time-entries");
     useTimeEntries.mockReturnValue({
       data: [],
       isLoading: false,
@@ -252,7 +252,7 @@ describe("WorkHoursPage", () => {
   });
 
   it("should show refetching indicator", () => {
-    const { useTimeEntries } = require("@/services/time-entries");
+    const { useTimeEntries } = require("@/features/time-tracking/time-entries");
     useTimeEntries.mockReturnValue({
       data: mockWorkHours,
       isLoading: false,

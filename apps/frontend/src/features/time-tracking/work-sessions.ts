@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import api from "@/lib/axios";
-import { LocalWorkSession, LocalWorkSessionStatus } from "@/features/time-tracking/lib/work-timer-db";
+import { LocalWorkSession, LocalWorkSessionStatus } from "./lib/work-timer-db";
 import {
   subscribe,
   getElapsedSeconds,
@@ -11,7 +11,7 @@ import {
   pause,
   stop,
   discard,
-} from "@/features/time-tracking/lib/work-timer-engine";
+} from "./lib/work-timer-engine";
 
 export interface WorkTimerEngineState {
   session: LocalWorkSession | null;
