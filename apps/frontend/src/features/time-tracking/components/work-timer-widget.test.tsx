@@ -1,8 +1,8 @@
 import { screen, fireEvent, render } from "@testing-library/react";
 
-import { WorkTimerWidget } from "../work-timer-widget";
+import { WorkTimerWidget } from "./work-timer-widget";
 
-import type { LocalWorkSession } from "@/features/time-tracking/lib/work-timer-db";
+import type { LocalWorkSession } from "../lib/work-timer-db";
 
 const mockStart = jest.fn();
 const mockConfirm = jest.fn();
@@ -32,7 +32,7 @@ jest.mock("@/hooks/use-push-subscription", () => ({
   usePushSubscription: () => mockUsePushSubscription(),
 }));
 
-jest.mock("@/features/time-tracking/lib/work-timer-sync", () => ({
+jest.mock("../lib/work-timer-sync", () => ({
   startSyncLoop: (...args: unknown[]) => mockStartSyncLoop(...args),
   hydrateFromServer: (...args: unknown[]) => mockHydrateFromServer(...args),
 }));
@@ -40,7 +40,7 @@ jest.mock("@/features/time-tracking/lib/work-timer-sync", () => ({
 // The finish form is built out in a later task (T20) — the widget only needs
 // to know it delegates to it once STOPPING, so it's mocked here to keep this
 // suite scoped to the widget's own rendering/wiring logic.
-jest.mock("../work-session-finish-form", () => ({
+jest.mock("./work-session-finish-form", () => ({
   WorkSessionFinishForm: ({ session }: { session: LocalWorkSession }) => (
     <div data-testid="work-session-finish-form-stub">{session.id}</div>
   ),
@@ -48,7 +48,7 @@ jest.mock("../work-session-finish-form", () => ({
 
 // Same rationale as the finish-form mock above — WorkSessionStartForm has
 // its own dedicated test file; here only the widget's toggle/wiring matters.
-jest.mock("../work-session-start-form", () => ({
+jest.mock("./work-session-start-form", () => ({
   WorkSessionStartForm: ({
     onCancel,
     onStart,

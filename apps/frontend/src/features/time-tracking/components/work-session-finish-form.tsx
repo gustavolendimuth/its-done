@@ -24,14 +24,14 @@ import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { reset } from "@/features/time-tracking/lib/work-timer-engine";
+import { reset } from "../lib/work-timer-engine";
 import { useClients } from "@/services/clients";
 import {
   useFinishWorkSession,
   useWorkTimerEngine,
 } from "@/services/work-sessions";
 
-import type { LocalWorkSession } from "@/features/time-tracking/lib/work-timer-db";
+import type { LocalWorkSession } from "../lib/work-timer-db";
 
 export interface WorkSessionFinishFormProps {
   session: LocalWorkSession;

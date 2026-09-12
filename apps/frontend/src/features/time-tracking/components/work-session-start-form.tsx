@@ -21,7 +21,7 @@ import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { useClients } from "@/services/clients";
 
-import type { StartDetails } from "@/features/time-tracking/lib/work-timer-engine";
+import type { StartDetails } from "../lib/work-timer-engine";
 
 export interface WorkSessionStartFormProps {
   onCancel: () => void;

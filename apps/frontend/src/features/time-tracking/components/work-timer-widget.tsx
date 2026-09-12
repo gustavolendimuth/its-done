@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { usePushSubscription } from "@/hooks/use-push-subscription";
 import { cn } from "@/lib/utils";
-import { hydrateFromServer, startSyncLoop } from "@/features/time-tracking/lib/work-timer-sync";
+import { hydrateFromServer, startSyncLoop } from "../lib/work-timer-sync";
 import { useWorkTimerEngine } from "@/services/work-sessions";
 
 import { WorkSessionFinishForm } from "./work-session-finish-form";
