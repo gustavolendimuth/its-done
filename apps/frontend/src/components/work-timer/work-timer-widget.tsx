@@ -27,8 +27,8 @@ function formatElapsed(totalSeconds: number): string {
 }
 
 function useOnlineStatus(): boolean {
-  const [isOnline, setIsOnline] = useState(
-    typeof navigator === "undefined" ? true : navigator.onLine
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof window === "undefined" ? true : navigator.onLine
   );
 
   useEffect(() => {

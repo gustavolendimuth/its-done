@@ -64,8 +64,8 @@ function formatHours(hours: number | null | undefined): string {
 }
 
 function useOnlineStatus(): boolean {
-  const [isOnline, setIsOnline] = useState(
-    typeof navigator === "undefined" ? true : navigator.onLine
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof window === "undefined" ? true : navigator.onLine
   );
 
   useEffect(() => {
