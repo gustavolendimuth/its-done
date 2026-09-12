@@ -1,5 +1,5 @@
 import { MainLayout } from "@/components/layout/main-layout";
-import { WorkTimerWidget } from "@/components/work-timer/work-timer-widget";
+import { WorkTimerWidget } from "@/features/time-tracking/components/work-timer-widget";
 
 export default function AuthenticatedLayout({
   children,
