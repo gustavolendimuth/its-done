@@ -1,25 +1,244 @@
 "use client";
 
-// Minimal placeholder — fleshed out in T20 (client/project/description fields,
-// validation, submit via useFinishWorkSession, and the discard flow). It
-// exists already so WorkTimerWidget (T18) can render it inline once the
-// session reaches STOPPING, per design.md's WorkTimerWidget interface.
-import { Card, CardContent } from "@/components/ui/card";
-import { LocalWorkSession } from "@/lib/work-timer-db";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ClientCombobox } from "@/components/ui/client-combobox";
+import { Label } from "@/components/ui/label";
+import { ProjectCombobox } from "@/components/ui/project-combobox";
+import { Textarea } from "@/components/ui/textarea";
+import { reset } from "@/lib/work-timer-engine";
+import { useClients } from "@/services/clients";
+import {
+  useFinishWorkSession,
+  useWorkTimerEngine,
+} from "@/services/work-sessions";
+
+import type { LocalWorkSession } from "@/lib/work-timer-db";
 
 export interface WorkSessionFinishFormProps {
   session: LocalWorkSession;
   onSuccess: () => void;
 }
 
-export function WorkSessionFinishForm({ session }: WorkSessionFinishFormProps) {
+const finishFormSchema = z.object({
+  clientId: z.string().min(1, "Cliente é obrigatório"),
+  projectId: z.string().optional(),
+  description: z.string().min(1, "Descrição é obrigatória"),
+});
+
+type FinishFormData = z.infer<typeof finishFormSchema>;
+
+// Mirrors the HH:MM rounding already applied by work-timer-engine.stop()
+// (session.hours) — this only formats it for display, no rounding happens
+// here.
+function formatHours(hours: number | null | undefined): string {
+  const totalMinutes = Math.round((hours ?? 0) * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `${h}h${m.toString().padStart(2, "0")}`;
+}
+
+function useOnlineStatus(): boolean {
+  const [isOnline, setIsOnline] = useState(
+    typeof navigator === "undefined" ? true : navigator.onLine
+  );
+
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+  }, []);
+
+  return isOnline;
+}
+
+// Rendered inline by WorkTimerWidget once the session reaches STOPPING
+// (spec.md P1 "Encerrar sessão e preencher detalhes", WKT-06). Unlike the
+// rest of the timer, this form is NOT local-first: it needs a connection to
+// load client/project options, so it gates on connectivity (AC1) instead of
+// working offline.
+export function WorkSessionFinishForm({
+  session,
+  onSuccess,
+}: WorkSessionFinishFormProps) {
+  const isOnline = useOnlineStatus();
+  const { data: clients = [] } = useClients();
+  const { discard } = useWorkTimerEngine();
+  const finishMutation = useFinishWorkSession();
+  const [discardOpen, setDiscardOpen] = useState(false);
+
+  const {
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+  } = useForm<FinishFormData>({
+    resolver: zodResolver(finishFormSchema),
+    defaultValues: { clientId: "", projectId: "", description: "" },
+  });
+
+  const selectedClientId = watch("clientId");
+
+  const onSubmit = async (data: FinishFormData) => {
+    await finishMutation.mutateAsync({
+      sessionId: session.id,
+      data: {
+        clientId: data.clientId,
+        projectId: data.projectId || undefined,
+        description: data.description,
+      },
+    });
+    // Not part of the outbox/sync flow (finish() is a normal authenticated
+    // call, not a local-first event) — clear the local mirror directly so
+    // the widget goes back to IDLE instead of re-showing this form.
+    await reset();
+    onSuccess();
+  };
+
+  const handleDiscardConfirmed = async () => {
+    await discard();
+    setDiscardOpen(false);
+  };
+
+  if (!isOnline) {
+    return (
+      <Card
+        data-testid="work-session-finish-form-offline"
+        className="fixed bottom-4 right-4 z-50 w-96 border-green-200 dark:border-green-800"
+      >
+        <CardContent className="p-4 text-sm text-muted-foreground">
+          Sessão encerrada — aguardando conexão para carregar o formulário.
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card
       data-testid="work-session-finish-form"
-      className="fixed bottom-4 right-4 z-50 w-80 border-green-200 dark:border-green-800"
+      className="fixed bottom-4 right-4 z-50 w-96 border-green-200 dark:border-green-800"
     >
-      <CardContent className="p-4 text-sm text-muted-foreground">
-        Sessão {session.id} encerrada — formulário em construção.
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">
+          Sessão de {formatHours(session.hours)}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Cliente *</Label>
+            <Controller
+              name="clientId"
+              control={control}
+              render={({ field }) => (
+                <ClientCombobox
+                  clients={clients}
+                  value={field.value}
+                  onSelect={field.onChange}
+                />
+              )}
+            />
+            {errors.clientId && (
+              <p className="text-sm text-destructive">
+                {errors.clientId.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Projeto</Label>
+            <Controller
+              name="projectId"
+              control={control}
+              render={({ field }) => (
+                <ProjectCombobox
+                  clientId={selectedClientId}
+                  value={field.value}
+                  onSelect={(projectId) => field.onChange(projectId ?? "")}
+                  disabled={!selectedClientId}
+                  allowClear
+                />
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Descrição *</Label>
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <Textarea {...field} placeholder="O que você fez?" />
+              )}
+            />
+            {errors.description && (
+              <p className="text-sm text-destructive">
+                {errors.description.message}
+              </p>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              type="submit"
+              disabled={finishMutation.isPending}
+              className="flex-1"
+            >
+              {finishMutation.isPending ? "Salvando..." : "Salvar"}
+            </Button>
+
+            <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
+              <AlertDialogTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  data-testid="discard-trigger"
+                >
+                  Descartar
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Descartar sessão?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    O tempo registrado será perdido e nenhum registro de
+                    horas será criado. Essa ação não pode ser desfeita.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    data-testid="discard-confirm"
+                    onClick={handleDiscardConfirmed}
+                  >
+                    Descartar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </form>
       </CardContent>
     </Card>
   );

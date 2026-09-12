@@ -627,6 +627,8 @@ T24
 
 **Commit**: `feat(work-timer): add session finish form`
 
+**Status**: ✅ Done — 6 new tests passing (`work-session-finish-form.test.tsx`, scoped run: `pnpm test:ci -- work-session-finish-form`; full `work-timer*` scoped run: 40/40 green, including T18's widget suite unaffected since it mocks this module). Replaced T18's placeholder content in this same file with the full implementation: `ClientCombobox`/`ProjectCombobox`/`Textarea` (react-hook-form + zod, matching `work-hour-form.tsx`'s pattern) and an `AlertDialog` discard confirmation (matching `work-hour-card.tsx`'s delete-confirmation pattern) — real Radix `AlertDialog` exercised directly in tests (open via trigger, confirm via the action), no mock needed. Added one extra test beyond the 5-minimum ("waiting-for-connection placeholder when offline") to cover spec.md WKT-06 AC1's connectivity gate ("assim que houver conexão, SHALL exibir um formulário"), which is this task's own requirement and not covered anywhere else. Necessary minimal addition beyond this task's single-file listing (same rationale as T9/T10/T12/T18): added `reset()` to `work-timer-engine.ts` (T15's file) — after a successful `finish()`, the local IndexedDB mirror needs clearing so the widget returns to IDLE (the backend's ENDED status has no path back to the client's local state otherwise, since `finish()` isn't part of the sync/outbox flow); `discard()` couldn't be reused for this because it enqueues a sync event that would incorrectly try to flip an already-ENDED session to DISCARDED server-side. Build gate (last task of Phase 5): `pnpm build` clean; `eslint` clean on all touched/added files (`work-session-finish-form.tsx`, its test file, `work-timer-engine.ts`).
+
 ---
 
 ### T21: `public/sw.js` (Service Worker)

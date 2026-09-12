@@ -222,6 +222,17 @@ export async function discard(): Promise<void> {
   });
 }
 
+// Clears the local mirror after a session was finished server-side via the
+// non-outbox `finish()` endpoint (see work-session-finish-form.tsx). Distinct
+// from discard(): no sync event is enqueued here, since the server already
+// marked the session ENDED through a separate authenticated call, not the
+// local-first event flow.
+export async function reset(): Promise<void> {
+  state = null;
+  notify();
+  await clearActiveSession();
+}
+
 export function getElapsedSeconds(): number {
   if (!state) return 0;
 
