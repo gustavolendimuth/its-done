@@ -242,6 +242,8 @@ T24
 
 **Commit**: `feat(work-sessions): add POST /work-sessions/sync endpoint`
 
+**Status**: ✅ Done — 5 new e2e tests passing against the real dev Postgres DB (concurrency race verified via `Promise.all`, backed by T1's partial unique index + P2002 catch). Same 2 pre-existing unrelated `pnpm test` failures; `pnpm test:e2e` fully green (6/6).
+
 ---
 
 ### T7: `GET /work-sessions/active` endpoint
