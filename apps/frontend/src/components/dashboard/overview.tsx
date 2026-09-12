@@ -17,12 +17,12 @@ import {
 } from "lucide-react";
 import { useState, useMemo } from "react";
 
-import { ClientInvoiceCard } from "@/components/invoices/client-invoice-card";
+import { ClientInvoiceCard } from "@/features/invoices/components/client-invoice-card";
 import {
   InvoiceSearchFilters,
   SortBy,
   FilterStatus,
-} from "@/components/invoices/invoice-search-filters";
+} from "@/features/invoices/components/invoice-search-filters";
 import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 import {

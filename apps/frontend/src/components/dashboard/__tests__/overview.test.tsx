@@ -22,7 +22,7 @@ jest.mock("@/components/layout/loading-skeleton", () => ({
   LoadingSkeleton: () => <div data-testid="loading-skeleton">Loading...</div>,
 }));
 
-jest.mock("@/components/invoices/client-invoice-card", () => ({
+jest.mock("@/features/invoices/components/client-invoice-card", () => ({
   ClientInvoiceCard: ({ invoice }: any) => (
     <div data-testid="invoice-card">
       <p>Invoice {invoice.number}</p>

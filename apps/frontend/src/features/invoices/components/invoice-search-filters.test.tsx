@@ -6,7 +6,7 @@ import {
   useInvoiceFilters,
   SortBy,
   FilterStatus,
-} from "../invoice-search-filters";
+} from "./invoice-search-filters";
 
 // Mock data for testing
 const mockInvoices = [

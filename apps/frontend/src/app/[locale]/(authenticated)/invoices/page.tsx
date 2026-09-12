@@ -8,12 +8,12 @@ import { toast } from "sonner";
 
 import { CreateInvoiceForm } from "@/components/invoices/create-invoice-form";
 import { EditInvoiceForm } from "@/components/invoices/edit-invoice-form";
-import { InvoiceCard } from "@/components/invoices/invoice-card";
+import { InvoiceCard } from "@/features/invoices/components/invoice-card";
 import {
   InvoiceSearchFilters,
   useInvoiceFilters,
-} from "@/components/invoices/invoice-search-filters";
-import { InvoiceUploadModal } from "@/components/invoices/invoice-upload-modal";
+} from "@/features/invoices/components/invoice-search-filters";
+import { InvoiceUploadModal } from "@/features/invoices/components/invoice-upload-modal";
 import { InvoicesBigStats } from "@/components/invoices/invoices-big-stats";
 import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/loading-skeleton";

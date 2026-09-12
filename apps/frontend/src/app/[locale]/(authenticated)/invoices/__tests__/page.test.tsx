@@ -47,7 +47,7 @@ jest.mock("@/components/invoices/edit-invoice-form", () => ({
   ),
 }));
 
-jest.mock("@/components/invoices/invoice-upload-modal", () => ({
+jest.mock("@/features/invoices/components/invoice-upload-modal", () => ({
   InvoiceUploadModal: ({
     invoice,
     onSuccess,
@@ -65,7 +65,7 @@ jest.mock("@/components/invoices/invoice-upload-modal", () => ({
   ),
 }));
 
-jest.mock("@/components/invoices/invoice-card", () => ({
+jest.mock("@/features/invoices/components/invoice-card", () => ({
   InvoiceCard: ({
     number,
     clientName,
