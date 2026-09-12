@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-import AdminPage from "../page";
+import AdminPage from "./page";
 
 // Mock dependencies
 jest.mock("next-auth/react");
@@ -10,7 +10,7 @@ jest.mock("next/navigation");
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
-jest.mock("@/services/admin", () => ({
+jest.mock("@/features/admin", () => ({
   useSystemStats: () => ({
     data: {
       users: { total: 10, admins: 2, regular: 8 },
@@ -22,16 +22,8 @@ jest.mock("@/services/admin", () => ({
     },
     isLoading: false,
   }),
-}));
-
-// Mock child components
-jest.mock("../users", () => ({
-  __esModule: true,
-  default: () => <div>Admin Users Component</div>,
-}));
-jest.mock("../activity", () => ({
-  __esModule: true,
-  default: () => <div>Admin Activity Component</div>,
+  AdminUsers: () => <div>Admin Users Component</div>,
+  AdminActivity: () => <div>Admin Activity Component</div>,
 }));
 
 describe("AdminPage", () => {
@@ -91,11 +83,13 @@ describe("AdminPage", () => {
     });
 
     // Mock loading state
-    jest.doMock("@/services/admin", () => ({
+    jest.doMock("@/features/admin", () => ({
       useSystemStats: () => ({
         data: null,
         isLoading: true,
       }),
+      AdminUsers: () => <div>Admin Users Component</div>,
+      AdminActivity: () => <div>Admin Activity Component</div>,
     }));
 
     render(<AdminPage />);

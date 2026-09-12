@@ -38,7 +38,7 @@ import {
   useAllUsers,
   useUpdateUserRole,
   useDeleteUser,
-} from "@/services/admin";
+} from "./admin.service";
 import { ApiError } from "@/types";
 
 export default function AdminUsers() {
