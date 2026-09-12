@@ -1,6 +1,6 @@
 "use client";
 
-import { AnalyticsBigStats } from "@/components/analytics/analytics-big-stats";
+import { AnalyticsBigStats } from "./analytics-big-stats";
 import type { DashboardStats } from "@/features/dashboard";
 
 import { RecentActivitiesCard } from "./recent-activities-card";

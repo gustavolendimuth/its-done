@@ -30,7 +30,7 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 
-import { AnalyticsBigStats } from "@/components/analytics/analytics-big-stats";
+import { AnalyticsBigStats } from "@/features/analytics/components/analytics-big-stats";
 import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
@@ -69,7 +69,7 @@ import {
   useInvoiceReport,
   useSummaryReport,
   type ReportFilters,
-} from "@/services/reports";
+} from "@/features/analytics/reports.service";
 import { useTimeEntries } from "@/features/time-tracking";
 
 const COLORS = [

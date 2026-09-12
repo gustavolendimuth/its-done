@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClients } from "@/features/clients";
 import { useDashboardStats } from "@/features/dashboard";
 import { useTimeEntries } from "@/features/time-tracking";
-import { useHoursReport, useInvoiceReport, useSummaryReport } from "@/services/reports";
+import { useHoursReport, useInvoiceReport, useSummaryReport } from "../reports.service";
 
 import { AnalyticsOverviewTab } from "./analytics-overview-tab";
 import { AnalyticsReportsTab } from "./analytics-reports-tab";
