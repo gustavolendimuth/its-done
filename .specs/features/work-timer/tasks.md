@@ -406,6 +406,8 @@ T24
 
 **Commit**: `feat(push): add POST /push/subscriptions endpoint`
 
+**Status**: ✅ Done — 2 new e2e tests passing (`pnpm test:e2e` 18/18 green); `pnpm test` has the same 2 pre-existing unrelated failures as T2/T4/T5/T11. Registered `PushModule` in `AppModule` and added `PushController`/`CreateSubscriptionDto` (minimal additions beyond the task's single-file listing, same rationale as T9/T10 — the endpoint can't be reached without being wired into the app). Upsert keyed by `endpoint` per `design.md`.
+
 ---
 
 ### T13: `WorkSessionSchedulerService` (cron)

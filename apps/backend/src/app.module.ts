@@ -18,6 +18,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { InAppNotificationsModule } from './in-app-notifications/in-app-notifications.module';
 import { AdminModule } from './admin/admin.module';
 import { WorkSessionsModule } from './work-sessions/work-sessions.module';
+import { PushModule } from './push/push.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { WorkSessionsModule } from './work-sessions/work-sessions.module';
     InAppNotificationsModule,
     AdminModule,
     WorkSessionsModule,
+    PushModule,
   ],
   controllers: [AppController],
   providers: [AppService],
