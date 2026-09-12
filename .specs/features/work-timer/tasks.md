@@ -323,6 +323,8 @@ T24
 
 **Commit**: `feat(work-sessions): add action-token-authenticated confirm/stop endpoints`
 
+**Status**: ✅ Done — 4 new e2e tests passing (`pnpm test:e2e` 12/12 green). Interpretation note: "reused token" is resolved as a state-guarded no-op (200, unchanged state) rather than a hard 401, per spec.md's explicit edge case "trata a segunda confirmação como no-op, sem erro visível ao usuário" — genuinely invalid/expired/wrong-session tokens still get 401. Added `WorkSessionsService.getSessionById()` (not in T9's listed files, but a minimal, necessary addition — the actionToken routes only know sessionId and must resolve its owning userId to call `applyEvents()`).
+
 ---
 
 ### T10: `POST /work-sessions/:id/finish`

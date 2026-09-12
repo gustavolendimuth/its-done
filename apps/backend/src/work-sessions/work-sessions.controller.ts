@@ -3,17 +3,26 @@ import {
   Get,
   Post,
   Body,
+  Param,
+  Query,
   UseGuards,
+  UnauthorizedException,
   Request,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { Prisma } from '@prisma/client';
 import { WorkSessionsService } from './work-sessions.service';
 import { SyncRequestDto } from './dto/sync-request.dto';
+import { SyncEventType } from './dto/sync-event.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActionTokenService } from './services/action-token.service';
 
 @Controller('work-sessions')
 export class WorkSessionsController {
-  constructor(private readonly workSessionsService: WorkSessionsService) {}
+  constructor(
+    private readonly workSessionsService: WorkSessionsService,
+    private readonly actionTokenService: ActionTokenService,
+  ) {}
 
   @Post('sync')
   @UseGuards(JwtAuthGuard)
@@ -47,5 +56,50 @@ export class WorkSessionsController {
       req.user.id,
     );
     return { session };
+  }
+
+  @Post(':id/confirm')
+  async confirmByActionToken(
+    @Param('id') id: string,
+    @Query('actionToken') actionToken?: string,
+  ) {
+    return this.applyActionTokenEvent(id, actionToken, SyncEventType.CONFIRM);
+  }
+
+  @Post(':id/stop')
+  async stopByActionToken(
+    @Param('id') id: string,
+    @Query('actionToken') actionToken?: string,
+  ) {
+    return this.applyActionTokenEvent(id, actionToken, SyncEventType.STOP);
+  }
+
+  private async applyActionTokenEvent(
+    sessionId: string,
+    actionToken: string | undefined,
+    type: SyncEventType,
+  ) {
+    if (!actionToken) {
+      throw new UnauthorizedException('Missing action token');
+    }
+
+    const session = await this.workSessionsService.getSessionById(sessionId);
+    if (!session) {
+      throw new UnauthorizedException('Session not found');
+    }
+
+    const valid = await this.actionTokenService.verify(sessionId, actionToken);
+    if (!valid) {
+      throw new UnauthorizedException('Invalid or expired action token');
+    }
+
+    return this.workSessionsService.applyEvents(session.userId, [
+      {
+        eventId: randomUUID(),
+        sessionId,
+        type,
+        clientTimestamp: new Date().toISOString(),
+      },
+    ]);
   }
 }

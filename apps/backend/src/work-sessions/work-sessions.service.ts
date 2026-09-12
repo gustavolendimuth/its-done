@@ -47,6 +47,13 @@ export class WorkSessionsService {
     });
   }
 
+  // Needed by the action-token-authenticated routes (T9), which only know
+  // the sessionId (from the notification payload) and must resolve its
+  // owning userId to call applyEvents().
+  async getSessionById(sessionId: string): Promise<WorkSession | null> {
+    return this.prisma.workSession.findUnique({ where: { id: sessionId } });
+  }
+
   async applyEvents(
     userId: string,
     events: SyncEventDto[],
