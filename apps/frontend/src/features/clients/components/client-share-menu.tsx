@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { Client } from "@/types/client";
+import { Client } from "@/features/clients/types";
 
 interface ClientShareMenuProps {
   client: Client;

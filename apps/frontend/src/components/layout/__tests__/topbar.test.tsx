@@ -25,7 +25,7 @@ jest.mock("next-intl", () => ({
 }));
 
 // Mock clients service
-jest.mock("@/services/clients", () => ({
+jest.mock("@/features/clients/clients", () => ({
   useClients: jest.fn(() => ({ data: [] })),
 }));
 

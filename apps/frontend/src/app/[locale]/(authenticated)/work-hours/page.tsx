@@ -24,7 +24,7 @@ import {
   useTimeEntries,
   useDeleteTimeEntry,
 } from "@/features/time-tracking";
-import { useClients, Client } from "@/services/clients";
+import { useClients, Client } from "@/features/clients/clients";
 
 export default function WorkHoursPage() {
   const t = useTranslations("workHours");

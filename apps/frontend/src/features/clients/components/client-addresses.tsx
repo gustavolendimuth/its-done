@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { AddressCombobox } from "@/components/ui/address-combobox";
 import { Label } from "@/components/ui/label";
-import { useClientAddresses } from "@/services/addresses";
+import { useClientAddresses } from "@/features/clients/addresses";
 
 
 interface ClientAddressesProps {

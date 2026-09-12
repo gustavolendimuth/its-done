@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUpdateAddress , Address } from "@/services/addresses";
+import { useUpdateAddress , Address } from "@/features/clients/addresses";
 
 import { ADDRESS_TYPES, BRAZILIAN_STATES } from "./address-constants";
 

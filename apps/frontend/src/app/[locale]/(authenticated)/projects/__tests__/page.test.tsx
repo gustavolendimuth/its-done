@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ProjectsPage from "../page";
 
-import type { Client } from "@/services/clients";
+import type { Client } from "@/features/clients/clients";
 import type { Project } from "@/features/projects";
 
 // Mock next-intl
@@ -164,7 +164,7 @@ const mockProjects: Project[] = [
   },
 ];
 
-jest.mock("@/services/clients", () => ({
+jest.mock("@/features/clients/clients", () => ({
   useClients: jest.fn(() => ({
     data: mockClients,
     isLoading: false,

@@ -22,7 +22,7 @@ import {
 import { AddressForm } from "@/features/clients/components/addresses/address-form";
 import { EditAddressForm } from "@/features/clients/components/addresses/edit-address-form";
 import { cn } from "@/lib/utils";
-import { Address } from "@/services/addresses";
+import { Address } from "@/features/clients/addresses";
 
 
 interface AddressComboboxProps {

@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { Client } from "@/services/clients";
+import { Client } from "@/features/clients/clients";
 import { useCreateTimeEntry } from "../time-entries";
 
 /**

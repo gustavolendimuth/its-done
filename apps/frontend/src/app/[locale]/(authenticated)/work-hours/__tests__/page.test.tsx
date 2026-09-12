@@ -130,7 +130,7 @@ jest.mock("@/features/time-tracking", () => ({
   })),
 }));
 
-jest.mock("@/services/clients", () => ({
+jest.mock("@/features/clients/clients", () => ({
   useClients: jest.fn(() => ({
     data: mockClients,
     isLoading: false,

@@ -18,7 +18,7 @@ import { ClientCombobox } from "@/components/ui/client-combobox";
 import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Client } from "@/services/clients";
+import { Client } from "@/features/clients/clients";
 import { useCreateInvoice, useUploadInvoiceFile } from "@/services/invoices";
 
 

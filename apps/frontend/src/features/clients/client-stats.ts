@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
-import { ClientSpecificStats } from "@/types/client";
+import { ClientSpecificStats } from "@/features/clients/types";
 
 export interface ClientStats {
   totalClients: number;

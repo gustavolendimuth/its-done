@@ -14,7 +14,7 @@ import { SearchInput } from "@/components/ui/search-input";
 import { ClientCard } from "@/features/clients/components/client-card";
 import { ClientForm } from "@/features/clients/components/client-form";
 import { ClientsBigStats } from "@/features/clients/components/clients-big-stats";
-import { useClients } from "@/services/clients";
+import { useClients } from "@/features/clients/clients";
 
 export default function ClientsPage() {
   const t = useTranslations("clients");

@@ -39,9 +39,9 @@ import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { cn , formatHoursToHHMM } from "@/lib/utils";
 
-import { useClientSpecificStats } from "@/services/client-stats";
-import { useUpdateClient, UpdateClientDto } from "@/services/clients";
-import { Client } from "@/types/client";
+import { useClientSpecificStats } from "@/features/clients/client-stats";
+import { useUpdateClient, UpdateClientDto } from "@/features/clients/clients";
+import { Client } from "@/features/clients/types";
 
 import { ClientAddresses } from "./client-addresses";
 import { ClientShareMenu } from "./client-share-menu";

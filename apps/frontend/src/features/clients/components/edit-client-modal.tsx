@@ -19,8 +19,8 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { useUpdateClient } from "@/services/clients";
-import { Client, UpdateClientDto } from "@/types/client";
+import { useUpdateClient } from "@/features/clients/clients";
+import { Client, UpdateClientDto } from "@/features/clients/types";
 
 import { ClientAddresses } from "./client-addresses";
 
