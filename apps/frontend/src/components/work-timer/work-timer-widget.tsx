@@ -4,6 +4,7 @@ import { AlertTriangle, Clock, Pause, Play, WifiOff } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { usePushSubscription } from "@/hooks/use-push-subscription";
 import { cn } from "@/lib/utils";
 import { useWorkTimerEngine } from "@/services/work-sessions";
 
@@ -50,6 +51,7 @@ export function WorkTimerWidget() {
   const { session, status, elapsedSeconds, start, confirm, stop } =
     useWorkTimerEngine();
   const isOnline = useOnlineStatus();
+  const { permission, subscribe } = usePushSubscription();
 
   if (status === "STOPPING" && session) {
     return <WorkSessionFinishForm session={session} onSuccess={() => {}} />;
@@ -59,6 +61,19 @@ export function WorkTimerWidget() {
   const isPaused = status === "PAUSED";
   const bannerDue = isRunning && session?.lastPromptAt != null;
   const isLongRunning = isRunning && elapsedSeconds >= TWELVE_HOURS_SECONDS;
+
+  // Ask for notification permission the first time the user ever starts a
+  // session — never on plain page load, and never again once the browser
+  // has recorded a decision (granted or denied), per WKT-04 AC1 and this
+  // task's own "not repeated on subsequent starts" requirement. The browser
+  // itself is the source of truth for "already decided" via
+  // Notification.permission, so no extra flag needs to be persisted here.
+  const handleStart = () => {
+    if (permission === "default") {
+      void subscribe();
+    }
+    void start();
+  };
 
   return (
     <div
@@ -85,7 +100,7 @@ export function WorkTimerWidget() {
         {status === "IDLE" && (
           <div data-testid="work-timer-idle" className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-green-600 dark:text-green-400" />
-            <Button size="sm" onClick={() => start()}>
+            <Button size="sm" onClick={handleStart}>
               <Play className="mr-1.5 h-3.5 w-3.5" />
               Iniciar
             </Button>

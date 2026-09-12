@@ -10,9 +10,15 @@ const mockStop = jest.fn();
 const mockDiscard = jest.fn();
 const mockPause = jest.fn();
 const mockUseWorkTimerEngine = jest.fn();
+const mockSubscribe = jest.fn();
+const mockUsePushSubscription = jest.fn();
 
 jest.mock("@/services/work-sessions", () => ({
   useWorkTimerEngine: () => mockUseWorkTimerEngine(),
+}));
+
+jest.mock("@/hooks/use-push-subscription", () => ({
+  usePushSubscription: () => mockUsePushSubscription(),
 }));
 
 // The finish form is built out in a later task (T20) — the widget only needs
@@ -62,6 +68,10 @@ describe("WorkTimerWidget", () => {
     Object.defineProperty(window.navigator, "onLine", {
       configurable: true,
       value: true,
+    });
+    mockUsePushSubscription.mockReturnValue({
+      permission: "default",
+      subscribe: mockSubscribe,
     });
   });
 
@@ -167,5 +177,47 @@ describe("WorkTimerWidget", () => {
     expect(screen.getByTestId("work-timer-12h-alert")).toBeInTheDocument();
     expect(mockStop).not.toHaveBeenCalled();
     expect(mockPause).not.toHaveBeenCalled();
+  });
+
+  it("prompts for push permission on the first-ever start (permission still 'default')", () => {
+    mockUsePushSubscription.mockReturnValue({
+      permission: "default",
+      subscribe: mockSubscribe,
+    });
+    mockEngine({ status: "IDLE", session: null });
+
+    render(<WorkTimerWidget />);
+    fireEvent.click(screen.getByRole("button", { name: /iniciar/i }));
+
+    expect(mockSubscribe).toHaveBeenCalledTimes(1);
+    expect(mockStart).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not re-prompt on a later start once permission was already granted", () => {
+    mockUsePushSubscription.mockReturnValue({
+      permission: "granted",
+      subscribe: mockSubscribe,
+    });
+    mockEngine({ status: "IDLE", session: null });
+
+    render(<WorkTimerWidget />);
+    fireEvent.click(screen.getByRole("button", { name: /iniciar/i }));
+
+    expect(mockSubscribe).not.toHaveBeenCalled();
+    expect(mockStart).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not re-prompt on a later start once permission was already denied", () => {
+    mockUsePushSubscription.mockReturnValue({
+      permission: "denied",
+      subscribe: mockSubscribe,
+    });
+    mockEngine({ status: "IDLE", session: null });
+
+    render(<WorkTimerWidget />);
+    fireEvent.click(screen.getByRole("button", { name: /iniciar/i }));
+
+    expect(mockSubscribe).not.toHaveBeenCalled();
+    expect(mockStart).toHaveBeenCalledTimes(1);
   });
 });

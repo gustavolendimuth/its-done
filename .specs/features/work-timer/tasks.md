@@ -705,6 +705,8 @@ T24
 
 **Commit**: `feat(work-timer): trigger push permission prompt on first session start`
 
+**Status**: ✅ Done — 3 new tests passing in `work-timer-widget.test.tsx` (scoped run: `pnpm test:ci -- work-timer-widget` 10/10 green; `use-push-subscription` 3/3 unaffected). Guards the prompt on `permission === "default"` — the browser's own `Notification.permission` is the source of truth for "already decided" (granted or denied), so no extra flag needed to satisfy "not repeated on subsequent starts". This is the last task of Phase 6 — build gate run: `pnpm build` failed once on a real TS error this task's own new code introduced (`Type 'string' can only be iterated through when using the '--downlevelIteration' flag`, from `[...rawData]` in `use-push-subscription.ts`'s `urlBase64ToUint8Array` — same class of issue T17 hit and fixed the same way), fixed by using `rawData.split("")` instead of the spread; `pnpm build` now clean, `eslint` clean on all Phase-6 files. Full-suite baseline unchanged from the established precedent (T14 onward): `pnpm test:ci` 33 failed / 13 passed suites, 226 failed / 147 passed tests — same 226 pre-existing failures, all new tests from this batch passing.
+
 ---
 
 ### T24: Document new environment variables
