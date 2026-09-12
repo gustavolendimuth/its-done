@@ -624,13 +624,14 @@ T32
 - Skill: NONE
 
 **Done when**:
-- [ ] `components/dashboard/`, `services/dashboard.ts` no longer exist at old paths
-- [ ] `overview.tsx` split or exception noted
-- [ ] Imports of `work-hours-stats` updated to `@/features/time-tracking`
-- [ ] Gate check passes: `cd apps/frontend && pnpm test:ci`
+- [x] `components/dashboard/`, `services/dashboard.ts` no longer exist at old paths
+- [x] `overview.tsx` split or exception noted
+- [x] Imports of `work-hours-stats` updated to `@/features/time-tracking` (N/A — `total-hours-summary.tsx` is orphaned, see below; the actual cross-feature import fixed was `useDashboardStats` in `analytics`)
+- [x] Gate check passes: `cd apps/frontend && pnpm test:ci`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Complete — commit `c9c9407`. `overview.tsx` (381 lines) split into `overview-header.tsx`, `overview-main-stats.tsx`, `overview-performance-cards.tsx`, `overview-invoices-section.tsx` (pure extraction of the 4 existing `render*` closures, no behavior change). Also found `TotalHoursSummary` has zero consumers anywhere (orphaned, like earlier-documented cases) — migrated as-is, documented in README, not deleted. Also found a previously-missed co-located test at `components/dashboard/__tests__/overview.test.tsx` (my initial repo scan's filename pattern missed it since the file is named `overview.test.tsx`, not `*dashboard*test*`); moved it into the feature and confirmed via a throwaway `git worktree` at the pre-refactor commit that its 2 failing / 5 passing result is pre-existing, not a regression from the split.
 
 ---
 
@@ -647,13 +648,14 @@ T32
 - Skill: NONE
 
 **Done when**:
-- [ ] All 3 routes import the dashboard component only from `@/features/dashboard`
-- [ ] Gate check passes: `cd apps/frontend && pnpm test:ci && pnpm build`
-- [ ] Manual check: public `/client-dashboard/[clientId]` still renders (Playwright MCP)
-- [ ] No new failures vs. `baseline.md`
+- [x] All 3 routes import the dashboard component only from `@/features/dashboard`
+- [x] Gate check passes: `cd apps/frontend && pnpm test:ci && pnpm build`
+- [ ] Manual check: public `/client-dashboard/[clientId]` still renders (Playwright MCP) — deferred to T32 (needs dev server + backend + DB, same environment limitation as T7/T13/T17/T22)
+- [x] No new failures vs. `baseline.md`
 
 **Tests**: unit
 **Gate**: full
+**Status**: ✅ Complete — commit `93b96be`. Baseline preserved exactly (220 failed/167 passed/387 total). Manual Playwright check of the public client-dashboard route deferred to T32's full verification pass.
 
 ---
 
