@@ -63,7 +63,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
 import { useClients } from "@/features/clients";
-import { useDashboardStats } from "@/services/dashboard";
+import { useDashboardStats } from "@/features/dashboard";
 import {
   useHoursReport,
   useInvoiceReport,
