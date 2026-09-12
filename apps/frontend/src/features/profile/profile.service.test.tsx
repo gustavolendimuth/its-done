@@ -12,7 +12,7 @@ import {
   useDeleteProfileAvatar,
   useUpdateProfilePreferences,
   type Profile,
-} from "../profile";
+} from "./profile.service";
 
 // Mock axios
 jest.mock("@/lib/axios", () => ({

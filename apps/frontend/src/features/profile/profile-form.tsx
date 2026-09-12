@@ -14,8 +14,8 @@ import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { useProfile, useUpdateProfile } from "@/services/profile";
-import { profileFormSchema, type ProfileFormValues } from "@/types/profile";
+import { useProfile, useUpdateProfile } from "./profile.service";
+import { profileFormSchema, type ProfileFormValues } from "./types";
 
 export function ProfileForm() {
   const { toast } = useToast();

@@ -1,7 +1,7 @@
 import { MapPin, Globe } from "lucide-react";
 import React, { useState } from "react";
 
-import { ProfilePopover } from "@/components/profile/profile-popover";
+import { ProfilePopover } from "@/features/profile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {

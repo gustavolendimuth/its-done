@@ -2,7 +2,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
-import { useProfile } from "../profile";
+import { useProfile } from "./profile.service";
 
 // Mock axios
 jest.mock("@/lib/axios");
