@@ -253,6 +253,17 @@ describe("work-timer-engine", () => {
     );
   });
 
+  it("stop() floors a very short session (1min) to the 0.25h minimum instead of 0", async () => {
+    await engine.start();
+    jest.setSystemTime(START_TIME + 60 * 1000);
+
+    await engine.stop();
+
+    expect(dbMock.setActiveSession).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "STOPPING", hours: 0.25 })
+    );
+  });
+
   it("discard() clears the local session and enqueues a discard event", async () => {
     const session = await engine.start();
 
