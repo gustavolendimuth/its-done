@@ -888,6 +888,8 @@ No ❌ violations.
 **Tests**: unit (existing component tests must still pass with translated strings)
 **Gate**: quick (FE)
 
+**Status**: ✅ Resolved — added `WorkTimerWidget`/`WorkSessionFinishForm` namespaces to `messages/en.json` and `messages/pt-BR.json` (pt-BR values kept byte-identical to the previously-hardcoded copy; unslop-reviewed before finalizing — no changes to the pt-BR text were warranted since it's a verbatim relocation of already-shipped copy, not new prose). Both components now use `useTranslations`; the finish form's zod schema (which needed translated validation messages) is built via a `buildFinishFormSchema(t)` factory called with `useMemo` inside the component instead of at module scope. Updated both suites' tests to mock `next-intl` (matching the existing `project-edit-dialog.test.tsx` pattern) and query by message key instead of hardcoded copy. `cd apps/frontend && pnpm test:ci -- work-timer`: 51/51 passed (same count — no assertions removed, only re-targeted). `pnpm build` clean.
+
 ### FIX5 (Minor): Direct assertions for proxied edge cases
 
 **What**: Add direct tests for: (a) double "Sim, continuar" (confirm) reused-token no-op, mirroring the existing `stop` double-click test; (b) WKT-06 AC5 asserting zero `WorkHour` rows exist after a discard; (c) WKT-04 AC6 with `Notification.permission` explicitly set to `"denied"`, asserting the banner/local auto-pause still functions; (d) WKT-04 AC2's push payload asserting the full `actions` array and multi-subscription fan-out (not just `objectContaining({sessionId})`).

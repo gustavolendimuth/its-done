@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle, Clock, Pause, Play, WifiOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ function useOnlineStatus(): boolean {
 // directly). Mounted once in the authenticated layout (see T19) so it stays
 // visible across every page.
 export function WorkTimerWidget() {
+  const t = useTranslations("WorkTimerWidget");
   const { session, status, elapsedSeconds, start, confirm, stop } =
     useWorkTimerEngine();
   const isOnline = useOnlineStatus();
@@ -101,7 +103,7 @@ export function WorkTimerWidget() {
         {!isOnline && (
           <span
             data-testid="work-timer-offline-indicator"
-            title="Offline — sincroniza ao reconectar"
+            title={t("offlineIndicator")}
             className="text-muted-foreground"
           >
             <WifiOff className="h-4 w-4" />
@@ -113,7 +115,7 @@ export function WorkTimerWidget() {
             <Clock className="h-5 w-5 text-green-600 dark:text-green-400" />
             <Button size="sm" onClick={handleStart}>
               <Play className="mr-1.5 h-3.5 w-3.5" />
-              Iniciar
+              {t("start")}
             </Button>
           </div>
         )}
@@ -123,7 +125,7 @@ export function WorkTimerWidget() {
             {isLongRunning && (
               <span
                 data-testid="work-timer-12h-alert"
-                title="Sessão rodando há mais de 12 horas"
+                title={t("longRunningAlert")}
                 className="text-amber-600 dark:text-amber-400"
               >
                 <AlertTriangle className="h-4 w-4" />
@@ -137,7 +139,7 @@ export function WorkTimerWidget() {
               {formatElapsed(elapsedSeconds)}
             </span>
             <Button size="sm" variant="outline" onClick={() => stop()}>
-              Parar
+              {t("stop")}
             </Button>
           </div>
         )}
@@ -145,12 +147,12 @@ export function WorkTimerWidget() {
         {isPaused && (
           <div data-testid="work-timer-paused" className="flex items-center gap-3">
             <Pause className="h-4 w-4 text-green-600 dark:text-green-400" />
-            <span className="text-sm text-muted-foreground">Pausado</span>
+            <span className="text-sm text-muted-foreground">{t("paused")}</span>
             <span className="font-mono text-base font-semibold tabular-nums">
               {formatElapsed(elapsedSeconds)}
             </span>
             <Button size="sm" onClick={() => confirm()}>
-              Continuar
+              {t("resume")}
             </Button>
           </div>
         )}
@@ -161,13 +163,13 @@ export function WorkTimerWidget() {
           data-testid="work-timer-banner"
           className="flex items-center gap-2 border-t border-green-200 dark:border-green-800 px-4 py-2"
         >
-          <span className="text-sm">Ainda está trabalhando?</span>
+          <span className="text-sm">{t("stillWorking")}</span>
           <div className="ml-auto flex gap-2">
             <Button size="sm" onClick={() => confirm()}>
-              Sim, continuar
+              {t("confirmContinue")}
             </Button>
             <Button size="sm" variant="outline" onClick={() => stop()}>
-              Não, encerrar
+              {t("confirmFinish")}
             </Button>
           </div>
         </div>

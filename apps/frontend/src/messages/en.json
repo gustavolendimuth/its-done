@@ -803,6 +803,33 @@
     "topUsersDescription": "Users with the most work hours",
     "userStats": "{hours} total hours, {clients} clients"
   },
+  "WorkTimerWidget": {
+    "start": "Start",
+    "stop": "Stop",
+    "paused": "Paused",
+    "resume": "Resume",
+    "stillWorking": "Still working?",
+    "confirmContinue": "Yes, continue",
+    "confirmFinish": "No, finish",
+    "offlineIndicator": "Offline, syncs once reconnected",
+    "longRunningAlert": "Session running for over 12 hours"
+  },
+  "WorkSessionFinishForm": {
+    "clientRequired": "Client is required",
+    "descriptionRequired": "Description is required",
+    "offlineNotice": "Session ended. Waiting for a connection to load the form.",
+    "title": "Session: {duration}",
+    "clientLabel": "Client *",
+    "projectLabel": "Project",
+    "descriptionLabel": "Description *",
+    "descriptionPlaceholder": "What did you work on?",
+    "saving": "Saving...",
+    "save": "Save",
+    "discard": "Discard",
+    "discardTitle": "Discard session?",
+    "discardDescription": "The recorded time will be lost and no work-hour entry will be created. This action cannot be undone.",
+    "cancel": "Cancel"
+  },
   "notifications": {
     "title": "Notifications",
     "markAsRead": "Mark as read",

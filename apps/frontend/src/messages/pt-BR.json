@@ -801,6 +801,33 @@
       "error": "Erro ao salvar configurações"
     }
   },
+  "WorkTimerWidget": {
+    "start": "Iniciar",
+    "stop": "Parar",
+    "paused": "Pausado",
+    "resume": "Continuar",
+    "stillWorking": "Ainda está trabalhando?",
+    "confirmContinue": "Sim, continuar",
+    "confirmFinish": "Não, encerrar",
+    "offlineIndicator": "Offline — sincroniza ao reconectar",
+    "longRunningAlert": "Sessão rodando há mais de 12 horas"
+  },
+  "WorkSessionFinishForm": {
+    "clientRequired": "Cliente é obrigatório",
+    "descriptionRequired": "Descrição é obrigatória",
+    "offlineNotice": "Sessão encerrada — aguardando conexão para carregar o formulário.",
+    "title": "Sessão de {duration}",
+    "clientLabel": "Cliente *",
+    "projectLabel": "Projeto",
+    "descriptionLabel": "Descrição *",
+    "descriptionPlaceholder": "O que você fez?",
+    "saving": "Salvando...",
+    "save": "Salvar",
+    "discard": "Descartar",
+    "discardTitle": "Descartar sessão?",
+    "discardDescription": "O tempo registrado será perdido e nenhum registro de horas será criado. Essa ação não pode ser desfeita.",
+    "cancel": "Cancelar"
+  },
   "notifications": {
     "title": "Notificações",
     "markAsRead": "Marcar como lida",

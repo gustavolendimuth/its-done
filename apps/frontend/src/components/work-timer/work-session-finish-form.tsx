@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -36,13 +37,21 @@ export interface WorkSessionFinishFormProps {
   onSuccess: () => void;
 }
 
-const finishFormSchema = z.object({
-  clientId: z.string().min(1, "Cliente é obrigatório"),
-  projectId: z.string().optional(),
-  description: z.string().min(1, "Descrição é obrigatória"),
-});
+// The zod schema is built from translated messages, so it's constructed
+// inside the component (see buildFinishFormSchema below) rather than as a
+// module-level constant — it needs `t` from useTranslations, which is only
+// available once rendering has started.
+type TranslateFn = (key: string) => string;
 
-type FinishFormData = z.infer<typeof finishFormSchema>;
+function buildFinishFormSchema(t: TranslateFn) {
+  return z.object({
+    clientId: z.string().min(1, t("clientRequired")),
+    projectId: z.string().optional(),
+    description: z.string().min(1, t("descriptionRequired")),
+  });
+}
+
+type FinishFormData = z.infer<ReturnType<typeof buildFinishFormSchema>>;
 
 // Mirrors the HH:MM rounding already applied by work-timer-engine.stop()
 // (session.hours) — this only formats it for display, no rounding happens
@@ -82,11 +91,13 @@ export function WorkSessionFinishForm({
   session,
   onSuccess,
 }: WorkSessionFinishFormProps) {
+  const t = useTranslations("WorkSessionFinishForm");
   const isOnline = useOnlineStatus();
   const { data: clients = [] } = useClients();
   const { discard } = useWorkTimerEngine();
   const finishMutation = useFinishWorkSession();
   const [discardOpen, setDiscardOpen] = useState(false);
+  const finishFormSchema = useMemo(() => buildFinishFormSchema(t), [t]);
 
   const {
     handleSubmit,
@@ -128,7 +139,7 @@ export function WorkSessionFinishForm({
         className="fixed bottom-4 right-4 z-50 w-96 border-green-200 dark:border-green-800"
       >
         <CardContent className="p-4 text-sm text-muted-foreground">
-          Sessão encerrada — aguardando conexão para carregar o formulário.
+          {t("offlineNotice")}
         </CardContent>
       </Card>
     );
@@ -141,13 +152,13 @@ export function WorkSessionFinishForm({
     >
       <CardHeader className="pb-3">
         <CardTitle className="text-base">
-          Sessão de {formatHours(session.hours)}
+          {t("title", { duration: formatHours(session.hours) })}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label>Cliente *</Label>
+            <Label>{t("clientLabel")}</Label>
             <Controller
               name="clientId"
               control={control}
@@ -167,7 +178,7 @@ export function WorkSessionFinishForm({
           </div>
 
           <div className="space-y-2">
-            <Label>Projeto</Label>
+            <Label>{t("projectLabel")}</Label>
             <Controller
               name="projectId"
               control={control}
@@ -184,12 +195,12 @@ export function WorkSessionFinishForm({
           </div>
 
           <div className="space-y-2">
-            <Label>Descrição *</Label>
+            <Label>{t("descriptionLabel")}</Label>
             <Controller
               name="description"
               control={control}
               render={({ field }) => (
-                <Textarea {...field} placeholder="O que você fez?" />
+                <Textarea {...field} placeholder={t("descriptionPlaceholder")} />
               )}
             />
             {errors.description && (
@@ -205,7 +216,7 @@ export function WorkSessionFinishForm({
               disabled={finishMutation.isPending}
               className="flex-1"
             >
-              {finishMutation.isPending ? "Salvando..." : "Salvar"}
+              {finishMutation.isPending ? t("saving") : t("save")}
             </Button>
 
             <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
@@ -215,24 +226,23 @@ export function WorkSessionFinishForm({
                   variant="outline"
                   data-testid="discard-trigger"
                 >
-                  Descartar
+                  {t("discard")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Descartar sessão?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("discardTitle")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    O tempo registrado será perdido e nenhum registro de
-                    horas será criado. Essa ação não pode ser desfeita.
+                    {t("discardDescription")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     data-testid="discard-confirm"
                     onClick={handleDiscardConfirmed}
                   >
-                    Descartar
+                    {t("discard")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

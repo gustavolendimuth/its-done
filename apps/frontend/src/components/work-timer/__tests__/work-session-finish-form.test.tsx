@@ -9,6 +9,17 @@ const mockMutateAsync = jest.fn();
 const mockDiscard = jest.fn();
 const mockReset = jest.fn();
 
+// Mirrors the project's established next-intl test pattern (see
+// project-edit-dialog.test.tsx): the mock returns the raw key, so this
+// suite's assertions target the WorkSessionFinishForm message keys directly
+// instead of pt-BR/en copy — that stays in messages/{en,pt-BR}.json (Fix 4).
+jest.mock("next-intl", () => ({
+  useTranslations:
+    () =>
+    (key: string, values?: Record<string, unknown>) =>
+      values ? `${key}:${JSON.stringify(values)}` : key,
+}));
+
 jest.mock("@/lib/work-timer-engine", () => ({
   reset: (...args: unknown[]) => mockReset(...args),
 }));
@@ -110,13 +121,13 @@ describe("WorkSessionFinishForm", () => {
   it("blocks submit and shows the missing-client message when description is filled but client is empty", async () => {
     render(<WorkSessionFinishForm session={baseSession()} onSuccess={jest.fn()} />);
 
-    fireEvent.change(screen.getByPlaceholderText("O que você fez?"), {
+    fireEvent.change(screen.getByPlaceholderText("descriptionPlaceholder"), {
       target: { value: "Worked on the landing page" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
+    fireEvent.click(screen.getByRole("button", { name: "save" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Cliente é obrigatório")).toBeInTheDocument();
+      expect(screen.getByText("clientRequired")).toBeInTheDocument();
     });
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
@@ -127,10 +138,10 @@ describe("WorkSessionFinishForm", () => {
     fireEvent.change(screen.getByTestId("client-combobox"), {
       target: { value: "client-1" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
+    fireEvent.click(screen.getByRole("button", { name: "save" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Descrição é obrigatória")).toBeInTheDocument();
+      expect(screen.getByText("descriptionRequired")).toBeInTheDocument();
     });
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
@@ -146,10 +157,10 @@ describe("WorkSessionFinishForm", () => {
     fireEvent.change(screen.getByTestId("client-combobox"), {
       target: { value: "client-1" },
     });
-    fireEvent.change(screen.getByPlaceholderText("O que você fez?"), {
+    fireEvent.change(screen.getByPlaceholderText("descriptionPlaceholder"), {
       target: { value: "Worked on the landing page" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
+    fireEvent.click(screen.getByRole("button", { name: "save" }));
 
     await waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledWith({

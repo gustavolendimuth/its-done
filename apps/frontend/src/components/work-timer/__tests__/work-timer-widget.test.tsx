@@ -16,6 +16,14 @@ const mockStartSyncLoopCleanup = jest.fn();
 const mockStartSyncLoop = jest.fn(() => mockStartSyncLoopCleanup);
 const mockHydrateFromServer = jest.fn().mockResolvedValue(undefined);
 
+// Mirrors the project's established next-intl test pattern (see
+// project-edit-dialog.test.tsx): the mock returns the raw key, so this
+// suite's assertions target the WorkTimerWidget message keys directly
+// instead of pt-BR/en copy — that stays in messages/{en,pt-BR}.json (Fix 4).
+jest.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
 jest.mock("@/services/work-sessions", () => ({
   useWorkTimerEngine: () => mockUseWorkTimerEngine(),
 }));
@@ -96,7 +104,7 @@ describe("WorkTimerWidget", () => {
     render(<WorkTimerWidget />);
 
     expect(screen.getByTestId("work-timer-idle")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /iniciar/i }));
+    fireEvent.click(screen.getByRole("button", { name: "start" }));
     expect(mockStart).toHaveBeenCalledTimes(1);
   });
 
@@ -114,7 +122,7 @@ describe("WorkTimerWidget", () => {
     expect(running).toHaveTextContent("00:01:05");
     expect(screen.queryByTestId("work-timer-banner")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /parar/i }));
+    fireEvent.click(screen.getByRole("button", { name: "stop" }));
     expect(mockStop).toHaveBeenCalledTimes(1);
   });
 
@@ -129,10 +137,10 @@ describe("WorkTimerWidget", () => {
 
     expect(screen.getByTestId("work-timer-banner")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /sim, continuar/i }));
+    fireEvent.click(screen.getByRole("button", { name: "confirmContinue" }));
     expect(mockConfirm).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("button", { name: /não, encerrar/i }));
+    fireEvent.click(screen.getByRole("button", { name: "confirmFinish" }));
     expect(mockStop).toHaveBeenCalledTimes(1);
   });
 
@@ -146,7 +154,7 @@ describe("WorkTimerWidget", () => {
     render(<WorkTimerWidget />);
 
     expect(screen.getByTestId("work-timer-paused")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /continuar/i }));
+    fireEvent.click(screen.getByRole("button", { name: "resume" }));
     expect(mockConfirm).toHaveBeenCalledTimes(1);
   });
 
@@ -195,7 +203,7 @@ describe("WorkTimerWidget", () => {
     mockEngine({ status: "IDLE", session: null });
 
     render(<WorkTimerWidget />);
-    fireEvent.click(screen.getByRole("button", { name: /iniciar/i }));
+    fireEvent.click(screen.getByRole("button", { name: "start" }));
 
     expect(mockSubscribe).toHaveBeenCalledTimes(1);
     expect(mockStart).toHaveBeenCalledTimes(1);
@@ -209,7 +217,7 @@ describe("WorkTimerWidget", () => {
     mockEngine({ status: "IDLE", session: null });
 
     render(<WorkTimerWidget />);
-    fireEvent.click(screen.getByRole("button", { name: /iniciar/i }));
+    fireEvent.click(screen.getByRole("button", { name: "start" }));
 
     expect(mockSubscribe).not.toHaveBeenCalled();
     expect(mockStart).toHaveBeenCalledTimes(1);
@@ -223,7 +231,7 @@ describe("WorkTimerWidget", () => {
     mockEngine({ status: "IDLE", session: null });
 
     render(<WorkTimerWidget />);
-    fireEvent.click(screen.getByRole("button", { name: /iniciar/i }));
+    fireEvent.click(screen.getByRole("button", { name: "start" }));
 
     expect(mockSubscribe).not.toHaveBeenCalled();
     expect(mockStart).toHaveBeenCalledTimes(1);
