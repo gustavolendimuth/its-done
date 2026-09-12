@@ -120,6 +120,27 @@ describe("work-timer-sync", () => {
     );
   });
 
+  it("carries clientId/projectId/description from the authoritative response instead of dropping them (WKT-10)", async () => {
+    const remoteSession = {
+      ...makeLocalSession(),
+      clientId: "client-1",
+      projectId: "project-1",
+      description: "Planejado com antecedência",
+    };
+    mockedDb.getPendingEvents.mockResolvedValue([makeEvent()]);
+    mockedApi.post.mockResolvedValue({ data: { session: remoteSession } });
+
+    await syncNow();
+
+    expect(mockedDb.setActiveSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        clientId: "client-1",
+        projectId: "project-1",
+        description: "Planejado com antecedência",
+      })
+    );
+  });
+
   it("clears the local active session when the response has no active session", async () => {
     mockedDb.getPendingEvents.mockResolvedValue([makeEvent()]);
     mockedApi.post.mockResolvedValue({ data: { session: null } });
@@ -200,6 +221,27 @@ describe("work-timer-sync", () => {
       expect(mockedDb.setActiveSession).toHaveBeenCalledWith(remoteSession);
       expect(mockedEngine.applyAuthoritativeSession).toHaveBeenCalledWith(
         remoteSession
+      );
+    });
+
+    it("carries clientId/projectId/description when hydrating a fresh device from the server (WKT-10)", async () => {
+      mockedDb.getActiveSession.mockResolvedValue(null);
+      const remoteSession = {
+        ...makeLocalSession({ status: "RUNNING" }),
+        clientId: "client-1",
+        projectId: null,
+        description: "Planejado com antecedência",
+      };
+      mockedApi.get.mockResolvedValue({ data: { session: remoteSession } });
+
+      await hydrateFromServer();
+
+      expect(mockedDb.setActiveSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          clientId: "client-1",
+          projectId: null,
+          description: "Planejado com antecedência",
+        })
       );
     });
 

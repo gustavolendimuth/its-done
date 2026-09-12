@@ -26,6 +26,9 @@ interface RemoteWorkSession {
   lastPromptAt: string | null;
   lastConfirmedAt: string | null;
   hours: number | null;
+  clientId: string | null;
+  projectId: string | null;
+  description: string | null;
 }
 
 interface SyncResponse {
@@ -47,6 +50,13 @@ function mapRemoteSession(remote: RemoteWorkSession): LocalWorkSession {
     lastPromptAt: remote.lastPromptAt,
     lastConfirmedAt: remote.lastConfirmedAt,
     hours: remote.hours,
+    // WKT-10: without these, every sync (including the periodic 30s one)
+    // would silently wipe out details entered upfront on another device or
+    // via the start-with-details form, since the authoritative response
+    // always overwrites the local mirror.
+    clientId: remote.clientId,
+    projectId: remote.projectId,
+    description: remote.description,
   };
 }
 
