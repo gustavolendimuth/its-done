@@ -672,11 +672,12 @@ T32
 - Skill: NONE
 
 **Done when**:
-- [ ] Extracted components render the same UI/behavior as the original inline JSX (manual visual check via Playwright MCP, since no automated test exists for this page today)
-- [ ] Gate check passes: `cd apps/frontend && pnpm test:ci`
+- [ ] Extracted components render the same UI/behavior as the original inline JSX (manual visual check via Playwright MCP, since no automated test exists for this page today) — deferred to T32 (dev server/backend/DB needed)
+- [x] Gate check passes: `cd apps/frontend && pnpm test:ci`
 
 **Tests**: unit (none pre-existing for this file — no new coverage required, only preservation)
 **Gate**: quick
+**Status**: ✅ Complete — commit `9c5acec` (bundled with an unrelated fix commit, see deviation below). Split into 10 files under `features/analytics/{types.ts, components/*}`: `analytics-view.tsx` (orchestrator, holds all hooks/state), `analytics-overview-tab.tsx` + `analytics-reports-tab.tsx` (tab composition), and 7 single-responsibility section/chart components. `page.tsx` itself is untouched here (route thinning is T27) — the new files aren't wired to any consumer yet, but `next build`'s project-wide `tsc` pass confirmed they typecheck correctly (Next.js type-checks the whole program, not just reachable files). `AnalyticsBigStats` and `ReportFilters`/report types are imported from their pre-move locations (`@/components/analytics/analytics-big-stats`, `@/services/reports`) since T26 hasn't moved them yet — same forward-reference pattern used in earlier batches. **Deviation**: while fixing this task I discovered T23's commit (`c9c9407`) had a broken relative import (`"../overview"` instead of `"./overview"`) in the test file moved during T23 — the gate had been run against an uncommitted working-tree fix, not the actually-staged content (confirmed with a throwaway `git worktree` at the broken commit, which failed to resolve the module). Fixed in `9c5acec`, which unfortunately also carries this task's new files since they were staged together. No further impact: baseline re-confirmed exactly (220/167/387) against the corrected, fully-committed HEAD.
 
 ---
 
@@ -693,11 +694,12 @@ T32
 - Skill: NONE
 
 **Done when**:
-- [ ] `components/analytics/`, `services/reports.ts` no longer exist at old paths
-- [ ] Gate check passes: `cd apps/frontend && pnpm test:ci`
+- [x] `components/analytics/`, `services/reports.ts` no longer exist at old paths
+- [x] Gate check passes: `cd apps/frontend && pnpm test:ci`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Complete — commit `9bec28d`. Neither file had a pre-existing test. `page.tsx` (not yet thinned, that's T27) updated to import from the new internal paths as a transient step.
 
 ---
 
@@ -714,13 +716,14 @@ T32
 - Skill: NONE
 
 **Done when**:
-- [ ] `app/.../analytics/page.tsx` is a thin wrapper (target: comparable to other route files, well under 100 lines)
-- [ ] Gate check passes: `cd apps/frontend && pnpm test:ci && pnpm build`
-- [ ] Manual check: analytics page renders identically (Playwright MCP) — filters, stats, charts
-- [ ] No new failures vs. `baseline.md`
+- [x] `app/.../analytics/page.tsx` is a thin wrapper (target: comparable to other route files, well under 100 lines) — now 7 lines
+- [x] Gate check passes: `cd apps/frontend && pnpm test:ci && pnpm build`
+- [ ] Manual check: analytics page renders identically (Playwright MCP) — filters, stats, charts — deferred to T32
+- [x] No new failures vs. `baseline.md`
 
 **Tests**: unit
 **Gate**: full
+**Status**: ✅ Complete — commit `c63342a`. Baseline preserved exactly (220/167/387) against a fully-committed, verified-clean HEAD (re-checked `git status` before and after the gate run, after the T23 lesson).
 
 ---
 
