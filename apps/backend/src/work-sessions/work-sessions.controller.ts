@@ -7,6 +7,8 @@ import {
   Query,
   UseGuards,
   UnauthorizedException,
+  NotFoundException,
+  BadRequestException,
   Request,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
@@ -14,14 +16,17 @@ import { Prisma } from '@prisma/client';
 import { WorkSessionsService } from './work-sessions.service';
 import { SyncRequestDto } from './dto/sync-request.dto';
 import { SyncEventType } from './dto/sync-event.dto';
+import { FinishSessionDto } from './dto/finish-session.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActionTokenService } from './services/action-token.service';
+import { WorkHoursService } from '../work-hours/work-hours.service';
 
 @Controller('work-sessions')
 export class WorkSessionsController {
   constructor(
     private readonly workSessionsService: WorkSessionsService,
     private readonly actionTokenService: ActionTokenService,
+    private readonly workHoursService: WorkHoursService,
   ) {}
 
   @Post('sync')
@@ -101,5 +106,33 @@ export class WorkSessionsController {
         clientTimestamp: new Date().toISOString(),
       },
     ]);
+  }
+
+  @Post(':id/finish')
+  @UseGuards(JwtAuthGuard)
+  async finish(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() dto: FinishSessionDto,
+  ) {
+    const session = await this.workSessionsService.getSessionById(id);
+    if (!session || session.userId !== req.user.id) {
+      throw new NotFoundException('Session not found');
+    }
+    if (session.status !== 'STOPPING') {
+      throw new BadRequestException('Session is not ready to finish');
+    }
+
+    const workHour = await this.workHoursService.create(req.user.id, {
+      date: session.startedAt,
+      hours: session.hours ?? 0,
+      clientId: dto.clientId,
+      projectId: dto.projectId,
+      description: dto.description,
+    });
+
+    await this.workSessionsService.markEnded(id);
+
+    return { workHour };
   }
 }

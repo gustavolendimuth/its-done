@@ -54,6 +54,14 @@ export class WorkSessionsService {
     return this.prisma.workSession.findUnique({ where: { id: sessionId } });
   }
 
+  // Used by the finish() flow (T10) once the WorkHour has been created.
+  async markEnded(sessionId: string): Promise<void> {
+    await this.prisma.workSession.update({
+      where: { id: sessionId },
+      data: { status: WorkSessionStatus.ENDED },
+    });
+  }
+
   async applyEvents(
     userId: string,
     events: SyncEventDto[],

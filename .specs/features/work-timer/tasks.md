@@ -352,6 +352,8 @@ T24
 
 **Commit**: `feat(work-sessions): add POST /work-sessions/:id/finish endpoint`
 
+**Status**: ✅ Done — 4 new e2e tests passing (`pnpm test:e2e` 16/16 green); `pnpm build` and lint clean on all touched files. Added `WorkSessionsService.markEnded()` (minimal addition, same rationale as T9's `getSessionById()`) and imported `WorkHoursModule` into `WorkSessionsModule` to reuse `WorkHoursService.create()` (and T2's client/project validation) directly, per design. This is the last task of Phase 2 — the batch's final task.
+
 ---
 
 ### T11: `PushService` (web-push + VAPID)
