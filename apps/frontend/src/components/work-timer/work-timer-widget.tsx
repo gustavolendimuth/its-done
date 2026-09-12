@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { usePushSubscription } from "@/hooks/use-push-subscription";
 import { cn } from "@/lib/utils";
+import { hydrateFromServer, startSyncLoop } from "@/lib/work-timer-sync";
 import { useWorkTimerEngine } from "@/services/work-sessions";
 
 import { WorkSessionFinishForm } from "./work-session-finish-form";
@@ -52,6 +53,16 @@ export function WorkTimerWidget() {
     useWorkTimerEngine();
   const isOnline = useOnlineStatus();
   const { permission, subscribe } = usePushSubscription();
+
+  // Composition root for cross-device sync (WKT-03): on mount, pick up an
+  // authoritative session from the server if this device has none locally
+  // yet, then keep the local outbox syncing (online event + periodic) for
+  // as long as the widget — mounted once in the authenticated layout — is
+  // alive.
+  useEffect(() => {
+    void hydrateFromServer();
+    return startSyncLoop();
+  }, []);
 
   if (status === "STOPPING" && session) {
     return <WorkSessionFinishForm session={session} onSuccess={() => {}} />;

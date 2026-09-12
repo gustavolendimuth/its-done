@@ -233,6 +233,21 @@ export async function reset(): Promise<void> {
   await clearActiveSession();
 }
 
+// Overwrites the in-memory reactive state with an authoritative session
+// fetched/synced from the server (GET /work-sessions/active or a sync
+// response), notifying subscribers immediately so the UI updates without a
+// page reload (WKT-03 AC1, AC2). Unlike start/confirm/pause/stop/discard,
+// this does not enqueue a sync event or write to IndexedDB itself — the
+// caller (work-timer-sync.ts) already owns persisting the authoritative
+// value there; this only keeps the live engine state consistent with it.
+export function applyAuthoritativeSession(
+  session: LocalWorkSession | null
+): void {
+  state = session;
+  loaded = true;
+  notify();
+}
+
 export function getElapsedSeconds(): number {
   if (!state) return 0;
 

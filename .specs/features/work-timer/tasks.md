@@ -845,3 +845,49 @@ Execution is strictly sequential — there is no intra-phase parallelism. A sing
 | T24 | Docs | none | none | ✅ OK |
 
 No ❌ violations.
+
+---
+
+## Fix Tasks (Round 1 — from Verifier FAIL, see `validation.md`)
+
+### FIX1 (Blocker): Wire `startSyncLoop()` and `GET /work-sessions/active` into the running app
+
+**What**: `work-timer-sync.ts`'s `startSyncLoop()`/`syncNow()` and the `active` fetch are fully built and unit-tested but never called anywhere in the app (confirmed by grep in `validation.md`). Wire `startSyncLoop()` to start when the authenticated app mounts (e.g. inside `WorkTimerWidget`'s mount effect, or a dedicated effect in the authenticated layout/providers). On load, if the engine has no local session, call `GET /work-sessions/active` and hydrate local state from the authoritative server response. On a `discarded` response during sync, propagate it into the live `work-timer-engine` reactive state (not just IndexedDB) so `useWorkTimerEngine()` re-renders without a page reload.
+**Where**: `apps/frontend/src/components/work-timer/work-timer-widget.tsx` (or a new small hook/effect it uses), `apps/frontend/src/lib/work-timer-engine.ts` (if it needs a method to accept an externally-fetched authoritative session), `apps/frontend/src/lib/work-timer-sync.ts` (if `discarded` propagation needs a callback hook-in)
+**Requirement**: WKT-03 (AC1, AC2), WKT-09 (AC3's reconnect half)
+**Tests**: unit/component — assert `startSyncLoop` (or its effect) is invoked on mount; assert a device with no local session calls `GET /work-sessions/active` and renders the returned RUNNING/PAUSED session
+**Gate**: quick (FE)
+
+**Status**: ✅ Resolved — added `work-timer-engine.applyAuthoritativeSession()` (overwrites live `state` + notifies subscribers) and `work-timer-sync.hydrateFromServer()` (calls `GET /work-sessions/active` when no local session exists); `syncNow()` now calls `applyAuthoritativeSession` on every response (covers both the discard-propagation case and normal cross-device updates). Both are wired into `WorkTimerWidget`'s mount effect (`useEffect(() => { void hydrateFromServer(); return startSyncLoop(); }, [])`). 6 new tests added (2 widget-mount wiring, 4 `hydrateFromServer`) + assertions added to 3 existing `work-timer-sync` tests confirming `applyAuthoritativeSession` receives the correct payload. `pnpm test:ci -- work-timer`: 49/49 passed (was 43). `pnpm build` clean.
+
+### FIX2 (Major): WKT-09 offline-reconciliation edge cases
+
+**What**: Add (a) a test asserting a `clientTimestamp` before `currentSegmentStartedAt` clamps to the lower bound in `WorkSessionsService`; (b) a multi-hour offline-gap reconciliation test; (c) a `work-timer-db.ts` test proving persistence across a simulated close/reopen (write → reinitialize module/connection → re-read).
+**Where**: `apps/backend/src/work-sessions/work-sessions.service.spec.ts`, `apps/frontend/src/lib/__tests__/work-timer-db.test.ts`
+**Requirement**: WKT-09 (AC3, AC6)
+**Tests**: unit
+**Gate**: quick (BE) + quick (FE)
+
+### FIX3 (Major): Reload/reopen elapsed-time path untested
+
+**What**: Add a `work-timer-engine` test that resets modules, seeds `work-timer-db` with a session whose `currentSegmentStartedAt` is e.g. 2 hours in the past, re-imports the engine, and asserts the first `getElapsedSeconds()` read reflects the full gap (no reset to zero).
+**Where**: `apps/frontend/src/lib/__tests__/work-timer-engine.test.ts`
+**Requirement**: WKT-01 (AC4), WKT-02 (AC2)
+**Tests**: unit
+**Gate**: quick (FE)
+
+### FIX4 (Minor): Route hardcoded pt-BR strings through next-intl
+
+**What**: Add the missing keys to `messages/en.json` and `messages/pt-BR.json`, and route `work-timer-widget.tsx` and `work-session-finish-form.tsx` through `useTranslations` instead of hardcoded Portuguese strings.
+**Where**: `apps/frontend/src/messages/en.json`, `apps/frontend/src/messages/pt-BR.json`, `apps/frontend/src/components/work-timer/work-timer-widget.tsx`, `apps/frontend/src/components/work-timer/work-session-finish-form.tsx`
+**Requirement**: — (i18n convention conformance)
+**Tests**: unit (existing component tests must still pass with translated strings)
+**Gate**: quick (FE)
+
+### FIX5 (Minor): Direct assertions for proxied edge cases
+
+**What**: Add direct tests for: (a) double "Sim, continuar" (confirm) reused-token no-op, mirroring the existing `stop` double-click test; (b) WKT-06 AC5 asserting zero `WorkHour` rows exist after a discard; (c) WKT-04 AC6 with `Notification.permission` explicitly set to `"denied"`, asserting the banner/local auto-pause still functions; (d) WKT-04 AC2's push payload asserting the full `actions` array and multi-subscription fan-out (not just `objectContaining({sessionId})`).
+**Where**: `apps/backend/test/work-sessions-action-token.e2e-spec.ts`, `apps/backend/src/work-hours/work-hours.service.spec.ts` or `work-sessions.service.spec.ts`, `apps/frontend/src/components/work-timer/__tests__/work-timer-widget.test.tsx`, `apps/backend/src/work-sessions/services/work-session-scheduler.service.spec.ts`
+**Requirement**: WKT-04 (AC2, AC6, edge case), WKT-06 (AC5)
+**Tests**: unit/e2e
+**Gate**: full (BE) + quick (FE)

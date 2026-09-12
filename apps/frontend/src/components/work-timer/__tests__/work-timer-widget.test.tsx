@@ -12,6 +12,9 @@ const mockPause = jest.fn();
 const mockUseWorkTimerEngine = jest.fn();
 const mockSubscribe = jest.fn();
 const mockUsePushSubscription = jest.fn();
+const mockStartSyncLoopCleanup = jest.fn();
+const mockStartSyncLoop = jest.fn(() => mockStartSyncLoopCleanup);
+const mockHydrateFromServer = jest.fn().mockResolvedValue(undefined);
 
 jest.mock("@/services/work-sessions", () => ({
   useWorkTimerEngine: () => mockUseWorkTimerEngine(),
@@ -19,6 +22,11 @@ jest.mock("@/services/work-sessions", () => ({
 
 jest.mock("@/hooks/use-push-subscription", () => ({
   usePushSubscription: () => mockUsePushSubscription(),
+}));
+
+jest.mock("@/lib/work-timer-sync", () => ({
+  startSyncLoop: (...args: unknown[]) => mockStartSyncLoop(...args),
+  hydrateFromServer: (...args: unknown[]) => mockHydrateFromServer(...args),
 }));
 
 // The finish form is built out in a later task (T20) — the widget only needs
@@ -219,5 +227,30 @@ describe("WorkTimerWidget", () => {
 
     expect(mockSubscribe).not.toHaveBeenCalled();
     expect(mockStart).toHaveBeenCalledTimes(1);
+  });
+
+  // WKT-03 (Fix 1): the widget is the app's composition root for the timer
+  // (mounted once in the authenticated layout, T19) — it must start the
+  // cross-device sync loop and hydrate from the server on mount, otherwise
+  // both are dead code despite being fully implemented and unit-tested in
+  // isolation (see validation.md Fix 1).
+  it("hydrates from the server and starts the sync loop when it mounts", () => {
+    mockEngine({ status: "IDLE", session: null });
+
+    render(<WorkTimerWidget />);
+
+    expect(mockHydrateFromServer).toHaveBeenCalledTimes(1);
+    expect(mockStartSyncLoop).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops the sync loop when it unmounts", () => {
+    mockEngine({ status: "IDLE", session: null });
+
+    const { unmount } = render(<WorkTimerWidget />);
+    expect(mockStartSyncLoopCleanup).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(mockStartSyncLoopCleanup).toHaveBeenCalledTimes(1);
   });
 });

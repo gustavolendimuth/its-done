@@ -8,6 +8,7 @@ import {
   LocalWorkSession,
   LocalWorkSessionStatus,
 } from "./work-timer-db";
+import { applyAuthoritativeSession } from "./work-timer-engine";
 
 export interface DiscardedNotice {
   sessionId: string;
@@ -72,9 +73,16 @@ export async function syncNow(onDiscarded?: DiscardedListener): Promise<void> {
   await ackEvents(pending.map((event) => event.eventId));
 
   if (data.session) {
-    await setActiveSession(mapRemoteSession(data.session));
+    const mapped = mapRemoteSession(data.session);
+    await setActiveSession(mapped);
+    // Keep the live engine state (not just IndexedDB) in sync with the
+    // authoritative server response, so a state change — including this
+    // device's session being displaced by a conflict winner — is reflected
+    // in the UI immediately, without a page reload (WKT-03 AC2).
+    applyAuthoritativeSession(mapped);
   } else {
     await clearActiveSession();
+    applyAuthoritativeSession(null);
   }
 
   if (
@@ -84,6 +92,36 @@ export async function syncNow(onDiscarded?: DiscardedListener): Promise<void> {
     onDiscarded
   ) {
     onDiscarded(data.discarded);
+  }
+}
+
+// WKT-03 AC1: a device that opens with no local session known (e.g. a fresh
+// login on a different device from the one that started the session) has
+// nothing in its outbox to sync, so syncNow() alone would never contact the
+// server. This reads the authoritative state directly and hydrates both
+// IndexedDB and the live engine state with it, when one exists.
+export async function hydrateFromServer(): Promise<void> {
+  const local = await getActiveSession();
+  if (local) {
+    return;
+  }
+
+  let remote: RemoteWorkSession | null;
+  try {
+    const response = await api.get<{ session: RemoteWorkSession | null }>(
+      "/work-sessions/active"
+    );
+    remote = response.data.session;
+  } catch {
+    // Best-effort: a fresh device with no connection simply stays IDLE until
+    // the next successful hydration attempt or the periodic sync loop.
+    return;
+  }
+
+  if (remote) {
+    const mapped = mapRemoteSession(remote);
+    await setActiveSession(mapped);
+    applyAuthoritativeSession(mapped);
   }
 }
 
