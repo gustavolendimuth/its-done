@@ -815,8 +815,10 @@
   "WorkSessionFinishForm": {
     "clientRequired": "Cliente é obrigatório",
     "descriptionRequired": "Descrição é obrigatória",
+    "dateRequired": "Data é obrigatória",
     "offlineNotice": "Sessão encerrada — aguardando conexão para carregar o formulário.",
     "title": "Sessão de {duration}",
+    "dateLabel": "Data *",
     "clientLabel": "Cliente *",
     "projectLabel": "Projeto",
     "descriptionLabel": "Descrição *",

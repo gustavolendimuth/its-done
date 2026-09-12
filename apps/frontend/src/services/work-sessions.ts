@@ -55,6 +55,9 @@ export interface FinishWorkSessionDto {
   clientId: string;
   projectId?: string;
   description: string;
+  // WKT-11: ISO date string — the day to log the WorkHour under, which may
+  // differ from the session's own startedAt day.
+  date: string;
 }
 
 export const useFinishWorkSession = () => {

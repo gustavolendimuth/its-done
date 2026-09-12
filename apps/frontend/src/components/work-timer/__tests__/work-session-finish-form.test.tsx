@@ -86,6 +86,25 @@ jest.mock("@/components/ui/project-combobox", () => ({
   ),
 }));
 
+jest.mock("@/components/ui/date-picker", () => ({
+  DatePickerComponent: ({
+    value,
+    onChange,
+  }: {
+    value: Date | null;
+    onChange: (date: Date | null) => void;
+  }) => (
+    <input
+      data-testid="date-picker"
+      type="date"
+      value={value ? value.toISOString().slice(0, 10) : ""}
+      onChange={(e) =>
+        onChange(e.target.value ? new Date(`${e.target.value}T00:00:00.000Z`) : null)
+      }
+    />
+  ),
+}));
+
 function baseSession(overrides: Partial<LocalWorkSession> = {}): LocalWorkSession {
   return {
     id: "session-1",
@@ -169,11 +188,72 @@ describe("WorkSessionFinishForm", () => {
           clientId: "client-1",
           projectId: undefined,
           description: "Worked on the landing page",
+          date: "2026-01-01T00:00:00.000Z",
         },
       });
     });
     await waitFor(() => expect(mockReset).toHaveBeenCalledTimes(1));
     expect(onSuccess).toHaveBeenCalledTimes(1);
+  });
+
+  it("defaults the date field to the session's startedAt day, not today (WKT-11)", () => {
+    render(
+      <WorkSessionFinishForm
+        session={baseSession({ startedAt: "2025-06-15T00:00:00.000Z" })}
+        onSuccess={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("date-picker")).toHaveValue("2025-06-15");
+  });
+
+  it("sends the edited date instead of the session's startedAt when the user changes it (WKT-11)", async () => {
+    mockMutateAsync.mockResolvedValueOnce({});
+
+    render(
+      <WorkSessionFinishForm
+        session={baseSession({ startedAt: "2025-06-15T00:00:00.000Z" })}
+        onSuccess={jest.fn()}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId("client-combobox"), {
+      target: { value: "client-1" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("descriptionPlaceholder"), {
+      target: { value: "Esqueci de registrar ontem" },
+    });
+    fireEvent.change(screen.getByTestId("date-picker"), {
+      target: { value: "2025-06-10" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "save" }));
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ date: "2025-06-10T00:00:00.000Z" }),
+        })
+      );
+    });
+  });
+
+  it("pre-fills client/project/description from the session when it was started with upfront details (WKT-10)", () => {
+    render(
+      <WorkSessionFinishForm
+        session={baseSession({
+          clientId: "client-1",
+          projectId: "project-1",
+          description: "Planejado com antecedência",
+        })}
+        onSuccess={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("client-combobox")).toHaveValue("client-1");
+    expect(screen.getByTestId("project-combobox")).toHaveValue("project-1");
+    expect(screen.getByPlaceholderText("descriptionPlaceholder")).toHaveValue(
+      "Planejado com antecedência"
+    );
   });
 
   it("does not discard when only the discard trigger is clicked, without confirming", () => {

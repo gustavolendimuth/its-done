@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientCombobox } from "@/components/ui/client-combobox";
+import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,6 +49,7 @@ function buildFinishFormSchema(t: TranslateFn) {
     clientId: z.string().min(1, t("clientRequired")),
     projectId: z.string().optional(),
     description: z.string().min(1, t("descriptionRequired")),
+    date: z.date({ required_error: t("dateRequired") }),
   });
 }
 
@@ -106,7 +108,16 @@ export function WorkSessionFinishForm({
     formState: { errors },
   } = useForm<FinishFormData>({
     resolver: zodResolver(finishFormSchema),
-    defaultValues: { clientId: "", projectId: "", description: "" },
+    // WKT-10: pre-fills client/project/description when the session was
+    // started with upfront details — still editable here. WKT-11: the date
+    // defaults to the day the session actually STARTED, not today, since
+    // the person may only be filling this in days later.
+    defaultValues: {
+      clientId: session.clientId ?? "",
+      projectId: session.projectId ?? "",
+      description: session.description ?? "",
+      date: new Date(session.startedAt),
+    },
   });
 
   const selectedClientId = watch("clientId");
@@ -118,6 +129,7 @@ export function WorkSessionFinishForm({
         clientId: data.clientId,
         projectId: data.projectId || undefined,
         description: data.description,
+        date: data.date.toISOString(),
       },
     });
     // Not part of the outbox/sync flow (finish() is a normal authenticated
@@ -157,6 +169,26 @@ export function WorkSessionFinishForm({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label>{t("dateLabel")}</Label>
+            <Controller
+              name="date"
+              control={control}
+              render={({ field }) => (
+                <DatePickerComponent
+                  value={field.value}
+                  onChange={(date) => date && field.onChange(date)}
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("1900-01-01")
+                  }
+                />
+              )}
+            />
+            {errors.date && (
+              <p className="text-sm text-destructive">{errors.date.message}</p>
+            )}
+          </div>
+
           <div className="space-y-2">
             <Label>{t("clientLabel")}</Label>
             <Controller

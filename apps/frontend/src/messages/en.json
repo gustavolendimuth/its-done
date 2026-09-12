@@ -817,8 +817,10 @@
   "WorkSessionFinishForm": {
     "clientRequired": "Client is required",
     "descriptionRequired": "Description is required",
+    "dateRequired": "Date is required",
     "offlineNotice": "Session ended. Waiting for a connection to load the form.",
     "title": "Session: {duration}",
+    "dateLabel": "Date *",
     "clientLabel": "Client *",
     "projectLabel": "Project",
     "descriptionLabel": "Description *",
