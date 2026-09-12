@@ -462,6 +462,8 @@ T24
 
 **Commit**: `feat(work-timer): add IndexedDB local storage layer`
 
+**Status**: ✅ Done — 5 new tests passing (`work-timer-db.test.ts`, scoped run: `pnpm test:ci -- work-timer-db`). Two environment fixes needed and applied: (1) jsdom lacks `structuredClone`, which `fake-indexeddb` needs internally — polyfilled in the test file only; (2) added a standard `idb` `blocking()` handler in `work-timer-db.ts` (closes the connection when another open/delete request is waiting) — this is a legitimate production concern (schema upgrades across tabs), not test-only, and it also fixes test-to-test DB isolation via `indexedDB.deleteDatabase`. **Full-suite baseline note**: `pnpm test:ci` (unscoped) fails broadly — 33 failed / 6 passed suites, 226 failed / 94 passed tests — confirmed via `git stash` to be a pre-existing baseline with zero relation to this feature (identical failure count with this task's files stashed out). Documenting this as the new pre-existing-failure baseline for the frontend gate going forward in this batch (mirrors the backend's T2-established precedent).
+
 ---
 
 ### T15: `work-timer-engine.ts` (client state machine)

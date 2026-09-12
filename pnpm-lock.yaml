@@ -391,6 +391,9 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
+      idb:
+        specifier: ^8.0.3
+        version: 8.0.3
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
@@ -497,6 +500,9 @@ importers:
       eslint-plugin-unused-imports:
         specifier: ^4.1.4
         version: 4.1.4(eslint@8.57.1)
+      fake-indexeddb:
+        specifier: ^6.2.5
+        version: 6.2.5
       jest:
         specifier: 29.7.0
         version: 29.7.0(@types/node@20.19.0)(ts-node@10.9.2)
@@ -9388,6 +9394,11 @@ packages:
     engines: {'0': node >=0.6.0}
     dev: true
 
+  /fake-indexeddb@6.2.5:
+    resolution: {integrity: sha512-CGnyrvbhPlWYMngksqrSSUT1BAVP49dZocrHuK0SvtR0D5TMs5wP0o3j7jexDJW01KSadjBp1M/71o/KR3nD1w==}
+    engines: {node: '>=18'}
+    dev: true
+
   /fast-deep-equal@2.0.1:
     resolution: {integrity: sha512-bCK/2Z4zLidyB4ReuIsvALH6w31YfAQDmXMqMx6FyfHqvBxtjC0eRumeSu4Bs3XtXwpyIywtSTrVT99BxY1f9w==}
     dev: false
@@ -10044,6 +10055,10 @@ packages:
     resolution: {integrity: sha512-nFYW2im0WJ3RUVZwabd71J8QTZRtkK1xxZBY7klg7a6KS/os17LZSj9q1VhbRSnk3S8Mv2I7F1izr/aEJ6cUsw==}
     dependencies:
       '@formatjs/icu-messageformat-parser': 3.5.13
+    dev: false
+
+  /idb@8.0.3:
+    resolution: {integrity: sha512-LtwtVyVYO5BqRvcsKuB2iUMnHwPVByPCXFXOpuU96IZPPoPN6xjOGxZQ74pgSVVLQWtUOYgyeL4GE98BY5D3wg==}
     dev: false
 
   /ieee754@1.1.13:
