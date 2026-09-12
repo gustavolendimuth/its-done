@@ -434,6 +434,8 @@ T24
 
 **Commit**: `feat(work-sessions): add hourly-check and auto-pause scheduler`
 
+**Status**: ✅ Done — 5 new tests passing (`work-session-scheduler.service.spec.ts`). Auto-pause reuses `WorkSessionsService.applyEvents()`'s existing `pause` transition (via a synthetic `PAUSE` event with `clientTimestamp = now`) instead of duplicating the freeze math, per design.md's reuse note. `WorkSessionSchedulerService` is registered directly as a provider in `AppModule` (not in `WorkSessionsModule`) since `AppModule` already imports both `WorkSessionsModule` and `PushModule` and their exports are sufficient — avoids an unlisted change to `work-sessions.module.ts`. Also fixed a prettier-only formatting issue in T11's `push.service.ts` (multi-line object-type wrap) surfaced by this task's mandatory build-gate lint run — no behavior change. This is the last task of Phase 3 — build gate run: `pnpm build` clean; `pnpm lint` has the same pre-existing unrelated errors noted in T1 (none in files touched by this task); `pnpm test` 39/41 passing, same 2 pre-existing unrelated failures as T2/T4/T5/T11/T12.
+
 ---
 
 ### T14: `work-timer-db.ts` (IndexedDB layer)

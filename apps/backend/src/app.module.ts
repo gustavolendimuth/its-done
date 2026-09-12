@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { SentryModule } from '@sentry/nestjs/setup';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -19,6 +20,7 @@ import { InAppNotificationsModule } from './in-app-notifications/in-app-notifica
 import { AdminModule } from './admin/admin.module';
 import { WorkSessionsModule } from './work-sessions/work-sessions.module';
 import { PushModule } from './push/push.module';
+import { WorkSessionSchedulerService } from './work-sessions/services/work-session-scheduler.service';
 
 @Module({
   imports: [
@@ -26,6 +28,7 @@ import { PushModule } from './push/push.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -44,6 +47,6 @@ import { PushModule } from './push/push.module';
     PushModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, WorkSessionSchedulerService],
 })
 export class AppModule {}

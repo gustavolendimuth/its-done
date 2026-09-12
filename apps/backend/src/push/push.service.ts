@@ -40,7 +40,12 @@ export class PushService implements OnModuleInit {
   }
 
   private async sendToSubscription(
-    subscription: { id: string; endpoint: string; p256dh: string; auth: string },
+    subscription: {
+      id: string;
+      endpoint: string;
+      p256dh: string;
+      auth: string;
+    },
     payload: PushPayload,
   ): Promise<void> {
     try {
