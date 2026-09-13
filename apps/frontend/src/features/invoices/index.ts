@@ -12,7 +12,6 @@ export { InvoiceUploadModal } from "./components/invoice-upload-modal";
 export { InvoicesBigStats } from "./components/invoices-big-stats";
 export { CreateInvoiceForm } from "./components/create-invoice-form";
 export { EditInvoiceForm } from "./components/edit-invoice-form";
-export { InvoiceUploadForm } from "./components/invoice-upload-form";
 export { InvoiceFileUpload } from "./components/invoice-file-upload";
 export { WorkHoursSelector } from "./components/work-hours-selector";
 export { WorkHoursSelectionSummary } from "./components/work-hours-selection-summary";

@@ -6,7 +6,7 @@ Geração e gestão de invoices a partir de `WorkHour`s (ver `AD` sobre cálculo
 
 - `InvoiceCard`, `ClientInvoiceCard`, `InvoicesBigStats` — UI de `app/[locale]/(authenticated)/invoices/page.tsx` e `features/dashboard/overview.tsx`
 - `InvoiceSearchFilters`, `useInvoiceFilters` (+ tipos `SortBy`, `FilterStatus`, `InvoiceFilters`) — busca/filtro/ordenação reutilizados entre a página de invoices e o overview do dashboard
-- `CreateInvoiceForm`, `EditInvoiceForm`, `InvoiceUploadModal`, `InvoiceUploadForm`, `InvoiceFileUpload` — formulários e upload de arquivo
+- `CreateInvoiceForm`, `EditInvoiceForm`, `InvoiceUploadModal`, `InvoiceFileUpload` — formulários e upload de arquivo
 - `WorkHoursSelector`, `WorkHoursSelectionSummary` — seleção de `WorkHour`s pra compor uma invoice, consomem `@/features/time-tracking`
 - `useInvoices`, `useInvoice`, `useCreateInvoice`, `useUpdateInvoice`, `useDeleteInvoice`, `useUploadInvoiceFile`, `useClientInvoices`, `useDownloadInvoice`, `invoicesService`, tipo `Invoice` (`invoices.ts`)
 - `useInvoiceStats`, tipo `InvoiceStats` (`invoice-stats.ts`)
