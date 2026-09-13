@@ -75,6 +75,20 @@ export function CreateInvoiceForm({
     },
   });
 
+  const onValidationError = (formErrors: typeof errors) => {
+    if (formErrors.amount) {
+      toast.error(
+        "Cannot create invoice: the calculated amount is $0.00. Make sure the selected work hours belong to a project with an hourly rate greater than 0."
+      );
+    } else if (formErrors.workHourIds) {
+      toast.error("Select at least one work hour to invoice.");
+    } else if (formErrors.clientId) {
+      toast.error("Select a client.");
+    } else {
+      toast.error("Please review the highlighted fields before submitting.");
+    }
+  };
+
   const watchedClientId = watch("clientId");
 
   // Buscar horas disponíveis (não faturadas ou de faturas canceladas)
@@ -178,7 +192,10 @@ export function CreateInvoiceForm({
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      onSubmit={handleSubmit(onSubmit, onValidationError)}
+      className="space-y-6"
+    >
       {/* Client Selection */}
       <div className="space-y-2">
         <Label htmlFor="clientId">Client</Label>
