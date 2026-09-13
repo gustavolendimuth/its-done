@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { EmptyState } from "@/components/layout/empty-state";
-import { ProjectsPageSkeleton } from "@/features/projects";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
@@ -16,14 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useClients } from "@/features/clients";
 import {
   ProjectCard,
   ProjectCreateDialog,
   ProjectsBigStats,
   useProjects,
   useDeleteProject,
-} from "@/features/projects";
-import { useClients } from "@/features/clients";
+ ProjectsPageSkeleton } from "@/features/projects";
 
 export default function ProjectsPage() {
   const t = useTranslations("projects");
@@ -106,7 +105,9 @@ export default function ProjectsPage() {
           icon={Folder}
           title={t("noProjectsFound")}
           description={
-            selectedClientId === "all" ? t("createFirst") : t("noProjectsFound")
+            selectedClientId === "all"
+              ? t("createFirst")
+              : t("noProjectsForClient")
           }
           actions={[
             {

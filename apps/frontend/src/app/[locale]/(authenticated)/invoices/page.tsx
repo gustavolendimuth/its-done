@@ -1,19 +1,18 @@
 "use client";
 
 import { Plus, FileText } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/layout/empty-state";
-import { InvoicesPageSkeleton } from "@/features/invoices";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
 import { useClients } from "@/features/clients";
-import {
+import { InvoicesPageSkeleton ,
   CreateInvoiceForm,
   EditInvoiceForm,
   InvoiceCard,
@@ -191,7 +190,7 @@ export default function InvoicesPage() {
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         title={t("createInvoice")}
-        description={t("createFormSubtitle")}
+        description={t("createInvoiceFormSubtitle")}
         icon={FileText}
         className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto"
       >
@@ -207,7 +206,7 @@ export default function InvoicesPage() {
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           title={t("edit")}
-          description={t("editFormSubtitle")}
+          description={t("editInvoiceFormSubtitle")}
           icon={FileText}
           className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto"
         >

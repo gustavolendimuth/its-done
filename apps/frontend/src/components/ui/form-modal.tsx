@@ -16,7 +16,7 @@ interface FormModalProps {
   onOpenChange: (open: boolean) => void;
   title: string;
   description: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string }> | null;
   children: React.ReactNode;
   className?: string;
 }
@@ -41,7 +41,7 @@ export function FormModal({
         <div className="space-y-6 p-2 md:p-4">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-3xl">
-              <Icon className="h-6 w-6" />
+              {Icon && <Icon className="h-6 w-6" />}
               {title}
             </DialogTitle>
             <DialogDescription>{description}</DialogDescription>

@@ -97,7 +97,7 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
           setOpen(newOpen);
         }}
         title={t("editClient")}
-        description={t("formSubtitle")}
+        description={t("editClientFormSubtitle")}
         icon={Users}
         className="sm:max-w-[600px]"
       >
