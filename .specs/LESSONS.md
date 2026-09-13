@@ -44,6 +44,18 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: apps/frontend/src/lib/work-timer-engine.ts checkHourlyRule() dueForPrompt (WKT-04 AC2) (local-first)
 - last seen: 2026-09-12T12:43:20Z
 
+### L-006 — When a spec AC has multiple observable effects (mutation call, success toast, modal/state close), assert all of them, not just the mutation payload — a page-level mock stub for a form component should also invoke its onSuccess callback so success-driven state transitions get exercised.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `frontend/forms` · harmful: 0
+- features: work-hour-edit
+- evidence: WHE-01 AC2 — apps/frontend/src/features/time-tracking/components/work-hour-form.test.tsx:171-203, apps/frontend/src/app/[locale]/(authenticated)/work-hours/__tests__/page.test.tsx:254-266 (frontend/forms)
+- last seen: 2026-09-13T11:14:17Z
+
+### L-007 — When a task's Done-when criterion lists two attributes for the same UI state (e.g. aria-label and title), assert both directly instead of relying on an accessible-name query to stand in for the second one.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `frontend/testing` · harmful: 0
+- features: work-hour-edit
+- evidence: T5 Done-when — apps/frontend/src/features/time-tracking/components/work-hours-table.test.tsx:64-67 (frontend/testing)
+- last seen: 2026-09-13T11:14:17Z
+
 ## Quarantined (failed when applied — ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

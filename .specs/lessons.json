@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 6,
+  "next_id": 8,
   "lessons": [
     {
       "id": "L-001",
@@ -94,6 +94,42 @@
       ],
       "created": "2026-09-12T12:43:20Z",
       "last_seen": "2026-09-12T12:43:20Z"
+    },
+    {
+      "id": "L-006",
+      "key": "ac_gap::when a spec ac has multiple observable effects mutation call success toast modal state close assert all of them not just the mutation payload a page level mock stub for a form component should also invoke its onsuccess callback so success driven state transitions get exercised",
+      "text": "When a spec AC has multiple observable effects (mutation call, success toast, modal/state close), assert all of them, not just the mutation payload — a page-level mock stub for a form component should also invoke its onSuccess callback so success-driven state transitions get exercised.",
+      "signal": "ac_gap",
+      "scope": "frontend/forms",
+      "status": "candidate",
+      "features": [
+        "work-hour-edit"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "WHE-01 AC2 — apps/frontend/src/features/time-tracking/components/work-hour-form.test.tsx:171-203, apps/frontend/src/app/[locale]/(authenticated)/work-hours/__tests__/page.test.tsx:254-266 (frontend/forms)"
+      ],
+      "created": "2026-09-13T11:14:17Z",
+      "last_seen": "2026-09-13T11:14:17Z"
+    },
+    {
+      "id": "L-007",
+      "key": "spec_precision_gap::when a task s done when criterion lists two attributes for the same ui state e g aria label and title assert both directly instead of relying on an accessible name query to stand in for the second one",
+      "text": "When a task's Done-when criterion lists two attributes for the same UI state (e.g. aria-label and title), assert both directly instead of relying on an accessible-name query to stand in for the second one.",
+      "signal": "spec_precision_gap",
+      "scope": "frontend/testing",
+      "status": "candidate",
+      "features": [
+        "work-hour-edit"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "T5 Done-when — apps/frontend/src/features/time-tracking/components/work-hours-table.test.tsx:64-67 (frontend/testing)"
+      ],
+      "created": "2026-09-13T11:14:17Z",
+      "last_seen": "2026-09-13T11:14:17Z"
     }
   ]
 }
