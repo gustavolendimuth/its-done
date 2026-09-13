@@ -197,10 +197,29 @@ export class WorkHoursService {
         id,
         userId,
       },
+      include: {
+        invoiceWorkHours: {
+          include: {
+            invoice: {
+              select: { status: true },
+            },
+          },
+        },
+      },
     });
 
     if (!workHour) {
       throw new NotFoundException('Work hour not found');
+    }
+
+    const isInvoiced = workHour.invoiceWorkHours.some(
+      (invoiceWorkHour) => invoiceWorkHour.invoice.status !== 'CANCELED',
+    );
+
+    if (isInvoiced) {
+      throw new BadRequestException(
+        'Cannot edit a work hour that has already been invoiced',
+      );
     }
 
     const updatedWorkHour = await this.prisma.workHour.update({
