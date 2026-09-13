@@ -1,4 +1,3 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
@@ -86,7 +85,14 @@ const mockClients = [
 
 // Mock the time-tracking feature (components + service, single barrel import in page.tsx)
 jest.mock("@/features/time-tracking", () => ({
-  WorkHourForm: () => <div data-testid="work-hour-form">Work Hour Form</div>,
+  WorkHourForm: ({ workHour }: any) => (
+    <div data-testid="work-hour-form">
+      Work Hour Form
+      {workHour && (
+        <span data-testid="work-hour-form-editing-id">{workHour.id}</span>
+      )}
+    </div>
+  ),
   WorkHoursBigStats: ({
     workHours,
     isRefetching,
@@ -101,7 +107,7 @@ jest.mock("@/features/time-tracking", () => ({
       <span>Loading: {isRefetching.toString()}</span>
     </div>
   ),
-  WorkHoursTable: ({ workHours, deletingId, onDelete }: any) => (
+  WorkHoursTable: ({ workHours, deletingId, onDelete, onEdit }: any) => (
     <div data-testid="work-hours-table">
       {workHours.map((workHour: any) => (
         <div data-testid="work-hour-row" key={workHour.id}>
@@ -109,6 +115,12 @@ jest.mock("@/features/time-tracking", () => ({
           <p>Client: {workHour.client?.name}</p>
           <p>Project: {workHour.project?.name}</p>
           <p>Deleting: {(deletingId === workHour.id).toString()}</p>
+          <button
+            aria-label="edit work hour"
+            onClick={() => onEdit(workHour.id)}
+          >
+            edit
+          </button>
           <button
             aria-label="delete work hour"
             onClick={() => onDelete(workHour.id)}
@@ -128,6 +140,9 @@ jest.mock("@/features/time-tracking", () => ({
   useDeleteTimeEntry: jest.fn(() => ({
     mutateAsync: jest.fn(),
   })),
+  WorkHoursSkeleton: () => (
+    <div data-testid="loading-skeleton">Loading...</div>
+  ),
 }));
 
 jest.mock("@/features/clients", () => ({
@@ -141,6 +156,15 @@ jest.mock("@/features/clients", () => ({
 describe("WorkHoursPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Restore the default implementation (previous tests may have overridden it via
+    // mockReturnValue, which clearAllMocks does not undo)
+    const { useTimeEntries } = require("@/features/time-tracking");
+    useTimeEntries.mockReturnValue({
+      data: mockWorkHours,
+      isLoading: false,
+      isFetching: false,
+      error: null,
+    });
   });
 
   it("should render loading skeleton when loading", () => {
@@ -225,6 +249,20 @@ describe("WorkHoursPage", () => {
 
     // Check if modal is open
     expect(screen.getByTestId("work-hour-form")).toBeInTheDocument();
+  });
+
+  it("should open edit modal pre-filled when clicking edit", () => {
+    render(<WorkHoursPage />);
+
+    expect(screen.queryByTestId("work-hour-form")).not.toBeInTheDocument();
+
+    const editButtons = screen.getAllByLabelText("edit work hour");
+    fireEvent.click(editButtons[0]);
+
+    expect(screen.getByTestId("work-hour-form")).toBeInTheDocument();
+    expect(screen.getByTestId("work-hour-form-editing-id")).toHaveTextContent(
+      "1"
+    );
   });
 
   it("should pass an empty list to the table when there are no work hours", () => {

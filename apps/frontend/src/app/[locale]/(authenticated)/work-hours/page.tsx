@@ -4,7 +4,6 @@ import { Clock, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useMemo } from "react";
 
-import { WorkHoursSkeleton } from "@/features/time-tracking";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
@@ -17,14 +16,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useClients, Client } from "@/features/clients";
 import {
   WorkHourForm,
   WorkHoursBigStats,
   WorkHoursTable,
   useTimeEntries,
   useDeleteTimeEntry,
-} from "@/features/time-tracking";
-import { useClients, Client } from "@/features/clients";
+ WorkHoursSkeleton } from "@/features/time-tracking";
+
+import type { TimeEntry } from "@/types";
 
 export default function WorkHoursPage() {
   const t = useTranslations("workHours");
@@ -52,6 +53,9 @@ export default function WorkHoursPage() {
   const [selectedClient, setSelectedClient] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingWorkHour, setEditingWorkHour] = useState<TimeEntry | null>(
+    null
+  );
 
   // Memorizar as datas para evitar recriações desnecessárias
   const queryParams = useMemo(() => {
@@ -103,8 +107,14 @@ export default function WorkHoursPage() {
   };
 
   const handleEdit = (id: string) => {
-    // TODO: Implementar edição de work hour
-    console.log("Edit work hour:", id);
+    const workHour = (workHours ?? []).find((entry) => entry.id === id);
+    if (workHour) {
+      setEditingWorkHour(workHour);
+    }
+  };
+
+  const handleWorkHourEdited = () => {
+    setEditingWorkHour(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -237,6 +247,25 @@ export default function WorkHoursPage() {
               </p>
             </div>
           </div>
+        )}
+      </FormModal>
+
+      {/* Edit Work Hour Modal */}
+      <FormModal
+        open={!!editingWorkHour}
+        onOpenChange={(open) => {
+          if (!open) setEditingWorkHour(null);
+        }}
+        title={t("editWorkHourTitle")}
+        description={t("editHoursFormSubtitle")}
+        icon={Clock}
+      >
+        {editingWorkHour && clients && (
+          <WorkHourForm
+            onSuccess={handleWorkHourEdited}
+            clients={clients}
+            workHour={editingWorkHour}
+          />
         )}
       </FormModal>
     </PageContainer>
