@@ -1,4 +1,3 @@
-import { jest, describe, it, expect, beforeEach } from "@jest/globals";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook } from "@testing-library/react";
 import { useSession } from "next-auth/react";
@@ -66,6 +65,7 @@ describe("useAvatar", () => {
       name: "John Doe",
       email: "john@example.com",
       role: "USER",
+      image: "https://lh3.googleusercontent.com/a/default-user",
     },
     expires: new Date().toISOString(),
   };

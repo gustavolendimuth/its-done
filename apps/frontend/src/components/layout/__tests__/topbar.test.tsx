@@ -1,5 +1,5 @@
-import { jest } from "@jest/globals";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 
 import { Topbar } from "../topbar";
@@ -11,6 +11,7 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),
   })),
+  usePathname: jest.fn(() => "/work-hours"),
 }));
 
 // Mock next-auth/react
@@ -22,11 +23,32 @@ jest.mock("next-auth/react", () => ({
 // Mock next-intl
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
 }));
 
 // Mock clients service
 jest.mock("@/features/clients", () => ({
   useClients: jest.fn(() => ({ data: [] })),
+}));
+
+// Mock notifications
+jest.mock("@/features/notifications", () => ({
+  NotificationBell: () => null,
+}));
+
+// Mock the Gravatar health/profile queries (useAvatar depends on them, and
+// this file doesn't wrap Topbar in a QueryClientProvider)
+jest.mock("@/services/gravatar", () => ({
+  ...jest.requireActual("@/services/gravatar"),
+  useGravatarHealth: () => ({ data: true, isLoading: false }),
+  useGravatarProfile: () => ({ data: null, isLoading: false }),
+}));
+
+jest.mock("@/services/network-status", () => ({
+  useShouldSkipExternalServices: () => ({
+    skipGravatar: false,
+    isOffline: false,
+  }),
 }));
 
 describe("Topbar", () => {
@@ -44,7 +66,7 @@ describe("Topbar", () => {
     jest.clearAllMocks();
   });
 
-  it("should render user name when session is authenticated", () => {
+  it("should render user name when session is authenticated", async () => {
     (useSession as jest.Mock).mockReturnValue({
       data: mockSession,
       status: "authenticated",
@@ -52,6 +74,13 @@ describe("Topbar", () => {
     });
 
     render(<Topbar />);
+
+    // The user's name is shown in the dropdown menu, not the collapsed bar.
+    // mockSession has no image, so useAvatar falls back to a generated
+    // DiceBear avatar.
+    const avatarButton = screen.getByRole("button", { name: "@John Doe" });
+
+    await userEvent.click(avatarButton);
 
     expect(screen.getByText("John Doe")).toBeInTheDocument();
   });
@@ -71,7 +100,7 @@ describe("Topbar", () => {
     render(<Topbar />);
 
     // Check if add hours button is rendered
-    const addHoursButton = screen.getByText("workHours.addHours");
+    const addHoursButton = screen.getByText("addHours");
 
     expect(addHoursButton).toBeInTheDocument();
   });
@@ -85,7 +114,7 @@ describe("Topbar", () => {
     render(<Topbar />);
 
     // Check if add hours button is not rendered
-    const addHoursButton = screen.queryByText("workHours.addHours");
+    const addHoursButton = screen.queryByText("addHours");
 
     expect(addHoursButton).not.toBeInTheDocument();
   });
@@ -105,13 +134,13 @@ describe("Topbar", () => {
     render(<Topbar />);
 
     // Click add hours button
-    const addHoursButton = screen.getByText("workHours.addHours");
+    const addHoursButton = screen.getByText("addHours");
 
     fireEvent.click(addHoursButton);
 
     // Check if modal is opened
     expect(
-      screen.getByText("workHours.addHoursFormSubtitle")
+      screen.getByText("addHoursFormSubtitle")
     ).toBeInTheDocument();
   });
 
@@ -130,31 +159,25 @@ describe("Topbar", () => {
     render(<Topbar />);
 
     // Open modal
-    const addHoursButton = screen.getByText("workHours.addHours");
+    const addHoursButton = screen.getByText("addHours");
 
     fireEvent.click(addHoursButton);
 
     // Check if modal is opened
     expect(
-      screen.getByText("workHours.addHoursFormSubtitle")
+      screen.getByText("addHoursFormSubtitle")
     ).toBeInTheDocument();
 
-    // Click outside modal (dialog overlay)
-    const dialogOverlay = document.querySelector(
-      "[data-testid=dialog-overlay]"
-    );
-
-    if (dialogOverlay) {
-      fireEvent.click(dialogOverlay);
-    }
+    // Close the modal (Radix Dialog closes on Escape)
+    fireEvent.keyDown(document, { key: "Escape", code: "Escape" });
 
     // Check if modal is closed
     expect(
-      screen.queryByText("workHours.addHoursFormSubtitle")
+      screen.queryByText("addHoursFormSubtitle")
     ).not.toBeInTheDocument();
   });
 
-  it("should display user information in dropdown menu", () => {
+  it("should display user information in dropdown menu", async () => {
     // Mock authenticated session
     const mockUser = {
       name: "John Doe",
@@ -171,14 +194,14 @@ describe("Topbar", () => {
     // Click on avatar to open dropdown
     const avatar = screen.getByRole("button", { name: "@John Doe" });
 
-    fireEvent.click(avatar);
+    await userEvent.click(avatar);
 
     // Check if user information is displayed
     expect(screen.getByText("John Doe")).toBeInTheDocument();
     expect(screen.getByText("john@example.com")).toBeInTheDocument();
   });
 
-  it("should display only email if name is not available", () => {
+  it("should display only email if name is not available", async () => {
     // Mock authenticated session without name
     const mockUser = {
       email: "john@example.com",
@@ -194,7 +217,7 @@ describe("Topbar", () => {
     // Click on avatar to open dropdown
     const avatar = screen.getByRole("button", { name: "@john@example.com" });
 
-    fireEvent.click(avatar);
+    await userEvent.click(avatar);
 
     // Check if only email is displayed
     expect(screen.queryByText("John Doe")).not.toBeInTheDocument();

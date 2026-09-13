@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { ModeToggle } from "@/components/mode-toggle";
-import { NotificationBell } from "@/features/notifications";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,8 +17,10 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { WorkHourForm } from "@/features/time-tracking";
 import { useClients } from "@/features/clients";
+import { NotificationBell } from "@/features/notifications";
+import { WorkHourForm } from "@/features/time-tracking";
+import { useAvatar } from "@/hooks/use-avatar";
 
 interface TopbarProps {
   children?: React.ReactNode;
@@ -43,13 +44,7 @@ export function Topbar({ children }: TopbarProps) {
     setIsAddHoursOpen(false);
   };
 
-  const displayName = session?.user?.name || session?.user?.email || "";
-  const initials = displayName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-  const avatarUrl = session?.user?.image || "";
+  const { avatarUrl, fallbackUrls, initials, displayName } = useAvatar();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -65,9 +60,10 @@ export function Topbar({ children }: TopbarProps) {
                 variant="outline"
                 size="sm"
                 className="h-8"
+                title={tWorkHours("addHours")}
                 onClick={() => setIsAddHoursOpen(true)}
               >
-                <PlusCircle className="h-4 w-4 mr-2" />
+                <Clock className="h-4 w-4 mr-2" />
                 {tWorkHours("addHours")}
               </Button>
             )}
@@ -83,6 +79,10 @@ export function Topbar({ children }: TopbarProps) {
                   >
                     <UserAvatar
                       src={avatarUrl}
+                      // fallbackUrls[0] duplicates avatarUrl (the primary,
+                      // already covered by `src`); UserAvatar only needs the
+                      // retries that come after it.
+                      fallbackUrls={fallbackUrls.slice(1)}
                       alt={`@${displayName}`}
                       className="h-8 w-8"
                       fallbackText={initials}
