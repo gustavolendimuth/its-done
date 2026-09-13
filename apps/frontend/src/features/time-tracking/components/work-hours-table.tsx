@@ -31,7 +31,11 @@ import {
 } from "@/components/ui/table";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
 
-import { groupByMonthAndWeek, type WorkHourRow } from "./work-hours-grouping";
+import {
+  groupByMonthAndWeek,
+  isWorkHourInvoiced,
+  type WorkHourRow,
+} from "./work-hours-grouping";
 
 export type { WorkHourRow } from "./work-hours-grouping";
 
@@ -288,15 +292,26 @@ export function WorkHoursTable({
 
                             <TableCell>
                               <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  aria-label={`${t("edit")} ${t("workHour")}`}
-                                  onClick={() => onEdit(workHour.id)}
-                                >
-                                  <Edit className="h-3.5 w-3.5" />
-                                </Button>
+                                {(() => {
+                                  const invoiced = isWorkHourInvoiced(workHour);
+                                  const editLabel = invoiced
+                                    ? t("cannotEditInvoiced")
+                                    : `${t("edit")} ${t("workHour")}`;
+
+                                  return (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      aria-label={editLabel}
+                                      title={invoiced ? editLabel : undefined}
+                                      disabled={invoiced}
+                                      onClick={() => onEdit(workHour.id)}
+                                    >
+                                      <Edit className="h-3.5 w-3.5" />
+                                    </Button>
+                                  );
+                                })()}
 
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
