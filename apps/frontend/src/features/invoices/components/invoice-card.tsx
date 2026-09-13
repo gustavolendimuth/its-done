@@ -17,8 +17,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { cn } from "@/lib/utils";
 import { useDownloadInvoice } from "@/features/invoices/invoices";
+import { cn } from "@/lib/utils";
 
 export interface InvoiceCardAction {
   icon: LucideIcon;

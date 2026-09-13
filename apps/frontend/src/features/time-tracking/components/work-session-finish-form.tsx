@@ -24,8 +24,9 @@ import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { reset } from "../lib/work-timer-engine";
 import { useClients } from "@/features/clients";
+
+import { reset } from "../lib/work-timer-engine";
 import {
   useFinishWorkSession,
   useWorkTimerEngine,

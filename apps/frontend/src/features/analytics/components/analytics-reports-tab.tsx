@@ -1,11 +1,11 @@
 "use client";
 
-import type { Client } from "@/features/clients";
 
 import { HoursReportSection } from "./hours-report-section";
 import { InvoiceReportSection } from "./invoice-report-section";
 import { ReportFiltersCard } from "./report-filters-card";
 import { SummaryReportSection } from "./summary-report-section";
+
 import type {
   HoursReport,
   InvoiceReport,
@@ -13,6 +13,7 @@ import type {
   ReportType,
   SummaryReport,
 } from "../types";
+import type { Client } from "@/features/clients";
 
 export interface AnalyticsReportsTabProps {
   filters: ReportFilters;

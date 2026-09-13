@@ -16,8 +16,8 @@ import {
   BigStatsDisplay,
   BigStatItem,
 } from "@/components/ui/big-stats-display";
-import { formatHoursToHHMM } from "@/lib/utils";
 import { useDashboardStats } from "@/features/dashboard";
+import { formatHoursToHHMM } from "@/lib/utils";
 
 
 interface AnalyticsBigStatsProps {

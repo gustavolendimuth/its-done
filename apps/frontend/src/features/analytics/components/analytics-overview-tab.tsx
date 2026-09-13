@@ -1,11 +1,11 @@
 "use client";
 
 import { AnalyticsBigStats } from "./analytics-big-stats";
-import type { DashboardStats } from "@/features/dashboard";
-
 import { RecentActivitiesCard } from "./recent-activities-card";
 import { TopClientsChart } from "./top-clients-chart";
 import { WeeklyHoursChart } from "./weekly-hours-chart";
+
+import type { DashboardStats } from "@/features/dashboard";
 
 export interface AnalyticsOverviewTabProps {
   topClientsData: { name: string; hours: number; color: string }[];

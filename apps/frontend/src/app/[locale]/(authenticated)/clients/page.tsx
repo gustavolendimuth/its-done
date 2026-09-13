@@ -5,13 +5,12 @@ import { useTranslations } from "next-intl";
 import { useState, useMemo } from "react";
 
 import { EmptyState } from "@/components/layout/empty-state";
-import { ClientsPageSkeleton } from "@/features/clients";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
 import { SearchInput } from "@/components/ui/search-input";
-import { ClientCard, ClientForm, ClientsBigStats, useClients } from "@/features/clients";
+import { ClientsPageSkeleton , ClientCard, ClientForm, ClientsBigStats, useClients } from "@/features/clients";
 
 export default function ClientsPage() {
   const t = useTranslations("clients");

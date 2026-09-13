@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { cn, formatHoursToHHMM } from "@/lib/utils";
 import { Invoice, useDownloadInvoice } from "@/features/invoices/invoices";
+import { cn, formatHoursToHHMM } from "@/lib/utils";
 
 export interface ClientInvoiceCardProps {
   invoice: Invoice;

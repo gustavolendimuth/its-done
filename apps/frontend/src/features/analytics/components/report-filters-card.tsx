@@ -21,8 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Client } from "@/features/clients";
+
 import type { ReportFilters, ReportType } from "../types";
+import type { Client } from "@/features/clients";
 
 export interface ReportFiltersCardProps {
   filters: ReportFilters;

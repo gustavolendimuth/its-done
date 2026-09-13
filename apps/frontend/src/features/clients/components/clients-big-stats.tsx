@@ -7,8 +7,8 @@ import {
   BigStatsDisplay,
   BigStatItem,
 } from "@/components/ui/big-stats-display";
-import { formatHoursToHHMM } from "@/lib/utils";
 import { useClientStats } from "@/features/clients/client-stats";
+import { formatHoursToHHMM } from "@/lib/utils";
 
 
 interface ClientsBigStatsProps {

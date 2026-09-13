@@ -34,12 +34,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { ApiError } from "@/types";
+
 import {
   useAllUsers,
   useUpdateUserRole,
   useDeleteUser,
 } from "./admin.service";
-import { ApiError } from "@/types";
 
 export default function AdminUsers() {
   const { data: users, isLoading } = useAllUsers();

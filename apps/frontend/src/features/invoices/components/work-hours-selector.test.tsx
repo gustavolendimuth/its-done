@@ -1,4 +1,3 @@
-import { expect, jest } from "@jest/globals";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WorkHoursSelector } from "./work-hours-selector";

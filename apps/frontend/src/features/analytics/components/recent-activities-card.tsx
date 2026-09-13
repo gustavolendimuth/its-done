@@ -11,8 +11,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { DashboardStats } from "@/features/dashboard";
 import { cn } from "@/lib/utils";
+
+import type { DashboardStats } from "@/features/dashboard";
 
 export interface RecentActivitiesCardProps {
   activities: DashboardStats["recentActivities"];

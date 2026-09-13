@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn, formatTimeAgo } from "@/lib/utils";
+
 import {
   useDeleteNotification,
   useMarkAllNotificationsAsRead,

@@ -15,8 +15,9 @@ import {
   BigStatItem,
 } from "@/components/ui/big-stats-display";
 import { formatHoursToHHMM } from "@/lib/utils";
-import { useWorkHoursStats } from "../work-hours-stats";
 import { TimeEntry } from "@/types";
+
+import { useWorkHoursStats } from "../work-hours-stats";
 
 interface WorkHoursBigStatsProps {
   dateRange?: {

@@ -3,8 +3,8 @@
 import { Clock, TrendingUp } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn, formatHoursToHHMM } from "@/lib/utils";
 import { useWorkHoursStats } from "@/features/time-tracking";
+import { cn, formatHoursToHHMM } from "@/lib/utils";
 
 interface TotalHoursSummaryProps {
   className?: string;

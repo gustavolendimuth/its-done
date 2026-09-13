@@ -7,9 +7,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { type ProfilePopoverProps } from "./types";
 
 import { ProfileForm } from "./profile-form";
+import { type ProfilePopoverProps } from "./types";
+
 
 export function ProfilePopover({ size = "md" }: ProfilePopoverProps) {
   return (

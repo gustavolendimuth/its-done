@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { AnalyticsPageSkeleton } from "./analytics-page-skeleton";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
@@ -14,10 +13,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClients } from "@/features/clients";
 import { useDashboardStats } from "@/features/dashboard";
 import { useTimeEntries } from "@/features/time-tracking";
+
 import { useHoursReport, useInvoiceReport, useSummaryReport } from "../reports.service";
 
 import { AnalyticsOverviewTab } from "./analytics-overview-tab";
+import { AnalyticsPageSkeleton } from "./analytics-page-skeleton";
 import { AnalyticsReportsTab } from "./analytics-reports-tab";
+
 import type { ReportFilters, ReportType } from "../types";
 
 const COLORS = [

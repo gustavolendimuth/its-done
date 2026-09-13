@@ -15,7 +15,6 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { ProjectEditDialog } from "./project-edit-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +30,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn, formatTimeAgo } from "@/lib/utils";
+
+import { ProjectEditDialog } from "./project-edit-dialog";
 
 interface ProjectCardProps {
   project: {

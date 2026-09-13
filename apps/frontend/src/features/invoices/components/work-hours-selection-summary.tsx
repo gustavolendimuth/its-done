@@ -3,8 +3,8 @@
 import { Clock, FileText } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { formatHoursToHHMM } from "@/lib/utils";
 import { WorkHoursSelectionSummaryProps } from "@/features/invoices/types";
+import { formatHoursToHHMM } from "@/lib/utils";
 
 export function WorkHoursSelectionSummary({
   totalHours,
