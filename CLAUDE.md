@@ -20,331 +20,69 @@ The project maintains a minimal set of documentation files. When updating code:
 
 ## Key Commands
 
-### Development
-```bash
-# Start full development environment (RECOMMENDED)
-pnpm dev                       # Smart script: stops existing services + starts + colored logs
+### Docker
 
-# Individual services
-cd apps/backend && pnpm dev    # Backend only (port 3002)
-cd apps/frontend && pnpm dev   # Frontend only (port 3000)
-
-# Alternative from any directory
-pnpm start:dev                 # From frontend or backend folder
-```
-
-### Build & Test
-```bash
-# Build
-pnpm build                     # Build all apps
-pnpm build:backend             # Backend only
-pnpm build:frontend            # Frontend only
-
-# Test
-pnpm test                      # Run all tests
-cd apps/frontend && pnpm test  # Frontend tests with Jest
-cd apps/backend && pnpm test   # Backend tests with Jest
-
-# Frontend test modes
-cd apps/frontend
-pnpm test:ci                   # CI mode (no watch)
-pnpm test:coverage             # With coverage report
-```
-
-### Database (Prisma)
-```bash
-cd apps/backend
-
-# Development
-pnpm prisma generate           # Generate Prisma client
-pnpm prisma db push            # Push schema changes
-pnpm prisma migrate dev        # Create and apply migration
-pnpm prisma studio             # Open Prisma Studio (port 5555)
-
-# Seed data
-pnpm db:seed                   # Seed development data
-pnpm db:seed:prod              # Seed production data
-```
-
-### Code Quality
-```bash
-pnpm lint                      # Lint all packages
-pnpm format                    # Format code with Prettier
-```
-
-### Docker (Development & Production)
 ```bash
 # Development (hot reload)
 docker compose -f docker-compose.dev.yml up -d
 docker compose -f docker-compose.dev.yml logs -f
-
-# Production (test locally before Railway deploy)
-docker compose up -d --build
-docker compose logs -f
-
-# See DOCKER.md for complete guide
 ```
 
 ## Architecture
 
 ### Monorepo Structure
+
 - **apps/backend**: NestJS API (TypeScript, Prisma, PostgreSQL)
 - **apps/frontend**: Next.js 14 App Router (React 18, TypeScript, TailwindCSS)
 - **packages/**: Shared TypeScript configurations
 
-### Backend Modules (NestJS)
-Located in `apps/backend/src/`:
-- `auth/` - JWT + Google OAuth authentication (guards, strategies)
-- `users/` - User management with role-based access (USER/ADMIN)
-- `clients/` - Client management with multiple addresses
-- `projects/` - Projects with hourlyRate for automatic invoice calculation
-- `work-hours/` - Time tracking entries linked to clients/projects
-- `invoices/` - Invoice generation with file upload (Railway Volume → S3 → local fallback)
-- `addresses/` - Multiple addresses per client (billing, shipping, office)
-- `settings/` - User preferences and alert configuration
-- `notifications/` - Email notifications via Resend (hours alerts, invoice notifications)
-- `dashboard/` - Metrics and analytics
-- `reports/` - Reporting functionality
-- `admin/` - Admin panel (first user by ID is auto-admin)
-
-### Frontend Structure (Next.js App Router)
-Located in `apps/frontend/src/`, organized **feature-based** (by business domain, not by technical type):
-
-- `app/[locale]/` - Internationalized routes (pt-BR, en). Route files are thin wrappers — they compose layout (`PageContainer`/`PageHeader`) and render the matching feature's main component; business logic lives in `features/`, not here.
-  - `(authenticated)/` - Protected routes requiring login: `dashboard/`, `clients/`, `projects/`, `work-hours/`, `invoices/`, `analytics/`, `settings/`, `admin/`
-  - `client-dashboard/[clientId]/` - **Public** dashboard for clients to view their invoices (renders the same component as the internal dashboard)
-- `features/<domain>/` - One folder per business domain: `auth`, `clients` (includes client addresses — Address belongs to Client, no own route), `projects`, `time-tracking` (work-hours entries + the local-first work-timer, merged since they're tightly coupled), `invoices`, `dashboard`, `analytics`, `settings`, `notifications`, `profile`, `admin`. Each domain owns its components, hooks, service(s) and types.
-  - **Adaptive internal structure**: a small domain (≤6 component files) keeps everything flat at the feature root; a larger domain (clients, time-tracking, invoices, analytics) gets a `components/` subfolder to avoid cluttering the root — hooks/services/types stay flat either way, since those are never numerous per domain.
-  - **Public API via barrel**: every feature exposes an `index.ts` re-exporting what's consumed from outside — code outside a feature imports only from `@/features/<domain>`, never from an internal file path.
-  - **README per domain**: every feature has a short `README.md` stating its responsibility, entry points, and any documented exception (e.g. a large file kept unsplit, or a component with no current consumer).
-  - **Co-located tests**: tests live next to the file they test (`Component.tsx` + `Component.test.tsx`), not in a separate `__tests__/` folder.
-- `components/` - Only what's genuinely shared across features:
-  - `ui/` - Design system (Radix UI + Shadcn wrappers)
-  - `layout/` - App shell (`PageHeader`, `PageContainer`, `MainLayout`, `Topbar`, `MobileNav`, `EmptyState`, the generic variants of `LoadingSkeleton`)
-- `services/` - Only cross-cutting or currently-unclaimed services remain here (e.g. `avatar.ts`/`gravatar.ts`/`network-status.ts` back the shared avatar UI; a handful of services — `backup`, `export`, `import`, `webhook*`, `system`, `logs`, `audit`, `sms`, `email`, `push`, `user-stats` — have no current UI consumer and are left in place rather than guessed into a feature or deleted). Domain-specific services live inside their feature instead.
-- `hooks/` - Only genuinely cross-cutting hooks (`use-toast`, `use-safe-hydration`, `use-avatar`, `use-push-subscription`)
-- `lib/` - Cross-cutting infra only (`axios.ts`, `utils.ts`); domain-specific logic that used to live here (e.g. the work-timer's local-first engine) now lives inside its feature (`features/time-tracking/lib/`)
-
-### Database Schema (Prisma)
-Key models in `apps/backend/prisma/schema.prisma`:
-- **User** - Authentication, role (USER/ADMIN)
-- **Client** - Contact info, belongs to User
-- **Address** - Multiple addresses per Client (type: billing/shipping/office, isPrimary)
-- **Project** - Linked to Client, has `hourlyRate` for invoice calculation
-- **WorkHour** - Time entries linked to User, Client, optional Project
-- **Invoice** - Generated from WorkHours, has status (PENDING/PAID/CANCELED), file upload
-- **InvoiceWorkHour** - Junction table linking Invoices to WorkHours (many-to-many)
-- **Settings** - User preferences (alertHours, notificationEmail)
-- **NotificationLog** - Audit trail for sent emails
-
-### Important Data Relationships
-- User → Clients, Projects, WorkHours (1:N)
-- Client → Projects, WorkHours, Invoices, Addresses (1:N)
-- Project → WorkHours (1:N) - Each project has `hourlyRate` used for invoice calculation
-- Invoice ↔ WorkHours (N:N via InvoiceWorkHour junction table)
-- WorkHour can belong to only ONE Invoice (enforced by business logic)
-
 ## Critical Business Logic
 
 ### Invoice Calculation
+
 **IMPORTANT**: Invoice amounts are calculated from `project.hourlyRate`:
+
 - Each WorkHour associated with a Project uses that project's hourlyRate
 - Total = Σ(workHour.hours × workHour.project.hourlyRate)
 - If no project, hourlyRate defaults to 0
 - This is a recent change - historically the rate was per-invoice
 
 ### File Upload Strategy (Priority Order)
+
 1. **Railway Volume** (production) - `/app/data` if `RAILWAY_ENVIRONMENT` set
 2. **AWS S3** (fallback) - If AWS credentials configured
 3. **Local Storage** (development) - `uploads/` directory
 
-### Authentication Flow
-- NextAuth.js handles session management
-- Supports Email/Password + Google OAuth2
-- JWT tokens for backend API authentication
-- Password reset via email with 1-hour expiry tokens
-- Admin role: First user (by DB ID) is auto-admin
-
 ### Notification System
+
 - **Hours Alert**: Auto-email when user exceeds configured threshold (Settings.alertHours)
 - **Invoice Upload**: Auto-email to client when invoice created
 - **Welcome Email**: Sent on user registration
 - Anti-spam: Uses NotificationLog to prevent duplicate alerts for same threshold
 
 ### Client Dashboard (Public)
+
 - Public route: `/client-dashboard/[clientId]` (no auth required)
 - Clients can view their invoices, hours worked, and download files
 - Share via WhatsApp, Email, or copy link from Clients page
 
-## Key Features & Components
-
-### Dashboard System
-- **Unified Component**: Single dashboard component supports both internal and client modes
-- **Internal Dashboard** (`/dashboard`): Admin view with tabs for Recent Work, Invoices, Clients
-- **Client Dashboard** (`/client-dashboard/[clientId]`): Public portal for clients
-
-### Search & Filtering
-- **InvoiceSearchFilters** component: Reusable search/filter component
-  - Search by invoice number, description, or client name
-  - Filter by status (All, Paid, Pending, Canceled)
-  - Sort by date, amount, status, or hours
-  - Live result counter
-
-### Design System
-- **BigStatsDisplay**: Colored stats cards per page (blue for clients, indigo for projects, purple for invoices, green for work hours)
-- **Card Components**: Themed cards (ClientCard, ProjectCard, InvoiceCard, WorkHourCard) with consistent styling
-- **PageHeader**: Standardized header with icon, title, description, and action buttons
-- **InfoCard**: Context-aware info boxes with themed colors
-
-### Internationalization
-- Uses `next-intl` for i18n (pt-BR, en)
-- Translation files: `apps/frontend/src/messages/{locale}.json`
-- **Form-specific translations**: Separate keys for form subtitles vs page descriptions
-  - Example: `editClientFormSubtitle` vs `editClientDescription`
-- **Custom time formatting**: `formatTimeAgo()` function uses custom translations instead of date-fns locale
-
-### Avatar System
-- Intelligent fallback chain: Google Profile → Gravatar → UI Avatars → DiceBear → Local SVG
-- Handles DNS failures gracefully
-- 5-minute cache for successful avatars
-
-## Testing
-
-### Frontend Tests (Jest + Testing Library)
-- Located in `__tests__/` directories next to components
-- Run with `pnpm test` from `apps/frontend`
-- Key test files:
-  - Component tests for major features
-  - Translation consistency tests
-  - Form modal integration tests
-
-### Backend Tests (Jest)
-- Located next to source files (`.spec.ts`)
-- Run with `pnpm test` from `apps/backend`
-- Includes unit and integration tests
-
-### Manual/Visual Verification (Playwright)
-- This project has a project-local MCP server named `playwright` (scope: local,
-  registered via `claude mcp add --scope local playwright npx -- @playwright/mcp@latest
-  --headless`) that runs **headless** — no visible browser window, so it never steals
-  focus. Use its `mcp__playwright__*` tools for manual/e2e-style verification in this
-  project instead of the account-wide `mcp__plugin_playwright_playwright__*` plugin
-  tools (which open a headed, focus-stealing window). This is scoped to this project
-  only; other projects still use the headed plugin browser.
-
-## Environment Variables
-
-### Backend (.env)
-```env
-DATABASE_URL="postgresql://..."
-JWT_SECRET="..."
-RESEND_API_KEY="..."         # Email service
-FROM_EMAIL="..."
-GOOGLE_CLIENT_ID="..."       # OAuth (optional)
-GOOGLE_CLIENT_SECRET="..."
-RAILWAY_VOLUME_PATH="/app/data"  # Production storage
-AWS_ACCESS_KEY_ID="..."      # S3 fallback (optional)
-AWS_SECRET_ACCESS_KEY="..."
-AWS_S3_BUCKET="..."
-VAPID_PUBLIC_KEY="..."       # Web Push (work timer hourly prompt)
-VAPID_PRIVATE_KEY="..."      # Web Push, keep secret
-VAPID_SUBJECT="mailto:you@example.com"  # Web Push contact email
-```
-
-### Frontend (.env.local)
-```env
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="..."
-API_URL="http://localhost:3002"
-GOOGLE_CLIENT_ID="..."       # Must match backend
-GOOGLE_CLIENT_SECRET="..."
-NEXT_PUBLIC_VAPID_PUBLIC_KEY="..."  # Must match backend's VAPID_PUBLIC_KEY
-```
-
 ## Deployment
 
 ### Railway (Recommended)
+
 - Auto-deploy on push to `main` branch
 - Uses Dockerfiles in `apps/backend/` and `apps/frontend/`
 - Railway Volume for persistent file storage (1GB)
 - See `RAILWAY_COMPLETE_GUIDE.md` for detailed setup
 
-### Docker
-- Multi-stage builds optimized for production
-- Backend: `apps/backend/Dockerfile`
-- Frontend: `apps/frontend/Dockerfile` (uses Next.js standalone output)
-
 ## Important Patterns & Conventions
 
 ### Code Organization
+
 - **By feature, not type**: Backend modules group controllers/services/DTOs together
 - **Absolute imports**: Use path aliases (`@/components`, not `../../components`)
 - **DTO validation**: Use `class-validator` decorators on all DTOs
 - **Type safety**: Prisma types extended in `apps/backend/src/types/entities.ts`
-
-### API Standards
-- RESTful endpoints with `/api` prefix
-- JWT authentication via `@UseGuards(JwtAuthGuard)`
-- Admin routes protected with `@UseGuards(AdminGuard)`
-- Public routes: `/api/public/*` (e.g., client dashboard data)
-
-### Frontend Patterns
-- **Server Components** by default (Next.js 14 App Router)
-- **Client Components**: Use `'use client'` directive sparingly
-- **Data fetching**: TanStack Query (React Query) for client-side data
-- **Forms**: React Hook Form + Zod validation
-- **Styling**: TailwindCSS with `cn()` utility for conditional classes
-
-### Error Handling
-- Backend: Custom `GlobalExceptionFilter` in `apps/backend/src/global.filter.ts`
-- Frontend: Try-catch with toast notifications (Sonner)
-- Sentry integration for error tracking
-
-## Common Tasks
-
-### Adding a New Feature Module (Backend)
-1. Generate module: `nest g module feature-name`
-2. Add service: `nest g service feature-name`
-3. Add controller: `nest g controller feature-name`
-4. Create DTOs in `dto/` folder with validation decorators
-5. Update Prisma schema if needed, then `pnpm prisma migrate dev`
-6. Import module in `app.module.ts`
-
-### Adding a New Page (Frontend)
-1. Create route in `app/[locale]/(authenticated)/your-page/page.tsx`
-2. Use PageHeader and PageContainer for layout consistency
-3. Add translations to `messages/en.json` and `messages/pt-BR.json`
-4. Create the feature in `features/your-feature/` (components + hooks + service + `types.ts`), with an `index.ts` barrel and a short `README.md` — see "Frontend Structure" above for the adaptive flat-vs-`components/` rule
-5. Keep the route file a thin wrapper importing from `@/features/your-feature`
-6. Add navigation link in layout sidebar if needed
-
-### Running a Single Test
-```bash
-# Frontend
-cd apps/frontend
-pnpm test -- path/to/test.test.tsx
-
-# Backend
-cd apps/backend
-pnpm test -- path/to/test.spec.ts
-```
-
-## Third-Party Integrations
-
-- **Resend**: Email service (notifications, password reset)
-- **Google OAuth**: Social authentication
-- **Railway**: Hosting platform with volume storage
-- **AWS S3**: Fallback file storage
-- **Sentry**: Error tracking and monitoring
-- **Prisma**: ORM and database toolkit
-
-## Performance Considerations
-
-- Frontend uses Next.js Server Components for reduced client-side JS
-- TanStack Query provides intelligent caching and background refetching
-- Images should use Next.js `<Image>` component for optimization
-- Database queries use Prisma's relation loading to avoid N+1 problems
-- File uploads: 10MB limit enforced at backend
 
 ## Security Notes
 
