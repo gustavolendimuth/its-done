@@ -19,6 +19,8 @@ import { Client } from "@/features/clients";
 
 import { useCreateTimeEntry, useUpdateTimeEntry } from "../time-entries";
 
+import type { CreateTimeEntryDto as FullCreateTimeEntryDto } from "@/types/entities";
+
 /**
  * Máscara de tempo "HH:mm" a partir dos dígitos digitados. Substitui o antigo
  * react-input-mask (mask="99:99"), incompatível com o React 19 por depender de
@@ -97,7 +99,7 @@ export function WorkHourForm({
   } = useForm<WorkHourFormData>({
     resolver: zodResolver(
       isEditMode ? editWorkHourFormSchema : workHourFormSchema
-    ) as Resolver<WorkHourFormData>,
+    ) as unknown as Resolver<WorkHourFormData>,
     defaultValues: {
       date: workHour ? new Date(workHour.date) : new Date(),
       projectId: "",
@@ -126,11 +128,16 @@ export function WorkHourForm({
       if (isEditMode && workHour) {
         await updateTimeEntry.mutateAsync({
           id: workHour.id,
+          // SPEC_DEVIATION: cast to the entities.ts CreateTimeEntryDto (which has
+          // `description`) because `Partial<CreateTimeEntryDto>` here resolves to
+          // the local (description-less) declaration in `@/types/index.ts`, which
+          // shadows the fuller one re-exported from `@/types/entities.ts` —
+          // pre-existing duplicate-type issue, out of this feature's scope.
           data: {
             date: formData.date.toISOString(),
             hours: decimalHours,
             description: formData.description || undefined,
-          },
+          } as Partial<FullCreateTimeEntryDto>,
         });
 
         toast.success(t("savedSuccessfully", { type: t("workHour") }));
