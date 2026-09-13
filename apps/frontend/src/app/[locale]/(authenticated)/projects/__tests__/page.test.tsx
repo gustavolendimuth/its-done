@@ -1,4 +1,3 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
@@ -75,6 +74,7 @@ jest.mock("@/features/projects", () => ({
     mutateAsync: jest.fn(),
     isPending: false,
   })),
+  ProjectsPageSkeleton: () => <div data-testid="loading-skeleton" />,
 }));
 
 jest.mock("@/components/layout/page-container", () => ({
@@ -174,6 +174,15 @@ jest.mock("@/features/clients", () => ({
 describe("ProjectsPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Restore the default implementation (previous tests may have overridden it via
+    // mockReturnValue, which clearAllMocks does not undo)
+    const { useProjects } = require("@/features/projects");
+    useProjects.mockImplementation((clientId?: string) => ({
+      data: clientId
+        ? mockProjects.filter((p) => p.clientId === clientId)
+        : mockProjects,
+      isLoading: false,
+    }));
     // Reset window.confirm
     window.confirm = jest.fn(() => true);
   });

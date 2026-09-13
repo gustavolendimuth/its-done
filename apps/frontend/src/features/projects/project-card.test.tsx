@@ -1,4 +1,3 @@
-import { jest } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 
@@ -19,6 +18,7 @@ const mockProject = {
   id: "1",
   name: "Test Project",
   description: "Test Description",
+  clientId: "1",
   client: {
     id: "1",
     name: "Test Client",
@@ -26,6 +26,9 @@ const mockProject = {
     email: "test@example.com",
   },
   createdAt: new Date().toISOString(),
+  _count: {
+    workHours: 5,
+  },
 };
 
 const mockOnDelete = jest.fn();
@@ -102,7 +105,7 @@ describe("ProjectCard Component", () => {
 
     fireEvent.click(clientButton);
 
-    expect(mockRouter.push).toHaveBeenCalledWith("/clients/client-1");
+    expect(mockRouter.push).toHaveBeenCalledWith("/clients/1");
   });
 
   test("displays all action buttons", () => {
@@ -142,10 +145,9 @@ describe("ProjectCard Component", () => {
       />
     );
 
-    // Check stats labels
-    expect(screen.getByText("Entries")).toBeInTheDocument();
-    expect(screen.getByText("Created")).toBeInTheDocument();
-    expect(screen.getByText("Status")).toBeInTheDocument();
-    expect(screen.getByText("Active")).toBeInTheDocument();
+    // Check stats labels (next-intl is mocked to return the raw key)
+    expect(screen.getByText("created")).toBeInTheDocument();
+    expect(screen.getByText("status")).toBeInTheDocument();
+    expect(screen.getByText("active")).toBeInTheDocument();
   });
 });

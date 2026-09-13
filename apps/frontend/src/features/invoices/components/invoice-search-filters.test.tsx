@@ -1,4 +1,3 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 import {
@@ -61,7 +60,7 @@ describe("InvoiceSearchFilters", () => {
   it("should render search input with correct placeholder", () => {
     render(<InvoiceSearchFilters {...mockProps} />);
 
-    const searchInput = screen.getByPlaceholderText("Search invoices...");
+    const searchInput = screen.getByPlaceholderText("Search invoices by number or description...");
 
     expect(searchInput).toBeInTheDocument();
   });
@@ -97,7 +96,7 @@ describe("InvoiceSearchFilters", () => {
       <InvoiceSearchFilters {...mockProps} onSearchChange={onSearchChange} />
     );
 
-    const searchInput = screen.getByPlaceholderText("Search invoices...");
+    const searchInput = screen.getByPlaceholderText("Search invoices by number or description...");
 
     fireEvent.change(searchInput, { target: { value: "new search" } });
 
@@ -109,7 +108,7 @@ describe("InvoiceSearchFilters", () => {
       <InvoiceSearchFilters {...mockProps} searchTerm="existing search" />
     );
 
-    const searchInput = screen.getByPlaceholderText("Search invoices...");
+    const searchInput = screen.getByPlaceholderText("Search invoices by number or description...");
 
     expect(searchInput).toHaveValue("existing search");
   });

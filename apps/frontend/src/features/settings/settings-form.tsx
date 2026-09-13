@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 import { useSettings, useUpdateSettings } from "./settings.service";
 
 
@@ -99,7 +100,7 @@ export function SettingsForm() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+          <Loader2 role="status" className="h-6 w-6 animate-spin mr-2" />
           <span>{t("loadingSettings")}</span>
         </CardContent>
       </Card>
@@ -133,7 +134,11 @@ export function SettingsForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            noValidate
+            className="space-y-6"
+          >
             <div className="space-y-2">
               <Label htmlFor="alertHours" className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />

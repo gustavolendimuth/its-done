@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useClients } from "@/features/clients";
+
 import { useUpdateProject, type Project } from "./projects.service";
 
 const projectSchema = z.object({
@@ -110,7 +111,11 @@ export function ProjectEditDialog({
       icon={FolderPlus}
       className="sm:max-w-[600px]"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        className="space-y-4"
+      >
         <div className="space-y-2">
           <Label htmlFor="clientId">{t("client")} *</Label>
           <Controller

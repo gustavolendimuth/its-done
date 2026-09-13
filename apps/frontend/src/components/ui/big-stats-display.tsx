@@ -189,7 +189,10 @@ export function BigStatsDisplay({
   const styles = variantStyles[variant];
 
   return (
-    <Card className={cn(styles.card, "shadow-lg", className)}>
+    <Card
+      data-testid="big-stats-display"
+      className={cn(styles.card, "shadow-lg", className)}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">

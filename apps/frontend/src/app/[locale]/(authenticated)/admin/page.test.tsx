@@ -6,12 +6,14 @@ import AdminPage from "./page";
 
 // Mock dependencies
 jest.mock("next-auth/react");
-jest.mock("next/navigation");
+jest.mock("next/navigation", () => ({
+  redirect: jest.fn(),
+}));
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 jest.mock("@/features/admin", () => ({
-  useSystemStats: () => ({
+  useSystemStats: jest.fn(() => ({
     data: {
       users: { total: 10, admins: 2, regular: 8 },
       clients: 5,
@@ -21,7 +23,7 @@ jest.mock("@/features/admin", () => ({
       revenue: 5000,
     },
     isLoading: false,
-  }),
+  })),
   AdminUsers: () => <div>Admin Users Component</div>,
   AdminActivity: () => <div>Admin Activity Component</div>,
 }));
@@ -83,14 +85,12 @@ describe("AdminPage", () => {
     });
 
     // Mock loading state
-    jest.doMock("@/features/admin", () => ({
-      useSystemStats: () => ({
-        data: null,
-        isLoading: true,
-      }),
-      AdminUsers: () => <div>Admin Users Component</div>,
-      AdminActivity: () => <div>Admin Activity Component</div>,
-    }));
+    const { useSystemStats } = jest.requireMock("@/features/admin");
+
+    useSystemStats.mockReturnValueOnce({
+      data: null,
+      isLoading: true,
+    });
 
     render(<AdminPage />);
 

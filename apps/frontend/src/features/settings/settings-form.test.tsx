@@ -1,4 +1,3 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
@@ -56,6 +55,22 @@ jest.mock("./settings.service", () => ({
 describe("SettingsForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Restore the default (previous tests may have overridden it via
+    // mockReturnValue, which clearAllMocks does not undo)
+    const { useSettings } = require("./settings.service");
+
+    useSettings.mockReturnValue({
+      data: mockSettings,
+      isLoading: false,
+      error: null,
+    });
+    // Default to a successful mutation so isSubmitting resets between
+    // submissions; tests exercising failure/pending states override this.
+    mockUpdateSettings.mockImplementation(
+      (_data: unknown, options: UpdateSettingsOptions) => {
+        options.onSuccess();
+      }
+    );
   });
 
   it("should render loading state", () => {
@@ -239,6 +254,10 @@ describe("SettingsForm", () => {
   });
 
   it("should disable form inputs while submitting", async () => {
+    // Leave the mutation pending (no onSuccess/onError call) so isSubmitting
+    // stays true long enough to observe the disabled state.
+    mockUpdateSettings.mockImplementation(() => {});
+
     render(<SettingsForm />);
 
     const alertHoursInput = screen.getByLabelText("alertHoursThreshold");
@@ -248,7 +267,11 @@ describe("SettingsForm", () => {
     fireEvent.change(alertHoursInput, { target: { value: "180" } });
     fireEvent.click(submitButton);
 
-    expect(alertHoursInput).toBeDisabled();
+    // Validation (and thus isSubmitting flipping to true) resolves
+    // asynchronously, so wait for the disabled state to appear.
+    await waitFor(() => {
+      expect(alertHoursInput).toBeDisabled();
+    });
     expect(emailInput).toBeDisabled();
     expect(submitButton).toBeDisabled();
     expect(screen.getByText("loading")).toBeInTheDocument();

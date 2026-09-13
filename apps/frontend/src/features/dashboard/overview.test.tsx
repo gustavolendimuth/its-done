@@ -1,5 +1,5 @@
-import { describe, it, expect } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import "@testing-library/jest-dom";
 import { Overview } from "./overview";
@@ -189,12 +189,13 @@ describe("Overview", () => {
     expect(invoiceCards[0]).toHaveTextContent("INV-001");
   });
 
-  it("should filter invoices by status", () => {
+  it("should filter invoices by status", async () => {
     render(<Overview data={mockData} isLoading={false} />);
 
-    // Get the status filter
-    const statusFilter = screen.getByLabelText(/status/i);
-    fireEvent.change(statusFilter, { target: { value: "PAID" } });
+    // Open the status filter (a Radix Select, not a native <select>) and
+    // choose "Paid"
+    await userEvent.click(screen.getByLabelText(/status/i));
+    await userEvent.click(screen.getByRole("option", { name: "Paid" }));
 
     // Should only show paid invoices
     const invoiceCards = screen.getAllByTestId("invoice-card");
@@ -202,24 +203,27 @@ describe("Overview", () => {
     expect(invoiceCards[0]).toHaveTextContent("PAID");
   });
 
-  it("should sort invoices by different criteria", () => {
+  it("should sort invoices by different criteria", async () => {
     render(<Overview data={mockData} isLoading={false} />);
 
-    // Get the sort select
+    // The sort control is a Radix Select, not a native <select>
     const sortSelect = screen.getByLabelText(/sort by/i);
 
     // Sort by amount
-    fireEvent.change(sortSelect, { target: { value: "amount" } });
+    await userEvent.click(sortSelect);
+    await userEvent.click(await screen.findByText("Amount"));
     let invoiceCards = screen.getAllByTestId("invoice-card");
     expect(invoiceCards[0]).toHaveTextContent("$1500"); // Higher amount first
 
     // Sort by hours
-    fireEvent.change(sortSelect, { target: { value: "hours" } });
+    await userEvent.click(sortSelect);
+    await userEvent.click(await screen.findByText("Hours"));
     invoiceCards = screen.getAllByTestId("invoice-card");
     expect(invoiceCards[0]).toHaveTextContent("INV-002"); // More hours first
 
     // Sort by status
-    fireEvent.change(sortSelect, { target: { value: "status" } });
+    await userEvent.click(sortSelect);
+    await userEvent.click(await screen.findByText("Status"));
     invoiceCards = screen.getAllByTestId("invoice-card");
     expect(invoiceCards[0]).toHaveTextContent("PAID"); // Alphabetical order
   });

@@ -1,5 +1,4 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
 import InvoicesPage from "../page";
@@ -143,6 +142,7 @@ jest.mock("@/features/invoices", () => ({
     </div>
   ),
   InvoiceCard: ({
+    id,
     number,
     clientName,
     amount,
@@ -157,11 +157,12 @@ jest.mock("@/features/invoices", () => ({
       <p>Amount: ${amount}</p>
       <p>Status: {status}</p>
       <button onClick={onEdit}>Edit</button>
-      <button onClick={onDelete}>Delete</button>
+      <button onClick={() => onDelete(id)}>Delete</button>
       <button onClick={onUpload}>Upload</button>
     </div>
   ),
   InvoicesBigStats: () => <div data-testid="invoices-big-stats">Stats</div>,
+  InvoicesPageSkeleton: () => <div data-testid="loading-skeleton" />,
   useInvoices: jest.fn(() => ({
     data: mockInvoices,
     isLoading: false,
@@ -182,12 +183,21 @@ jest.mock("@/features/clients", () => ({
 describe("InvoicesPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Restore the default (some tests below override it via mockReturnValue,
+    // which clearAllMocks does not undo)
+    const { useInvoices } = require("@/features/invoices");
+
+    useInvoices.mockReturnValue({
+      data: mockInvoices,
+      isLoading: false,
+      error: null,
+    });
   });
 
   it("should render loading skeleton when loading", () => {
     const { useInvoices } = require("@/features/invoices");
     useInvoices.mockReturnValue({
-      data: null,
+      data: undefined,
       isLoading: true,
       error: null,
     });
@@ -199,7 +209,7 @@ describe("InvoicesPage", () => {
   it("should render error state when there is an error", () => {
     const { useInvoices } = require("@/features/invoices");
     useInvoices.mockReturnValue({
-      data: null,
+      data: undefined,
       isLoading: false,
       error: new Error("Test error"),
     });
@@ -222,12 +232,13 @@ describe("InvoicesPage", () => {
     // Check invoice cards
     const cards = screen.getAllByTestId("invoice-card");
     expect(cards).toHaveLength(2);
-    expect(cards[0]).toHaveTextContent("Invoice: INV-001");
-    expect(cards[0]).toHaveTextContent("Client: John Doe");
-    expect(cards[0]).toHaveTextContent("Amount: $1000");
-    expect(cards[1]).toHaveTextContent("Invoice: INV-002");
-    expect(cards[1]).toHaveTextContent("Client: Jane Smith");
-    expect(cards[1]).toHaveTextContent("Amount: $1500");
+    // Default sort is newest first, so INV-002 (2024-03-02) leads INV-001 (2024-03-01)
+    expect(cards[0]).toHaveTextContent("Invoice: INV-002");
+    expect(cards[0]).toHaveTextContent("Client: Jane Smith");
+    expect(cards[0]).toHaveTextContent("Amount: $1500");
+    expect(cards[1]).toHaveTextContent("Invoice: INV-001");
+    expect(cards[1]).toHaveTextContent("Client: John Doe");
+    expect(cards[1]).toHaveTextContent("Amount: $1000");
   });
 
   it("should handle invoice deletion", async () => {
@@ -239,16 +250,20 @@ describe("InvoicesPage", () => {
 
     render(<InvoicesPage />);
 
-    // Find and click delete button
+    // Find and click delete button (default sort is newest first, so the
+    // first card is invoice "2")
     const deleteButtons = screen.getAllByText("Delete");
     fireEvent.click(deleteButtons[0]);
 
     // Check if delete mutation was called
-    expect(mockMutateAsync).toHaveBeenCalledWith("1");
+    expect(mockMutateAsync).toHaveBeenCalledWith("2");
 
-    // Check toast
+    // Check toast (handleDelete awaits the mutation before toasting)
     const { toast } = require("sonner");
-    expect(toast.success).toHaveBeenCalledWith("deleteSuccess");
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("deleteSuccess");
+    });
   });
 
   it("should handle invoice edit", () => {
@@ -273,13 +288,14 @@ describe("InvoicesPage", () => {
   it("should handle invoice upload", () => {
     render(<InvoicesPage />);
 
-    // Find and click upload button
+    // Find and click upload button (default sort is newest first, so the
+    // first card is invoice "2" / INV-002)
     const uploadButtons = screen.getAllByText("Upload");
     fireEvent.click(uploadButtons[0]);
 
     // Check if upload modal is open
     expect(screen.getByTestId("invoice-upload-modal")).toBeInTheDocument();
-    expect(screen.getByText("Upload for: INV-001")).toBeInTheDocument();
+    expect(screen.getByText("Upload for: INV-002")).toBeInTheDocument();
 
     // Close modal
     const closeButton = screen.getByText("Close");

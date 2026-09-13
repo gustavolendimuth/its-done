@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import { jest } from "@jest/globals";
 import { ReactNode } from "react";
 
 import api from "@/lib/axios";
@@ -378,11 +377,22 @@ describe("Invoice Services", () => {
         setAttribute: jest.fn(),
         click: jest.fn(),
       };
+      const originalCreateElement = document.createElement.bind(document);
       const createElement = jest
         .spyOn(document, "createElement")
-        .mockReturnValue(mockLink as any);
-      const appendChild = jest.spyOn(document.body, "appendChild");
-      const removeChild = jest.spyOn(document.body, "removeChild");
+        .mockImplementation((tagName: string, ...args: unknown[]) =>
+          tagName === "a"
+            ? (mockLink as any)
+            : (originalCreateElement as any)(tagName, ...args)
+        );
+      // mockLink is a plain object, not a real Node, so appendChild/removeChild
+      // must not fall through to jsdom's real (Node-typed) implementation
+      const appendChild = jest
+        .spyOn(document.body, "appendChild")
+        .mockImplementation((node) => node);
+      const removeChild = jest
+        .spyOn(document.body, "removeChild")
+        .mockImplementation((node) => node);
 
       const { result } = renderHook(() => useDownloadInvoice(), {
         wrapper: createWrapper(),

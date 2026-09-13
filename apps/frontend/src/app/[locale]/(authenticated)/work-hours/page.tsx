@@ -172,7 +172,10 @@ export default function WorkHoursPage() {
               {tCommon("filterByClient")}
             </label>
             <Select value={selectedClient} onValueChange={setSelectedClient}>
-              <SelectTrigger className="w-full h-11 bg-gradient-to-r from-background to-muted/20 border-2 border-muted hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-200">
+              <SelectTrigger
+                aria-label={tCommon("filterByClient")}
+                className="w-full h-11 bg-gradient-to-r from-background to-muted/20 border-2 border-muted hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-200"
+              >
                 <SelectValue placeholder={t("selectClient")} />
               </SelectTrigger>
               <SelectContent>

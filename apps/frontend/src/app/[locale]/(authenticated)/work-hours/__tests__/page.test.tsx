@@ -208,7 +208,7 @@ describe("WorkHoursPage", () => {
     render(<WorkHoursPage />);
 
     // Open client filter
-    const clientFilter = screen.getByLabelText(/filter by client/i);
+    const clientFilter = screen.getByLabelText("filterByClient");
     fireEvent.click(clientFilter);
 
     // Select a client
@@ -232,8 +232,9 @@ describe("WorkHoursPage", () => {
 
     render(<WorkHoursPage />);
 
-    // Find and click delete button
-    const deleteButton = screen.getByLabelText(/delete work hour/i);
+    // Find and click the first delete button (one per work hour row)
+    const [deleteButton] = screen.getAllByLabelText(/delete work hour/i);
+
     fireEvent.click(deleteButton);
 
     // Check if delete mutation was called

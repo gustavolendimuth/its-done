@@ -1,4 +1,3 @@
-import { jest } from "@jest/globals";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -42,10 +41,10 @@ const mockUpdateProject = jest.fn(
 );
 
 jest.mock("./projects.service", () => ({
-  useUpdateProject: () => ({
+  useUpdateProject: jest.fn(() => ({
     mutateAsync: mockUpdateProject,
     isPending: false,
-  }),
+  })),
 }));
 
 const mockClients: Client[] = [
@@ -135,6 +134,14 @@ describe("ProjectEditDialog", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Restore the default (some tests override it via mockReturnValue,
+    // which clearAllMocks does not undo)
+    const { useUpdateProject } = require("./projects.service");
+
+    useUpdateProject.mockReturnValue({
+      mutateAsync: mockUpdateProject,
+      isPending: false,
+    });
   });
 
   it("renders correctly with project data", () => {
@@ -414,12 +421,12 @@ describe("ProjectEditDialog", () => {
       ...defaultProps,
     };
 
-    jest.mock("./projects.service", () => ({
-      useUpdateProject: () => ({
-        mutateAsync: mockUpdateProject,
-        isPending: true,
-      }),
-    }));
+    const { useUpdateProject } = require("./projects.service");
+
+    useUpdateProject.mockReturnValue({
+      mutateAsync: mockUpdateProject,
+      isPending: true,
+    });
 
     render(<ProjectEditDialog {...pendingProps} />);
 

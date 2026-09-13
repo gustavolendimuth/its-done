@@ -1,4 +1,3 @@
-import { jest } from "@jest/globals";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -40,10 +39,10 @@ const mockCreateProject = jest.fn(
 );
 
 jest.mock("./projects.service", () => ({
-  useCreateProject: () => ({
+  useCreateProject: jest.fn(() => ({
     mutateAsync: mockCreateProject,
     isPending: false,
-  }),
+  })),
 }));
 
 const mockClients: Client[] = [
@@ -107,13 +106,21 @@ describe("ProjectCreateDialog", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Restore the default (some tests override it via mockReturnValue,
+    // which clearAllMocks does not undo)
+    const { useCreateProject } = require("./projects.service");
+
+    useCreateProject.mockReturnValue({
+      mutateAsync: mockCreateProject,
+      isPending: false,
+    });
   });
 
   it("renders correctly with default props", () => {
     render(<ProjectCreateDialog {...defaultProps} />);
 
     expect(screen.getByText("title")).toBeInTheDocument();
-    expect(screen.getByText("subtitle")).toBeInTheDocument();
+    expect(screen.getByText("formSubtitle")).toBeInTheDocument();
     expect(screen.getByTestId("client-combobox")).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText("enterName")
@@ -246,12 +253,12 @@ describe("ProjectCreateDialog", () => {
     ).not.toBeDisabled();
 
     // Mock pending state
-    jest.mock("./projects.service", () => ({
-      useCreateProject: () => ({
-        mutateAsync: mockCreateProject,
-        isPending: true,
-      }),
-    }));
+    const { useCreateProject } = require("./projects.service");
+
+    useCreateProject.mockReturnValue({
+      mutateAsync: mockCreateProject,
+      isPending: true,
+    });
 
     // Re-render with pending state
     rerender(<ProjectCreateDialog {...defaultProps} />);

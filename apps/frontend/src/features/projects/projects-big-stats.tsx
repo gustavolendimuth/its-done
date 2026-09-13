@@ -14,6 +14,7 @@ import {
   BigStatsDisplay,
   BigStatItem,
 } from "@/components/ui/big-stats-display";
+
 import { useProjects } from "./projects.service";
 
 
@@ -68,8 +69,8 @@ export function ProjectsBigStats({
     if (uniqueClients === 0) return t("focusNoFocus");
     const avgProjectsPerClient = totalProjects / uniqueClients;
 
-    if (avgProjectsPerClient >= 3) return t("focusDeepClientWork");
-    if (avgProjectsPerClient >= 1.5) return t("focusBalanced");
+    if (avgProjectsPerClient >= 1.5) return t("focusDeepClientWork");
+    if (avgProjectsPerClient >= 1) return t("focusBalanced");
 
     return t("focusClientDiversity");
   };

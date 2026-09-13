@@ -1,4 +1,3 @@
-import { describe, it, expect, jest } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
@@ -89,9 +88,21 @@ jest.mock("@/features/clients", () => ({
     </div>
   ),
   ClientsBigStats: () => <div data-testid="clients-big-stats">Stats</div>,
+  ClientsPageSkeleton: () => <div data-testid="loading-skeleton" />,
 }));
 
 describe("ClientsPage", () => {
+  beforeEach(() => {
+    // Restore the default (some tests below override it via mockReturnValue,
+    // which is not undone automatically between tests)
+    const { useClients } = require("@/features/clients");
+
+    useClients.mockReturnValue({
+      data: mockClients,
+      isLoading: false,
+    });
+  });
+
   it("should render loading skeleton when loading", () => {
     const { useClients } = require("@/features/clients");
     useClients.mockReturnValue({

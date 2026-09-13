@@ -65,7 +65,7 @@ export function InvoiceSearchFilters({
           value={filterStatus}
           onValueChange={(value: FilterStatus) => onStatusChange(value)}
         >
-          <SelectTrigger className="w-full sm:w-[140px]">
+          <SelectTrigger className="w-full sm:w-[140px]" aria-label="Status">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -81,7 +81,7 @@ export function InvoiceSearchFilters({
           value={sortBy}
           onValueChange={(value: SortBy) => onSortChange(value)}
         >
-          <SelectTrigger className="w-full sm:w-[140px]">
+          <SelectTrigger className="w-full sm:w-[140px]" aria-label="Sort by">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>

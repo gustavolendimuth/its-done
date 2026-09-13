@@ -1,4 +1,3 @@
-import { jest } from "@jest/globals";
 import { render, screen } from "@testing-library/react";
 
 import { ProjectsBigStats } from "./projects-big-stats";
@@ -45,6 +44,7 @@ const mockProjects: Project[] = [
       company: mockClient1.company,
       email: mockClient1.email,
     },
+    totalHours: 40,
     _count: {
       workHours: 40,
     },
@@ -63,6 +63,7 @@ const mockProjects: Project[] = [
       company: mockClient2.company,
       email: mockClient2.email,
     },
+    totalHours: 60,
     _count: {
       workHours: 60,
     },
@@ -81,6 +82,7 @@ const mockProjects: Project[] = [
       company: mockClient1.company,
       email: mockClient1.email,
     },
+    totalHours: 0,
     _count: {
       workHours: 0,
     },
@@ -98,12 +100,25 @@ jest.mock("./projects.service", () => ({
 }));
 
 describe("ProjectsBigStats", () => {
+  beforeEach(() => {
+    // Restore the default (some tests below override it via mockReturnValue,
+    // which would otherwise leak into later tests)
+    const { useProjects } = require("./projects.service");
+
+    useProjects.mockImplementation((clientId?: string) => ({
+      data: clientId
+        ? mockProjects.filter((p) => p.clientId === clientId)
+        : mockProjects,
+      isLoading: false,
+    }));
+  });
+
   it("renders correctly with all projects", () => {
     render(<ProjectsBigStats />);
 
     // Check main stats
     expect(screen.getByText("3")).toBeInTheDocument(); // Total projects
-    expect(screen.getByText(/100 totalWorkHours/)).toBeInTheDocument(); // Total work hours
+    expect(screen.getByText(/100\.0 totalWorkHours/)).toBeInTheDocument(); // Total work hours
     expect(screen.getByText(/2 clientsInvolved/)).toBeInTheDocument(); // Unique clients
 
     // Check average hours per project
@@ -121,7 +136,7 @@ describe("ProjectsBigStats", () => {
 
     // Check main stats for client1's projects
     expect(screen.getByText("2")).toBeInTheDocument(); // Total projects for client1
-    expect(screen.getByText(/40 totalWorkHours/)).toBeInTheDocument(); // Total work hours for client1
+    expect(screen.getByText(/40\.0 totalWorkHours/)).toBeInTheDocument(); // Total work hours for client1
     expect(screen.getByText(/1 clientsInvolved/)).toBeInTheDocument(); // Single client
 
     // Check average hours per project
@@ -147,29 +162,29 @@ describe("ProjectsBigStats", () => {
       _count: { workHours: 40 },
     }));
 
-    jest.mock("./projects.service", () => ({
-      useProjects: () => ({
-        data: manyProjects,
-        isLoading: false,
-      }),
-    }));
+    const { useProjects } = require("./projects.service");
+
+    useProjects.mockReturnValue({
+      data: manyProjects,
+      isLoading: false,
+    });
 
     rerender(<ProjectsBigStats />);
     expect(screen.getByText("portfolioHealthExcellent")).toBeInTheDocument();
   });
 
   it("handles empty projects list", () => {
-    jest.mock("./projects.service", () => ({
-      useProjects: () => ({
-        data: [],
-        isLoading: false,
-      }),
-    }));
+    const { useProjects } = require("./projects.service");
+
+    useProjects.mockReturnValue({
+      data: [],
+      isLoading: false,
+    });
 
     render(<ProjectsBigStats />);
 
     expect(screen.getByText("0")).toBeInTheDocument(); // Total projects
-    expect(screen.getByText(/0 totalWorkHours/)).toBeInTheDocument();
+    expect(screen.getByText(/0\.0 totalWorkHours/)).toBeInTheDocument();
     expect(screen.getByText(/0 clientsInvolved/)).toBeInTheDocument();
     expect(screen.getByText("0.0")).toBeInTheDocument(); // Average hours
     expect(screen.getByText("0%")).toBeInTheDocument(); // Utilization rate
@@ -180,7 +195,7 @@ describe("ProjectsBigStats", () => {
   it("shows loading state", () => {
     render(<ProjectsBigStats isRefetching={true} />);
 
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByText(/updating/i)).toBeInTheDocument();
   });
 
   it("displays correct project portfolio goal message", () => {
@@ -195,12 +210,12 @@ describe("ProjectsBigStats", () => {
       id: `project${i}`,
     }));
 
-    jest.mock("./projects.service", () => ({
-      useProjects: () => ({
-        data: moreProjects,
-        isLoading: false,
-      }),
-    }));
+    const { useProjects } = require("./projects.service");
+
+    useProjects.mockReturnValue({
+      data: moreProjects,
+      isLoading: false,
+    });
 
     rerender(<ProjectsBigStats />);
     expect(screen.getByText("goodProjectPortfolio")).toBeInTheDocument();
@@ -211,12 +226,10 @@ describe("ProjectsBigStats", () => {
       id: `project${i}`,
     }));
 
-    jest.mock("./projects.service", () => ({
-      useProjects: () => ({
-        data: manyProjects,
-        isLoading: false,
-      }),
-    }));
+    useProjects.mockReturnValue({
+      data: manyProjects,
+      isLoading: false,
+    });
 
     rerender(<ProjectsBigStats />);
     expect(screen.getByText("excellentPortfolio")).toBeInTheDocument();
