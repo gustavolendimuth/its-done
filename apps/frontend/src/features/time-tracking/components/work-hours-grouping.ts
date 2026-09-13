@@ -16,6 +16,18 @@ export interface WorkHourRow {
     name: string;
   };
   createdAt: string | Date;
+  invoiceWorkHours?: {
+    invoice: {
+      id: string;
+      status: string;
+    };
+  }[];
+}
+
+export function isWorkHourInvoiced(row: WorkHourRow): boolean {
+  return (row.invoiceWorkHours ?? []).some(
+    (invoiceWorkHour) => invoiceWorkHour.invoice.status !== "CANCELED"
+  );
 }
 
 export interface WeekGroup {
