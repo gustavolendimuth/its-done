@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -16,7 +16,8 @@ import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { Client } from "@/features/clients";
-import { useCreateTimeEntry } from "../time-entries";
+
+import { useCreateTimeEntry, useUpdateTimeEntry } from "../time-entries";
 
 /**
  * Máscara de tempo "HH:mm" a partir dos dígitos digitados. Substitui o antigo
@@ -29,25 +30,50 @@ function formatHHmm(input: string): string {
   return `${digits.slice(0, 2)}:${digits.slice(2)}`;
 }
 
+function decimalHoursToHHmm(hours: number): string {
+  const totalMinutes = Math.round(hours * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+const hoursFieldSchema = z
+  .string()
+  .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)");
+
 const workHourFormSchema = z.object({
   date: z.date({
     required_error: "Please select a date",
   }),
   projectId: z.string().min(1, "Project is required"),
-  hours: z
-    .string()
-    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
+  hours: hoursFieldSchema,
   clientId: z.string().min(1, "Client is required"),
   description: z.string().optional(),
 });
 
+const editWorkHourFormSchema = z.object({
+  date: z.date({
+    required_error: "Please select a date",
+  }),
+  hours: hoursFieldSchema,
+  description: z.string().optional(),
+});
+
 type WorkHourFormData = z.infer<typeof workHourFormSchema>;
+
+interface EditableWorkHour {
+  id: string;
+  date: string;
+  hours: number;
+  description?: string;
+}
 
 interface WorkHourFormProps {
   onSuccess?: () => void;
   clients: Client[];
   defaultClientId?: string;
   hideClientSelection?: boolean;
+  workHour?: EditableWorkHour | null;
 }
 
 export function WorkHourForm({
@@ -55,8 +81,10 @@ export function WorkHourForm({
   clients,
   defaultClientId,
   hideClientSelection = false,
+  workHour,
 }: WorkHourFormProps) {
   const t = useTranslations("workHours");
+  const isEditMode = !!workHour;
 
   const queryClient = useQueryClient();
   const {
@@ -67,13 +95,15 @@ export function WorkHourForm({
     watch,
     formState: { errors },
   } = useForm<WorkHourFormData>({
-    resolver: zodResolver(workHourFormSchema),
+    resolver: zodResolver(
+      isEditMode ? editWorkHourFormSchema : workHourFormSchema
+    ) as Resolver<WorkHourFormData>,
     defaultValues: {
-      date: new Date(),
+      date: workHour ? new Date(workHour.date) : new Date(),
       projectId: "",
-      hours: "",
+      hours: workHour ? decimalHoursToHHmm(workHour.hours) : "",
       clientId: defaultClientId || "",
-      description: "",
+      description: workHour?.description ?? "",
     },
   });
 
@@ -85,11 +115,28 @@ export function WorkHourForm({
   }, [selectedClientId, setValue]);
 
   const createTimeEntry = useCreateTimeEntry();
+  const updateTimeEntry = useUpdateTimeEntry();
+  const activeMutation = isEditMode ? updateTimeEntry : createTimeEntry;
 
   const onSubmit = async (formData: WorkHourFormData) => {
     try {
       const [hours, minutes] = formData.hours.split(":");
       const decimalHours = Number(hours) + Number(minutes) / 60;
+
+      if (isEditMode && workHour) {
+        await updateTimeEntry.mutateAsync({
+          id: workHour.id,
+          data: {
+            date: formData.date.toISOString(),
+            hours: decimalHours,
+            description: formData.description || undefined,
+          },
+        });
+
+        toast.success(t("savedSuccessfully", { type: t("workHour") }));
+        onSuccess?.();
+        return;
+      }
 
       const payload = {
         ...formData,
@@ -111,7 +158,7 @@ export function WorkHourForm({
       onSuccess?.();
       console.log("✅ onSuccess callback completed");
     } catch (error) {
-      console.error("❌ Error creating work hour:", error);
+      console.error("❌ Error saving work hour:", error);
       if (error instanceof AxiosError && error.response) {
         console.error("❌ Error response:", error.response.data);
         toast.error(t("errorSaving", { type: t("workHour") }));
@@ -149,7 +196,7 @@ export function WorkHourForm({
         )}
       </div>
 
-      {!hideClientSelection && (
+      {!isEditMode && !hideClientSelection && (
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">
             {t("client")} *
@@ -175,32 +222,36 @@ export function WorkHourForm({
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-foreground">
-          {t("project")} *
-        </Label>
-        <Controller
-          name="projectId"
-          control={control}
-          render={({ field }) => (
-            <ProjectCombobox
-              clientId={selectedClientId}
-              value={field.value}
-              onSelect={field.onChange}
-              placeholder={t("selectProject")}
-              disabled={!selectedClientId}
-            />
+      {!isEditMode && (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-foreground">
+            {t("project")} *
+          </Label>
+          <Controller
+            name="projectId"
+            control={control}
+            render={({ field }) => (
+              <ProjectCombobox
+                clientId={selectedClientId}
+                value={field.value}
+                onSelect={field.onChange}
+                placeholder={t("selectProject")}
+                disabled={!selectedClientId}
+              />
+            )}
+          />
+          {errors.projectId && (
+            <p className="text-sm text-destructive">
+              {errors.projectId.message}
+            </p>
           )}
-        />
-        {errors.projectId && (
-          <p className="text-sm text-destructive">{errors.projectId.message}</p>
-        )}
-        {!selectedClientId && (
-          <p className="text-sm text-muted-foreground">
-            {t("selectClientFirst")}
-          </p>
-        )}
-      </div>
+          {!selectedClientId && (
+            <p className="text-sm text-muted-foreground">
+              {t("selectClientFirst")}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label className="text-sm font-medium text-foreground">
@@ -251,10 +302,10 @@ export function WorkHourForm({
       <div className="space-y-4">
         <Button
           type="submit"
-          disabled={createTimeEntry.isPending}
+          disabled={activeMutation.isPending}
           className="w-full"
         >
-          {createTimeEntry.isPending ? (
+          {activeMutation.isPending ? (
             <>
               <svg
                 className="animate-spin -ml-1 mr-2 h-4 w-4"
@@ -277,6 +328,8 @@ export function WorkHourForm({
               </svg>
               {t("saving")}
             </>
+          ) : isEditMode ? (
+            t("saveChanges")
           ) : hideClientSelection ? (
             t("saveTimeEntry")
           ) : (
@@ -284,7 +337,7 @@ export function WorkHourForm({
           )}
         </Button>
 
-        {createTimeEntry.isError && (
+        {activeMutation.isError && (
           <Alert variant="destructive">
             <AlertDescription>
               {t("errorSaving", {
@@ -294,7 +347,7 @@ export function WorkHourForm({
           </Alert>
         )}
 
-        {createTimeEntry.isSuccess && (
+        {activeMutation.isSuccess && (
           <Alert className="border-primary/20 bg-primary/5 text-primary">
             <AlertDescription>
               {t("savedSuccessfully", {
