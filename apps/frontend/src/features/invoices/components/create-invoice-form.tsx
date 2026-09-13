@@ -58,7 +58,6 @@ export function CreateInvoiceForm({
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
 
   const {
     register,
@@ -126,27 +125,6 @@ export function CreateInvoiceForm({
     }
   }, [watchedInvoiceNumber, invoiceNumber]);
 
-  const handleFileUpload = async (): Promise<void> => {
-    if (!selectedFile) {
-      toast.error("Please select a file to upload");
-
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      // This will be called after invoice creation
-      // For now, just store the file for later upload
-      console.log("File ready for upload:", selectedFile.name);
-      toast.success("File prepared for upload");
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Failed to prepare file for upload");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const onSubmit = async (data: InvoiceFormData) => {
     setIsSubmitting(true);
     try {
@@ -185,7 +163,6 @@ export function CreateInvoiceForm({
       setCalculatedAmount(0);
       setInvoiceNumber("");
       setSelectedFile(null);
-      setUploadedFileUrl(null);
       onSuccess?.();
     } catch (error) {
       console.error("Error creating invoice:", error);
@@ -329,14 +306,11 @@ export function CreateInvoiceForm({
           }}
           selectedFile={selectedFile}
           onFileSelect={setSelectedFile}
-          isUploading={isUploading}
-          onUpload={handleFileUpload}
-          existingFileUrl={uploadedFileUrl || undefined}
-          uploadButtonText="Prepare File for Upload"
+          showUploadButton={false}
           showInvoiceNumber={true}
           invoiceNumberPlaceholder="Enter invoice number (optional)"
           title="Upload Invoice Document"
-          description="Upload the official invoice document after generating it from the tax authority website (optional)"
+          description="Select the invoice document — it will be uploaded together with the invoice when you click Create Invoice (optional)"
           compact={false}
         />
       </div>

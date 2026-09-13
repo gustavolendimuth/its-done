@@ -19,13 +19,16 @@ interface InvoiceFileUploadProps {
   /** Função chamada quando um arquivo é selecionado */
   onFileSelect: (file: File | null) => void;
   /** Estado de carregamento do upload */
-  isUploading: boolean;
+  isUploading?: boolean;
   /** Função chamada para fazer upload do arquivo */
-  onUpload: () => Promise<void>;
+  onUpload?: () => Promise<void>;
   /** URL do arquivo já enviado (opcional) */
   existingFileUrl?: string;
   /** Texto do botão de upload (opcional) */
   uploadButtonText?: string;
+  /** Exibir o botão de upload interno (default: true). Use `false` quando o upload
+   *  do arquivo é disparado por uma ação externa (ex.: submit de outro formulário). */
+  showUploadButton?: boolean;
   /** Mostrar campo de número da nota fiscal */
   showInvoiceNumber?: boolean;
   /** Placeholder para o número da nota fiscal */
@@ -55,6 +58,7 @@ export function InvoiceFileUpload({
   description = "Upload the official invoice document",
   compact = false,
   disabled = false,
+  showUploadButton = true,
 }: InvoiceFileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
   const downloadInvoiceMutation = useDownloadInvoice();
@@ -135,6 +139,8 @@ export function InvoiceFileUpload({
   };
 
   const handleUploadClick = async () => {
+    if (!onUpload) return;
+
     if (!selectedFile) {
       toast.error("Please select a file to upload");
 
@@ -235,23 +241,25 @@ export function InvoiceFileUpload({
           )}
         </div>
 
-        <Button
-          onClick={handleUploadClick}
-          disabled={!selectedFile || isUploading || disabled}
-          className="w-full"
-        >
-          {isUploading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Upload className="mr-2 h-4 w-4" />
-              {uploadButtonText}
-            </>
-          )}
-        </Button>
+        {showUploadButton && (
+          <Button
+            onClick={handleUploadClick}
+            disabled={!selectedFile || isUploading || disabled}
+            className="w-full"
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                {uploadButtonText}
+              </>
+            )}
+          </Button>
+        )}
       </div>
     );
   }
@@ -389,29 +397,31 @@ export function InvoiceFileUpload({
         )}
 
         {/* Upload Button */}
-        <Button
-          onClick={handleUploadClick}
-          disabled={
-            !selectedFile ||
-            isUploading ||
-            disabled ||
-            (showInvoiceNumber && !invoiceNumber.trim())
-          }
-          className="w-full"
-          size="lg"
-        >
-          {isUploading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Upload className="mr-2 h-4 w-4" />
-              {uploadButtonText}
-            </>
-          )}
-        </Button>
+        {showUploadButton && (
+          <Button
+            onClick={handleUploadClick}
+            disabled={
+              !selectedFile ||
+              isUploading ||
+              disabled ||
+              (showInvoiceNumber && !invoiceNumber.trim())
+            }
+            className="w-full"
+            size="lg"
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                {uploadButtonText}
+              </>
+            )}
+          </Button>
+        )}
 
         {/* Upload Requirements */}
         <div className="text-xs text-muted-foreground space-y-1">
