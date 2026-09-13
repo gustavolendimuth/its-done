@@ -65,6 +65,7 @@ describe("WorkHoursTable", () => {
       name: "cannotEditInvoiced",
     });
     expect(editButton).toBeDisabled();
+    expect(editButton).toHaveAttribute("title", "cannotEditInvoiced");
 
     fireEvent.click(editButton);
     expect(onEdit).not.toHaveBeenCalled();

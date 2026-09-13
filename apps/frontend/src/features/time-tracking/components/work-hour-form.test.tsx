@@ -19,6 +19,15 @@ jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
+const mockToastSuccess = jest.fn();
+
+jest.mock("sonner", () => ({
+  toast: {
+    success: (...args: unknown[]) => mockToastSuccess(...args),
+    error: jest.fn(),
+  },
+}));
+
 const mockClients: Client[] = [
   {
     id: "client-1",
@@ -170,10 +179,12 @@ describe("WorkHourForm", () => {
 
   it("edit mode: submits via update with only date/hours/description", async () => {
     mockUpdateMutateAsync.mockResolvedValueOnce({ id: "wh-1" });
+    const onSuccess = jest.fn();
 
     renderWithQueryClient(
       <WorkHourForm
         clients={mockClients}
+        onSuccess={onSuccess}
         workHour={{
           id: "wh-1",
           date: "2026-01-05T00:00:00.000Z",
@@ -200,6 +211,8 @@ describe("WorkHourForm", () => {
       })
     );
     expect(mockCreateMutateAsync).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockToastSuccess).toHaveBeenCalled());
+    expect(onSuccess).toHaveBeenCalled();
   });
 
   it("edit mode: blocks submit on invalid hours format", async () => {
