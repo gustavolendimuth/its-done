@@ -1,0 +1,258 @@
+diff --git a/apps/frontend/src/features/projects/project-card.tsx b/apps/frontend/src/features/projects/project-card.tsx
+--- a/apps/frontend/src/features/projects/project-card.tsx
++++ b/apps/frontend/src/features/projects/project-card.tsx
+@@ -34,1 +34,1 @@
+-import { ProjectEditDialog } from "./project-edit-dialog";
++
+diff --git a/apps/frontend/src/app/[locale]/(authenticated)/work-hours/page.tsx b/apps/frontend/src/app/[locale]/(authenticated)/work-hours/page.tsx
+--- a/apps/frontend/src/app/[locale]/(authenticated)/work-hours/page.tsx
++++ b/apps/frontend/src/app/[locale]/(authenticated)/work-hours/page.tsx
+@@ -29,1 +29,1 @@
+-import type { TimeEntry } from "@/types";
++
+diff --git a/apps/frontend/src/features/projects/projects-big-stats.tsx b/apps/frontend/src/features/projects/projects-big-stats.tsx
+--- a/apps/frontend/src/features/projects/projects-big-stats.tsx
++++ b/apps/frontend/src/features/projects/projects-big-stats.tsx
+@@ -18,1 +18,1 @@
+-import { useProjects } from "./projects.service";
++
+diff --git a/apps/frontend/src/features/clients/components/addresses/address-form.tsx b/apps/frontend/src/features/clients/components/addresses/address-form.tsx
+--- a/apps/frontend/src/features/clients/components/addresses/address-form.tsx
++++ b/apps/frontend/src/features/clients/components/addresses/address-form.tsx
+@@ -19,1 +19,1 @@
+-import { ADDRESS_TYPES, BRAZILIAN_STATES } from "./address-constants";
++
+diff --git a/apps/frontend/src/features/profile/profile-form.tsx b/apps/frontend/src/features/profile/profile-form.tsx
+--- a/apps/frontend/src/features/profile/profile-form.tsx
++++ b/apps/frontend/src/features/profile/profile-form.tsx
+@@ -18,1 +18,1 @@
+-import { useProfile, useUpdateProfile } from "./profile.service";
++
+@@ -19,1 +19,1 @@
+-import { profileFormSchema, type ProfileFormValues } from "./types";
++import { useProfile, useUpdateProfile } from "./profile.service";
+diff --git a/apps/frontend/src/features/notifications/notification-bell.tsx b/apps/frontend/src/features/notifications/notification-bell.tsx
+--- a/apps/frontend/src/features/notifications/notification-bell.tsx
++++ b/apps/frontend/src/features/notifications/notification-bell.tsx
+@@ -14,1 +14,1 @@
+-import { NotificationList } from "./notification-list";
++
+@@ -15,1 +15,1 @@
+-import { useUnreadNotificationCount } from "./notifications.service";
++import { NotificationList } from "./notification-list";
+diff --git a/apps/frontend/src/features/time-tracking/components/work-hours-big-stats.tsx b/apps/frontend/src/features/time-tracking/components/work-hours-big-stats.tsx
+--- a/apps/frontend/src/features/time-tracking/components/work-hours-big-stats.tsx
++++ b/apps/frontend/src/features/time-tracking/components/work-hours-big-stats.tsx
+@@ -20,1 +20,1 @@
+-import { useWorkHoursStats } from "../work-hours-stats";
++
+diff --git a/apps/frontend/src/components/ui/address-combobox.tsx b/apps/frontend/src/components/ui/address-combobox.tsx
+--- a/apps/frontend/src/components/ui/address-combobox.tsx
++++ b/apps/frontend/src/components/ui/address-combobox.tsx
+@@ -23,1 +23,1 @@
+-import { EditAddressForm } from "@/features/clients/components/addresses/edit-address-form";
++import { EditAddressForm } from "@/features/clients/components/addresses/edit-address-form";
+@@ -24,1 +24,1 @@
+-import type { Address } from "@/features/clients/addresses";
++import type { Address } from "@/features/clients/addresses";
+diff --git a/apps/frontend/src/features/time-tracking/components/work-hour-form.tsx b/apps/frontend/src/features/time-tracking/components/work-hour-form.tsx
+--- a/apps/frontend/src/features/time-tracking/components/work-hour-form.tsx
++++ b/apps/frontend/src/features/time-tracking/components/work-hour-form.tsx
+@@ -20,1 +20,1 @@
+-import { useCreateTimeEntry, useUpdateTimeEntry } from "../time-entries";
++
+@@ -22,1 +22,1 @@
+-import type { CreateTimeEntryDto as FullCreateTimeEntryDto } from "@/types/entities";
++
+diff --git a/apps/frontend/src/app/[locale]/(authenticated)/admin/page.tsx b/apps/frontend/src/app/[locale]/(authenticated)/admin/page.tsx
+--- a/apps/frontend/src/app/[locale]/(authenticated)/admin/page.tsx
++++ b/apps/frontend/src/app/[locale]/(authenticated)/admin/page.tsx
+@@ -24,1 +24,1 @@
+-import AdminActivity from "./activity";
++
+@@ -25,1 +25,1 @@
+-import AdminUsers from "./users";
++import AdminActivity from "./activity";
+diff --git a/apps/frontend/src/components/layout/__tests__/topbar.test.tsx b/apps/frontend/src/components/layout/__tests__/topbar.test.tsx
+--- a/apps/frontend/src/components/layout/__tests__/topbar.test.tsx
++++ b/apps/frontend/src/components/layout/__tests__/topbar.test.tsx
+@@ -1,1 +1,1 @@
+-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
++import { render, screen, fireEvent } from "@testing-library/react";
+diff --git a/apps/frontend/src/features/dashboard/overview-main-stats.tsx b/apps/frontend/src/features/dashboard/overview-main-stats.tsx
+--- a/apps/frontend/src/features/dashboard/overview-main-stats.tsx
++++ b/apps/frontend/src/features/dashboard/overview-main-stats.tsx
+@@ -6,1 +6,1 @@
+-import type { OverviewStats } from "./overview";
++
+diff --git a/apps/frontend/src/features/analytics/components/invoice-report-section.tsx b/apps/frontend/src/features/analytics/components/invoice-report-section.tsx
+--- a/apps/frontend/src/features/analytics/components/invoice-report-section.tsx
++++ b/apps/frontend/src/features/analytics/components/invoice-report-section.tsx
+@@ -20,1 +20,1 @@
+-import type { InvoiceReport } from "../types";
++
+diff --git a/apps/frontend/src/features/time-tracking/components/work-session-start-form.tsx b/apps/frontend/src/features/time-tracking/components/work-session-start-form.tsx
+--- a/apps/frontend/src/features/time-tracking/components/work-session-start-form.tsx
++++ b/apps/frontend/src/features/time-tracking/components/work-session-start-form.tsx
+@@ -24,1 +24,1 @@
+-import type { StartDetails } from "../lib/work-timer-engine";
++
+diff --git a/apps/frontend/src/features/time-tracking/work-sessions.ts b/apps/frontend/src/features/time-tracking/work-sessions.ts
+--- a/apps/frontend/src/features/time-tracking/work-sessions.ts
++++ b/apps/frontend/src/features/time-tracking/work-sessions.ts
+@@ -4,1 +4,1 @@
+-import api from "@/lib/axios";
++
+diff --git a/apps/frontend/src/features/profile/profile-popover.tsx b/apps/frontend/src/features/profile/profile-popover.tsx
+--- a/apps/frontend/src/features/profile/profile-popover.tsx
++++ b/apps/frontend/src/features/profile/profile-popover.tsx
+@@ -12,1 +12,1 @@
+-import { type ProfilePopoverProps } from "./types";
++import { ProfileForm } from "./profile-form";
+diff --git a/apps/frontend/src/features/analytics/components/report-filters-card.tsx b/apps/frontend/src/features/analytics/components/report-filters-card.tsx
+--- a/apps/frontend/src/features/analytics/components/report-filters-card.tsx
++++ b/apps/frontend/src/features/analytics/components/report-filters-card.tsx
+@@ -25,1 +25,1 @@
+-import type { ReportFilters, ReportType } from "../types";
++
+@@ -26,1 +26,1 @@
+-import type { Client } from "@/features/clients";
++import type { ReportFilters, ReportType } from "../types";
+diff --git a/apps/frontend/src/features/settings/settings-form.tsx b/apps/frontend/src/features/settings/settings-form.tsx
+--- a/apps/frontend/src/features/settings/settings-form.tsx
++++ b/apps/frontend/src/features/settings/settings-form.tsx
+@@ -23,1 +23,1 @@
+-import { useSettings, useUpdateSettings } from "./settings.service";
++
+diff --git a/apps/frontend/src/features/dashboard/overview-performance-cards.tsx b/apps/frontend/src/features/dashboard/overview-performance-cards.tsx
+--- a/apps/frontend/src/features/dashboard/overview-performance-cards.tsx
++++ b/apps/frontend/src/features/dashboard/overview-performance-cards.tsx
+@@ -5,1 +5,1 @@
+-import type { OverviewStats } from "./overview";
++
+diff --git a/apps/frontend/src/components/ui/project-combobox.tsx b/apps/frontend/src/components/ui/project-combobox.tsx
+--- a/apps/frontend/src/components/ui/project-combobox.tsx
++++ b/apps/frontend/src/components/ui/project-combobox.tsx
+@@ -10,1 +10,1 @@
+-import type { Project } from "@/features/projects";
++
+@@ -11,1 +11,1 @@
+-import type { Project } from "@/services/projects";
++
+diff --git a/apps/frontend/src/features/analytics/components/hours-report-section.tsx b/apps/frontend/src/features/analytics/components/hours-report-section.tsx
+--- a/apps/frontend/src/features/analytics/components/hours-report-section.tsx
++++ b/apps/frontend/src/features/analytics/components/hours-report-section.tsx
+@@ -33,1 +33,1 @@
+-import type { HoursReport } from "../types";
++
+diff --git a/apps/frontend/src/features/dashboard/overview.tsx b/apps/frontend/src/features/dashboard/overview.tsx
+--- a/apps/frontend/src/features/dashboard/overview.tsx
++++ b/apps/frontend/src/features/dashboard/overview.tsx
+@@ -6,1 +6,1 @@
+-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
++import { FilterStatus, Invoice, SortBy } from "@/features/invoices";
+@@ -7,1 +7,1 @@
+-import { FilterStatus, Invoice, SortBy } from "@/features/invoices";
++import { cn } from "@/lib/utils";
+@@ -8,1 +8,1 @@
+-import { cn } from "@/lib/utils";
++
+diff --git a/apps/frontend/src/features/admin/admin-activity.tsx b/apps/frontend/src/features/admin/admin-activity.tsx
+--- a/apps/frontend/src/features/admin/admin-activity.tsx
++++ b/apps/frontend/src/features/admin/admin-activity.tsx
+@@ -10,1 +10,1 @@
+-import { useRecentActivity } from "./admin.service";
++
+diff --git a/apps/frontend/src/features/clients/components/addresses/edit-address-form.tsx b/apps/frontend/src/features/clients/components/addresses/edit-address-form.tsx
+--- a/apps/frontend/src/features/clients/components/addresses/edit-address-form.tsx
++++ b/apps/frontend/src/features/clients/components/addresses/edit-address-form.tsx
+@@ -19,1 +19,1 @@
+-import { ADDRESS_TYPES, BRAZILIAN_STATES } from "./address-constants";
++
+diff --git a/apps/frontend/src/features/time-tracking/components/work-timer-widget.tsx b/apps/frontend/src/features/time-tracking/components/work-timer-widget.tsx
+--- a/apps/frontend/src/features/time-tracking/components/work-timer-widget.tsx
++++ b/apps/frontend/src/features/time-tracking/components/work-timer-widget.tsx
+@@ -7,1 +7,1 @@
+-import { Button } from "@/components/ui/button";
++import { usePushSubscription } from "@/hooks/use-push-subscription";
+@@ -8,1 +8,1 @@
+-import { usePushSubscription } from "@/hooks/use-push-subscription";
++import { cn } from "@/lib/utils";
+@@ -9,1 +9,1 @@
+-import { cn } from "@/lib/utils";
++
+diff --git a/apps/frontend/src/features/time-tracking/components/total-hours-display.tsx b/apps/frontend/src/features/time-tracking/components/total-hours-display.tsx
+--- a/apps/frontend/src/features/time-tracking/components/total-hours-display.tsx
++++ b/apps/frontend/src/features/time-tracking/components/total-hours-display.tsx
+@@ -18,1 +18,1 @@
+-import { useWorkHoursStats } from "../work-hours-stats";
++
+diff --git a/apps/frontend/src/features/analytics/components/recent-activities-card.tsx b/apps/frontend/src/features/analytics/components/recent-activities-card.tsx
+--- a/apps/frontend/src/features/analytics/components/recent-activities-card.tsx
++++ b/apps/frontend/src/features/analytics/components/recent-activities-card.tsx
+@@ -16,1 +16,1 @@
+-import type { DashboardStats } from "@/features/dashboard";
++
+diff --git a/apps/frontend/src/features/clients/components/client-card.tsx b/apps/frontend/src/features/clients/components/client-card.tsx
+--- a/apps/frontend/src/features/clients/components/client-card.tsx
++++ b/apps/frontend/src/features/clients/components/client-card.tsx
+@@ -46,1 +46,1 @@
+-import { ClientShareMenu } from "./client-share-menu";
++import { ClientAddresses } from "./client-addresses";
+diff --git a/apps/frontend/src/features/analytics/components/summary-report-section.tsx b/apps/frontend/src/features/analytics/components/summary-report-section.tsx
+--- a/apps/frontend/src/features/analytics/components/summary-report-section.tsx
++++ b/apps/frontend/src/features/analytics/components/summary-report-section.tsx
+@@ -14,1 +14,1 @@
+-import type { ReportFilters, SummaryReport } from "../types";
++
+diff --git a/apps/frontend/src/features/analytics/components/analytics-view.tsx b/apps/frontend/src/features/analytics/components/analytics-view.tsx
+--- a/apps/frontend/src/features/analytics/components/analytics-view.tsx
++++ b/apps/frontend/src/features/analytics/components/analytics-view.tsx
+@@ -17,1 +17,1 @@
+-import { useHoursReport, useInvoiceReport, useSummaryReport } from "../reports.service";
++
+@@ -19,1 +19,1 @@
+-import { AnalyticsOverviewTab } from "./analytics-overview-tab";
++
+@@ -20,1 +20,1 @@
+-import { AnalyticsPageSkeleton } from "./analytics-page-skeleton";
++import { AnalyticsOverviewTab } from "./analytics-overview-tab";
+@@ -21,1 +21,1 @@
+-import { AnalyticsReportsTab } from "./analytics-reports-tab";
++import { AnalyticsPageSkeleton } from "./analytics-page-skeleton";
+@@ -23,1 +23,1 @@
+-import type { ReportFilters, ReportType } from "../types";
++
+diff --git a/apps/frontend/src/features/time-tracking/components/work-session-finish-form.tsx b/apps/frontend/src/features/time-tracking/components/work-session-finish-form.tsx
+--- a/apps/frontend/src/features/time-tracking/components/work-session-finish-form.tsx
++++ b/apps/frontend/src/features/time-tracking/components/work-session-finish-form.tsx
+@@ -29,1 +29,1 @@
+-import { reset } from "../lib/work-timer-engine";
++
+@@ -35,1 +35,1 @@
+-import type { LocalWorkSession } from "../lib/work-timer-db";
++
+diff --git a/apps/frontend/src/features/time-tracking/lib/work-timer-sync.ts b/apps/frontend/src/features/time-tracking/lib/work-timer-sync.ts
+--- a/apps/frontend/src/features/time-tracking/lib/work-timer-sync.ts
++++ b/apps/frontend/src/features/time-tracking/lib/work-timer-sync.ts
+@@ -1,1 +1,1 @@
+-import api from "@/lib/axios";
++
+diff --git a/apps/frontend/src/features/projects/project-create-dialog.tsx b/apps/frontend/src/features/projects/project-create-dialog.tsx
+--- a/apps/frontend/src/features/projects/project-create-dialog.tsx
++++ b/apps/frontend/src/features/projects/project-create-dialog.tsx
+@@ -18,1 +18,1 @@
+-import { useCreateProject, type Project } from "./projects.service";
++
+diff --git a/apps/frontend/src/features/time-tracking/components/work-hours-table.tsx b/apps/frontend/src/features/time-tracking/components/work-hours-table.tsx
+--- a/apps/frontend/src/features/time-tracking/components/work-hours-table.tsx
++++ b/apps/frontend/src/features/time-tracking/components/work-hours-table.tsx
+@@ -34,1 +34,1 @@
+-import { groupByMonthAndWeek, type WorkHourRow } from "./work-hours-grouping";
++
+diff --git a/apps/frontend/src/features/projects/project-edit-dialog.tsx b/apps/frontend/src/features/projects/project-edit-dialog.tsx
+--- a/apps/frontend/src/features/projects/project-edit-dialog.tsx
++++ b/apps/frontend/src/features/projects/project-edit-dialog.tsx
+@@ -19,1 +19,1 @@
+-import { useUpdateProject, type Project } from "./projects.service";
++
