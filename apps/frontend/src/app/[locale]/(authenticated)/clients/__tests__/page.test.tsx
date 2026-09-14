@@ -3,34 +3,11 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ClientsPage from "../page";
 
-import type { Client } from "@/services/clients";
+import type { Client } from "@/features/clients";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
-}));
-
-// Mock components
-jest.mock("@/components/clients/client-form", () => ({
-  ClientForm: ({ onSuccess }: { onSuccess: () => void }) => (
-    <div data-testid="client-form">
-      <button onClick={onSuccess}>Submit</button>
-    </div>
-  ),
-}));
-
-jest.mock("@/components/clients/client-card", () => ({
-  ClientCard: ({ client }: { client: Client }) => (
-    <div data-testid="client-card">
-      <p>Company: {client.company}</p>
-      <p>Name: {client.name}</p>
-      <p>Email: {client.email}</p>
-    </div>
-  ),
-}));
-
-jest.mock("@/components/clients/clients-big-stats", () => ({
-  ClientsBigStats: () => <div data-testid="clients-big-stats">Stats</div>,
 }));
 
 jest.mock("@/components/layout/page-container", () => ({
@@ -91,17 +68,43 @@ const mockClients: Client[] = [
   },
 ];
 
-// Mock services
-jest.mock("@/services/clients", () => ({
+// Mock the clients feature barrel (components + hooks), never an internal path
+jest.mock("@/features/clients", () => ({
+  ...jest.requireActual("@/features/clients"),
   useClients: jest.fn(() => ({
     data: mockClients,
     isLoading: false,
   })),
+  ClientForm: ({ onSuccess }: { onSuccess: () => void }) => (
+    <div data-testid="client-form">
+      <button onClick={onSuccess}>Submit</button>
+    </div>
+  ),
+  ClientCard: ({ client }: { client: Client }) => (
+    <div data-testid="client-card">
+      <p>Company: {client.company}</p>
+      <p>Name: {client.name}</p>
+      <p>Email: {client.email}</p>
+    </div>
+  ),
+  ClientsBigStats: () => <div data-testid="clients-big-stats">Stats</div>,
+  ClientsPageSkeleton: () => <div data-testid="loading-skeleton" />,
 }));
 
 describe("ClientsPage", () => {
+  beforeEach(() => {
+    // Restore the default (some tests below override it via mockReturnValue,
+    // which is not undone automatically between tests)
+    const { useClients } = require("@/features/clients");
+
+    useClients.mockReturnValue({
+      data: mockClients,
+      isLoading: false,
+    });
+  });
+
   it("should render loading skeleton when loading", () => {
-    const { useClients } = require("@/services/clients");
+    const { useClients } = require("@/features/clients");
     useClients.mockReturnValue({
       data: null,
       isLoading: true,
@@ -145,7 +148,7 @@ describe("ClientsPage", () => {
   });
 
   it("should show empty state when no clients", () => {
-    const { useClients } = require("@/services/clients");
+    const { useClients } = require("@/features/clients");
     useClients.mockReturnValue({
       data: [],
       isLoading: false,

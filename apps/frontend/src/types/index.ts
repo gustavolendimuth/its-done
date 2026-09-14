@@ -19,6 +19,8 @@ export type TimeFormat = {
 export interface CreateTimeEntryDto {
   date: string;
   hours: number;
+  startTime?: string;
+  endTime?: string;
   clientId: string;
   projectId?: string;
 }

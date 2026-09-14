@@ -40,7 +40,7 @@ export function UserAvatar({
   );
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(!!src);
-  const fallbackIndexRef = useRef(0);
+  const fallbackIndexRef = useRef(-1);
   const hasTriedFallbackRef = useRef(false);
 
   // Reset state when src prop changes
@@ -48,7 +48,7 @@ export function UserAvatar({
     setCurrentImageSrc(src || null);
     setImageError(false);
     setIsLoading(!!src);
-    fallbackIndexRef.current = 0;
+    fallbackIndexRef.current = -1;
     hasTriedFallbackRef.current = false;
   }, [src]);
 
@@ -114,6 +114,11 @@ export function UserAvatar({
 
   return (
     <Avatar
+      // Radix keeps its internal image-loading status "loaded" even after
+      // AvatarImage unmounts (e.g. once every fallback URL has failed), which
+      // would otherwise hide AvatarFallback forever. Remounting the whole
+      // Avatar when we give up on images resets that internal state.
+      key={imageError ? "fallback" : "image"}
       className={cn(
         sizeClasses[size],
         "border-2 border-primary hover:border-primary/80 transition-colors relative",

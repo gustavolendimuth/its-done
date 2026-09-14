@@ -2,23 +2,9 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 import { UserAvatar } from "../user-avatar";
 
-// Mock Image loading behavior
-const mockImage = {
-  onload: null as (() => void) | null,
-  onerror: null as (() => void) | null,
-  src: "",
-};
-
-// Mock Image constructor
-global.Image = jest.fn().mockImplementation(() => mockImage);
-
 describe("UserAvatar", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset the mock image properties
-    mockImage.onload = null;
-    mockImage.onerror = null;
-    mockImage.src = "";
   });
 
   it("should render fallback text when no src is provided", () => {
@@ -112,23 +98,23 @@ describe("UserAvatar", () => {
   it("should apply correct size classes", () => {
     const { rerender } = render(<UserAvatar fallbackText="JD" size="sm" />);
 
-    let avatar = screen.getByText("JD").closest('[role="img"]');
+    let avatar = screen.getByText("JD").parentElement;
 
     expect(avatar).toHaveClass("h-6", "w-6");
 
     rerender(<UserAvatar fallbackText="JD" size="md" />);
-    avatar = screen.getByText("JD").closest('[role="img"]');
+    avatar = screen.getByText("JD").parentElement;
     expect(avatar).toHaveClass("h-8", "w-8");
 
     rerender(<UserAvatar fallbackText="JD" size="lg" />);
-    avatar = screen.getByText("JD").closest('[role="img"]');
+    avatar = screen.getByText("JD").parentElement;
     expect(avatar).toHaveClass("h-12", "w-12");
   });
 
   it("should apply custom className", () => {
     render(<UserAvatar fallbackText="JD" className="custom-avatar-class" />);
 
-    const avatar = screen.getByText("JD").closest('[role="img"]');
+    const avatar = screen.getByText("JD").parentElement;
 
     expect(avatar).toHaveClass("custom-avatar-class");
   });

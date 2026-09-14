@@ -65,6 +65,7 @@ describe("useAvatar", () => {
       name: "John Doe",
       email: "john@example.com",
       role: "USER",
+      image: "https://lh3.googleusercontent.com/a/default-user",
     },
     expires: new Date().toISOString(),
   };

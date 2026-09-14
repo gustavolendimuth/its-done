@@ -15,6 +15,7 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),
   })),
+  usePathname: jest.fn(() => "/work-hours"),
 }));
 
 // Mock next-auth/react
@@ -26,6 +27,32 @@ jest.mock("next-auth/react", () => ({
 // Mock next-intl
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
+}));
+
+// Mock clients service
+jest.mock("@/features/clients", () => ({
+  useClients: jest.fn(() => ({ data: [] })),
+}));
+
+// Mock notifications
+jest.mock("@/features/notifications", () => ({
+  NotificationBell: () => null,
+}));
+
+// Mock the Gravatar health/profile queries (useAvatar depends on them, and
+// this file doesn't wrap Topbar in a QueryClientProvider)
+jest.mock("@/services/gravatar", () => ({
+  ...jest.requireActual("@/services/gravatar"),
+  useGravatarHealth: () => ({ data: true, isLoading: false }),
+  useGravatarProfile: () => ({ data: null, isLoading: false }),
+}));
+
+jest.mock("@/services/network-status", () => ({
+  useShouldSkipExternalServices: () => ({
+    skipGravatar: false,
+    isOffline: false,
+  }),
 }));
 
 describe("PageHeader", () => {

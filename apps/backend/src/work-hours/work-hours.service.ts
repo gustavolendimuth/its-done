@@ -14,6 +14,28 @@ import { roundHoursToIncrement } from './utils/round-hours.util';
 
 const MIN_HOURS = 0.1;
 
+function hmToMinutes(value: string): number {
+  const [h, m] = value.split(':').map(Number);
+  return h * 60 + m;
+}
+
+// Valida o par startTime/endTime já mesclado (o que a linha vai efetivamente
+// ficar após a operação) - exatamente um dos dois presente, ou endTime não
+// estritamente depois de startTime, são erros de validação.
+function assertValidTimeRange(
+  startTime: string | null | undefined,
+  endTime: string | null | undefined,
+) {
+  if (!!startTime !== !!endTime) {
+    throw new BadRequestException(
+      'startTime and endTime must be provided together',
+    );
+  }
+  if (startTime && endTime && hmToMinutes(endTime) <= hmToMinutes(startTime)) {
+    throw new BadRequestException('endTime must be after startTime');
+  }
+}
+
 @Injectable()
 export class WorkHoursService {
   constructor(
@@ -42,12 +64,31 @@ export class WorkHoursService {
       throw new BadRequestException('User ID is required');
     }
 
+    assertValidTimeRange(
+      createWorkHourDto.startTime,
+      createWorkHourDto.endTime,
+    );
+
+    if (createWorkHourDto.projectId) {
+      const project = await this.prisma.project.findUnique({
+        where: { id: createWorkHourDto.projectId },
+      });
+
+      if (!project || project.clientId !== createWorkHourDto.clientId) {
+        throw new BadRequestException(
+          'Project does not belong to the selected client',
+        );
+      }
+    }
+
     const hours = await this.applyRounding(userId, createWorkHourDto.hours);
 
     const workHour = await this.prisma.workHour.create({
       data: {
         date: createWorkHourDto.date,
         hours,
+        startTime: createWorkHourDto.startTime,
+        endTime: createWorkHourDto.endTime,
         description: createWorkHourDto.description,
         client: {
           connect: {
@@ -209,11 +250,35 @@ export class WorkHoursService {
         id,
         userId,
       },
+      include: {
+        invoiceWorkHours: {
+          include: {
+            invoice: {
+              select: { status: true },
+            },
+          },
+        },
+      },
     });
 
     if (!workHour) {
       throw new NotFoundException('Work hour not found');
     }
+
+    const isInvoiced = workHour.invoiceWorkHours.some(
+      (invoiceWorkHour) => invoiceWorkHour.invoice.status !== 'CANCELED',
+    );
+
+    if (isInvoiced) {
+      throw new BadRequestException(
+        'Cannot edit a work hour that has already been invoiced',
+      );
+    }
+
+    assertValidTimeRange(
+      updateWorkHourDto.startTime ?? workHour.startTime,
+      updateWorkHourDto.endTime ?? workHour.endTime,
+    );
 
     const data =
       updateWorkHourDto.hours !== undefined
@@ -304,12 +369,16 @@ export class WorkHoursService {
 
     const totalHours = workHours.reduce((sum, wh) => sum + wh.hours, 0);
 
-    // Calculate average hours per day
-    const dateRange =
-      from && to
-        ? Math.ceil((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1
-        : 1;
-    const averageHoursPerDay = totalHours / dateRange;
+    // Average per day worked: divide by the number of distinct days that
+    // actually have entries, not by the calendar span of the filter. Using the
+    // calendar span made the "all time" range (which starts in the year 2000)
+    // collapse the average to ~0, and an unbounded query inflate it to the full
+    // total. This matches the "per working day" label shown in the UI and the
+    // same calculation already used by reports.service.
+    const workedDays = new Set(
+      workHours.map((wh) => wh.date.toISOString().split('T')[0]),
+    ).size;
+    const averageHoursPerDay = workedDays > 0 ? totalHours / workedDays : 0;
 
     // Count unique clients
     const uniqueClients = new Set(workHours.map((wh) => wh.clientId));

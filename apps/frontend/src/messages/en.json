@@ -40,7 +40,8 @@
     "settings": "Settings",
     "dashboard": "Dashboard",
     "analytics": "Analytics",
-    "logout": "Logout"
+    "logout": "Logout",
+    "admin": "Admin"
   },
   "auth": {
     "login": {
@@ -84,7 +85,8 @@
       "authenticating": "Authenticating...",
       "loading": "Loading...",
       "pleaseWait": "Please wait while we redirect you."
-    }
+    },
+    "logout": "Logout"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -102,7 +104,7 @@
     "monthlyGrowth": "Monthly Growth",
     "noDataAvailable": "No data available",
     "viewAll": "View All",
-    "addHours": "Add Hours",
+    "addHours": "Add Session",
     "createInvoice": "Create Invoice"
   },
   "workHours": {
@@ -110,13 +112,24 @@
     "subtitle": "Track and manage your work hours with precision",
     "infoTitle": "⏱️ Track your work time",
     "description": "📋 **How it works:**\n• Select client and project\n• Enter date and hours worked\n• Add activity description\n• Monitor metrics and estimated value\n\n💡 **Use filters** to view specific periods and analyze your productivity by client.",
-    "addHours": "Add Hours",
+    "addHours": "Add Session",
     "addHoursFormSubtitle": "Record time spent on client projects",
+    "editWorkHourTitle": "Edit Work Hours",
+    "editHoursFormSubtitle": "Update the date, hours, or description of this entry",
+    "saveChanges": "Save Changes",
+    "cannotEditInvoiced": "Cannot edit a work hour that has already been invoiced",
     "date": "Date",
     "client": "Client",
     "clients": "Clients",
     "project": "Project",
     "hours": "Hours",
+    "entryMode": "Entry mode",
+    "durationMode": "Duration",
+    "intervalMode": "Start and end time",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "invalidTimeFormat": "Invalid time format (HH:mm)",
+    "endTimeBeforeStart": "End time must be after start time",
     "actions": "Actions",
     "edit": "Edit",
     "delete": "Delete",
@@ -145,6 +158,22 @@
     "deleting": "Deleting...",
     "created": "Created",
     "on": "on",
+    "timeAgo": {
+      "justNow": "just now",
+      "lessThanMinute": "less than a minute",
+      "minute": "1 minute",
+      "minutes": "{count} minutes",
+      "hour": "1 hour",
+      "hours": "{count} hours",
+      "day": "1 day",
+      "days": "{count} days",
+      "week": "1 week",
+      "weeks": "{count} weeks",
+      "month": "1 month",
+      "months": "{count} months",
+      "year": "1 year",
+      "years": "{count} years"
+    },
     "pickDate": "Pick a date",
     "selectClientFirst": "Please select a client first",
     "saving": "Saving...",
@@ -168,7 +197,10 @@
     "weeklyProjection": "Weekly Projection",
     "week": "week",
     "dailyTarget": "Target: 8h/day • {percentage}% of daily target",
-    "updating": "Updating..."
+    "updating": "Updating...",
+    "searchPlaceholder": "Search by description, client or project...",
+    "noResults": "No entries match your search",
+    "noResultsDescription": "Try adjusting your search terms."
   },
   "clients": {
     "title": "Clients",
@@ -206,7 +238,7 @@
     "pendingAmount": "Pending",
     "editClient": "Edit Client",
     "editClientDescription": "Update client information, contact details and manage addresses",
-    "formSubtitle": "Modify client details and contact information",
+    "editClientFormSubtitle": "Modify client details and contact information",
     "saveChanges": "Save Changes",
     "shareOptions": {
       "title": "Share Client Dashboard",
@@ -263,6 +295,7 @@
     "addAnotherClient": "Add Another Client",
     "addNewClient": "Add New Client",
     "addNewClientDescription": "Create a new client profile with contact details and addresses",
+    "addNewClientFormSubtitle": "Enter client information and contact details",
     "createClientFormSubtitle": "Enter client information and contact details",
     "addNewAddress": "Add New Address",
     "addNewAddressDescription": "Add a new address for billing, delivery or office location",
@@ -276,7 +309,8 @@
     "enterContactNameOptional": "Enter contact person name (optional)",
     "errorCreatingClient": "Error creating client. Please try again.",
     "creating": "Creating",
-    "createClient": "Create Client"
+    "createClient": "Create Client",
+    "selectClient": "Select client"
   },
   "projects": {
     "title": "Projects",
@@ -304,6 +338,7 @@
     "deleteSuccess": "Project deleted successfully",
     "saveSuccess": "Project saved successfully",
     "noProjectsFound": "No projects found",
+    "noProjectsForClient": "No projects found for this client",
     "createFirst": "Create your first project",
     "totalHours": "Total Hours",
     "totalInvoices": "Total Invoices",
@@ -339,7 +374,10 @@
     "clientsInvolved": "clients involved",
     "alertHours": "Alert Hours Threshold",
     "alertHoursDescription": "Override the default alert threshold. When work hours reach this value, a draft invoice will be created and you'll receive a notification. Leave empty to use the default setting.",
-    "alertHoursPlaceholder": "e.g., 160"
+    "alertHoursPlaceholder": "e.g., 160",
+    "searchProjects": "Search projects...",
+    "addNewProject": "Add New Project",
+    "selectProject": "Select project"
   },
   "invoices": {
     "title": "Invoices",
@@ -347,8 +385,8 @@
     "infoTitle": "Intelligent Billing System",
     "description": "Comprehensive billing system that transforms your tracked work hours into professional billing documents and organized records. The operational flow includes: selection of registered work hours → automatic or manual invoice creation → supporting document upload (contracts, receipts) → payment status tracking → cash flow analysis. Manage the entire financial cycle with features like intelligent search by client, date or amount, status filters (paid/pending/cancelled), and financial performance insights. Monitor crucial metrics like billing rate, average invoice value, payment efficiency and revenue projections. Essential for maintaining your business financial health.",
     "createInvoice": "Create Invoice",
-    "createFormSubtitle": "Generate invoice from tracked work hours",
-    "editFormSubtitle": "Update invoice status and details",
+    "createInvoiceFormSubtitle": "Generate invoice from tracked work hours",
+    "editInvoiceFormSubtitle": "Update invoice status and details",
     "invoiceNumber": "Invoice Number",
     "client": "Client",
     "amount": "Amount",
@@ -388,6 +426,27 @@
     "pendingAmount": "Pending Amount",
     "noClient": "No client",
     "created": "Created",
+    "collected": "collected",
+    "paymentRate": "Payment Rate",
+    "ofTotalInvoiced": "of total invoiced",
+    "avgInvoiceValue": "Avg Invoice Value",
+    "perInvoice": "per invoice",
+    "cashFlowHealth": "Cash Flow Health",
+    "paymentEfficiency": "Payment efficiency",
+    "healthExcellent": "Excellent",
+    "healthGood": "Good",
+    "healthNeedsAttention": "Needs Attention",
+    "healthCritical": "Critical",
+    "collectionGoal": "Collection Goal",
+    "collectPending": "Collect ${amount} pending",
+    "allInvoicesCollected": "All invoices collected",
+    "targetCollectionRate": "Current collection rate: {current}%",
+    "revenueInsights": "Revenue Insights",
+    "volumeHigh": "High Volume",
+    "volumeGrowing": "Growing Volume",
+    "volumeDeveloping": "Developing",
+    "volumeStarting": "Starting",
+    "totalRevenue": "Total revenue: ${amount}",
     "confirmDeleteMessage": "Are you sure you want to delete this invoice? This action cannot be undone.",
     "fileUpload": {
       "title": "Invoice Document",
@@ -443,7 +502,8 @@
       "light": "Light",
       "dark": "Dark",
       "system": "System"
-    }
+    },
+    "loadingSave": "Saving..."
   },
   "analytics": {
     "title": "Analytics",
@@ -657,7 +717,9 @@
       "months": "{count} months",
       "year": "1 year",
       "years": "{count} years"
-    }
+    },
+    "noItemsFound": "No items found",
+    "addNew": "Add New"
   },
   "notifications": {
     "hoursLimitReached": "You have reached your monthly hours limit of {limit} hours",
@@ -776,6 +838,52 @@
     "topUsers": "Top Users",
     "topUsersDescription": "Users with the most work hours",
     "userStats": "{hours} total hours, {clients} clients"
+  },
+  "WorkTimerWidget": {
+    "idleHeading": "Time tracker",
+    "idleDescription": "Times your work now and turns it into billable hours.",
+    "start": "Start session",
+    "startWithDetails": "Start with details",
+    "stop": "Stop",
+    "paused": "Paused",
+    "resume": "Resume",
+    "stillWorking": "Still working?",
+    "confirmContinue": "Yes, continue",
+    "confirmFinish": "No, finish",
+    "offlineIndicator": "Offline, syncs once reconnected",
+    "longRunningAlert": "Session running for over 12 hours"
+  },
+  "WorkSessionStartForm": {
+    "clientRequired": "Client is required",
+    "descriptionRequired": "Description is required",
+    "offlineNotice": "Offline — connect to load client/project, or use the plain \"Start\" button.",
+    "title": "Start with details",
+    "description": "Choose the client and project before you start timing.",
+    "clientLabel": "Client *",
+    "projectLabel": "Project",
+    "descriptionLabel": "Description *",
+    "descriptionPlaceholder": "What are you about to work on?",
+    "starting": "Starting...",
+    "start": "Start",
+    "cancel": "Cancel"
+  },
+  "WorkSessionFinishForm": {
+    "clientRequired": "Client is required",
+    "descriptionRequired": "Description is required",
+    "dateRequired": "Date is required",
+    "offlineNotice": "Session ended. Waiting for a connection to load the form.",
+    "title": "Session: {duration}",
+    "dateLabel": "Date *",
+    "clientLabel": "Client *",
+    "projectLabel": "Project",
+    "descriptionLabel": "Description *",
+    "descriptionPlaceholder": "What did you work on?",
+    "saving": "Saving...",
+    "save": "Save",
+    "discard": "Discard",
+    "discardTitle": "Discard session?",
+    "discardDescription": "The recorded time will be lost and no work-hour entry will be created. This action cannot be undone.",
+    "cancel": "Cancel"
   },
   "notifications": {
     "title": "Notifications",

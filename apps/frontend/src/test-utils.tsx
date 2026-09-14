@@ -50,7 +50,9 @@ export function renderWithProviders(
 }
 
 // Re-export everything from testing library except render
+// eslint-disable-next-line import/export -- intentional: named `render` below shadows this
 export * from "@testing-library/react";
 
 // Export our custom render function
+// eslint-disable-next-line import/export -- intentional: overrides `render` from the star export above
 export { renderWithProviders as render };

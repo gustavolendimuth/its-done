@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useForgotPassword } from "@/services/auth";
+import { useForgotPassword } from "@/features/auth";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("auth.forgotPassword");

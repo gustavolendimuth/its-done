@@ -1,28 +1,29 @@
 "use client";
 
 import { Plus, FileText } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
-import { CreateInvoiceForm } from "@/components/invoices/create-invoice-form";
-import { EditInvoiceForm } from "@/components/invoices/edit-invoice-form";
-import { InvoiceCard } from "@/components/invoices/invoice-card";
-import {
-  InvoiceSearchFilters,
-  useInvoiceFilters,
-} from "@/components/invoices/invoice-search-filters";
-import { InvoiceUploadModal } from "@/components/invoices/invoice-upload-modal";
-import { InvoicesBigStats } from "@/components/invoices/invoices-big-stats";
 import { EmptyState } from "@/components/layout/empty-state";
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
-import { useClients } from "@/services/clients";
-import { useInvoices, useDeleteInvoice, Invoice } from "@/services/invoices";
+import { useClients } from "@/features/clients";
+import { InvoicesPageSkeleton ,
+  CreateInvoiceForm,
+  EditInvoiceForm,
+  InvoiceCard,
+  InvoiceSearchFilters,
+  useInvoiceFilters,
+  InvoiceUploadModal,
+  InvoicesBigStats,
+  useInvoices,
+  useDeleteInvoice,
+  Invoice,
+} from "@/features/invoices";
 
 export default function InvoicesPage() {
   const t = useTranslations("invoices");
@@ -78,7 +79,7 @@ export default function InvoicesPage() {
   };
 
   if (isLoading || clientsLoading) {
-    return <LoadingSkeleton type="invoices-page" />;
+    return <InvoicesPageSkeleton />;
   }
 
   if (error) {
@@ -189,7 +190,7 @@ export default function InvoicesPage() {
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         title={t("createInvoice")}
-        description={t("createFormSubtitle")}
+        description={t("createInvoiceFormSubtitle")}
         icon={FileText}
         className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto"
       >
@@ -205,7 +206,7 @@ export default function InvoicesPage() {
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           title={t("edit")}
-          description={t("editFormSubtitle")}
+          description={t("editInvoiceFormSubtitle")}
           icon={FileText}
           className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto"
         >

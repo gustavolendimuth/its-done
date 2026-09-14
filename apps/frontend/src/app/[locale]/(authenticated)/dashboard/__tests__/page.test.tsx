@@ -9,7 +9,7 @@ jest.mock("next-intl", () => ({
 }));
 
 // Mock services
-jest.mock("@/services/time-entries", () => ({
+jest.mock("@/features/time-tracking", () => ({
   useTimeEntries: jest.fn(() => ({
     data: [
       { id: "1", hours: 5, clientId: "client1" },
@@ -17,9 +17,12 @@ jest.mock("@/services/time-entries", () => ({
     ],
     isLoading: false,
   })),
+  useWorkHoursStats: jest.fn(() => ({
+    isLoading: false,
+  })),
 }));
 
-jest.mock("@/services/invoices", () => ({
+jest.mock("@/features/invoices", () => ({
   useInvoices: jest.fn(() => ({
     data: [
       {
@@ -48,18 +51,12 @@ jest.mock("@/services/invoices", () => ({
   })),
 }));
 
-jest.mock("@/services/clients", () => ({
+jest.mock("@/features/clients", () => ({
   useClients: jest.fn(() => ({
     data: [
       { id: "client1", name: "Client 1", company: "Company 1" },
       { id: "client2", name: "Client 2", company: "Company 2" },
     ],
-    isLoading: false,
-  })),
-}));
-
-jest.mock("@/services/work-hours-stats", () => ({
-  useWorkHoursStats: jest.fn(() => ({
     isLoading: false,
   })),
 }));
@@ -95,7 +92,7 @@ jest.mock("@/components/ui/info-card", () => ({
   ),
 }));
 
-jest.mock("@/components/dashboard/overview", () => ({
+jest.mock("@/features/dashboard", () => ({
   Overview: ({ data, isLoading }: { data: any; isLoading: boolean }) => (
     <div data-testid="overview">
       <span>Loading: {isLoading.toString()}</span>
@@ -146,7 +143,7 @@ describe("DashboardPage", () => {
   it("should show loading state when data is being fetched", () => {
     // Mock loading state
     jest
-      .spyOn(require("@/services/time-entries"), "useTimeEntries")
+      .spyOn(require("@/features/time-tracking"), "useTimeEntries")
       .mockReturnValue({
         data: [],
         isLoading: true,

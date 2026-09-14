@@ -1,7 +1,11 @@
 import { useSession } from "next-auth/react";
 import { useMemo } from "react";
 
-import { useGravatarHealth, useGravatarProfile } from "@/services/gravatar";
+import {
+  generateGravatarAvatarUrl,
+  useGravatarHealth,
+  useGravatarProfile,
+} from "@/services/gravatar";
 import { useShouldSkipExternalServices } from "@/services/network-status";
 
 export interface UseAvatarResult {
@@ -10,6 +14,7 @@ export interface UseAvatarResult {
   image: string | null;
   gravatarProfile: any;
   isLoading: boolean;
+  isLoadingProfile: boolean;
   avatarUrl: string | null;
   fallbackUrls: string[];
   displayName: string;
@@ -28,7 +33,9 @@ const generateUIAvatarsUrl = (seed: string) => {
 
 // Generate local SVG avatar as final fallback
 const generateLocalSVGAvatar = (initials: string) => {
-  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="%2322c55e"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-size="16">${initials}</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="#22c55e"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-size="16">${initials}</text></svg>`;
+
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
 };
 
 export function useAvatar(): UseAvatarResult {
@@ -46,7 +53,7 @@ export function useAvatar(): UseAvatarResult {
     useGravatarProfile(shouldFetchProfile ? email : undefined);
 
   return useMemo(() => {
-    const name = user?.name || "User";
+    const name = user?.name || user?.email || "User";
     const initials = name
       .split(" ")
       .map((n) => n[0])
@@ -56,6 +63,8 @@ export function useAvatar(): UseAvatarResult {
     const avatarUrl =
       user?.image || generateDiceBearUrl(email || user?.name || "");
     const fallbackUrls = [
+      avatarUrl,
+      ...(email ? [generateGravatarAvatarUrl(email)] : []),
       generateUIAvatarsUrl(name),
       generateLocalSVGAvatar(initials),
     ];
@@ -66,6 +75,7 @@ export function useAvatar(): UseAvatarResult {
       image: avatarUrl || null,
       gravatarProfile: gravatarProfileData,
       isLoading: isLoadingProfile,
+      isLoadingProfile,
       avatarUrl,
       fallbackUrls,
       displayName: name,

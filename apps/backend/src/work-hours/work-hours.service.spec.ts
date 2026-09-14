@@ -2,16 +2,20 @@ import { BadRequestException } from '@nestjs/common';
 
 import { WorkHoursService } from './work-hours.service';
 
+// Minimal mocks for dependencies
 const prismaMock = {
   workHour: {
     create: jest.fn(),
-    update: jest.fn(),
     findFirst: jest.fn(),
+    update: jest.fn(),
+  },
+  project: {
+    findUnique: jest.fn(),
   },
 } as any;
 
 const hoursThresholdCheckerMock = {
-  checkAndNotify: jest.fn().mockResolvedValue(undefined),
+  checkAndNotify: jest.fn(),
 } as any;
 
 const settingsServiceMock = {
@@ -24,6 +28,9 @@ describe('WorkHoursService - create()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     hoursThresholdCheckerMock.checkAndNotify.mockResolvedValue(undefined);
+    settingsServiceMock.findByUserId.mockResolvedValue({
+      roundingIncrementMinutes: 0,
+    });
     service = new WorkHoursService(
       prismaMock,
       hoursThresholdCheckerMock,
@@ -31,13 +38,18 @@ describe('WorkHoursService - create()', () => {
     );
   });
 
+  const userId = 'user-1';
+
   it('persists the raw hours when no rounding increment is configured', async () => {
     settingsServiceMock.findByUserId.mockResolvedValueOnce({
       roundingIncrementMinutes: 0,
     });
-    prismaMock.workHour.create.mockResolvedValueOnce({ id: 'wh1', hours: 1.37 });
+    prismaMock.workHour.create.mockResolvedValueOnce({
+      id: 'wh1',
+      hours: 1.37,
+    });
 
-    await service.create('user-1', {
+    await service.create(userId, {
       date: new Date('2026-01-01'),
       hours: 1.37,
       clientId: 'client-1',
@@ -54,9 +66,12 @@ describe('WorkHoursService - create()', () => {
     settingsServiceMock.findByUserId.mockResolvedValueOnce({
       roundingIncrementMinutes: 15,
     });
-    prismaMock.workHour.create.mockResolvedValueOnce({ id: 'wh1', hours: 1.25 });
+    prismaMock.workHour.create.mockResolvedValueOnce({
+      id: 'wh1',
+      hours: 1.25,
+    });
 
-    await service.create('user-1', {
+    await service.create(userId, {
       date: new Date('2026-01-01'),
       hours: 1.37,
       clientId: 'client-1',
@@ -75,13 +90,149 @@ describe('WorkHoursService - create()', () => {
     });
 
     await expect(
-      service.create('user-1', {
+      service.create(userId, {
         date: new Date('2026-01-01'),
         hours: 0.2,
         clientId: 'client-1',
       } as any),
     ).rejects.toThrow(BadRequestException);
 
+    expect(prismaMock.workHour.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects creation when projectId does not belong to clientId', async () => {
+    prismaMock.project.findUnique.mockResolvedValueOnce({
+      id: 'p1',
+      clientId: 'other-client',
+    });
+
+    const dto = {
+      date: new Date('2026-01-01'),
+      hours: 1,
+      clientId: 'c1',
+      projectId: 'p1',
+    } as any;
+
+    await expect(service.create(userId, dto)).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(prismaMock.workHour.create).not.toHaveBeenCalled();
+  });
+
+  it('accepts creation when projectId belongs to clientId', async () => {
+    prismaMock.project.findUnique.mockResolvedValueOnce({
+      id: 'p1',
+      clientId: 'c1',
+    });
+    prismaMock.workHour.create.mockResolvedValueOnce({
+      id: 'wh1',
+      clientId: 'c1',
+      projectId: 'p1',
+    });
+
+    const dto = {
+      date: new Date('2026-01-01'),
+      hours: 1,
+      clientId: 'c1',
+      projectId: 'p1',
+    } as any;
+
+    const result = await service.create(userId, dto);
+
+    expect(prismaMock.workHour.create).toHaveBeenCalled();
+    expect(result).toEqual({ id: 'wh1', clientId: 'c1', projectId: 'p1' });
+  });
+
+  it('accepts creation when no projectId is provided (unchanged behavior)', async () => {
+    prismaMock.workHour.create.mockResolvedValueOnce({
+      id: 'wh2',
+      clientId: 'c1',
+      projectId: null,
+    });
+
+    const dto = {
+      date: new Date('2026-01-01'),
+      hours: 1,
+      clientId: 'c1',
+    } as any;
+
+    const result = await service.create(userId, dto);
+
+    expect(prismaMock.project.findUnique).not.toHaveBeenCalled();
+    expect(prismaMock.workHour.create).toHaveBeenCalled();
+    expect(result).toEqual({ id: 'wh2', clientId: 'c1', projectId: null });
+  });
+
+  it('persists startTime and endTime when provided', async () => {
+    prismaMock.workHour.create.mockResolvedValueOnce({ id: 'wh3' });
+
+    const dto = {
+      date: new Date('2026-01-01'),
+      hours: 3.5,
+      clientId: 'c1',
+      startTime: '09:00',
+      endTime: '12:30',
+    } as any;
+
+    await service.create(userId, dto);
+
+    expect(prismaMock.workHour.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          startTime: '09:00',
+          endTime: '12:30',
+        }),
+      }),
+    );
+  });
+
+  it('persists null startTime and endTime when only hours is provided', async () => {
+    prismaMock.workHour.create.mockResolvedValueOnce({ id: 'wh4' });
+
+    const dto = {
+      date: new Date('2026-01-01'),
+      hours: 1,
+      clientId: 'c1',
+    } as any;
+
+    await service.create(userId, dto);
+
+    expect(prismaMock.workHour.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          startTime: undefined,
+          endTime: undefined,
+        }),
+      }),
+    );
+  });
+
+  it('rejects creation when only one of startTime/endTime is provided', async () => {
+    const dto = {
+      date: new Date('2026-01-01'),
+      hours: 1,
+      clientId: 'c1',
+      startTime: '09:00',
+    } as any;
+
+    await expect(service.create(userId, dto)).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(prismaMock.workHour.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects creation when endTime is not after startTime', async () => {
+    const dto = {
+      date: new Date('2026-01-01'),
+      hours: 1,
+      clientId: 'c1',
+      startTime: '12:00',
+      endTime: '12:00',
+    } as any;
+
+    await expect(service.create(userId, dto)).rejects.toThrow(
+      BadRequestException,
+    );
     expect(prismaMock.workHour.create).not.toHaveBeenCalled();
   });
 });
@@ -92,6 +243,9 @@ describe('WorkHoursService - update()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     hoursThresholdCheckerMock.checkAndNotify.mockResolvedValue(undefined);
+    settingsServiceMock.findByUserId.mockResolvedValue({
+      roundingIncrementMinutes: 0,
+    });
     service = new WorkHoursService(
       prismaMock,
       hoursThresholdCheckerMock,
@@ -99,17 +253,25 @@ describe('WorkHoursService - update()', () => {
     );
   });
 
+  const userId = 'user-1';
+  const workHourId = 'wh-1';
+  const dto = { hours: 2 } as any;
+
   it('persists the rounded hours when hours is edited and a rounding increment is configured', async () => {
     prismaMock.workHour.findFirst.mockResolvedValueOnce({
       id: 'wh1',
-      userId: 'user-1',
+      userId,
+      invoiceWorkHours: [],
     });
     settingsServiceMock.findByUserId.mockResolvedValueOnce({
       roundingIncrementMinutes: 30,
     });
-    prismaMock.workHour.update.mockResolvedValueOnce({ id: 'wh1', hours: 1.5 });
+    prismaMock.workHour.update.mockResolvedValueOnce({
+      id: 'wh1',
+      hours: 1.5,
+    });
 
-    await service.update('user-1', 'wh1', { hours: 1.37 } as any);
+    await service.update(userId, 'wh1', { hours: 1.37 } as any);
 
     expect(prismaMock.workHour.update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -122,14 +284,15 @@ describe('WorkHoursService - update()', () => {
   it('rejects when rounding produces less than 0.1 hours', async () => {
     prismaMock.workHour.findFirst.mockResolvedValueOnce({
       id: 'wh1',
-      userId: 'user-1',
+      userId,
+      invoiceWorkHours: [],
     });
     settingsServiceMock.findByUserId.mockResolvedValueOnce({
       roundingIncrementMinutes: 60,
     });
 
     await expect(
-      service.update('user-1', 'wh1', { hours: 0.2 } as any),
+      service.update(userId, 'wh1', { hours: 0.2 } as any),
     ).rejects.toThrow(BadRequestException);
 
     expect(prismaMock.workHour.update).not.toHaveBeenCalled();
@@ -138,14 +301,15 @@ describe('WorkHoursService - update()', () => {
   it('does not consult rounding when hours is not part of the update', async () => {
     prismaMock.workHour.findFirst.mockResolvedValueOnce({
       id: 'wh1',
-      userId: 'user-1',
+      userId,
+      invoiceWorkHours: [],
     });
     prismaMock.workHour.update.mockResolvedValueOnce({
       id: 'wh1',
       description: 'updated',
     });
 
-    await service.update('user-1', 'wh1', { description: 'updated' } as any);
+    await service.update(userId, 'wh1', { description: 'updated' } as any);
 
     expect(settingsServiceMock.findByUserId).not.toHaveBeenCalled();
     expect(prismaMock.workHour.update).toHaveBeenCalledWith(
@@ -153,5 +317,110 @@ describe('WorkHoursService - update()', () => {
         data: { description: 'updated' },
       }),
     );
+  });
+
+  it('throws BadRequestException when linked to a PENDING invoice', async () => {
+    prismaMock.workHour.findFirst.mockResolvedValueOnce({
+      id: workHourId,
+      userId,
+      invoiceWorkHours: [{ invoice: { status: 'PENDING' } }],
+    });
+
+    await expect(service.update(userId, workHourId, dto)).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(prismaMock.workHour.update).not.toHaveBeenCalled();
+  });
+
+  it('throws BadRequestException when linked to a PAID invoice', async () => {
+    prismaMock.workHour.findFirst.mockResolvedValueOnce({
+      id: workHourId,
+      userId,
+      invoiceWorkHours: [{ invoice: { status: 'PAID' } }],
+    });
+
+    await expect(service.update(userId, workHourId, dto)).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(prismaMock.workHour.update).not.toHaveBeenCalled();
+  });
+
+  it('proceeds when linked only to a CANCELED invoice', async () => {
+    prismaMock.workHour.findFirst.mockResolvedValueOnce({
+      id: workHourId,
+      userId,
+      invoiceWorkHours: [{ invoice: { status: 'CANCELED' } }],
+    });
+    prismaMock.workHour.update.mockResolvedValueOnce({
+      id: workHourId,
+      hours: 2,
+    });
+
+    const result = await service.update(userId, workHourId, dto);
+
+    expect(prismaMock.workHour.update).toHaveBeenCalled();
+    expect(result).toEqual({ id: workHourId, hours: 2 });
+  });
+
+  it('proceeds when not linked to any invoice', async () => {
+    prismaMock.workHour.findFirst.mockResolvedValueOnce({
+      id: workHourId,
+      userId,
+      invoiceWorkHours: [],
+    });
+    prismaMock.workHour.update.mockResolvedValueOnce({
+      id: workHourId,
+      hours: 2,
+    });
+
+    const result = await service.update(userId, workHourId, dto);
+
+    expect(prismaMock.workHour.update).toHaveBeenCalled();
+    expect(result).toEqual({ id: workHourId, hours: 2 });
+  });
+
+  it('allows patching a single time field when the row already has both', async () => {
+    prismaMock.workHour.findFirst.mockResolvedValueOnce({
+      id: workHourId,
+      userId,
+      startTime: '09:00',
+      endTime: '12:30',
+      invoiceWorkHours: [],
+    });
+    prismaMock.workHour.update.mockResolvedValueOnce({ id: workHourId });
+
+    await service.update(userId, workHourId, { startTime: '10:00' } as any);
+
+    expect(prismaMock.workHour.update).toHaveBeenCalled();
+  });
+
+  it('rejects patching a single time field when the row has neither', async () => {
+    prismaMock.workHour.findFirst.mockResolvedValueOnce({
+      id: workHourId,
+      userId,
+      startTime: null,
+      endTime: null,
+      invoiceWorkHours: [],
+    });
+
+    await expect(
+      service.update(userId, workHourId, { startTime: '10:00' } as any),
+    ).rejects.toThrow(BadRequestException);
+    expect(prismaMock.workHour.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects an update that makes the merged endTime not after startTime', async () => {
+    prismaMock.workHour.findFirst.mockResolvedValueOnce({
+      id: workHourId,
+      userId,
+      startTime: '09:00',
+      endTime: '17:00',
+      invoiceWorkHours: [],
+    });
+
+    await expect(
+      service.update(userId, workHourId, { endTime: '08:00' } as any),
+    ).rejects.toThrow(BadRequestException);
+    expect(prismaMock.workHour.update).not.toHaveBeenCalled();
   });
 });

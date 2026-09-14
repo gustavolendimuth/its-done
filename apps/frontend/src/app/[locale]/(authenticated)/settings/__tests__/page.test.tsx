@@ -17,7 +17,7 @@ jest.mock("sonner", () => ({
 }));
 
 // Mock components
-jest.mock("@/components/settings/settings-form", () => ({
+jest.mock("@/features/settings", () => ({
   SettingsForm: () => <div data-testid="settings-form">Settings Form</div>,
 }));
 

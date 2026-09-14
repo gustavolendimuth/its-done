@@ -25,6 +25,8 @@ model User {
   settings        Settings?
   notificationLogs NotificationLog[]
   inAppNotifications InAppNotification[]
+  workSessions    WorkSession[]
+  pushSubscriptions PushSubscription[]
 }
 
 model WorkHour {
@@ -32,6 +34,8 @@ model WorkHour {
   date        DateTime
   description String?
   hours       Float
+  startTime   String?
+  endTime     String?
   userId      String
   clientId    String
   projectId   String?
@@ -153,6 +157,53 @@ model InAppNotification {
 
   @@index([userId, read])
   @@index([userId, createdAt])
+}
+
+model WorkSession {
+  id                      String            @id
+  userId                  String
+  status                  WorkSessionStatus @default(RUNNING)
+  startedAt               DateTime
+  currentSegmentStartedAt DateTime?
+  accumulatedSeconds      Int               @default(0)
+  lastPromptAt            DateTime?
+  lastConfirmedAt         DateTime?
+  promptNonce             String?
+  clientId                String?
+  projectId               String?
+  description             String?
+  hours                   Float?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  user                    User              @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model WorkSessionSyncedEvent {
+  eventId   String   @id
+  sessionId String
+  type      String
+  appliedAt DateTime @default(now())
+}
+
+enum WorkSessionStatus {
+  RUNNING
+  PAUSED
+  STOPPING
+  ENDED
+  DISCARDED
 }
 
 enum InAppNotificationType {
