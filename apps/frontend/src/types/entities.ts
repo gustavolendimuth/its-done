@@ -62,6 +62,8 @@ export interface WorkHour {
   date: string;
   description?: string;
   hours: number;
+  startTime?: string | null;
+  endTime?: string | null;
   userId: string;
   clientId: string;
   projectId?: string;
@@ -165,6 +167,8 @@ export interface CreateTimeEntryDto {
   date: string;
   description?: string;
   hours: number;
+  startTime?: string;
+  endTime?: string;
   clientId: string;
   projectId?: string;
 }

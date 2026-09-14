@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -20,6 +20,8 @@ import { Client } from "@/features/clients";
 import { useCreateTimeEntry, useUpdateTimeEntry } from "../time-entries";
 
 import type { CreateTimeEntryDto as FullCreateTimeEntryDto } from "@/types/entities";
+
+type EntryMode = "duration" | "interval";
 
 /**
  * Máscara de tempo "HH:mm" a partir dos dígitos digitados. Substitui o antigo
@@ -39,34 +41,104 @@ function decimalHoursToHHmm(hours: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-const hoursFieldSchema = z
-  .string()
-  .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)");
+function isFullHHmm(value: string): boolean {
+  return /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value ?? "");
+}
 
-const workHourFormSchema = z.object({
-  date: z.date({
-    required_error: "Please select a date",
-  }),
-  projectId: z.string().min(1, "Project is required"),
-  hours: hoursFieldSchema,
-  clientId: z.string().min(1, "Client is required"),
-  description: z.string().optional(),
-});
+// Um valor com só 1-2 dígitos e sem ":" é interpretado como "só a hora" e
+// ganha ":00" - tanto no blur (feedback visual) quanto na validação do zod
+// (garante o mesmo resultado se o Enter disparar o submit sem passar por blur).
+function normalizeHourOnly(value: string): string {
+  return /^\d{1,2}$/.test(value ?? "") ? `${value.padStart(2, "0")}:00` : value;
+}
 
-const editWorkHourFormSchema = z.object({
-  date: z.date({
-    required_error: "Please select a date",
-  }),
-  hours: hoursFieldSchema,
-  description: z.string().optional(),
-});
+function hmToDecimal(value: string): number {
+  const [h, m] = value.split(":");
+  return Number(h) + Number(m) / 60;
+}
 
-type WorkHourFormData = z.infer<typeof workHourFormSchema>;
+function hasStoredInterval(workHour?: EditableWorkHour | null): boolean {
+  return !!(workHour?.startTime && workHour?.endTime);
+}
+
+function buildSchema(
+  t: (key: string) => string,
+  mode: EntryMode,
+  includeClientProject: boolean
+) {
+  const timeField = z.string().transform(normalizeHourOnly);
+  const shape: Record<string, z.ZodTypeAny> = {
+    date: z.date({
+      required_error: "Please select a date",
+    }),
+    description: z.string().optional(),
+    hours: timeField,
+    startTime: timeField,
+    endTime: timeField,
+  };
+  if (includeClientProject) {
+    shape.clientId = z.string().min(1, "Client is required");
+    shape.projectId = z.string().min(1, "Project is required");
+  }
+
+  return z.object(shape).superRefine((data, ctx) => {
+    if (mode === "duration") {
+      if (!isFullHHmm(data.hours as string)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["hours"],
+          message: t("invalidTimeFormat"),
+        });
+      }
+      return;
+    }
+
+    const startOk = isFullHHmm(data.startTime as string);
+    const endOk = isFullHHmm(data.endTime as string);
+    if (!startOk) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["startTime"],
+        message: t("invalidTimeFormat"),
+      });
+    }
+    if (!endOk) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["endTime"],
+        message: t("invalidTimeFormat"),
+      });
+    }
+    if (
+      startOk &&
+      endOk &&
+      hmToDecimal(data.endTime as string) <= hmToDecimal(data.startTime as string)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["endTime"],
+        message: t("endTimeBeforeStart"),
+      });
+    }
+  });
+}
+
+type WorkHourFormData = {
+  date: Date;
+  description?: string;
+  hours: string;
+  startTime: string;
+  endTime: string;
+  clientId?: string;
+  projectId?: string;
+};
 
 interface EditableWorkHour {
   id: string;
   date: string;
   hours: number;
+  startTime?: string | null;
+  endTime?: string | null;
   description?: string;
   isInvoiced?: boolean;
 }
@@ -93,21 +165,33 @@ export function WorkHourForm({
   const isEditMode = !!workHour;
 
   const queryClient = useQueryClient();
+
+  const [entryMode, setEntryMode] = useState<EntryMode>(() =>
+    hasStoredInterval(workHour) ? "interval" : "duration"
+  );
+  const [lastSavedMode, setLastSavedMode] = useState<EntryMode>(entryMode);
+
+  const schema = useMemo(
+    () => buildSchema(t, entryMode, !isEditMode),
+    [t, entryMode, isEditMode]
+  );
+
   const {
     handleSubmit,
     reset,
     setValue,
+    getValues,
     control,
     watch,
     formState: { errors, dirtyFields },
   } = useForm<WorkHourFormData>({
-    resolver: zodResolver(
-      isEditMode ? editWorkHourFormSchema : workHourFormSchema
-    ) as unknown as Resolver<WorkHourFormData>,
+    resolver: zodResolver(schema) as unknown as Resolver<WorkHourFormData>,
     defaultValues: {
       date: workHour ? new Date(workHour.date) : new Date(),
       projectId: "",
       hours: workHour ? decimalHoursToHHmm(workHour.hours) : "",
+      startTime: workHour?.startTime ?? "",
+      endTime: workHour?.endTime ?? "",
       clientId: defaultClientId || "",
       description: workHour?.description ?? "",
     },
@@ -126,15 +210,47 @@ export function WorkHourForm({
   const updateTimeEntry = useUpdateTimeEntry();
   const activeMutation = isEditMode ? updateTimeEntry : createTimeEntry;
 
+  const handleModeChange = (next: EntryMode) => {
+    if (next === entryMode || fieldsDisabled) return;
+    if (next === "duration") {
+      const st = getValues("startTime");
+      const et = getValues("endTime");
+      if (isFullHHmm(st) && isFullHHmm(et) && hmToDecimal(et) > hmToDecimal(st)) {
+        setValue("hours", decimalHoursToHHmm(hmToDecimal(et) - hmToDecimal(st)), {
+          shouldDirty: true,
+        });
+      }
+    }
+    setEntryMode(next);
+  };
+
+  const handleTimeBlur =
+    (field: { value: string; onChange: (v: string) => void; onBlur: () => void }) =>
+    () => {
+      if (/^\d{1,2}$/.test(field.value ?? "")) {
+        field.onChange(normalizeHourOnly(field.value));
+      }
+      field.onBlur();
+    };
+
   const onSubmit = async (formData: WorkHourFormData) => {
     try {
-      const [hours, minutes] = formData.hours.split(":");
-      const decimalHours = Number(hours) + Number(minutes) / 60;
+      const decimalHours =
+        entryMode === "duration"
+          ? hmToDecimal(formData.hours)
+          : hmToDecimal(formData.endTime) - hmToDecimal(formData.startTime);
 
       if (isEditMode && workHour) {
         const changed: Partial<FullCreateTimeEntryDto> = {};
         if (dirtyFields.date) changed.date = formData.date.toISOString();
-        if (dirtyFields.hours) changed.hours = decimalHours;
+        if (entryMode === "duration") {
+          if (dirtyFields.hours) changed.hours = decimalHours;
+        } else {
+          if (dirtyFields.startTime) changed.startTime = formData.startTime;
+          if (dirtyFields.endTime) changed.endTime = formData.endTime;
+          if (dirtyFields.startTime || dirtyFields.endTime)
+            changed.hours = decimalHours;
+        }
         if (dirtyFields.description)
           changed.description = formData.description || undefined;
 
@@ -150,24 +266,33 @@ export function WorkHourForm({
 
         toast.success(t("savedSuccessfully", { type: t("workHour") }));
         reset(formData);
+        setLastSavedMode(entryMode);
         return;
       }
 
-      const payload = {
-        ...formData,
-        hours: decimalHours,
+      const payload: Record<string, unknown> = {
         date: formData.date.toISOString(),
+        hours: decimalHours,
+        clientId: formData.clientId,
         projectId: formData.projectId || undefined,
         description: formData.description || undefined,
       };
+      if (entryMode === "interval") {
+        payload.startTime = formData.startTime;
+        payload.endTime = formData.endTime;
+      }
 
       console.log("📝 Submitting work hour form with payload:", payload);
 
-      const result = await createTimeEntry.mutateAsync(payload);
+      const result = await createTimeEntry.mutateAsync(
+        payload as unknown as FullCreateTimeEntryDto
+      );
       console.log("✅ Work hour created successfully:", result);
 
       toast.success(t("savedSuccessfully", { type: t("workHour") }));
       reset();
+      setEntryMode("duration");
+      setLastSavedMode("duration");
 
       console.log("🔄 Calling onSuccess callback...");
       onSuccess?.();
@@ -188,6 +313,7 @@ export function WorkHourForm({
 
   const handleCancel = () => {
     reset();
+    setEntryMode(lastSavedMode);
     onCancel?.();
   };
 
@@ -240,7 +366,7 @@ export function WorkHourForm({
             render={({ field }) => (
               <ClientCombobox
                 clients={clients}
-                value={field.value}
+                value={field.value ?? ""}
                 onSelect={field.onChange}
                 placeholder={t("selectClient")}
                 onClientAdded={handleClientAdded}
@@ -290,24 +416,109 @@ export function WorkHourForm({
         <Label className="text-sm font-medium text-foreground">
           {t("hours")} *
         </Label>
-        <Controller
-          name="hours"
-          control={control}
-          render={({ field }) => (
-            <Input
-              type="text"
-              inputMode="numeric"
-              placeholder="HH:mm"
-              className="font-mono"
-              value={field.value ?? ""}
-              onChange={(e) => field.onChange(formatHHmm(e.target.value))}
-              onBlur={field.onBlur}
-              disabled={fieldsDisabled}
+
+        <div className="flex gap-2" role="group" aria-label={t("entryMode")}>
+          <Button
+            type="button"
+            variant={entryMode === "duration" ? "default" : "outline"}
+            size="sm"
+            aria-pressed={entryMode === "duration"}
+            disabled={fieldsDisabled}
+            onClick={() => handleModeChange("duration")}
+          >
+            {t("durationMode")}
+          </Button>
+          <Button
+            type="button"
+            variant={entryMode === "interval" ? "default" : "outline"}
+            size="sm"
+            aria-pressed={entryMode === "interval"}
+            disabled={fieldsDisabled}
+            onClick={() => handleModeChange("interval")}
+          >
+            {t("intervalMode")}
+          </Button>
+        </div>
+
+        {entryMode === "duration" ? (
+          <>
+            <Controller
+              name="hours"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="HH:mm"
+                  className="font-mono"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(formatHHmm(e.target.value))}
+                  onBlur={handleTimeBlur(field)}
+                  disabled={fieldsDisabled}
+                />
+              )}
             />
-          )}
-        />
-        {errors.hours && (
-          <p className="text-sm text-destructive">{errors.hours.message}</p>
+            {errors.hours && (
+              <p className="text-sm text-destructive">{errors.hours.message}</p>
+            )}
+          </>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">
+                {t("startTime")}
+              </Label>
+              <Controller
+                name="startTime"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="HH:mm"
+                    className="font-mono"
+                    data-testid="start-time-input"
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(formatHHmm(e.target.value))}
+                    onBlur={handleTimeBlur(field)}
+                    disabled={fieldsDisabled}
+                  />
+                )}
+              />
+              {errors.startTime && (
+                <p className="text-sm text-destructive">
+                  {errors.startTime.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">
+                {t("endTime")}
+              </Label>
+              <Controller
+                name="endTime"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="HH:mm"
+                    className="font-mono"
+                    data-testid="end-time-input"
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(formatHHmm(e.target.value))}
+                    onBlur={handleTimeBlur(field)}
+                    disabled={fieldsDisabled}
+                  />
+                )}
+              />
+              {errors.endTime && (
+                <p className="text-sm text-destructive">
+                  {errors.endTime.message}
+                </p>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
