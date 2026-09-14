@@ -1,9 +1,23 @@
 # Bug: `react-input-mask` quebra com React 19 (`findDOMNode is not a function`)
 
-Status: aberto, não corrigido ainda. Severidade alta: trava a tela inteira (error boundary do
-Next.js) ao abrir qualquer formulário afetado. Descoberto na sessão de e2e da feature de
-arredondamento de horas (MW-3), em 2026-09-14, testando via Playwright contra a app real, não
+Status: **corrigido**. Severidade alta enquanto esteve aberto: travava a tela inteira (error
+boundary do Next.js) ao abrir qualquer formulário afetado. Descoberto na sessão de e2e da feature
+de arredondamento de horas (MW-3), em 2026-09-14, testando via Playwright contra a app real, não
 mockada.
+
+A correção (opção 2 das sugestões abaixo) já tinha sido feita no commit `3238153` ("fix: repair
+broken pages (React 19 crashes, i18n, wrong metrics)", 2026-07-21) e chegou a este branch via
+merge do `main` (`c328650`). Este documento ficou desatualizado entre a descoberta do bug (sessão
+de e2e, antes do merge) e a chegada da correção ao branch. Verificado nesta sessão via
+`systematic-debugging`:
+- `phone-input.tsx` e `work-hour-form.tsx` reimplementam as máscaras em JS puro (`onChange`/regex),
+  sem `react-input-mask`.
+- `react-input-mask` e `@types/react-input-mask` não constam mais em `package.json`.
+- Nenhuma referência real a `findDOMNode`/`InputMask` no código (só comentários explicativos).
+- Suíte `work-hour-form.test.tsx`: 25/25 passando.
+- Verificação visual via Playwright não foi possível nesta sessão (stack dev já em uso por outra
+  sessão/worktree, sem credenciais de login em texto claro disponíveis); a evidência de código e
+  testes acima é considerada suficiente.
 
 ## Resumo
 
@@ -80,24 +94,17 @@ Pra validar a feature de arredondamento de horas sem esse bug no caminho, os lan
 cliente e de horas foram feitos via chamada direta à API (`curl` contra os endpoints REST),
 contornando os formulários quebrados. Isso não é uma correção, só destravou o teste manual.
 
-## Sugestões de correção
+## Correção aplicada
 
-Nenhuma decidida ainda.
+Opção 2 (implementar a máscara nativamente), commit `3238153`:
 
-1. Trocar `react-input-mask` por uma lib mantida e compatível com React 19. Candidatas:
-   `react-imask` (usa `imask` por baixo, mantida ativamente) ou `input-format`. É a mudança de
-   API mais trabalhosa, mas resolve de raiz.
-2. Implementar a máscara nativamente. Pro caso de `HH:mm` (`work-hour-form.tsx`) e
-   `(11) 99999-9999` (`phone-input.tsx`) as regras são simples, um `onChange` com regex cobre os
-   dois casos sem depender de lib externa. Já existe um regex de validação de horário duplicado
-   entre `work-hour-form.tsx` e `lib/utils.ts`/`work-hour-card.tsx`; trocar a lib é uma boa
-   chance de também unificar essa duplicação.
-3. Fork ou patch local de `react-input-mask`, trocando a chamada a `findDOMNode` por um
-   `forwardRef` ou callback ref. É a mais rápida de aplicar, mas fica mantendo um patch de uma
-   lib morta.
+- `phone-input.tsx` e `work-hour-form.tsx` viraram inputs controlados com `onChange` + regex,
+  sem depender de lib externa.
+- `react-input-mask` e `@types/react-input-mask` removidos de `apps/frontend/package.json`.
 
-A opção 2 parece a mais barata e a única que remove a dependência problemática de vez. Qualquer
-uma resolve o crash; fica pra quem for corrigir decidir olhando o código com calma.
+Opções descartadas: trocar por `react-imask`/`input-format` (mudança de API maior, sem ganho
+adicional já que o caso de uso é simples); fork/patch local de `react-input-mask` (mantém uma
+dependência morta).
 
 ## Referências
 
