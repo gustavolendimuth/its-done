@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -30,13 +30,6 @@ function formatHHmm(input: string): string {
   const digits = String(input ?? "").replace(/\D/g, "").slice(0, 4);
   if (digits.length <= 2) return digits;
   return `${digits.slice(0, 2)}:${digits.slice(2)}`;
-}
-
-function formatDateUTC(date: Date): string {
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const year = date.getUTCFullYear();
-  return `${day}/${month}/${year}`;
 }
 
 function decimalHoursToHHmm(hours: number): string {
@@ -78,10 +71,9 @@ interface EditableWorkHour {
   isInvoiced?: boolean;
 }
 
-type EditableFieldName = "date" | "hours" | "description";
-
 interface WorkHourFormProps {
   onSuccess?: () => void;
+  onCancel?: () => void;
   clients: Client[];
   defaultClientId?: string;
   hideClientSelection?: boolean;
@@ -90,12 +82,14 @@ interface WorkHourFormProps {
 
 export function WorkHourForm({
   onSuccess,
+  onCancel,
   clients,
   defaultClientId,
   hideClientSelection = false,
   workHour,
 }: WorkHourFormProps) {
   const t = useTranslations("workHours");
+  const tCommon = useTranslations("common");
   const isEditMode = !!workHour;
 
   const queryClient = useQueryClient();
@@ -121,17 +115,7 @@ export function WorkHourForm({
 
   const selectedClientId = watch("clientId");
   const isInvoiced = !!workHour?.isInvoiced;
-
-  const [editingFields, setEditingFields] = useState<Set<EditableFieldName>>(
-    new Set()
-  );
-  const isFieldOpen = (field: EditableFieldName) =>
-    !isEditMode || editingFields.has(field);
-  const openField = (field: EditableFieldName) => {
-    if (!isEditMode || isInvoiced) return;
-    setEditingFields((prev) => new Set(prev).add(field));
-  };
-  const hasOpenFields = editingFields.size > 0;
+  const fieldsDisabled = isEditMode && isInvoiced;
 
   // Reset project when client changes
   useEffect(() => {
@@ -166,7 +150,6 @@ export function WorkHourForm({
 
         toast.success(t("savedSuccessfully", { type: t("workHour") }));
         reset(formData);
-        setEditingFields(new Set());
         return;
       }
 
@@ -203,9 +186,10 @@ export function WorkHourForm({
     queryClient.invalidateQueries({ queryKey: ["clients"] });
   };
 
-  const watchedDate = watch("date");
-  const watchedHours = watch("hours");
-  const watchedDescription = watch("description");
+  const handleCancel = () => {
+    reset();
+    onCancel?.();
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -219,7 +203,11 @@ export function WorkHourForm({
         <Label className="text-sm font-medium text-foreground">
           {t("date")} *
         </Label>
-        {isFieldOpen("date") ? (
+        <div
+          className={
+            fieldsDisabled ? "pointer-events-none opacity-70" : undefined
+          }
+        >
           <Controller
             name="date"
             control={control}
@@ -234,17 +222,7 @@ export function WorkHourForm({
               />
             )}
           />
-        ) : (
-          <button
-            type="button"
-            data-testid="field-date-view"
-            disabled={isInvoiced}
-            onClick={() => openField("date")}
-            className="w-full text-left text-sm rounded-md border border-input px-3 py-2 disabled:cursor-default disabled:opacity-70"
-          >
-            {watchedDate ? formatDateUTC(watchedDate) : "—"}
-          </button>
-        )}
+        </div>
         {errors.date && (
           <p className="text-sm text-destructive">{errors.date.message}</p>
         )}
@@ -311,33 +289,22 @@ export function WorkHourForm({
         <Label className="text-sm font-medium text-foreground">
           {t("hours")} *
         </Label>
-        {isFieldOpen("hours") ? (
-          <Controller
-            name="hours"
-            control={control}
-            render={({ field }) => (
-              <Input
-                type="text"
-                inputMode="numeric"
-                placeholder="HH:mm"
-                className="font-mono"
-                value={field.value ?? ""}
-                onChange={(e) => field.onChange(formatHHmm(e.target.value))}
-                onBlur={field.onBlur}
-              />
-            )}
-          />
-        ) : (
-          <button
-            type="button"
-            data-testid="field-hours-view"
-            disabled={isInvoiced}
-            onClick={() => openField("hours")}
-            className="w-full text-left text-sm font-mono rounded-md border border-input px-3 py-2 disabled:cursor-default disabled:opacity-70"
-          >
-            {watchedHours || "—"}
-          </button>
-        )}
+        <Controller
+          name="hours"
+          control={control}
+          render={({ field }) => (
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="HH:mm"
+              className="font-mono"
+              value={field.value ?? ""}
+              onChange={(e) => field.onChange(formatHHmm(e.target.value))}
+              onBlur={field.onBlur}
+              disabled={fieldsDisabled}
+            />
+          )}
+        />
         {errors.hours && (
           <p className="text-sm text-destructive">{errors.hours.message}</p>
         )}
@@ -347,29 +314,18 @@ export function WorkHourForm({
         <Label className="text-sm font-medium text-foreground">
           {t("hourDescription")}
         </Label>
-        {isFieldOpen("description") ? (
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }) => (
-              <Textarea
-                {...field}
-                placeholder={t("descriptionPlaceholder")}
-                className="min-h-[100px]"
-              />
-            )}
-          />
-        ) : (
-          <button
-            type="button"
-            data-testid="field-description-view"
-            disabled={isInvoiced}
-            onClick={() => openField("description")}
-            className="w-full text-left text-sm rounded-md border border-input px-3 py-2 min-h-[100px] disabled:cursor-default disabled:opacity-70"
-          >
-            {watchedDescription || "—"}
-          </button>
-        )}
+        <Controller
+          name="description"
+          control={control}
+          render={({ field }) => (
+            <Textarea
+              {...field}
+              placeholder={t("descriptionPlaceholder")}
+              className="min-h-[100px]"
+              disabled={fieldsDisabled}
+            />
+          )}
+        />
         {errors.description && (
           <p className="text-sm text-destructive">
             {errors.description.message}
@@ -378,45 +334,56 @@ export function WorkHourForm({
       </div>
 
       <div className="space-y-4">
-        {(!isEditMode || hasOpenFields) && (
-        <Button
-          type="submit"
-          disabled={activeMutation.isPending}
-          className="w-full"
-        >
-          {activeMutation.isPending ? (
-            <>
-              <svg
-                data-testid="save-spinner"
-                className="animate-spin -ml-1 mr-2 h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              {t("saving")}
-            </>
-          ) : isEditMode ? (
-            t("saveChanges")
-          ) : hideClientSelection ? (
-            t("saveTimeEntry")
-          ) : (
-            t("saveWorkHour")
+        <div className={isEditMode ? "flex gap-3" : undefined}>
+          {isEditMode && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              disabled={activeMutation.isPending}
+              className="flex-1"
+            >
+              {tCommon("cancel")}
+            </Button>
           )}
-        </Button>
-        )}
+          <Button
+            type="submit"
+            disabled={activeMutation.isPending || fieldsDisabled}
+            className={isEditMode ? "flex-1" : "w-full"}
+          >
+            {activeMutation.isPending ? (
+              <>
+                <svg
+                  data-testid="save-spinner"
+                  className="animate-spin -ml-1 mr-2 h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                {t("saving")}
+              </>
+            ) : isEditMode ? (
+              t("saveChanges")
+            ) : hideClientSelection ? (
+              t("saveTimeEntry")
+            ) : (
+              t("saveWorkHour")
+            )}
+          </Button>
+        </div>
 
         {activeMutation.isError && (
           <Alert variant="destructive">

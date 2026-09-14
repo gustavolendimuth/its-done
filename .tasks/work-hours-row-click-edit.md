@@ -14,12 +14,20 @@ botão "Salvar" sempre visível - não há como só consultar uma work hour sem 
 alterá-la.
 
 A mudança: o botão de editar sai da tabela. Clicar em qualquer parte da linha (fora dos botões de
-ação) abre o mesmo modal, mas agora em modo de visualização, sem botão "Salvar". Cada campo
-(`date`, `hours`, `description`) só vira editável quando o usuário clica nele; o botão "Salvar"
-aparece assim que pelo menos um campo estiver em edição, e um único clique nele salva todos os
-campos alterados de uma vez.
+ação) abre o mesmo modal, diretamente em modo de edição - `date`, `hours` e `description` já
+aparecem como inputs editáveis, pré-preenchidos, com os botões "Salvar" e "Cancelar" sempre
+visíveis no rodapé.
 
-15 critérios em 3 slices · 1 porta de mão única · 1 aberto, dos quais 0 bloqueiam
+## Revisão
+
+A primeira versão implementada (visualização por padrão, campo vira editável só ao clicar nele,
+botão "Salvar" escondido até algum campo entrar em edição) foi revertida a pedido do usuário
+depois de construída e verificada - ver "Sources". Os critérios 5-9 e 14 da versão original foram
+substituídos pelos critérios abaixo; a porta de mão única original (padrão visualizar→editar-por-
+campo) foi desfeita antes de chegar à `main`, então não chegou a virar precedente pra nenhum outro
+código - ver "Decided".
+
+12 critérios em 3 slices · 0 portas de mão única · 1 aberto, dos quais 0 bloqueiam
 
 ## Criteria
 
@@ -35,67 +43,61 @@ campos alterados de uma vez.
 4. Always, a `TableRow` tem `role="button"` e `tabIndex={0}`, e pressionar `Enter` ou `Espaço` com
    foco na linha abre o mesmo modal de visualização que o clique do mouse.
 
-### Editar por campo dentro do modal
+### Inputs sempre editáveis, Salvar e Cancelar sempre visíveis
 
-5. Given o modal aberto em modo de visualização, when o usuário clica no valor exibido do campo
-   "Data", then esse campo vira o input editável já usado hoje em `WorkHourForm` e o botão
-   "Salvar" aparece no rodapé do modal.
-6. Given o modal aberto em modo de visualização, when o usuário clica no valor exibido do campo
-   "Horas", then esse campo vira o input com a máscara `HH:mm` já existente e o botão "Salvar"
-   aparece.
-7. Given o modal aberto em modo de visualização, when o usuário clica no valor exibido do campo
-   "Descrição", then esse campo vira o input/textarea editável e o botão "Salvar" aparece.
-8. Given um ou mais campos já em edição, when o usuário clica em outro campo ainda em
-   visualização, then esse campo também vira editável, os anteriores continuam editáveis, e
-   apenas um botão "Salvar" é exibido (não um por campo).
-9. Given a work hour vinculada a uma invoice com status diferente de `CANCELED`
-   (`isWorkHourInvoiced` retorna `true`), then nenhum campo responde a clique - permanecem em
-   modo de visualização - e o modal exibe um aviso fixo reaproveitando a string `cannotEditInvoiced`
-   já usada hoje como tooltip do botão de editar.
+5. Given o modal de edição aberto (workHour não faturada), then `date`, `hours` e `description`
+   são renderizados como inputs editáveis (os mesmos controles já usados hoje em `WorkHourForm`),
+   pré-preenchidos com os valores atuais, e os botões "Salvar" e "Cancelar" estão sempre visíveis
+   no rodapé do modal desde a abertura.
+6. Given a work hour vinculada a uma invoice com status diferente de `CANCELED`
+   (`isWorkHourInvoiced` retorna `true`), then os inputs `date`, `hours`, `description` e o botão
+   "Salvar" ficam desabilitados, e o modal exibe um aviso fixo reaproveitando a string
+   `cannotEditInvoiced` já usada hoje como tooltip do antigo botão de editar. O botão "Cancelar"
+   continua habilitado (só fecha o modal).
+7. When o usuário clica em "Cancelar", then os campos voltam aos valores originais (ou aos
+   últimos valores salvos, se já houve um salvamento nesta sessão do modal) e o modal é fechado.
 
 ### Salvar as alterações
 
-10. Given pelo menos um campo em edição com valor alterado, when o usuário clica em "Salvar",
-    then `useUpdateTimeEntry` é chamado uma única vez com `PATCH /work-hours/:id` contendo somente
-    os campos alterados dentre `date`, `hours`, `description`.
+10. Given pelo menos um campo com valor alterado, when o usuário clica em "Salvar", then
+    `useUpdateTimeEntry` é chamado uma única vez com `PATCH /work-hours/:id` contendo somente os
+    campos cujo valor mudou dentre `date`, `hours`, `description`.
 11. While a mutação de salvar está pendente (`isPending`), o botão "Salvar" fica desabilitado e
     mostra o spinner já usado hoje no formulário.
-12. Given a mutação retorna sucesso, then todos os campos voltam ao modo de visualização com os
-    valores atualizados, o botão "Salvar" desaparece, e as mesmas invalidações de query já
+12. Given a mutação retorna sucesso, then os inputs mantêm os novos valores salvos, o `Alert` de
+    sucesso já existente em `WorkHourForm` aparece, e as mesmas invalidações de query já
     existentes (`timeEntries`, `timeEntries/id`, `workHours/stats`, `clients/stats`, `dashboard`)
-    são disparadas.
+    são disparadas. O modal permanece aberto - o usuário fecha manualmente (X, clique fora, `Esc`
+    ou "Cancelar") quando terminar.
 13. If a mutação retorna erro (ex.: 400 porque a work hour foi faturada entre a abertura do modal
-    e o clique em "Salvar"), then os campos alterados permanecem em modo de edição com os valores
-    digitados preservados, e o `Alert` de erro já existente em `WorkHourForm` exibe a mensagem
-    retornada pela API.
-14. Always, enquanto nenhum campo tiver sido clicado para edição, nenhum botão "Salvar" é exibido
-    no modal.
-15. Given um ou mais campos em edição sem terem sido salvos, when o usuário fecha o modal (X,
-    clique fora, ou `Esc`), then as alterações não são persistidas; reabrindo o modal pra mesma
-    work hour, ele volta a abrir em modo de visualização com os valores originais.
+    e o clique em "Salvar"), then os inputs mantêm os valores digitados, e o `Alert` de erro já
+    existente em `WorkHourForm` exibe a mensagem retornada pela API.
+15. Given uma alteração não salva em algum campo, when o usuário fecha o modal sem clicar em
+    "Salvar" (X, clique fora, `Esc`, ou o "Cancelar" do critério 7), then a alteração não é
+    persistida; reabrindo o modal pra mesma work hour, os campos voltam a mostrar os valores
+    originais (ou os últimos salvos).
 
 ## States
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Viewing: clique/Enter na linha (1, 4)
-    Viewing --> Viewing: clique em campo com work hour faturada (9)
-    Viewing --> Editing: clique em campo editável (5, 6, 7)
-    Editing --> Editing: clique em outro campo em visualização (8)
+    [*] --> Editing: clique/Enter na linha (1, 4, 5)
+    Editing --> EditingDisabled: workHour faturada (6)
     Editing --> Saving: clique em Salvar (10)
-    Saving --> Viewing: sucesso (12)
+    Saving --> Editing: sucesso (12)
     Saving --> Editing: erro (13)
-    Editing --> Viewing: fecha modal sem salvar - descarta (15)
-    Viewing --> [*]: fecha modal (existing)
+    Editing --> [*]: fecha modal ou Cancelar sem salvar - descarta (7, 15)
 ```
 
 ## Out of scope
 
 - Editar `projectId`/`clientId` pelo modal - `UpdateWorkHourDto` do backend não aceita
   `projectId`, e o formulário já esconde esses campos no modo edição hoje.
-- Confirmação de "descartar alterações" ao fechar o modal com edições não salvas - descarte é
-  silencioso (critério 15), sem diálogo de confirmação; nenhum padrão desse tipo existe hoje no
-  app.
+- Confirmação de "descartar alterações" ao clicar em "Cancelar" ou fechar o modal com edições não
+  salvas - descarte é silencioso (critérios 7, 15), sem diálogo de confirmação; nenhum padrão
+  desse tipo existe hoje no app.
+- Botão "Cancelar" no modal de criação (sem `workHour`) - não pedido; o formulário de criação
+  segue como estava.
 - Alterar o comportamento do botão de excluir (`AlertDialog`) - inalterado por esta task.
 - Alterar a regra de negócio que bloqueia edição de work hours faturadas - o bloqueio já existe
   no backend (`WorkHoursService.update`) e no frontend (`isWorkHourInvoiced`); só a forma de
@@ -130,7 +132,7 @@ stateDiagram-v2
   modal e o clique em Salvar
 - data lifecycle: n/a - não cria nem apaga work hours, só atualiza campos já existentes
 - external-dependency failure: 13 - mesmo `Alert` de erro cobre falha de rede/API
-- state transitions: 5, 6, 7, 8, 12, 13, 15 (ver diagrama em States)
+- state transitions: 5, 6, 7, 12, 13, 15 (ver diagrama em States)
 - observability: n/a - não solicitado; nenhum log ou métrica nova nesta task
 
 ## Impact
@@ -140,23 +142,30 @@ stateDiagram-v2
 | domain | existing term: "editar work hour" antes disparado por botão dedicado na linha (`onEdit` prop de `WorkHoursTable`), agora por clique na linha + clique no campo - consumidores diretos: `work-hours/page.tsx` (`handleEdit`), `WorkHoursTable`, `WorkHourForm` |
 | tests | `work-hours-table.test.tsx` - 3 testes buscam `getByRole("button", { name: "edit workHour" })`, precisam ser reescritos pra simular clique/Enter na linha |
 | tests | `work-hours/__tests__/page.test.tsx` - mock de `WorkHoursTable` e o teste "should open edit modal..." (linhas ~121-126, ~258-273) usam o botão "edit work hour", precisam simular clique na linha |
+| tests | `work-hour-form.test.tsx` - testes do modo edição reescritos de novo na revisão (removidos os que testavam clique-por-campo/visualização; adicionados os de Cancelar e inputs sempre editáveis) |
 | stored data | nothing to migrate - nenhuma mudança de schema, DTO ou payload persistido |
 
 ## Decided
 
 | Decision | Shape | Alternative rejected |
 |---|---|---|
-| Padrão de interação visualizar→editar-por-campo com salvar único (não existe hoje no codebase, vira precedente) | Estado local por campo (ex.: `Set` dos nomes de campo em edição) alterna cada campo entre view/edit dentro do modal; um único botão "Salvar" no rodapé dispara um `PATCH /work-hours/:id` com todos os campos alterados | Edição de um campo por vez (serializado: editar → salvar/cancelar → só então editar outro) - rejeitada pelo usuário: exigiria bloquear os demais campos até cada edição terminar, contrariando o fluxo de editar vários campos e salvar tudo junto |
+| ~~Padrão de interação visualizar→editar-por-campo com salvar único~~ - revertido nesta revisão antes de chegar à `main`; nunca virou precedente pra outro código | - | - |
+
+None além disso é porta de mão única - inputs sempre editáveis e botão "Cancelar" são UI comum já
+usada em outros modais do app (ex.: `AlertDialogCancel`), sem contrato ou schema novo.
 
 ## Sources
 
 - Pedido do usuário nesta conversa - define o comportamento base: sem botão de editar na tabela,
-  clique na linha abre modal de visualização sem botão salvar, clique no campo libera edição e
-  mostra o botão salvar
-- Respostas às perguntas de esclarecimento nesta conversa - `user delegated`: múltiplos campos
-  podem ficar em edição simultânea com um único botão "Salvar" (critério 8, 10); work hours
-  faturadas ficam com campos não clicáveis e aviso fixo reaproveitando `cannotEditInvoiced`
-  (critério 9)
+  clique na linha abre modal de edição
+- Respostas às perguntas de esclarecimento nesta conversa (versão original, revertida) -
+  `user delegated`: múltiplos campos podem ficar em edição simultânea com um único botão "Salvar"
+  (critério 10, mantido); work hours faturadas ficam com campos desabilitados e aviso fixo
+  reaproveitando `cannotEditInvoiced` (critério 6, mantido - só a forma de desabilitar mudou)
+- Pedido de revisão do usuário, depois de ver a primeira implementação construída e verificada -
+  reverte o padrão visualizar→editar-por-campo (critérios 5-9, 14 originais): inputs sempre
+  editáveis, botão "Salvar" sempre visível, novo botão "Cancelar" (critérios 5, 6, 7, 12, 15
+  revisados)
 
 Esta task é o registro da decisão. Se um documento vinculado divergir, perguntar antes de
 construir.

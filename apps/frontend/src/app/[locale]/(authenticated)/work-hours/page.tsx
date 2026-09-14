@@ -114,6 +114,10 @@ export default function WorkHoursPage() {
     }
   };
 
+  const handleCancelEdit = () => {
+    setEditingWorkHour(null);
+  };
+
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     try {
@@ -263,6 +267,7 @@ export default function WorkHoursPage() {
         {editingWorkHour && clients && (
           <WorkHourForm
             clients={clients}
+            onCancel={handleCancelEdit}
             workHour={{
               ...editingWorkHour,
               isInvoiced: isWorkHourInvoiced(editingWorkHour),
