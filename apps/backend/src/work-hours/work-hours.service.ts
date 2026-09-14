@@ -2,11 +2,17 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWorkHourDto } from './dto/create-work-hour.dto';
 import { UpdateWorkHourDto } from './dto/update-work-hour.dto';
 import { HoursThresholdCheckerService } from './services/hours-threshold-checker.service';
+import { SettingsService } from '../settings/settings.service';
+import { roundHoursToIncrement } from './utils/round-hours.util';
+
+const MIN_HOURS = 0.1;
 
 function hmToMinutes(value: string): number {
   const [h, m] = value.split(':').map(Number);
@@ -35,7 +41,23 @@ export class WorkHoursService {
   constructor(
     private prisma: PrismaService,
     private hoursThresholdChecker: HoursThresholdCheckerService,
+    @Inject(forwardRef(() => SettingsService))
+    private settingsService: SettingsService,
   ) {}
+
+  private async applyRounding(userId: string, hours: number) {
+    const settings = await this.settingsService.findByUserId(userId);
+    const rounded = roundHoursToIncrement(
+      hours,
+      settings.roundingIncrementMinutes ?? 0,
+    );
+
+    if (rounded < MIN_HOURS) {
+      throw new BadRequestException('Hours must be at least 0.1');
+    }
+
+    return rounded;
+  }
 
   async create(userId: string, createWorkHourDto: CreateWorkHourDto) {
     if (!userId) {
@@ -59,10 +81,12 @@ export class WorkHoursService {
       }
     }
 
+    const hours = await this.applyRounding(userId, createWorkHourDto.hours);
+
     const workHour = await this.prisma.workHour.create({
       data: {
         date: createWorkHourDto.date,
-        hours: createWorkHourDto.hours,
+        hours,
         startTime: createWorkHourDto.startTime,
         endTime: createWorkHourDto.endTime,
         description: createWorkHourDto.description,
@@ -256,9 +280,17 @@ export class WorkHoursService {
       updateWorkHourDto.endTime ?? workHour.endTime,
     );
 
+    const data =
+      updateWorkHourDto.hours !== undefined
+        ? {
+            ...updateWorkHourDto,
+            hours: await this.applyRounding(userId, updateWorkHourDto.hours),
+          }
+        : updateWorkHourDto;
+
     const updatedWorkHour = await this.prisma.workHour.update({
       where: { id },
-      data: updateWorkHourDto,
+      data,
       include: {
         client: true,
         project: true,

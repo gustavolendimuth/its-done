@@ -32,6 +32,7 @@ jest.mock("sonner", () => ({
 const mockSettings = {
   alertHours: 160,
   notificationEmail: "test@example.com",
+  roundingIncrementMinutes: 0,
 };
 
 interface UpdateSettingsOptions {
@@ -42,6 +43,7 @@ interface UpdateSettingsOptions {
 const mockUpdateSettings = jest.fn();
 
 jest.mock("./settings.service", () => ({
+  ALLOWED_ROUNDING_INCREMENTS: [0, 5, 10, 15, 30, 60],
   useSettings: jest.fn(() => ({
     data: mockSettings,
     isLoading: false,
@@ -108,6 +110,9 @@ describe("SettingsForm", () => {
 
     expect(alertHoursInput).toHaveValue(160);
     expect(emailInput).toHaveValue("test@example.com");
+    // Radix Select renders the selected label in both the visible trigger and
+    // a visually-hidden native <select> fallback, so more than one match is expected.
+    expect(screen.getAllByText("roundingIncrementOff").length).toBeGreaterThan(0);
   });
 
   it("should validate alert hours input", async () => {
@@ -145,6 +150,7 @@ describe("SettingsForm", () => {
         {
           alertHours: 180,
           notificationEmail: "test@example.com",
+          roundingIncrementMinutes: 0,
         },
         expect.any(Object)
       );
@@ -174,6 +180,7 @@ describe("SettingsForm", () => {
         {
           alertHours: 160,
           notificationEmail: "new@example.com",
+          roundingIncrementMinutes: 0,
         },
         expect.any(Object)
       );
@@ -188,6 +195,7 @@ describe("SettingsForm", () => {
         {
           alertHours: 160,
           notificationEmail: undefined,
+          roundingIncrementMinutes: 0,
         },
         expect.any(Object)
       );

@@ -2,10 +2,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
 
+export const ALLOWED_ROUNDING_INCREMENTS = [0, 5, 10, 15, 30, 60] as const;
+export type RoundingIncrementMinutes =
+  (typeof ALLOWED_ROUNDING_INCREMENTS)[number];
+
 export interface Settings {
   id: string;
   alertHours: number;
   notificationEmail?: string;
+  roundingIncrementMinutes: RoundingIncrementMinutes;
   createdAt: string;
   updatedAt: string;
 }
@@ -13,6 +18,7 @@ export interface Settings {
 export interface CreateSettingsDto {
   alertHours: number;
   notificationEmail?: string;
+  roundingIncrementMinutes?: RoundingIncrementMinutes;
 }
 
 export interface UpdateSettingsDto extends Partial<CreateSettingsDto> {}
