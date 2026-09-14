@@ -4,17 +4,13 @@ import { Users, Plus, Search as SearchIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useMemo } from "react";
 
-import { ClientCard } from "@/components/clients/client-card";
-import { ClientForm } from "@/components/clients/client-form";
-import { ClientsBigStats } from "@/components/clients/clients-big-stats";
 import { EmptyState } from "@/components/layout/empty-state";
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
 import { SearchInput } from "@/components/ui/search-input";
-import { useClients } from "@/services/clients";
+import { ClientsPageSkeleton , ClientCard, ClientForm, ClientsBigStats, useClients } from "@/features/clients";
 
 export default function ClientsPage() {
   const t = useTranslations("clients");
@@ -40,7 +36,7 @@ export default function ClientsPage() {
   };
 
   if (isLoading) {
-    return <LoadingSkeleton type="clients-page" />;
+    return <ClientsPageSkeleton />;
   }
 
   return (

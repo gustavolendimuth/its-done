@@ -18,8 +18,6 @@ module.exports = {
     'coverage/',
     'logs/',
     '*.log',
-    'cypress/videos/',
-    'cypress/screenshots/',
     'prisma/migrations/',
     'apps/backend/uploads/',
   ],

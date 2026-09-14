@@ -1,4 +1,3 @@
-import { describe, it, expect } from "@jest/globals";
 
 import { formatTimeAgo, formatHoursToHHMM, cn } from "../utils";
 
@@ -28,12 +27,12 @@ describe("formatTimeAgo", () => {
 
   beforeAll(() => {
     // Mock Date.now() para ter resultados consistentes
-    vi.useFakeTimers();
-    vi.setSystemTime(now);
+    jest.useFakeTimers();
+    jest.setSystemTime(now);
   });
 
   afterAll(() => {
-    vi.useRealTimers();
+    jest.useRealTimers();
   });
 
   it("should return 'just now' for very recent dates", () => {
@@ -70,6 +69,40 @@ describe("formatTimeAgo", () => {
     const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
 
     expect(formatTimeAgo(threeDaysAgo, mockT)).toBe("3 days");
+  });
+
+  it("should return '1 week' for exactly 7 days ago", () => {
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    expect(formatTimeAgo(sevenDaysAgo, mockT)).toBe("1 week");
+  });
+
+  it("should return '4 weeks' for exactly 28 days ago", () => {
+    const twentyEightDaysAgo = new Date(
+      now.getTime() - 28 * 24 * 60 * 60 * 1000
+    );
+
+    expect(formatTimeAgo(twentyEightDaysAgo, mockT)).toBe("4 weeks");
+  });
+
+  it("should return '4 weeks' for 29 days ago (below the 1-month threshold)", () => {
+    const twentyNineDaysAgo = new Date(
+      now.getTime() - 29 * 24 * 60 * 60 * 1000
+    );
+
+    expect(formatTimeAgo(twentyNineDaysAgo, mockT)).toBe("4 weeks");
+  });
+
+  it("should return '1 month' for exactly 30 days ago", () => {
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    expect(formatTimeAgo(thirtyDaysAgo, mockT)).toBe("1 month");
+  });
+
+  it("should return '1 year' for exactly 365 days ago", () => {
+    const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+
+    expect(formatTimeAgo(oneYearAgo, mockT)).toBe("1 year");
   });
 });
 

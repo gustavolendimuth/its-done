@@ -1,4 +1,3 @@
-import { describe, it, expect, jest } from "@jest/globals";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
@@ -18,7 +17,7 @@ jest.mock("sonner", () => ({
 }));
 
 // Mock components
-jest.mock("@/components/settings/settings-form", () => ({
+jest.mock("@/features/settings", () => ({
   SettingsForm: () => <div data-testid="settings-form">Settings Form</div>,
 }));
 

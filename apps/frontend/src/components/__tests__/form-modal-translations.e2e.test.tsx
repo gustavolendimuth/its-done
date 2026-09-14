@@ -55,6 +55,8 @@ const TestComponent = ({ children }: { children: ReactNode }) => {
   const t = useTranslations("clients");
   return (
     <FormModal
+      open={true}
+      onOpenChange={() => {}}
       title={t("editClient")}
       description={t("editClientFormSubtitle")}
       icon={null}
@@ -87,9 +89,7 @@ describe("FormModal Translations E2E", () => {
     it("should display specific form subtitle for edit client modal", () => {
       render(
         <TestWrapper>
-          <TestComponent>
-            {enMessages.clients.editClientFormSubtitle}
-          </TestComponent>
+          <TestComponent>Form content</TestComponent>
         </TestWrapper>
       );
 
@@ -175,9 +175,7 @@ describe("FormModal Translations E2E", () => {
     it("should display specific form subtitle for edit client modal in Portuguese", () => {
       render(
         <TestWrapper>
-          <TestComponent>
-            {ptMessages.clients.editClientFormSubtitle}
-          </TestComponent>
+          <TestComponent>Form content</TestComponent>
         </TestWrapper>
       );
 

@@ -8,6 +8,28 @@ import { CreateWorkHourDto } from './dto/create-work-hour.dto';
 import { UpdateWorkHourDto } from './dto/update-work-hour.dto';
 import { HoursThresholdCheckerService } from './services/hours-threshold-checker.service';
 
+function hmToMinutes(value: string): number {
+  const [h, m] = value.split(':').map(Number);
+  return h * 60 + m;
+}
+
+// Valida o par startTime/endTime já mesclado (o que a linha vai efetivamente
+// ficar após a operação) - exatamente um dos dois presente, ou endTime não
+// estritamente depois de startTime, são erros de validação.
+function assertValidTimeRange(
+  startTime: string | null | undefined,
+  endTime: string | null | undefined,
+) {
+  if (!!startTime !== !!endTime) {
+    throw new BadRequestException(
+      'startTime and endTime must be provided together',
+    );
+  }
+  if (startTime && endTime && hmToMinutes(endTime) <= hmToMinutes(startTime)) {
+    throw new BadRequestException('endTime must be after startTime');
+  }
+}
+
 @Injectable()
 export class WorkHoursService {
   constructor(
@@ -20,10 +42,29 @@ export class WorkHoursService {
       throw new BadRequestException('User ID is required');
     }
 
+    assertValidTimeRange(
+      createWorkHourDto.startTime,
+      createWorkHourDto.endTime,
+    );
+
+    if (createWorkHourDto.projectId) {
+      const project = await this.prisma.project.findUnique({
+        where: { id: createWorkHourDto.projectId },
+      });
+
+      if (!project || project.clientId !== createWorkHourDto.clientId) {
+        throw new BadRequestException(
+          'Project does not belong to the selected client',
+        );
+      }
+    }
+
     const workHour = await this.prisma.workHour.create({
       data: {
         date: createWorkHourDto.date,
         hours: createWorkHourDto.hours,
+        startTime: createWorkHourDto.startTime,
+        endTime: createWorkHourDto.endTime,
         description: createWorkHourDto.description,
         client: {
           connect: {
@@ -185,11 +226,35 @@ export class WorkHoursService {
         id,
         userId,
       },
+      include: {
+        invoiceWorkHours: {
+          include: {
+            invoice: {
+              select: { status: true },
+            },
+          },
+        },
+      },
     });
 
     if (!workHour) {
       throw new NotFoundException('Work hour not found');
     }
+
+    const isInvoiced = workHour.invoiceWorkHours.some(
+      (invoiceWorkHour) => invoiceWorkHour.invoice.status !== 'CANCELED',
+    );
+
+    if (isInvoiced) {
+      throw new BadRequestException(
+        'Cannot edit a work hour that has already been invoiced',
+      );
+    }
+
+    assertValidTimeRange(
+      updateWorkHourDto.startTime ?? workHour.startTime,
+      updateWorkHourDto.endTime ?? workHour.endTime,
+    );
 
     const updatedWorkHour = await this.prisma.workHour.update({
       where: { id },

@@ -4,10 +4,8 @@ import { Clock, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useMemo } from "react";
 
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
-import { Button } from "@/components/ui/button";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
 import { PeriodSelectorV2 } from "@/components/ui/period-selector-v2";
@@ -18,11 +16,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { WorkHourCard } from "@/components/work-hours/work-hour-card";
-import { WorkHourForm } from "@/components/work-hours/work-hour-form";
-import { WorkHoursBigStats } from "@/components/work-hours/work-hours-big-stats";
-import { useClients, Client } from "@/services/clients";
-import { useTimeEntries, useDeleteTimeEntry } from "@/services/time-entries";
+import { useClients, Client } from "@/features/clients";
+import {
+  WorkHourForm,
+  WorkHoursBigStats,
+  WorkHoursTable,
+  useTimeEntries,
+  useDeleteTimeEntry,
+  isWorkHourInvoiced,
+ WorkHoursSkeleton } from "@/features/time-tracking";
+
+import type { TimeEntry } from "@/types";
 
 export default function WorkHoursPage() {
   const t = useTranslations("workHours");
@@ -50,6 +54,9 @@ export default function WorkHoursPage() {
   const [selectedClient, setSelectedClient] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingWorkHour, setEditingWorkHour] = useState<TimeEntry | null>(
+    null
+  );
 
   // Memorizar as datas para evitar recriações desnecessárias
   const queryParams = useMemo(() => {
@@ -89,7 +96,7 @@ export default function WorkHoursPage() {
 
   // Skeleton para carregamento inicial
   if (isInitialLoading) {
-    return <LoadingSkeleton type="work-hours" />;
+    return <WorkHoursSkeleton />;
   }
 
   const handleWorkHourAdded = () => {
@@ -101,8 +108,14 @@ export default function WorkHoursPage() {
   };
 
   const handleEdit = (id: string) => {
-    // TODO: Implementar edição de work hour
-    console.log("Edit work hour:", id);
+    const workHour = (workHours ?? []).find((entry) => entry.id === id);
+    if (workHour) {
+      setEditingWorkHour(workHour);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingWorkHour(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -160,7 +173,10 @@ export default function WorkHoursPage() {
               {tCommon("filterByClient")}
             </label>
             <Select value={selectedClient} onValueChange={setSelectedClient}>
-              <SelectTrigger className="w-full h-11 bg-gradient-to-r from-background to-muted/20 border-2 border-muted hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-200">
+              <SelectTrigger
+                aria-label={tCommon("filterByClient")}
+                className="w-full h-11 bg-gradient-to-r from-background to-muted/20 border-2 border-muted hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-200"
+              >
                 <SelectValue placeholder={t("selectClient")} />
               </SelectTrigger>
               <SelectContent>
@@ -193,24 +209,9 @@ export default function WorkHoursPage() {
 
       {/* Work Hours List */}
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-foreground">
-            {t("recentWork")}
-          </h2>
-          {(() => {
-            const length = workHours?.length ?? 0;
-
-            return (
-              length > 0 && (
-                <div className="text-sm text-muted-foreground">
-                  {length}{" "}
-                  {length === 1 ? tCommon("entry") : tCommon("entries")}{" "}
-                  {tCommon("found")}
-                </div>
-              )
-            );
-          })()}
-        </div>
+        <h2 className="text-xl font-semibold text-foreground mb-6">
+          {t("recentWork")}
+        </h2>
 
         {/* Loading indicator for refetching */}
         {isRefetching && (
@@ -222,36 +223,13 @@ export default function WorkHoursPage() {
           </div>
         )}
 
-        {/* Work Hours Grid */}
-        {workHours && workHours.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
-            {workHours
-              .filter((workHour) => workHour.client) // Filtra apenas work hours com cliente
-              .map((workHour) => (
-                <WorkHourCard
-                  key={workHour.id}
-                  workHour={workHour}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  isDeleting={deletingId === workHour.id}
-                />
-              ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <Clock className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-medium text-muted-foreground mb-2">
-              {t("noWorkHours")}
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              {t("noWorkHoursDescription")}
-            </p>
-            <Button onClick={() => setIsModalOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t("addHours")}
-            </Button>
-          </div>
-        )}
+        <WorkHoursTable
+          workHours={(workHours ?? []).filter((workHour) => workHour.client)}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          deletingId={deletingId}
+          onAddClick={() => setIsModalOpen(true)}
+        />
       </div>
 
       {/* Add Work Hour Modal */}
@@ -273,6 +251,28 @@ export default function WorkHoursPage() {
               </p>
             </div>
           </div>
+        )}
+      </FormModal>
+
+      {/* Edit Work Hour Modal */}
+      <FormModal
+        open={!!editingWorkHour}
+        onOpenChange={(open) => {
+          if (!open) setEditingWorkHour(null);
+        }}
+        title={t("editWorkHourTitle")}
+        description={t("editHoursFormSubtitle")}
+        icon={Clock}
+      >
+        {editingWorkHour && clients && (
+          <WorkHourForm
+            clients={clients}
+            onCancel={handleCancelEdit}
+            workHour={{
+              ...editingWorkHour,
+              isInvoiced: isWorkHourInvoiced(editingWorkHour),
+            }}
+          />
         )}
       </FormModal>
     </PageContainer>

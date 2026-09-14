@@ -114,7 +114,7 @@ export function shouldDisableGravatar(): boolean {
 
   const failureRate = metrics.gravatarFails / totalGravatarAttempts;
 
-  return failureRate > 0.8; // Disable if failure rate > 80%
+  return failureRate >= 0.8; // Disable if failure rate is 80% or higher
 }
 
 /**

@@ -1,11 +1,10 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
 import InvoicesPage from "../page";
 
-import type { Client } from "@/services/clients";
-import type { Invoice } from "@/services/invoices";
+import type { Client } from "@/features/clients";
+import type { Invoice } from "@/features/invoices";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -18,77 +17,6 @@ jest.mock("sonner", () => ({
     success: jest.fn(),
     error: jest.fn(),
   },
-}));
-
-// Mock components
-jest.mock("@/components/invoices/create-invoice-form", () => ({
-  CreateInvoiceForm: ({ onSuccess }: { onSuccess: () => void }) => (
-    <div data-testid="create-invoice-form">
-      <button onClick={onSuccess}>Submit</button>
-    </div>
-  ),
-}));
-
-jest.mock("@/components/invoices/edit-invoice-form", () => ({
-  EditInvoiceForm: ({
-    invoice,
-    onSuccess,
-    onCancel,
-  }: {
-    invoice: Invoice;
-    onSuccess: () => void;
-    onCancel: () => void;
-  }) => (
-    <div data-testid="edit-invoice-form">
-      <p>Invoice: {invoice.number}</p>
-      <button onClick={onSuccess}>Save</button>
-      <button onClick={onCancel}>Cancel</button>
-    </div>
-  ),
-}));
-
-jest.mock("@/components/invoices/invoice-upload-modal", () => ({
-  InvoiceUploadModal: ({
-    invoice,
-    onSuccess,
-    onClose,
-  }: {
-    invoice: Invoice;
-    onSuccess: () => void;
-    onClose: () => void;
-  }) => (
-    <div data-testid="invoice-upload-modal">
-      <p>Upload for: {invoice.number}</p>
-      <button onClick={onSuccess}>Upload</button>
-      <button onClick={onClose}>Close</button>
-    </div>
-  ),
-}));
-
-jest.mock("@/components/invoices/invoice-card", () => ({
-  InvoiceCard: ({
-    number,
-    clientName,
-    amount,
-    status,
-    onEdit,
-    onDelete,
-    onUpload,
-  }: any) => (
-    <div data-testid="invoice-card">
-      <p>Invoice: {number}</p>
-      <p>Client: {clientName}</p>
-      <p>Amount: ${amount}</p>
-      <p>Status: {status}</p>
-      <button onClick={onEdit}>Edit</button>
-      <button onClick={onDelete}>Delete</button>
-      <button onClick={onUpload}>Upload</button>
-    </div>
-  ),
-}));
-
-jest.mock("@/components/invoices/invoices-big-stats", () => ({
-  InvoicesBigStats: () => <div data-testid="invoices-big-stats">Stats</div>,
 }));
 
 jest.mock("@/components/layout/page-container", () => ({
@@ -174,8 +102,67 @@ const mockInvoices: Invoice[] = [
   },
 ];
 
-// Mock services
-jest.mock("@/services/invoices", () => ({
+// Mock the invoices feature barrel: stub the components + services this test
+// controls, keep the real InvoiceSearchFilters/useInvoiceFilters implementation.
+jest.mock("@/features/invoices", () => ({
+  ...jest.requireActual("@/features/invoices"),
+  CreateInvoiceForm: ({ onSuccess }: { onSuccess: () => void }) => (
+    <div data-testid="create-invoice-form">
+      <button onClick={onSuccess}>Submit</button>
+    </div>
+  ),
+  EditInvoiceForm: ({
+    invoice,
+    onSuccess,
+    onCancel,
+  }: {
+    invoice: Invoice;
+    onSuccess: () => void;
+    onCancel: () => void;
+  }) => (
+    <div data-testid="edit-invoice-form">
+      <p>Invoice: {invoice.number}</p>
+      <button onClick={onSuccess}>Save</button>
+      <button onClick={onCancel}>Cancel</button>
+    </div>
+  ),
+  InvoiceUploadModal: ({
+    invoice,
+    onSuccess,
+    onClose,
+  }: {
+    invoice: Invoice;
+    onSuccess: () => void;
+    onClose: () => void;
+  }) => (
+    <div data-testid="invoice-upload-modal">
+      <p>Upload for: {invoice.number}</p>
+      <button onClick={onSuccess}>Upload</button>
+      <button onClick={onClose}>Close</button>
+    </div>
+  ),
+  InvoiceCard: ({
+    id,
+    number,
+    clientName,
+    amount,
+    status,
+    onEdit,
+    onDelete,
+    onUpload,
+  }: any) => (
+    <div data-testid="invoice-card">
+      <p>Invoice: {number}</p>
+      <p>Client: {clientName}</p>
+      <p>Amount: ${amount}</p>
+      <p>Status: {status}</p>
+      <button onClick={onEdit}>Edit</button>
+      <button onClick={() => onDelete(id)}>Delete</button>
+      <button onClick={onUpload}>Upload</button>
+    </div>
+  ),
+  InvoicesBigStats: () => <div data-testid="invoices-big-stats">Stats</div>,
+  InvoicesPageSkeleton: () => <div data-testid="loading-skeleton" />,
   useInvoices: jest.fn(() => ({
     data: mockInvoices,
     isLoading: false,
@@ -186,7 +173,7 @@ jest.mock("@/services/invoices", () => ({
   })),
 }));
 
-jest.mock("@/services/clients", () => ({
+jest.mock("@/features/clients", () => ({
   useClients: jest.fn(() => ({
     data: mockClients,
     isLoading: false,
@@ -196,12 +183,21 @@ jest.mock("@/services/clients", () => ({
 describe("InvoicesPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Restore the default (some tests below override it via mockReturnValue,
+    // which clearAllMocks does not undo)
+    const { useInvoices } = require("@/features/invoices");
+
+    useInvoices.mockReturnValue({
+      data: mockInvoices,
+      isLoading: false,
+      error: null,
+    });
   });
 
   it("should render loading skeleton when loading", () => {
-    const { useInvoices } = require("@/services/invoices");
+    const { useInvoices } = require("@/features/invoices");
     useInvoices.mockReturnValue({
-      data: null,
+      data: undefined,
       isLoading: true,
       error: null,
     });
@@ -211,9 +207,9 @@ describe("InvoicesPage", () => {
   });
 
   it("should render error state when there is an error", () => {
-    const { useInvoices } = require("@/services/invoices");
+    const { useInvoices } = require("@/features/invoices");
     useInvoices.mockReturnValue({
-      data: null,
+      data: undefined,
       isLoading: false,
       error: new Error("Test error"),
     });
@@ -236,16 +232,17 @@ describe("InvoicesPage", () => {
     // Check invoice cards
     const cards = screen.getAllByTestId("invoice-card");
     expect(cards).toHaveLength(2);
-    expect(cards[0]).toHaveTextContent("Invoice: INV-001");
-    expect(cards[0]).toHaveTextContent("Client: John Doe");
-    expect(cards[0]).toHaveTextContent("Amount: $1000");
-    expect(cards[1]).toHaveTextContent("Invoice: INV-002");
-    expect(cards[1]).toHaveTextContent("Client: Jane Smith");
-    expect(cards[1]).toHaveTextContent("Amount: $1500");
+    // Default sort is newest first, so INV-002 (2024-03-02) leads INV-001 (2024-03-01)
+    expect(cards[0]).toHaveTextContent("Invoice: INV-002");
+    expect(cards[0]).toHaveTextContent("Client: Jane Smith");
+    expect(cards[0]).toHaveTextContent("Amount: $1500");
+    expect(cards[1]).toHaveTextContent("Invoice: INV-001");
+    expect(cards[1]).toHaveTextContent("Client: John Doe");
+    expect(cards[1]).toHaveTextContent("Amount: $1000");
   });
 
   it("should handle invoice deletion", async () => {
-    const { useDeleteInvoice } = require("@/services/invoices");
+    const { useDeleteInvoice } = require("@/features/invoices");
     const mockMutateAsync = jest.fn();
     useDeleteInvoice.mockReturnValue({
       mutateAsync: mockMutateAsync,
@@ -253,16 +250,20 @@ describe("InvoicesPage", () => {
 
     render(<InvoicesPage />);
 
-    // Find and click delete button
+    // Find and click delete button (default sort is newest first, so the
+    // first card is invoice "2")
     const deleteButtons = screen.getAllByText("Delete");
     fireEvent.click(deleteButtons[0]);
 
     // Check if delete mutation was called
-    expect(mockMutateAsync).toHaveBeenCalledWith("1");
+    expect(mockMutateAsync).toHaveBeenCalledWith("2");
 
-    // Check toast
+    // Check toast (handleDelete awaits the mutation before toasting)
     const { toast } = require("sonner");
-    expect(toast.success).toHaveBeenCalledWith("deleteSuccess");
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("deleteSuccess");
+    });
   });
 
   it("should handle invoice edit", () => {
@@ -287,13 +288,14 @@ describe("InvoicesPage", () => {
   it("should handle invoice upload", () => {
     render(<InvoicesPage />);
 
-    // Find and click upload button
+    // Find and click upload button (default sort is newest first, so the
+    // first card is invoice "2" / INV-002)
     const uploadButtons = screen.getAllByText("Upload");
     fireEvent.click(uploadButtons[0]);
 
     // Check if upload modal is open
     expect(screen.getByTestId("invoice-upload-modal")).toBeInTheDocument();
-    expect(screen.getByText("Upload for: INV-001")).toBeInTheDocument();
+    expect(screen.getByText("Upload for: INV-002")).toBeInTheDocument();
 
     // Close modal
     const closeButton = screen.getByText("Close");
@@ -306,7 +308,7 @@ describe("InvoicesPage", () => {
   });
 
   it("should show empty state when no invoices", () => {
-    const { useInvoices } = require("@/services/invoices");
+    const { useInvoices } = require("@/features/invoices");
     useInvoices.mockReturnValue({
       data: [],
       isLoading: false,

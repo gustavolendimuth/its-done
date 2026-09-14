@@ -17,7 +17,6 @@ const config = {
   testPathIgnorePatterns: [
     "<rootDir>/.next/",
     "<rootDir>/node_modules/",
-    "<rootDir>/cypress/",
   ],
   collectCoverageFrom: [
     "src/**/*.{js,jsx,ts,tsx}",

@@ -1,4 +1,3 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
 import {
   startOfToday,
@@ -13,19 +12,7 @@ import {
 
 // Mock next-intl useTranslations hook BEFORE importing component
 jest.mock("next-intl", () => ({
-  useTranslations: () => {
-    const translations: Record<string, string> = {
-      allTime: "All Time",
-      today: "Today",
-      thisWeek: "This Week",
-      thisMonth: "This Month",
-      last7Days: "Last 7 days",
-      last30Days: "Last 30 days",
-      selectPeriod: "Select Period",
-    };
-
-    return (key: string) => translations[key] || key;
-  },
+  useTranslations: () => (key: string) => key,
 }));
 
 // Mock DateRangePicker component

@@ -1,7 +1,7 @@
 "use client";
 
-import { LoginForm } from "@/components/auth/login-form";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { LoginForm } from "@/features/auth";
 
 export default function LoginPage() {
   return (

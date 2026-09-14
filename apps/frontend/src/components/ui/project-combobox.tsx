@@ -4,11 +4,10 @@ import { Folder } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { ProjectCreateDialog } from "@/components/projects/project-create-dialog";
 import { EntityCombobox } from "@/components/ui/entity-combobox";
-import { useProjects } from "@/services/projects";
+import { ProjectCreateDialog, useProjects } from "@/features/projects";
 
-import type { Project } from "@/services/projects";
+import type { Project } from "@/features/projects";
 
 interface ProjectComboboxProps {
   value?: string;
