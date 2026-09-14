@@ -89,6 +89,79 @@ describe('WorkHoursService - create()', () => {
     expect(prismaMock.workHour.create).toHaveBeenCalled();
     expect(result).toEqual({ id: 'wh2', clientId: 'c1', projectId: null });
   });
+
+  it('persists startTime and endTime when provided', async () => {
+    prismaMock.workHour.create.mockResolvedValueOnce({ id: 'wh3' });
+
+    const dto = {
+      date: new Date('2026-01-01'),
+      hours: 3.5,
+      clientId: 'c1',
+      startTime: '09:00',
+      endTime: '12:30',
+    } as any;
+
+    await service.create(userId, dto);
+
+    expect(prismaMock.workHour.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          startTime: '09:00',
+          endTime: '12:30',
+        }),
+      }),
+    );
+  });
+
+  it('persists null startTime and endTime when only hours is provided', async () => {
+    prismaMock.workHour.create.mockResolvedValueOnce({ id: 'wh4' });
+
+    const dto = {
+      date: new Date('2026-01-01'),
+      hours: 1,
+      clientId: 'c1',
+    } as any;
+
+    await service.create(userId, dto);
+
+    expect(prismaMock.workHour.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          startTime: undefined,
+          endTime: undefined,
+        }),
+      }),
+    );
+  });
+
+  it('rejects creation when only one of startTime/endTime is provided', async () => {
+    const dto = {
+      date: new Date('2026-01-01'),
+      hours: 1,
+      clientId: 'c1',
+      startTime: '09:00',
+    } as any;
+
+    await expect(service.create(userId, dto)).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(prismaMock.workHour.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects creation when endTime is not after startTime', async () => {
+    const dto = {
+      date: new Date('2026-01-01'),
+      hours: 1,
+      clientId: 'c1',
+      startTime: '12:00',
+      endTime: '12:00',
+    } as any;
+
+    await expect(service.create(userId, dto)).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(prismaMock.workHour.create).not.toHaveBeenCalled();
+  });
 });
 
 describe('WorkHoursService - update()', () => {
@@ -161,5 +234,50 @@ describe('WorkHoursService - update()', () => {
 
     expect(prismaMock.workHour.update).toHaveBeenCalled();
     expect(result).toEqual({ id: workHourId, hours: 2 });
+  });
+
+  it('allows patching a single time field when the row already has both', async () => {
+    prismaMock.workHour.findFirst.mockResolvedValueOnce({
+      id: workHourId,
+      userId,
+      startTime: '09:00',
+      endTime: '12:30',
+      invoiceWorkHours: [],
+    });
+    prismaMock.workHour.update.mockResolvedValueOnce({ id: workHourId });
+
+    await service.update(userId, workHourId, { startTime: '10:00' } as any);
+
+    expect(prismaMock.workHour.update).toHaveBeenCalled();
+  });
+
+  it('rejects patching a single time field when the row has neither', async () => {
+    prismaMock.workHour.findFirst.mockResolvedValueOnce({
+      id: workHourId,
+      userId,
+      startTime: null,
+      endTime: null,
+      invoiceWorkHours: [],
+    });
+
+    await expect(
+      service.update(userId, workHourId, { startTime: '10:00' } as any),
+    ).rejects.toThrow(BadRequestException);
+    expect(prismaMock.workHour.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects an update that makes the merged endTime not after startTime', async () => {
+    prismaMock.workHour.findFirst.mockResolvedValueOnce({
+      id: workHourId,
+      userId,
+      startTime: '09:00',
+      endTime: '17:00',
+      invoiceWorkHours: [],
+    });
+
+    await expect(
+      service.update(userId, workHourId, { endTime: '08:00' } as any),
+    ).rejects.toThrow(BadRequestException);
+    expect(prismaMock.workHour.update).not.toHaveBeenCalled();
   });
 });

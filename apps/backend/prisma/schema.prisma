@@ -34,6 +34,8 @@ model WorkHour {
   date        DateTime
   description String?
   hours       Float
+  startTime   String?
+  endTime     String?
   userId      String
   clientId    String
   projectId   String?

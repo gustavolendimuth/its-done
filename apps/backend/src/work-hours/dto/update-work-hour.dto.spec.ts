@@ -38,4 +38,28 @@ describe('UpdateWorkHourDto', () => {
 
     expect(dto.date).toBeInstanceOf(Date);
   });
+
+  it('accepts a valid startTime/endTime pair', async () => {
+    const dto = plainToInstance(UpdateWorkHourDto, {
+      startTime: '09:00',
+      endTime: '12:30',
+    });
+    const errors = await validate(dto);
+
+    expect(
+      errors.filter((e) => ['startTime', 'endTime'].includes(e.property)),
+    ).toHaveLength(0);
+  });
+
+  it('rejects a startTime/endTime not matching HH:mm', async () => {
+    const startErrors = await validate(
+      plainToInstance(UpdateWorkHourDto, { startTime: '9h' }),
+    );
+    expect(startErrors.some((e) => e.property === 'startTime')).toBe(true);
+
+    const endErrors = await validate(
+      plainToInstance(UpdateWorkHourDto, { endTime: '25:00' }),
+    );
+    expect(endErrors.some((e) => e.property === 'endTime')).toBe(true);
+  });
 });
