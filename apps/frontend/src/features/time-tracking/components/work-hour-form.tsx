@@ -387,6 +387,7 @@ export function WorkHourForm({
           {activeMutation.isPending ? (
             <>
               <svg
+                data-testid="save-spinner"
                 className="animate-spin -ml-1 mr-2 h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"

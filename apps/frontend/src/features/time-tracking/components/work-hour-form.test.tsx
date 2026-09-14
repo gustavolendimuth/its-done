@@ -270,6 +270,7 @@ describe("WorkHourForm", () => {
         data: { hours: 2 },
       })
     );
+    expect(mockUpdateMutateAsync).toHaveBeenCalledTimes(1);
     expect(mockCreateMutateAsync).not.toHaveBeenCalled();
   });
 
@@ -313,6 +314,7 @@ describe("WorkHourForm", () => {
     fireEvent.click(screen.getByTestId("field-hours-view"));
 
     expect(screen.getByRole("button", { name: /saving/ })).toBeDisabled();
+    expect(screen.getByTestId("save-spinner")).toBeInTheDocument();
   });
 
   it("edit mode: fields return to view mode with updated values after a successful save", async () => {
