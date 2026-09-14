@@ -33,6 +33,7 @@ jest.mock("sonner", () => ({
 const mockSettings = {
   alertHours: 160,
   notificationEmail: "test@example.com",
+  roundingIncrementMinutes: 0,
 };
 
 interface UpdateSettingsOptions {
@@ -93,6 +94,7 @@ describe("SettingsForm", () => {
 
     expect(alertHoursInput).toHaveValue(160);
     expect(emailInput).toHaveValue("test@example.com");
+    expect(screen.getByText("roundingIncrementOff")).toBeInTheDocument();
   });
 
   it("should validate alert hours input", async () => {
@@ -130,6 +132,7 @@ describe("SettingsForm", () => {
         {
           alertHours: 180,
           notificationEmail: "test@example.com",
+          roundingIncrementMinutes: 0,
         },
         expect.any(Object)
       );
@@ -159,6 +162,7 @@ describe("SettingsForm", () => {
         {
           alertHours: 160,
           notificationEmail: "new@example.com",
+          roundingIncrementMinutes: 0,
         },
         expect.any(Object)
       );
@@ -173,6 +177,7 @@ describe("SettingsForm", () => {
         {
           alertHours: 160,
           notificationEmail: undefined,
+          roundingIncrementMinutes: 0,
         },
         expect.any(Object)
       );

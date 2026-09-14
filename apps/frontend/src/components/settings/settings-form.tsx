@@ -1,10 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Settings, Mail, Clock, Save } from "lucide-react";
+import { Loader2, Settings, Mail, Clock, Save, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -19,7 +19,19 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useSettings, useUpdateSettings } from "@/services/settings";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ALLOWED_ROUNDING_INCREMENTS,
+  useSettings,
+  useUpdateSettings,
+  type RoundingIncrementMinutes,
+} from "@/services/settings";
 
 
 const settingsSchema = z.object({
@@ -32,6 +44,14 @@ const settingsSchema = z.object({
     .email("Invalid email address")
     .optional()
     .or(z.literal("")),
+  roundingIncrementMinutes: z.union([
+    z.literal(0),
+    z.literal(5),
+    z.literal(10),
+    z.literal(15),
+    z.literal(30),
+    z.literal(60),
+  ]),
 });
 
 type SettingsFormData = z.infer<typeof settingsSchema>;
@@ -45,12 +65,14 @@ export function SettingsForm() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isDirty },
   } = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       alertHours: 160,
       notificationEmail: "",
+      roundingIncrementMinutes: 0,
     },
   });
 
@@ -62,6 +84,7 @@ export function SettingsForm() {
       reset({
         alertHours: settings.alertHours,
         notificationEmail: settings.notificationEmail || "",
+        roundingIncrementMinutes: settings.roundingIncrementMinutes ?? 0,
       });
     }
   }, [settings, reset]);
@@ -75,6 +98,7 @@ export function SettingsForm() {
       {
         alertHours: data.alertHours,
         notificationEmail: data.notificationEmail || undefined,
+        roundingIncrementMinutes: data.roundingIncrementMinutes,
       },
       {
         onSuccess: () => {
@@ -181,6 +205,54 @@ export function SettingsForm() {
               )}
               <p className="text-sm text-muted-foreground">
                 {t("notificationEmailOptional")}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="roundingIncrementMinutes"
+                className="flex items-center gap-2"
+              >
+                <Timer className="h-4 w-4" />
+                {t("roundingIncrement")}
+              </Label>
+              <Controller
+                name="roundingIncrementMinutes"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={String(field.value)}
+                    onValueChange={(value) =>
+                      field.onChange(
+                        Number(value) as RoundingIncrementMinutes
+                      )
+                    }
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger id="roundingIncrementMinutes">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALLOWED_ROUNDING_INCREMENTS.map((increment) => (
+                        <SelectItem key={increment} value={String(increment)}>
+                          {increment === 0
+                            ? t("roundingIncrementOff")
+                            : t("roundingIncrementMinutesValue", {
+                                minutes: increment,
+                              })}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.roundingIncrementMinutes && (
+                <p className="text-sm text-destructive">
+                  {errors.roundingIncrementMinutes.message}
+                </p>
+              )}
+              <p className="text-sm text-muted-foreground">
+                {t("roundingIncrementDescription")}
               </p>
             </div>
 

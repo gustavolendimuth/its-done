@@ -32,6 +32,7 @@ export class SettingsService {
         userId,
         alertHours: 160,
         notificationEmail: null,
+        roundingIncrementMinutes: 0,
       };
     }
 
@@ -50,6 +51,8 @@ export class SettingsService {
       const createData: CreateSettingsDto = {
         alertHours: updateSettingsDto.alertHours ?? 160,
         notificationEmail: updateSettingsDto.notificationEmail,
+        roundingIncrementMinutes:
+          updateSettingsDto.roundingIncrementMinutes ?? 0,
       };
       updatedSettings = await this.create(userId, createData);
     } else {
