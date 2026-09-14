@@ -272,12 +272,16 @@ export class WorkHoursService {
 
     const totalHours = workHours.reduce((sum, wh) => sum + wh.hours, 0);
 
-    // Calculate average hours per day
-    const dateRange =
-      from && to
-        ? Math.ceil((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1
-        : 1;
-    const averageHoursPerDay = totalHours / dateRange;
+    // Average per day worked: divide by the number of distinct days that
+    // actually have entries, not by the calendar span of the filter. Using the
+    // calendar span made the "all time" range (which starts in the year 2000)
+    // collapse the average to ~0, and an unbounded query inflate it to the full
+    // total. This matches the "per working day" label shown in the UI and the
+    // same calculation already used by reports.service.
+    const workedDays = new Set(
+      workHours.map((wh) => wh.date.toISOString().split('T')[0]),
+    ).size;
+    const averageHoursPerDay = workedDays > 0 ? totalHours / workedDays : 0;
 
     // Count unique clients
     const uniqueClients = new Set(workHours.map((wh) => wh.clientId));

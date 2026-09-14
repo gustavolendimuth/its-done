@@ -40,7 +40,10 @@ export function getApiUrl(): string {
     return false;
   };
 
-  let chosen = process.env.NEXT_PUBLIC_API_URL;
+  // API_URL (server-only, e.g. Docker/Railway internal network) takes priority
+  // when running server-side; it's never inlined into the browser bundle since
+  // it lacks the NEXT_PUBLIC_ prefix, so client-side this is always undefined.
+  let chosen = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
   if (isInvalid(chosen)) chosen = "https://backend-its-done.up.railway.app";
 
   // Ensure we always target the backend API prefix (/api)

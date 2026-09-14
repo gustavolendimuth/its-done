@@ -26,11 +26,35 @@ import AdminUsers from "./users";
 
 export default function AdminPage() {
   const t = useTranslations("admin");
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState("overview");
   const { data: stats, isLoading } = useSystemStats();
 
-  // Redirecionar se não for admin
+  // Aguarda a sessão carregar antes de decidir sobre o acesso. Sem isso, o
+  // primeiro render (status "loading", session undefined) dispararia o
+  // redirect e o admin nunca conseguiria abrir a página.
+  if (status === "loading") {
+    return (
+      <PageContainer>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-4 w-[100px]" />
+                <Skeleton className="h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-7 w-[60px]" />
+                <Skeleton className="h-3 w-[80px] mt-1" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </PageContainer>
+    );
+  }
+
+  // Redirecionar se não for admin (somente após a sessão estar resolvida)
   if (session?.user?.role !== "ADMIN") {
     redirect("/dashboard");
   }

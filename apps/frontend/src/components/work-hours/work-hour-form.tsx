@@ -4,7 +4,6 @@ import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import InputMask from "react-input-mask";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -18,6 +17,17 @@ import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { Client } from "@/services/clients";
 import { useCreateTimeEntry } from "@/services/time-entries";
+
+/**
+ * Máscara de tempo "HH:mm" a partir dos dígitos digitados. Substitui o antigo
+ * react-input-mask (mask="99:99"), incompatível com o React 19 por depender de
+ * ReactDOM.findDOMNode.
+ */
+function formatHHmm(input: string): string {
+  const digits = String(input ?? "").replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+}
 
 const workHourFormSchema = z.object({
   date: z.date({
@@ -200,21 +210,15 @@ export function WorkHourForm({
           name="hours"
           control={control}
           render={({ field }) => (
-            <InputMask
-              mask="99:99"
-              value={field.value}
-              onChange={field.onChange}
-              maskChar={null}
-            >
-              {(inputProps: any) => (
-                <Input
-                  {...inputProps}
-                  type="text"
-                  placeholder="HH:mm"
-                  className="font-mono"
-                />
-              )}
-            </InputMask>
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="HH:mm"
+              className="font-mono"
+              value={field.value ?? ""}
+              onChange={(e) => field.onChange(formatHHmm(e.target.value))}
+              onBlur={field.onBlur}
+            />
           )}
         />
         {errors.hours && (
