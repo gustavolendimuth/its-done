@@ -5,11 +5,13 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { InAppNotificationsModule } from '../in-app-notifications/in-app-notifications.module';
 import { HoursThresholdCheckerService } from './services/hours-threshold-checker.service';
 import { DraftInvoiceService } from './services/draft-invoice.service';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
     NotificationsModule,
     InAppNotificationsModule,
+    forwardRef(() => SettingsModule),
   ],
   controllers: [WorkHoursController],
   providers: [
