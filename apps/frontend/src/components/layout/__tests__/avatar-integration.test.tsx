@@ -1,4 +1,3 @@
-import { jest } from "@jest/globals";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";

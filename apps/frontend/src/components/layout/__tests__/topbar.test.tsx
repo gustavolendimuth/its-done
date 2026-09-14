@@ -1,4 +1,3 @@
-import { jest } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 

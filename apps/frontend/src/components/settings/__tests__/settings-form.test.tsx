@@ -1,4 +1,3 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
@@ -44,6 +43,7 @@ interface UpdateSettingsOptions {
 const mockUpdateSettings = jest.fn();
 
 jest.mock("@/services/settings", () => ({
+  ALLOWED_ROUNDING_INCREMENTS: [0, 5, 10, 15, 30, 60],
   useSettings: jest.fn(() => ({
     data: mockSettings,
     isLoading: false,
@@ -57,6 +57,12 @@ jest.mock("@/services/settings", () => ({
 describe("SettingsForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const { useSettings } = require("@/services/settings");
+    useSettings.mockReturnValue({
+      data: mockSettings,
+      isLoading: false,
+      error: null,
+    });
   });
 
   it("should render loading state", () => {
@@ -94,7 +100,9 @@ describe("SettingsForm", () => {
 
     expect(alertHoursInput).toHaveValue(160);
     expect(emailInput).toHaveValue("test@example.com");
-    expect(screen.getByText("roundingIncrementOff")).toBeInTheDocument();
+    // Radix Select renders the selected label in both the visible trigger and
+    // a visually-hidden native <select> fallback, so more than one match is expected.
+    expect(screen.getAllByText("roundingIncrementOff").length).toBeGreaterThan(0);
   });
 
   it("should validate alert hours input", async () => {

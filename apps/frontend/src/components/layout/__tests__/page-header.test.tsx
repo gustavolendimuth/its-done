@@ -1,4 +1,3 @@
-import { jest } from "@jest/globals";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Settings, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";

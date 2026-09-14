@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import { jest } from "@jest/globals";
 import { ReactNode } from "react";
 
 import api from "@/lib/axios";
