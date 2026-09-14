@@ -71,13 +71,14 @@ Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/
 **C5** - Em modo edição (`workHour` presente, não faturada), o modal abre com `date`, `hours` e `description` como inputs já editáveis e pré-preenchidos (o mesmo `date-picker`/input `HH:mm`/textarea de sempre), e os botões "Salvar" (`saveChanges`) e "Cancelar" (`common.cancel`) visíveis desde a abertura
 Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/work-hour-form.test.tsx -t "edit mode: renders always-editable inputs prefilled from workHour, with Save and Cancel always visible"`
 
-**C6** - Quando `workHour.isInvoiced` é `true`, os inputs `date`/`hours`/`description` e o botão "Salvar" ficam desabilitados, e o modal mostra um texto fixo igual a `t("cannotEditInvoiced")`
+**C6** - Quando `workHour.isInvoiced` é `true`, o campo `date` (wrapper `data-testid="date-field-wrapper"`, `pointer-events-none`) e os inputs `hours`/`description` (`disabled`) e o botão "Salvar" ficam desabilitados, e o modal mostra um texto fixo igual a `t("cannotEditInvoiced")`
 Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/work-hour-form.test.tsx -t "edit mode: invoiced work hour disables every field and the save button, and shows the cannotEditInvoiced notice"`
 
 **C7** - Clicar em "Cancelar" reverte os campos pro último valor salvo (ou ao valor original, se nenhum salvamento aconteceu ainda) e chama `onCancel`
 Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/work-hour-form.test.tsx -t "edit mode: clicking Cancel discards the typed changes and calls onCancel"`
+Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/work-hour-form.test.tsx -t "edit mode: after a save, Cancel reverts to the last saved value rather than the original one"`
 
-### S3 - Salvar as alterações · 2 files · 18 KB · ~5k
+### S3 - Salvar as alterações · 3 files · 22 KB · ~6k
 
 **C10** - O clique em "Salvar" chama `useUpdateTimeEntry` uma única vez com `PATCH /work-hours/:id` contendo somente os campos cujo valor mudou, dentre `date`, `hours`, `description`
 Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/work-hour-form.test.tsx -t "edit mode: save sends only the field that was changed"`
@@ -87,6 +88,7 @@ Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/
 
 **C12** - Given sucesso na mutação, os inputs mantêm os novos valores salvos, o `Alert` de sucesso já existente aparece, e o modal permanece aberto (não fecha sozinho)
 Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/work-hour-form.test.tsx -t "edit mode: a successful save keeps the new value in the input and shows the success alert"`
+Proof: `cd apps/frontend && npx jest --ci "src/app/\[locale\]/\(authenticated\)/work-hours/__tests__/edit-modal-stays-open.test.tsx" -t "keeps the edit modal open after a successful save"`
 
 **C13** - If a mutação retorna erro, os inputs mantêm os valores digitados, e o `Alert` de erro já existente exibe a mensagem
 Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/work-hour-form.test.tsx -t "edit mode: a failed save keeps the typed value and shows the error alert"`

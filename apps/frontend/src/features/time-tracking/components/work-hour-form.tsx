@@ -204,6 +204,7 @@ export function WorkHourForm({
           {t("date")} *
         </Label>
         <div
+          data-testid="date-field-wrapper"
           className={
             fieldsDisabled ? "pointer-events-none opacity-70" : undefined
           }

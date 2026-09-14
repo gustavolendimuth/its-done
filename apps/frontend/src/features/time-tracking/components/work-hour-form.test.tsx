@@ -198,6 +198,36 @@ describe("WorkHourForm", () => {
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
+  it("edit mode: after a save, Cancel reverts to the last saved value rather than the original one", async () => {
+    mockUpdateMutateAsync.mockResolvedValueOnce({ id: "wh-1" });
+    const onCancel = jest.fn();
+
+    renderWithQueryClient(
+      <WorkHourForm
+        clients={mockClients}
+        workHour={editableWorkHour}
+        onCancel={onCancel}
+      />
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("HH:mm"), {
+      target: { value: "0200" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "saveChanges" }));
+    await waitFor(() => expect(mockUpdateMutateAsync).toHaveBeenCalled());
+    expect(screen.getByPlaceholderText("HH:mm")).toHaveValue("02:00");
+
+    // Edits again after the save, then cancels - should fall back to the
+    // last *saved* value (02:00), not the original workHour value (01:30).
+    fireEvent.change(screen.getByPlaceholderText("HH:mm"), {
+      target: { value: "0500" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "cancel" }));
+
+    expect(screen.getByPlaceholderText("HH:mm")).toHaveValue("02:00");
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
   it("edit mode: invoiced work hour disables every field and the save button, and shows the cannotEditInvoiced notice", () => {
     renderWithQueryClient(
       <WorkHourForm
@@ -207,6 +237,9 @@ describe("WorkHourForm", () => {
     );
 
     expect(screen.getByText("cannotEditInvoiced")).toBeInTheDocument();
+    expect(screen.getByTestId("date-field-wrapper")).toHaveClass(
+      "pointer-events-none"
+    );
     expect(screen.getByPlaceholderText("HH:mm")).toBeDisabled();
     expect(screen.getByDisplayValue("Existing work")).toBeDisabled();
     expect(

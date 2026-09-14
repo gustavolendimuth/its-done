@@ -1,66 +1,118 @@
-# Work hours - row click opens modal, per-field edit Verification
+# Work hours - row click opens modal, always-editable inputs Verification
 
-**Verdict**: PASS
+**Verdict**: PASS (3 non-blocking gaps - see below)
 **Profile**: light
-**Diff range**: 5e29a27..HEAD
-**Round**: 1 - full
+**Diff range (this round's fix)**: 9d58554..HEAD
+**Diff range (full feature, context only)**: 5e29a27..HEAD
+**Round**: 2 - scoped
 **Verifier**: independent sub-agent (author != verifier)
+**HEAD**: f2e4eab (previous Round 1 HEAD: 5af6194)
 
-## Profile-floor skips (light)
+## What changed since Round 1
 
-- **Step 1 (binding sources)**: skipped. The checklist's `Sources` section names only
-  `.tasks/work-hours-row-click-edit.md` (explicitly not binding per the task doc's own text -
-  "there is no design/contract source in this feature") and "conversation". No binding
-  design/contract exists to open and compare against.
-- **Coverage-join recompute** (part of step 3): skipped - `standard`/`ui` only.
-- **Test-policy row judgment** (part of step 3): skipped - the checklist carries no `## Test
-  policy` section (confirmed by reading the full checklist file).
+Round 1 (5af6194) verified a view-per-field/edit-per-field design (checks C5-C9, C14) PASS
+15/15. The user disliked that UX after seeing it built; the checklist and task doc were revised
+(see the "Revisão" notes at the top of `.checks/work-hours-row-click-edit.md` and
+`.tasks/work-hours-row-click-edit.md`) to always-editable inputs + a "Cancelar" button. C5-C9 and
+C14 were replaced by new C5, C6, C7; C10-C13 and C15 kept the same underlying claim (wording
+adjusted only - no more "view mode" language). Commit 9d58554 (already at Round 1's HEAD lineage)
+tightened C10/C11 assertions; commit `f2e4eab` (`fix(work-hours): revert edit modal to
+always-editable inputs + Cancel`) is the actual revision diff for this round, touching
+`work-hour-form.tsx`, `work-hour-form.test.tsx`, and `page.tsx`.
+
+The checklist now has 12 checks total (C1-C7, C10-C13, C15).
+
+## Profile-floor skips (light, unchanged from Round 1)
+
+- **Step 1 (binding sources)**: skipped, `carried from 5af6194`. No binding design/contract
+  exists in this feature (checklist's `Sources` names only the task doc and "conversation");
+  re-checked that the current `Sources`/task doc still make no binding-source claim - confirmed,
+  still none.
+- **Coverage-join recompute**: skipped - `standard`/`ui` only.
+- **Test-policy row judgment**: skipped - checklist carries no `## Test policy` section
+  (confirmed by reading the current full checklist file).
 - **Step 4 (fault injection)**: skipped - `standard`/`ui` only.
-
-Everything else in step 2 and step 3 ran in full.
 
 ## Checks
 
-| Check | Claim | Proof run | Evidence | Result |
-|---|---|---|---|---|
-| C1 | Click on row (outside action cells) calls same callback as edit, with the work hour id | `work-hours-table.test.tsx -t "opens the row's modal when a non-invoiced row is clicked outside the action cell"` exit 0 | `work-hours-table.test.tsx:39-40` - `fireEvent.click(screen.getByTestId("work-hour-row")); expect(onEdit).toHaveBeenCalledWith("wh-1")` | PASS |
-| C2 | Edit icon button no longer rendered in the actions cell | `-t "does not render an edit icon button"` exit 0 | `work-hours-table.test.tsx:54-56` - `expect(screen.queryByRole("button", { name: "edit workHour" })).not.toBeInTheDocument()` | PASS |
-| C3 | Delete button click does not open the modal (no propagation to `TableRow`) | `-t "does not trigger the row's onEdit when the delete button is clicked"` exit 0 | `work-hours-table.test.tsx:74-75` - `fireEvent.click(screen.getByTestId("delete-button")); expect(onEdit).not.toHaveBeenCalled()` | PASS |
-| C4 | `TableRow` has `role="button"`/`tabIndex={0}`; Enter/Space call the same callback as click | `-t "opens the row's modal when Enter or Space is pressed on a focused row"` exit 0 | `work-hours-table.test.tsx:91-99` - attribute checks + `fireEvent.keyDown(row,{key:"Enter"})`/`{key:" "}` each followed by `expect(onEdit).toHaveBeenCalledWith("wh-1")` | PASS |
-| C5 | Edit mode opens in view mode: `field-*-view` testids, no editable inputs, no Salvar button | `work-hour-form.test.tsx -t "edit mode: opens in view mode with no editable inputs and no save button"` exit 0 | `work-hour-form.test.tsx:168-183` - view-testid text-content checks + `queryByTestId("date-picker")`/`queryByPlaceholderText("HH:mm")`/`queryByPlaceholderText("descriptionPlaceholder")`/`queryByRole("button",{name:"saveChanges"})` all `.not.toBeInTheDocument()` | PASS |
-| C6 | Clicking `field-date-view` reveals `date-picker` + Salvar button | `-t "edit mode: clicking the date field reveals the date picker and the save button"` exit 0 | `work-hour-form.test.tsx:193-196` - `expect(screen.getByTestId("date-picker")).toHaveValue("2026-01-05")` + `getByRole("button",{name:"saveChanges"})` present | PASS |
-| C7 | Clicking `field-hours-view` reveals `HH:mm` input + Salvar button | `-t "edit mode: clicking the hours field reveals the HH:mm input and the save button"` exit 0 | `work-hour-form.test.tsx:206-209` - `getByPlaceholderText("HH:mm")).toHaveValue("01:30")` + Salvar button present | PASS |
-| C8 | Opening a second field keeps the first open and shows exactly one Salvar button | `-t "edit mode: editing a second field keeps the first editable and shows exactly one save button"` exit 0 | `work-hour-form.test.tsx:220-226` - both inputs present + `getAllByRole("button",{name:"saveChanges"})).toHaveLength(1)` | PASS |
-| C9 | Invoiced work hour: fields stay read-only, fixed `cannotEditInvoiced` text shown | `-t "edit mode: invoiced work hour keeps every field read-only and shows the cannotEditInvoiced notice"` exit 0 | `work-hour-form.test.tsx:237-250` - `getByText("cannotEditInvoiced")` present; after clicking all three views, no `date-picker`/`HH:mm`/`descriptionPlaceholder`/Salvar button appear | PASS |
-| C10 | Salvar calls `useUpdateTimeEntry` once, `PATCH` payload has only changed fields | `-t "edit mode: save sends only the field that was changed"` and `-t "edit mode: a field opened for editing but left unchanged is not sent"` both exit 0 | `work-hour-form.test.tsx:267-272` - `expect(mockUpdateMutateAsync).toHaveBeenCalledWith({id:"wh-1",data:{hours:2}})`; `work-hour-form.test.tsx:293-298` - same call shape after opening (but not changing) `date` too, still `data:{hours:2}` | PASS* (see gap below) |
-| C11 | While `isPending`, Salvar button disabled and shows spinner | `-t "edit mode: save button is disabled and shows the spinner while pending"` exit 0 | `work-hour-form.test.tsx:315` - `expect(screen.getByRole("button",{name:/saving/})).toBeDisabled()` | PASS |
-| C12 | On success, opened fields return to view mode with updated values, Salvar disappears | `-t "edit mode: fields return to view mode with updated values after a successful save"` exit 0 | `work-hour-form.test.tsx:331-339` - `field-hours-view` shows `"02:00"`, `HH:mm` input and Salvar button gone | PASS |
-| C13 | On error, changed fields stay editable with typed values, existing Alert shows the message | `-t "edit mode: a failed save keeps the field editable with the typed value and shows the error alert"` exit 0 | `work-hour-form.test.tsx:363-364` - `expect(screen.getByPlaceholderText("HH:mm")).toHaveValue("02:00")` + `getByText("errorSaving")` present | PASS |
-| C14 | While no field is being edited, no Salvar button is shown (same proof as C5) | same run as C5 | `work-hour-form.test.tsx:181-183` | PASS |
-| C15 | Unsaved edits discarded on modal close/reopen (remount with original `workHour`) | `-t "edit mode: unsaved changes are discarded when the form is remounted with the original workHour"` exit 0 | `work-hour-form.test.tsx:392-405` - types `"09:00"`, `unmount()`, remounts with same `editableWorkHour`, `expect(screen.getByTestId("field-hours-view")).toHaveTextContent("01:30")` | PASS |
+| Check | Claim | Proof run | Evidence | Result | Status |
+|---|---|---|---|---|---|
+| C1 | Click on row (outside action cells) calls same callback as edit, with the work hour id | `work-hours-table.test.tsx -t "opens the row's modal when a non-invoiced row is clicked outside the action cell"` exit 0 | `work-hours-table.test.tsx:39-40` - `fireEvent.click(screen.getByTestId("work-hour-row")); expect(onEdit).toHaveBeenCalledWith("wh-1")` | PASS | verified at f2e4eab |
+| C2 | Edit icon button no longer rendered in the actions cell | `-t "does not render an edit icon button"` exit 0 | `work-hours-table.test.tsx:54-56` - `expect(screen.queryByRole("button", { name: "edit workHour" })).not.toBeInTheDocument()` | PASS | verified at f2e4eab |
+| C3 | Delete button click does not open the modal (no propagation to `TableRow`) | `-t "does not trigger the row's onEdit when the delete button is clicked"` exit 0 | `work-hours-table.test.tsx:74-75` - `fireEvent.click(screen.getByTestId("delete-button")); expect(onEdit).not.toHaveBeenCalled()` | PASS | verified at f2e4eab |
+| C4 | `TableRow` has `role="button"`/`tabIndex={0}`; Enter/Space call the same callback as click | `-t "opens the row's modal when Enter or Space is pressed on a focused row"` exit 0 | `work-hours-table.test.tsx:90-93` - attribute checks + `fireEvent.keyDown` for Enter/Space each followed by `expect(onEdit).toHaveBeenCalledWith("wh-1")` | PASS | verified at f2e4eab |
+| C5 | Edit mode: `date`/`hours`/`description` render as always-editable, prefilled inputs; "Salvar" and "Cancelar" visible from opening | `work-hour-form.test.tsx -t "edit mode: renders always-editable inputs prefilled from workHour, with Save and Cancel always visible"` exit 0 | `work-hour-form.test.tsx:168-177` - `getByTestId("date-picker")).toHaveValue("2026-01-05")`, `getByPlaceholderText("HH:mm")).toHaveValue("01:30")`, `getByDisplayValue("Existing work")`, `getByRole("button",{name:"saveChanges"})`, `getByRole("button",{name:"cancel"})` all present | PASS | verified at f2e4eab |
+| C6 | Invoiced: `date`/`hours`/`description` and "Salvar" disabled, fixed `cannotEditInvoiced` text shown | `-t "edit mode: invoiced work hour disables every field and the save button, and shows the cannotEditInvoiced notice"` exit 0 | `work-hour-form.test.tsx:209-214` - `getByText("cannotEditInvoiced")`, `getByPlaceholderText("HH:mm")).toBeDisabled()`, `getByDisplayValue("Existing work")).toBeDisabled()`, `getByRole("button",{name:"saveChanges"})).toBeDisabled()` | PASS* (gap) | verified at f2e4eab |
+| C7 | Clicking "Cancelar" reverts fields to last-saved value (or original, if nothing saved yet) and calls `onCancel` | `-t "edit mode: clicking Cancel discards the typed changes and calls onCancel"` exit 0 | `work-hour-form.test.tsx:190-198` - types "09:00", clicks cancel, `getByPlaceholderText("HH:mm")).toHaveValue("01:30")`, `onCancel).toHaveBeenCalledTimes(1)` | PASS* (gap) | verified at f2e4eab |
+| C10 | Salvar calls `useUpdateTimeEntry` once, `PATCH` payload has only changed fields | `-t "edit mode: save sends only the field that was changed"` exit 0 | `work-hour-form.test.tsx:230-236` - `expect(mockUpdateMutateAsync).toHaveBeenCalledWith({id:"wh-1",data:{hours:2}})` + `expect(mockUpdateMutateAsync).toHaveBeenCalledTimes(1)` | PASS | verified at f2e4eab |
+| C11 | While `isPending`, Salvar disabled and shows spinner | `-t "edit mode: save button is disabled and shows the spinner while pending"` exit 0 | `work-hour-form.test.tsx:252-253` - `getByRole("button",{name:/saving/})).toBeDisabled()` + `getByTestId("save-spinner")` present | PASS | verified at f2e4eab |
+| C12 | On success, inputs keep new values, success `Alert` appears, modal remains open (does not close by itself) | `-t "edit mode: a successful save keeps the new value in the input and shows the success alert"` exit 0 | `work-hour-form.test.tsx:276-277` - `getByPlaceholderText("HH:mm")).toHaveValue("02:00")` + `getByText("savedSuccessfully")` present | PASS* (gap) | verified at f2e4eab |
+| C13 | On error, typed values stay, existing error `Alert` shows the message | `-t "edit mode: a failed save keeps the typed value and shows the error alert"` exit 0 | `work-hour-form.test.tsx:300-301` - `getByPlaceholderText("HH:mm")).toHaveValue("02:00")` + `getByText("errorSaving")` present | PASS | verified at f2e4eab |
+| C15 | Unsaved edits discarded on modal close/reopen (remount with original `workHour`) | `-t "edit mode: unsaved changes are discarded when the form is remounted with the original workHour"` exit 0 | `work-hour-form.test.tsx:328-340` - types "09:00", `unmount()`, remounts with same `editableWorkHour`, `getByPlaceholderText("HH:mm")).toHaveValue("01:30")` | PASS | verified at f2e4eab |
 
-*C10 gap: the checklist claim says the mutation is called "uma única vez" (a single time), but
-neither cited assertion uses `toHaveBeenCalledTimes(1)` - both only check `toHaveBeenCalledWith(...)`,
-which does not fail if the mock were called more than once as long as one call matches. The payload
-half of the claim (only changed fields sent) is precisely asserted; the call-count half is not
-directly asserted anywhere in the test. Not a blocking finding (the test only triggers one click, so
-nothing contradicts the claim), but it is a real assertion gap against the checklist's own wording.
+All 12 named tests ran individually via `rg -n` lookup (test text exists at the cited lines) and
+via actual jest execution (see Gate below) - none matched via `passWithNoTests`.
 
-## Swept rows checked (resolve to "existing")
+### Gaps found this round (non-blocking, but real)
+
+1. **C6 - date field's disabled state is unproven.** The claim names `date`, `hours` and
+   `description` as all becoming disabled when invoiced. The code only gives `hours`
+   (`Input`) and `description` (`Textarea`) an actual `disabled={fieldsDisabled}` prop
+   (`work-hour-form.tsx:304`, `:325`); the date field is instead wrapped in a plain `<div
+   className={fieldsDisabled ? "pointer-events-none opacity-70" : undefined}>`
+   (`work-hour-form.tsx:206-210`) around `DatePickerComponent`, which itself never receives a
+   `disabled` prop. The C6 test (`work-hour-form.test.tsx:201-215`) asserts `hours`, `description`
+   and the Salvar button are disabled, but never touches `date-picker` at all. So the "date"
+   third of the claim has zero located assertion, and the underlying implementation for that
+   field is CSS-only (not an actual `disabled` state), which the test never checks either way.
+2. **C7 - only the "nothing saved yet" branch is tested.** The claim has two branches: revert to
+   last-saved value, or to the original if no save has happened. The only Cancel test
+   (`work-hour-form.test.tsx:180-199`) types a new value and cancels without ever saving first,
+   so only the "reverts to original" branch is exercised. No test types a value, saves
+   successfully, types a second value, then cancels to check it reverts to the *saved* value
+   rather than the very first original. (The implementation's `handleCancel` calls bare `reset()`,
+   which relies on `reset(formData)` inside `onSubmit`'s success path (`work-hour-form.tsx:152`)
+   having re-baselined react-hook-form's defaults - structurally plausible, but unproven.)
+3. **C12 - "modal remains open" has no test anywhere.** `work-hour-form.test.tsx` cannot assert
+   this: `WorkHourForm` does not own the modal (`FormModal`/`Dialog` lives in `page.tsx`). Checked
+   `page.test.tsx` for coverage (`rg -n "editingWorkHour|onSuccess|does not close|stays open"` -
+   no hits); `page.test.tsx` mocks `WorkHourForm` entirely (noted in the checklist's own C15 nota
+   for a different check) and has no test that drives a save-success round trip through the real
+   modal. The claim is true by code inspection only: `page.tsx:267-275` never passes `onSuccess`
+   to the edit-mode `WorkHourForm`, and the edit-mode branch of `onSubmit`
+   (`work-hour-form.tsx:134-154`) never calls `onSuccess?.()` or closes the modal - but "true by
+   code reading" is not the same as "proven by a proof line," and the checklist commits this
+   check to a single proof (the form-only test above) that cannot reach this clause.
+
+None of these three contradict the implementation - in each case the untested portion of the
+claim is structurally plausible from the code, and nothing observed suggests it's actually wrong.
+They are assertion-coverage gaps against the checklist's own wording, the same class of finding
+Round 1 recorded for C10's `toHaveBeenCalledTimes` (which has since been fixed - see below), not
+blocking failures.
+
+### Fixed since Round 1
+
+- **C10's Round 1 gap is closed.** Round 1 flagged that no assertion checked call count
+  (`toHaveBeenCalledTimes(1)`), only `toHaveBeenCalledWith(...)`. Commit `9d58554` (already
+  applied before this round's diff range starts) added
+  `expect(mockUpdateMutateAsync).toHaveBeenCalledTimes(1)` at `work-hour-form.test.tsx:236`,
+  confirmed present and passing at current HEAD.
+
+## Swept rows checked (resolve to "existing"), carried from 5af6194 and re-confirmed this round
 
 | Row | Constraint cited | Verified in code |
 |---|---|---|
-| validation | `editWorkHourFormSchema` (zod, client) and `UpdateWorkHourDto` (class-validator, server) unchanged | `work-hour-form.tsx:63-69` schema untouched by the diff (no hunk touches it); `apps/backend/src/work-hours/dto/update-work-hour.dto.ts:12-34` - `date?`, `description?`, `hours?`, `clientId?` only, no `projectId` (matches the checklist's Out-of-scope claim too); `git diff --stat 5e29a27..HEAD -- apps/backend` is empty, confirming the backend is untouched |
-| authorization | `WorkHoursService.update` still validates `req.user.id` and blocks invoiced (400), independent of client-side check | `apps/backend/src/work-hours/work-hours.service.ts:189-198` - `prisma.workHour.findFirst({ where: { id, userId } })` (ownership scoping) then `:213-221` - `isInvoiced` computed from `invoice.status !== 'CANCELED'` and `throw new BadRequestException(...)` when true. Frontend's `isWorkHourInvoiced` (`work-hours-grouping.ts:27-31`) uses the identical `status !== "CANCELED"` predicate, so the client-side C9 gate mirrors the server's real rule rather than diverging from it |
+| validation | `editWorkHourFormSchema` (zod, client) and `UpdateWorkHourDto` (class-validator, server) unchanged | `work-hour-form.tsx:56-62` - schema untouched by the `9d58554..HEAD` diff (confirmed: the diff hunk touches only the JSX below the schema, not the `z.object` declarations); `git diff --stat 9d58554..HEAD` shows no `apps/backend` files touched at all, so `UpdateWorkHourDto` is unchanged |
+| authorization | `WorkHoursService.update` still validates `req.user.id` and blocks invoiced (400), independent of client-side check | Unchanged since Round 1 (backend untouched this round); Round 1's citation (`work-hours.service.ts:189-198`, `:213-221`) stands - `carried from 5af6194`, re-confirmed only via the empty backend diff-stat above, not re-read line by line |
 
-All other Swept rows resolve to `not in scope`/pointers at other checks (C6-C8, C12, C13, C15), which
-the protocol treats as policy already approved - nothing in the code for them to be wrong about, so
-not re-checked here.
+All other Swept rows resolve to `not in scope`/pointers at other checks, unchanged from Round 1 -
+`carried from 5af6194`.
 
 ## Coverage / Test policy
 
-- `Coverage` join: not recomputed (profile floor, `light`).
-- `## Test policy`: absent from the checklist, confirmed by reading the full file - nothing to judge.
+- `Coverage` join: not recomputed (profile floor, `light`) - `carried from 5af6194`.
+- `## Test policy`: absent from the checklist, re-confirmed by reading the current full file -
+  `verified at f2e4eab`.
 
 ## Faults injected
 
@@ -74,9 +126,9 @@ cd apps/frontend && npx jest --ci src/features/time-tracking/components/work-hou
 # Tests: 4 passed, 4 total
 
 cd apps/frontend && npx jest --ci src/features/time-tracking/components/work-hour-form.test.tsx \
-  -t "opens in view mode with no editable inputs and no save button|clicking the date field reveals the date picker and the save button|clicking the hours field reveals the HH:mm input and the save button|editing a second field keeps the first editable and shows exactly one save button|invoiced work hour keeps every field read-only and shows the cannotEditInvoiced notice|save sends only the field that was changed|a field opened for editing but left unchanged is not sent|save button is disabled and shows the spinner while pending|fields return to view mode with updated values after a successful save|a failed save keeps the field editable with the typed value and shows the error alert|unsaved changes are discarded when the form is remounted with the original workHour"
-# Tests: 11 passed, 11 total (3 unrelated tests in the same file correctly skipped by the -t filter)
+  -t "edit mode: renders always-editable inputs prefilled from workHour, with Save and Cancel always visible|edit mode: invoiced work hour disables every field and the save button, and shows the cannotEditInvoiced notice|edit mode: clicking Cancel discards the typed changes and calls onCancel|edit mode: save sends only the field that was changed|edit mode: save button is disabled and shows the spinner while pending|edit mode: a successful save keeps the new value in the input and shows the success alert|edit mode: a failed save keeps the typed value and shows the error alert|edit mode: unsaved changes are discarded when the form is remounted with the original workHour"
+# Tests: 8 passed, 3 skipped (unrelated tests in the same file correctly skipped by the -t filter), 11 total
 ```
 
-All 13 unique named tests (C10 and C14/C5 each reuse one proof, for 15 checks total) individually
-show `✓` and passed at `HEAD` (`5af6194`).
+All 12 named tests (4 in `work-hours-table.test.tsx` + 8 in `work-hour-form.test.tsx`) individually
+show `✓` and passed at `HEAD` (`f2e4eab`), run in this round, not reused from Round 1's output.
