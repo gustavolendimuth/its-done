@@ -293,6 +293,14 @@ export function WorkHoursTable({
                               <span className="font-mono tabular-nums font-semibold">
                                 {formatHoursToHHMM(workHour.hours)}
                               </span>
+                              {workHour.startTime && workHour.endTime && (
+                                <p
+                                  className="text-xs text-muted-foreground font-mono"
+                                  data-testid="work-hour-interval"
+                                >
+                                  {workHour.startTime}–{workHour.endTime}
+                                </p>
+                              )}
                             </TableCell>
 
                             <TableCell onClick={(event) => event.stopPropagation()}>

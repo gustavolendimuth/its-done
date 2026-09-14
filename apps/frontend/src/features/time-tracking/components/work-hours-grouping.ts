@@ -5,6 +5,8 @@ export interface WorkHourRow {
   date: string | Date;
   description?: string;
   hours: number;
+  startTime?: string | null;
+  endTime?: string | null;
   client?: {
     id: string;
     name?: string;

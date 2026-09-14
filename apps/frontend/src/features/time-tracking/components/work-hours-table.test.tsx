@@ -59,6 +59,36 @@ describe("WorkHoursTable", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("shows the startTime–endTime interval when the row has one", () => {
+    render(
+      <WorkHoursTable
+        workHours={[makeRow({ startTime: "09:00", endTime: "12:30" })]}
+        onEdit={noop}
+        onDelete={noop}
+        deletingId={null}
+        onAddClick={noop}
+      />
+    );
+
+    expect(screen.getByTestId("work-hour-interval")).toHaveTextContent(
+      "09:00–12:30"
+    );
+  });
+
+  it("does not show an interval when the row only has a duration", () => {
+    render(
+      <WorkHoursTable
+        workHours={[makeRow()]}
+        onEdit={noop}
+        onDelete={noop}
+        deletingId={null}
+        onAddClick={noop}
+      />
+    );
+
+    expect(screen.queryByTestId("work-hour-interval")).not.toBeInTheDocument();
+  });
+
   it("does not trigger the row's onEdit when the delete button is clicked", () => {
     const onEdit = jest.fn();
     render(
