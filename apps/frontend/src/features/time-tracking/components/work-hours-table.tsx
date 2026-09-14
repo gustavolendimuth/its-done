@@ -2,7 +2,7 @@
 
 import { isSameDay, isSameMonth, isSameWeek, subMonths, format } from "date-fns";
 import { enUS, ptBR } from "date-fns/locale";
-import { Building2, Clock, Edit, FileText, Trash2 } from "lucide-react";
+import { Building2, Clock, FileText, Trash2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Fragment, useMemo, useState } from "react";
 
@@ -31,11 +31,7 @@ import {
 } from "@/components/ui/table";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
 
-import {
-  groupByMonthAndWeek,
-  isWorkHourInvoiced,
-  type WorkHourRow,
-} from "./work-hours-grouping";
+import { groupByMonthAndWeek, type WorkHourRow } from "./work-hours-grouping";
 
 export type { WorkHourRow } from "./work-hours-grouping";
 
@@ -228,8 +224,17 @@ export function WorkHoursTable({
                         return (
                           <TableRow
                             key={workHour.id}
-                            className="group"
+                            className="group cursor-pointer"
                             data-testid="work-hour-row"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => onEdit(workHour.id)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                onEdit(workHour.id);
+                              }
+                            }}
                           >
                             <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                               {dateCellLabel(new Date(workHour.date))}
@@ -290,29 +295,8 @@ export function WorkHoursTable({
                               </span>
                             </TableCell>
 
-                            <TableCell>
+                            <TableCell onClick={(event) => event.stopPropagation()}>
                               <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                {(() => {
-                                  const invoiced = isWorkHourInvoiced(workHour);
-                                  const editLabel = invoiced
-                                    ? t("cannotEditInvoiced")
-                                    : `${t("edit")} ${t("workHour")}`;
-
-                                  return (
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8"
-                                      aria-label={editLabel}
-                                      title={invoiced ? editLabel : undefined}
-                                      disabled={invoiced}
-                                      onClick={() => onEdit(workHour.id)}
-                                    >
-                                      <Edit className="h-3.5 w-3.5" />
-                                    </Button>
-                                  );
-                                })()}
-
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
                                     <Button

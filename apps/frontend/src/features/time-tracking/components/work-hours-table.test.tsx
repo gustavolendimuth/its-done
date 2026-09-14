@@ -24,7 +24,7 @@ function makeRow(overrides: Partial<WorkHourRow> = {}): WorkHourRow {
 describe("WorkHoursTable", () => {
   const noop = () => {};
 
-  it("enables the edit button and calls onEdit when the work hour has no invoice", () => {
+  it("opens the row's modal when a non-invoiced row is clicked outside the action cell", () => {
     const onEdit = jest.fn();
     render(
       <WorkHoursTable
@@ -36,24 +36,34 @@ describe("WorkHoursTable", () => {
       />
     );
 
-    const editButton = screen.getByRole("button", { name: "edit workHour" });
-    expect(editButton).not.toBeDisabled();
-
-    fireEvent.click(editButton);
+    fireEvent.click(screen.getByTestId("work-hour-row"));
     expect(onEdit).toHaveBeenCalledWith("wh-1");
   });
 
-  it("disables the edit button when the work hour is linked to a PENDING invoice", () => {
+  it("does not render an edit icon button", () => {
+    render(
+      <WorkHoursTable
+        workHours={[makeRow()]}
+        onEdit={noop}
+        onDelete={noop}
+        deletingId={null}
+        onAddClick={noop}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "edit workHour" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "cannotEditInvoiced" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not trigger the row's onEdit when the delete button is clicked", () => {
     const onEdit = jest.fn();
     render(
       <WorkHoursTable
-        workHours={[
-          makeRow({
-            invoiceWorkHours: [
-              { invoice: { id: "inv-1", status: "PENDING" } },
-            ],
-          }),
-        ]}
+        workHours={[makeRow()]}
         onEdit={onEdit}
         onDelete={noop}
         deletingId={null}
@@ -61,27 +71,15 @@ describe("WorkHoursTable", () => {
       />
     );
 
-    const editButton = screen.getByRole("button", {
-      name: "cannotEditInvoiced",
-    });
-    expect(editButton).toBeDisabled();
-    expect(editButton).toHaveAttribute("title", "cannotEditInvoiced");
-
-    fireEvent.click(editButton);
+    fireEvent.click(screen.getByTestId("delete-button"));
     expect(onEdit).not.toHaveBeenCalled();
   });
 
-  it("enables the edit button when the work hour is linked only to a CANCELED invoice", () => {
+  it("opens the row's modal when Enter or Space is pressed on a focused row", () => {
     const onEdit = jest.fn();
     render(
       <WorkHoursTable
-        workHours={[
-          makeRow({
-            invoiceWorkHours: [
-              { invoice: { id: "inv-1", status: "CANCELED" } },
-            ],
-          }),
-        ]}
+        workHours={[makeRow()]}
         onEdit={onEdit}
         onDelete={noop}
         deletingId={null}
@@ -89,10 +87,15 @@ describe("WorkHoursTable", () => {
       />
     );
 
-    const editButton = screen.getByRole("button", { name: "edit workHour" });
-    expect(editButton).not.toBeDisabled();
+    const row = screen.getByTestId("work-hour-row");
+    expect(row).toHaveAttribute("role", "button");
+    expect(row).toHaveAttribute("tabIndex", "0");
 
-    fireEvent.click(editButton);
+    fireEvent.keyDown(row, { key: "Enter" });
+    expect(onEdit).toHaveBeenCalledWith("wh-1");
+
+    onEdit.mockClear();
+    fireEvent.keyDown(row, { key: " " });
     expect(onEdit).toHaveBeenCalledWith("wh-1");
   });
 });
