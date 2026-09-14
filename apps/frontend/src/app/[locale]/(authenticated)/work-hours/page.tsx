@@ -23,6 +23,7 @@ import {
   WorkHoursTable,
   useTimeEntries,
   useDeleteTimeEntry,
+  isWorkHourInvoiced,
  WorkHoursSkeleton } from "@/features/time-tracking";
 
 import type { TimeEntry } from "@/types";
@@ -111,10 +112,6 @@ export default function WorkHoursPage() {
     if (workHour) {
       setEditingWorkHour(workHour);
     }
-  };
-
-  const handleWorkHourEdited = () => {
-    setEditingWorkHour(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -265,9 +262,11 @@ export default function WorkHoursPage() {
       >
         {editingWorkHour && clients && (
           <WorkHourForm
-            onSuccess={handleWorkHourEdited}
             clients={clients}
-            workHour={editingWorkHour}
+            workHour={{
+              ...editingWorkHour,
+              isInvoiced: isWorkHourInvoiced(editingWorkHour),
+            }}
           />
         )}
       </FormModal>

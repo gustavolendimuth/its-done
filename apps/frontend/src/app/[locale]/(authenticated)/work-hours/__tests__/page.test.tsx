@@ -85,14 +85,11 @@ const mockClients = [
 
 // Mock the time-tracking feature (components + service, single barrel import in page.tsx)
 jest.mock("@/features/time-tracking", () => ({
-  WorkHourForm: ({ workHour, onSuccess }: any) => (
+  WorkHourForm: ({ workHour }: any) => (
     <div data-testid="work-hour-form">
       Work Hour Form
       {workHour && (
-        <>
-          <span data-testid="work-hour-form-editing-id">{workHour.id}</span>
-          <button onClick={onSuccess}>simulate edit success</button>
-        </>
+        <span data-testid="work-hour-form-editing-id">{workHour.id}</span>
       )}
     </div>
   ),
@@ -143,6 +140,7 @@ jest.mock("@/features/time-tracking", () => ({
   useDeleteTimeEntry: jest.fn(() => ({
     mutateAsync: jest.fn(),
   })),
+  isWorkHourInvoiced: jest.fn(() => false),
   WorkHoursSkeleton: () => (
     <div data-testid="loading-skeleton">Loading...</div>
   ),
@@ -267,9 +265,6 @@ describe("WorkHoursPage", () => {
     expect(screen.getByTestId("work-hour-form-editing-id")).toHaveTextContent(
       "1"
     );
-
-    fireEvent.click(screen.getByText("simulate edit success"));
-    expect(screen.queryByTestId("work-hour-form")).not.toBeInTheDocument();
   });
 
   it("should pass an empty list to the table when there are no work hours", () => {

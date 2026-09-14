@@ -97,6 +97,7 @@ jest.mock("@/components/ui/project-combobox", () => ({
 
 const mockCreateMutateAsync = jest.fn();
 const mockUpdateMutateAsync = jest.fn();
+const mockUseUpdateTimeEntry = jest.fn();
 
 jest.mock("../time-entries", () => ({
   useCreateTimeEntry: () => ({
@@ -105,17 +106,25 @@ jest.mock("../time-entries", () => ({
     isError: false,
     isSuccess: false,
   }),
-  useUpdateTimeEntry: () => ({
-    mutateAsync: mockUpdateMutateAsync,
-    isPending: false,
-    isError: false,
-    isSuccess: false,
-  }),
+  useUpdateTimeEntry: () => mockUseUpdateTimeEntry(),
 }));
+
+const editableWorkHour = {
+  id: "wh-1",
+  date: "2026-01-05T00:00:00.000Z",
+  hours: 1.5,
+  description: "Existing work",
+};
 
 describe("WorkHourForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseUpdateTimeEntry.mockReturnValue({
+      mutateAsync: mockUpdateMutateAsync,
+      isPending: false,
+      isError: false,
+      isSuccess: false,
+    });
   });
 
   it("create mode: renders client/project fields and submits via create", async () => {
@@ -144,56 +153,111 @@ describe("WorkHourForm", () => {
 
   it("edit mode: does not render client/project fields", () => {
     renderWithQueryClient(
-      <WorkHourForm
-        clients={mockClients}
-        workHour={{
-          id: "wh-1",
-          date: "2026-01-05T00:00:00.000Z",
-          hours: 1.5,
-          description: "Existing work",
-        }}
-      />
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
     );
 
     expect(screen.queryByTestId("client-combobox")).not.toBeInTheDocument();
     expect(screen.queryByTestId("project-combobox")).not.toBeInTheDocument();
   });
 
-  it("edit mode: prefills date, hours and description from workHour", () => {
+  it("edit mode: opens in view mode with no editable inputs and no save button", () => {
     renderWithQueryClient(
-      <WorkHourForm
-        clients={mockClients}
-        workHour={{
-          id: "wh-1",
-          date: "2026-01-05T00:00:00.000Z",
-          hours: 1.5,
-          description: "Existing work",
-        }}
-      />
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
     );
 
-    expect(screen.getByTestId("date-picker")).toHaveValue("2026-01-05");
-    expect(screen.getByPlaceholderText("HH:mm")).toHaveValue("01:30");
-    expect(screen.getByDisplayValue("Existing work")).toBeInTheDocument();
+    expect(screen.getByTestId("field-date-view")).toHaveTextContent(
+      "05/01/2026"
+    );
+    expect(screen.getByTestId("field-hours-view")).toHaveTextContent("01:30");
+    expect(screen.getByTestId("field-description-view")).toHaveTextContent(
+      "Existing work"
+    );
+
+    expect(screen.queryByTestId("date-picker")).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("HH:mm")).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("descriptionPlaceholder")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "saveChanges" })
+    ).not.toBeInTheDocument();
   });
 
-  it("edit mode: submits via update with only date/hours/description", async () => {
-    mockUpdateMutateAsync.mockResolvedValueOnce({ id: "wh-1" });
-    const onSuccess = jest.fn();
+  it("edit mode: clicking the date field reveals the date picker and the save button", () => {
+    renderWithQueryClient(
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
+    );
 
+    fireEvent.click(screen.getByTestId("field-date-view"));
+
+    expect(screen.getByTestId("date-picker")).toHaveValue("2026-01-05");
+    expect(
+      screen.getByRole("button", { name: "saveChanges" })
+    ).toBeInTheDocument();
+  });
+
+  it("edit mode: clicking the hours field reveals the HH:mm input and the save button", () => {
+    renderWithQueryClient(
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
+    );
+
+    fireEvent.click(screen.getByTestId("field-hours-view"));
+
+    expect(screen.getByPlaceholderText("HH:mm")).toHaveValue("01:30");
+    expect(
+      screen.getByRole("button", { name: "saveChanges" })
+    ).toBeInTheDocument();
+  });
+
+  it("edit mode: editing a second field keeps the first editable and shows exactly one save button", () => {
+    renderWithQueryClient(
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
+    );
+
+    fireEvent.click(screen.getByTestId("field-hours-view"));
+    fireEvent.click(screen.getByTestId("field-description-view"));
+
+    expect(screen.getByPlaceholderText("HH:mm")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("descriptionPlaceholder")
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("button", { name: "saveChanges" })
+    ).toHaveLength(1);
+  });
+
+  it("edit mode: invoiced work hour keeps every field read-only and shows the cannotEditInvoiced notice", () => {
     renderWithQueryClient(
       <WorkHourForm
         clients={mockClients}
-        onSuccess={onSuccess}
-        workHour={{
-          id: "wh-1",
-          date: "2026-01-05T00:00:00.000Z",
-          hours: 1.5,
-          description: "Existing work",
-        }}
+        workHour={{ ...editableWorkHour, isInvoiced: true }}
       />
     );
 
+    expect(screen.getByText("cannotEditInvoiced")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("field-date-view"));
+    fireEvent.click(screen.getByTestId("field-hours-view"));
+    fireEvent.click(screen.getByTestId("field-description-view"));
+
+    expect(screen.queryByTestId("date-picker")).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("HH:mm")).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("descriptionPlaceholder")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "saveChanges" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("edit mode: save sends only the field that was changed", async () => {
+    mockUpdateMutateAsync.mockResolvedValueOnce({ id: "wh-1" });
+
+    renderWithQueryClient(
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
+    );
+
+    fireEvent.click(screen.getByTestId("field-hours-view"));
     fireEvent.change(screen.getByPlaceholderText("HH:mm"), {
       target: { value: "0200" },
     });
@@ -203,31 +267,109 @@ describe("WorkHourForm", () => {
     await waitFor(() =>
       expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
         id: "wh-1",
-        data: {
-          date: "2026-01-05T00:00:00.000Z",
-          hours: 2,
-          description: "Existing work",
-        },
+        data: { hours: 2 },
       })
     );
     expect(mockCreateMutateAsync).not.toHaveBeenCalled();
-    await waitFor(() => expect(mockToastSuccess).toHaveBeenCalled());
-    expect(onSuccess).toHaveBeenCalled();
+  });
+
+  it("edit mode: a field opened for editing but left unchanged is not sent", async () => {
+    mockUpdateMutateAsync.mockResolvedValueOnce({ id: "wh-1" });
+
+    renderWithQueryClient(
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
+    );
+
+    // Opens the date field but never changes its value.
+    fireEvent.click(screen.getByTestId("field-date-view"));
+
+    fireEvent.click(screen.getByTestId("field-hours-view"));
+    fireEvent.change(screen.getByPlaceholderText("HH:mm"), {
+      target: { value: "0200" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "saveChanges" }));
+
+    await waitFor(() =>
+      expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
+        id: "wh-1",
+        data: { hours: 2 },
+      })
+    );
+  });
+
+  it("edit mode: save button is disabled and shows the spinner while pending", () => {
+    mockUseUpdateTimeEntry.mockReturnValue({
+      mutateAsync: mockUpdateMutateAsync,
+      isPending: true,
+      isError: false,
+      isSuccess: false,
+    });
+
+    renderWithQueryClient(
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
+    );
+
+    fireEvent.click(screen.getByTestId("field-hours-view"));
+
+    expect(screen.getByRole("button", { name: /saving/ })).toBeDisabled();
+  });
+
+  it("edit mode: fields return to view mode with updated values after a successful save", async () => {
+    mockUpdateMutateAsync.mockResolvedValueOnce({ id: "wh-1" });
+
+    renderWithQueryClient(
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
+    );
+
+    fireEvent.click(screen.getByTestId("field-hours-view"));
+    fireEvent.change(screen.getByPlaceholderText("HH:mm"), {
+      target: { value: "0200" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "saveChanges" }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("field-hours-view")).toHaveTextContent(
+        "02:00"
+      )
+    );
+    expect(screen.queryByPlaceholderText("HH:mm")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "saveChanges" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("edit mode: a failed save keeps the field editable with the typed value and shows the error alert", async () => {
+    mockUpdateMutateAsync.mockRejectedValueOnce(new Error("network error"));
+    mockUseUpdateTimeEntry.mockReturnValue({
+      mutateAsync: mockUpdateMutateAsync,
+      isPending: false,
+      isError: true,
+      isSuccess: false,
+    });
+
+    renderWithQueryClient(
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
+    );
+
+    fireEvent.click(screen.getByTestId("field-hours-view"));
+    fireEvent.change(screen.getByPlaceholderText("HH:mm"), {
+      target: { value: "0200" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "saveChanges" }));
+
+    await waitFor(() => expect(mockUpdateMutateAsync).toHaveBeenCalled());
+
+    expect(screen.getByPlaceholderText("HH:mm")).toHaveValue("02:00");
+    expect(screen.getByText("errorSaving")).toBeInTheDocument();
   });
 
   it("edit mode: blocks submit on invalid hours format", async () => {
     renderWithQueryClient(
-      <WorkHourForm
-        clients={mockClients}
-        workHour={{
-          id: "wh-1",
-          date: "2026-01-05T00:00:00.000Z",
-          hours: 1.5,
-          description: "Existing work",
-        }}
-      />
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
     );
 
+    fireEvent.click(screen.getByTestId("field-hours-view"));
     fireEvent.change(screen.getByPlaceholderText("HH:mm"), {
       target: { value: "9" },
     });
@@ -240,5 +382,26 @@ describe("WorkHourForm", () => {
       ).toBeInTheDocument()
     );
     expect(mockUpdateMutateAsync).not.toHaveBeenCalled();
+  });
+
+  it("edit mode: unsaved changes are discarded when the form is remounted with the original workHour", () => {
+    const { unmount } = renderWithQueryClient(
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
+    );
+
+    fireEvent.click(screen.getByTestId("field-hours-view"));
+    fireEvent.change(screen.getByPlaceholderText("HH:mm"), {
+      target: { value: "0900" },
+    });
+    expect(screen.getByPlaceholderText("HH:mm")).toHaveValue("09:00");
+
+    // Closing the modal unmounts the form; reopening it mounts a fresh one
+    // from the original (unedited) workHour, the same way the page does.
+    unmount();
+    renderWithQueryClient(
+      <WorkHourForm clients={mockClients} workHour={editableWorkHour} />
+    );
+
+    expect(screen.getByTestId("field-hours-view")).toHaveTextContent("01:30");
   });
 });

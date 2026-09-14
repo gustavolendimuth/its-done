@@ -27,7 +27,16 @@ Sources:
 Toca `work-hours-table.tsx` (remove o botão, adiciona clique/teclado na linha), `page.tsx`
 (calcula e repassa `isInvoiced`) e `work-hour-form.tsx` (visualização por campo). Reaproveita o
 prop `onEdit` de `WorkHoursTable` (agora disparado pela linha em vez do botão), a string i18n
-`cannotEditInvoiced` já existente, e `isWorkHourInvoiced` de `work-hours-grouping.ts`.
+`cannotEditInvoiced` já existente, e `isWorkHourInvoiced` de `work-hours-grouping.ts` (passou a
+ser reexportada pelo barrel `features/time-tracking/index.ts` pra `page.tsx` poder usá-la).
+
+Descoberta durante o build, consequência direta de C12 ("os campos voltam ao modo de
+visualização" - não "o modal fecha"): salvar uma edição não fecha mais o modal automaticamente
+(antes, `handleWorkHourEdited` chamava `setEditingWorkHour(null)` no sucesso). Removido
+`handleWorkHourEdited` e o prop `onSuccess` passado ao `WorkHourForm` de edição em `page.tsx`;
+`page.test.tsx` ajustado (mock ganhou `isWorkHourInvoiced`, o botão "simulate edit success" do
+mock - que só existia pra essa chamada - foi removido). Comportamento reversível, não é porta de
+mão única.
 
 | One-way door | Literal shape | Alternative rejected |
 | --- | --- | --- |
@@ -85,7 +94,13 @@ Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/
 Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/work-hour-form.test.tsx -t "edit mode: opens in view mode with no editable inputs and no save button"`
 
 **C15** - Given um campo em edição sem salvar, when o modal é fechado e reaberto pra mesma work hour, then ele volta a abrir em modo de visualização com os valores originais (não os digitados)
-Proof: `cd apps/frontend && npx jest --ci "src/app/[locale]/(authenticated)/work-hours/__tests__/page.test.tsx" -t "closing the edit modal without saving and reopening it shows the original values"`
+Proof: `cd apps/frontend && npx jest --ci src/features/time-tracking/components/work-hour-form.test.tsx -t "edit mode: unsaved changes are discarded when the form is remounted with the original workHour"`
+
+Nota: a prova de C15 foi movida de `page.test.tsx` (que mocka `WorkHourForm` inteiro, sem campos
+reais pra editar) pra `work-hour-form.test.tsx`, que desmonta/remonta o componente real com o
+mesmo `workHour` - é o nível que de fato alcança a alegação (`page.tsx` já unmounta o formulário
+ao fechar o modal via `{editingWorkHour && ... && <WorkHourForm .../>}`, então remontar com dados
+originais já descarta o estado local não salvo).
 
 ## Swept
 

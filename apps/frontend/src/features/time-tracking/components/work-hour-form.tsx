@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -30,6 +30,13 @@ function formatHHmm(input: string): string {
   const digits = String(input ?? "").replace(/\D/g, "").slice(0, 4);
   if (digits.length <= 2) return digits;
   return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+}
+
+function formatDateUTC(date: Date): string {
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const year = date.getUTCFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 function decimalHoursToHHmm(hours: number): string {
@@ -68,7 +75,10 @@ interface EditableWorkHour {
   date: string;
   hours: number;
   description?: string;
+  isInvoiced?: boolean;
 }
+
+type EditableFieldName = "date" | "hours" | "description";
 
 interface WorkHourFormProps {
   onSuccess?: () => void;
@@ -95,7 +105,7 @@ export function WorkHourForm({
     setValue,
     control,
     watch,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<WorkHourFormData>({
     resolver: zodResolver(
       isEditMode ? editWorkHourFormSchema : workHourFormSchema
@@ -110,6 +120,18 @@ export function WorkHourForm({
   });
 
   const selectedClientId = watch("clientId");
+  const isInvoiced = !!workHour?.isInvoiced;
+
+  const [editingFields, setEditingFields] = useState<Set<EditableFieldName>>(
+    new Set()
+  );
+  const isFieldOpen = (field: EditableFieldName) =>
+    !isEditMode || editingFields.has(field);
+  const openField = (field: EditableFieldName) => {
+    if (!isEditMode || isInvoiced) return;
+    setEditingFields((prev) => new Set(prev).add(field));
+  };
+  const hasOpenFields = editingFields.size > 0;
 
   // Reset project when client changes
   useEffect(() => {
@@ -126,6 +148,12 @@ export function WorkHourForm({
       const decimalHours = Number(hours) + Number(minutes) / 60;
 
       if (isEditMode && workHour) {
+        const changed: Partial<FullCreateTimeEntryDto> = {};
+        if (dirtyFields.date) changed.date = formData.date.toISOString();
+        if (dirtyFields.hours) changed.hours = decimalHours;
+        if (dirtyFields.description)
+          changed.description = formData.description || undefined;
+
         await updateTimeEntry.mutateAsync({
           id: workHour.id,
           // SPEC_DEVIATION: cast to the entities.ts CreateTimeEntryDto (which has
@@ -133,15 +161,12 @@ export function WorkHourForm({
           // the local (description-less) declaration in `@/types/index.ts`, which
           // shadows the fuller one re-exported from `@/types/entities.ts` —
           // pre-existing duplicate-type issue, out of this feature's scope.
-          data: {
-            date: formData.date.toISOString(),
-            hours: decimalHours,
-            description: formData.description || undefined,
-          } as Partial<FullCreateTimeEntryDto>,
+          data: changed,
         });
 
         toast.success(t("savedSuccessfully", { type: t("workHour") }));
-        onSuccess?.();
+        reset(formData);
+        setEditingFields(new Set());
         return;
       }
 
@@ -178,26 +203,48 @@ export function WorkHourForm({
     queryClient.invalidateQueries({ queryKey: ["clients"] });
   };
 
+  const watchedDate = watch("date");
+  const watchedHours = watch("hours");
+  const watchedDescription = watch("description");
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {isEditMode && isInvoiced && (
+        <Alert>
+          <AlertDescription>{t("cannotEditInvoiced")}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-2">
         <Label className="text-sm font-medium text-foreground">
           {t("date")} *
         </Label>
-        <Controller
-          name="date"
-          control={control}
-          render={({ field }) => (
-            <DatePickerComponent
-              value={field.value}
-              onChange={field.onChange}
-              placeholder={t("pickDate")}
-              disabled={(date) =>
-                date > new Date() || date < new Date("1900-01-01")
-              }
-            />
-          )}
-        />
+        {isFieldOpen("date") ? (
+          <Controller
+            name="date"
+            control={control}
+            render={({ field }) => (
+              <DatePickerComponent
+                value={field.value}
+                onChange={field.onChange}
+                placeholder={t("pickDate")}
+                disabled={(date) =>
+                  date > new Date() || date < new Date("1900-01-01")
+                }
+              />
+            )}
+          />
+        ) : (
+          <button
+            type="button"
+            data-testid="field-date-view"
+            disabled={isInvoiced}
+            onClick={() => openField("date")}
+            className="w-full text-left text-sm rounded-md border border-input px-3 py-2 disabled:cursor-default disabled:opacity-70"
+          >
+            {watchedDate ? formatDateUTC(watchedDate) : "—"}
+          </button>
+        )}
         {errors.date && (
           <p className="text-sm text-destructive">{errors.date.message}</p>
         )}
@@ -264,21 +311,33 @@ export function WorkHourForm({
         <Label className="text-sm font-medium text-foreground">
           {t("hours")} *
         </Label>
-        <Controller
-          name="hours"
-          control={control}
-          render={({ field }) => (
-            <Input
-              type="text"
-              inputMode="numeric"
-              placeholder="HH:mm"
-              className="font-mono"
-              value={field.value ?? ""}
-              onChange={(e) => field.onChange(formatHHmm(e.target.value))}
-              onBlur={field.onBlur}
-            />
-          )}
-        />
+        {isFieldOpen("hours") ? (
+          <Controller
+            name="hours"
+            control={control}
+            render={({ field }) => (
+              <Input
+                type="text"
+                inputMode="numeric"
+                placeholder="HH:mm"
+                className="font-mono"
+                value={field.value ?? ""}
+                onChange={(e) => field.onChange(formatHHmm(e.target.value))}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
+        ) : (
+          <button
+            type="button"
+            data-testid="field-hours-view"
+            disabled={isInvoiced}
+            onClick={() => openField("hours")}
+            className="w-full text-left text-sm font-mono rounded-md border border-input px-3 py-2 disabled:cursor-default disabled:opacity-70"
+          >
+            {watchedHours || "—"}
+          </button>
+        )}
         {errors.hours && (
           <p className="text-sm text-destructive">{errors.hours.message}</p>
         )}
@@ -288,17 +347,29 @@ export function WorkHourForm({
         <Label className="text-sm font-medium text-foreground">
           {t("hourDescription")}
         </Label>
-        <Controller
-          name="description"
-          control={control}
-          render={({ field }) => (
-            <Textarea
-              {...field}
-              placeholder={t("descriptionPlaceholder")}
-              className="min-h-[100px]"
-            />
-          )}
-        />
+        {isFieldOpen("description") ? (
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <Textarea
+                {...field}
+                placeholder={t("descriptionPlaceholder")}
+                className="min-h-[100px]"
+              />
+            )}
+          />
+        ) : (
+          <button
+            type="button"
+            data-testid="field-description-view"
+            disabled={isInvoiced}
+            onClick={() => openField("description")}
+            className="w-full text-left text-sm rounded-md border border-input px-3 py-2 min-h-[100px] disabled:cursor-default disabled:opacity-70"
+          >
+            {watchedDescription || "—"}
+          </button>
+        )}
         {errors.description && (
           <p className="text-sm text-destructive">
             {errors.description.message}
@@ -307,6 +378,7 @@ export function WorkHourForm({
       </div>
 
       <div className="space-y-4">
+        {(!isEditMode || hasOpenFields) && (
         <Button
           type="submit"
           disabled={activeMutation.isPending}
@@ -343,6 +415,7 @@ export function WorkHourForm({
             t("saveWorkHour")
           )}
         </Button>
+        )}
 
         {activeMutation.isError && (
           <Alert variant="destructive">

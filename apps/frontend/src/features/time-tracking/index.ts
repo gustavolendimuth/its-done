@@ -2,6 +2,7 @@ export { WorkHoursBigStats } from "./components/work-hours-big-stats";
 export { TotalHoursDisplay } from "./components/total-hours-display";
 export { WorkHoursTable } from "./components/work-hours-table";
 export type { WorkHourRow } from "./components/work-hours-table";
+export { isWorkHourInvoiced } from "./components/work-hours-grouping";
 export { WorkHourForm } from "./components/work-hour-form";
 export {
   WorkSessionFinishForm,
