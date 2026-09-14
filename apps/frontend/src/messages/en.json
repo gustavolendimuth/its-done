@@ -104,7 +104,7 @@
     "monthlyGrowth": "Monthly Growth",
     "noDataAvailable": "No data available",
     "viewAll": "View All",
-    "addHours": "Add Hours",
+    "addHours": "Add Session",
     "createInvoice": "Create Invoice"
   },
   "workHours": {
@@ -112,7 +112,7 @@
     "subtitle": "Track and manage your work hours with precision",
     "infoTitle": "⏱️ Track your work time",
     "description": "📋 **How it works:**\n• Select client and project\n• Enter date and hours worked\n• Add activity description\n• Monitor metrics and estimated value\n\n💡 **Use filters** to view specific periods and analyze your productivity by client.",
-    "addHours": "Add Hours",
+    "addHours": "Add Session",
     "addHoursFormSubtitle": "Record time spent on client projects",
     "editWorkHourTitle": "Edit Work Hours",
     "editHoursFormSubtitle": "Update the date, hours, or description of this entry",
