@@ -9,6 +9,12 @@ const nextConfig = {
   // Enable standalone output for Docker
   output: "standalone",
 
+  typescript: {
+    // Jest transpiles tests via babel and never type-checks them, so type
+    // drift in *.test.tsx only surfaces here. Skip them at build time.
+    tsconfigPath: "./tsconfig.build.json",
+  },
+
   // Environment variables configuration
   env: {
     NEXT_PUBLIC_API_URL:
