@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatHoursToHHMM } from "@/lib/utils";
+import { formatHoursToHHMM, resolveHourlyRate } from "@/lib/utils";
 import { TimeEntry } from "@/types";
 
 interface WorkHoursSelectorProps {
@@ -84,7 +84,7 @@ export function WorkHoursSelector({
       newSelectedIds.has(entry.id)
     );
     const totalAmount = selectedEntries.reduce((sum, entry) => {
-      const rate = entry.project?.hourlyRate ?? 0;
+      const rate = resolveHourlyRate(entry.project, entry.client);
       return sum + entry.hours * rate;
     }, 0);
     onSelectionChange(Array.from(newSelectedIds), totalAmount);
@@ -108,7 +108,7 @@ export function WorkHoursSelector({
       newSelectedIds.has(entry.id)
     );
     const totalAmount = selectedEntries.reduce((sum, entry) => {
-      const rate = entry.project?.hourlyRate ?? 0;
+      const rate = resolveHourlyRate(entry.project, entry.client);
       return sum + entry.hours * rate;
     }, 0);
     onSelectionChange(Array.from(newSelectedIds), totalAmount);
@@ -253,8 +253,8 @@ export function WorkHoursSelector({
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium">${(entry.hours * (entry.project?.hourlyRate ?? 0)).toFixed(2)}</div>
-                        <div className="text-xs text-muted-foreground">@ ${entry.project?.hourlyRate ?? 0}/hr</div>
+                        <div className="font-medium">${(entry.hours * resolveHourlyRate(entry.project, entry.client)).toFixed(2)}</div>
+                        <div className="text-xs text-muted-foreground">@ ${resolveHourlyRate(entry.project, entry.client)}/hr</div>
                       </div>
                     </div>
                   ))}

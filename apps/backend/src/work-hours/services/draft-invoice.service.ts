@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { resolveHourlyRate } from '../utils/resolve-hourly-rate.util';
 
 @Injectable()
 export class DraftInvoiceService {
@@ -14,7 +15,7 @@ export class DraftInvoiceService {
     const workHourIds: string[] = [];
 
     for (const wh of workHours) {
-      const hourlyRate = wh.project?.hourlyRate || 0;
+      const hourlyRate = resolveHourlyRate(wh.project, wh.client);
       totalAmount += wh.hours * hourlyRate;
       workHourIds.push(wh.id);
     }

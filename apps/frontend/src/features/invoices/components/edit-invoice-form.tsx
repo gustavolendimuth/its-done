@@ -22,6 +22,7 @@ import {
   useUploadInvoiceFile,
 } from "@/features/invoices/invoices";
 import { useAvailableTimeEntries } from "@/features/time-tracking";
+import { resolveHourlyRate } from "@/lib/utils";
 import { TimeEntry } from "@/types";
 
 import { InvoiceFileUpload } from "./invoice-file-upload";
@@ -104,7 +105,7 @@ export function EditInvoiceForm({
     setSelectedWorkHourIds(initialIds);
 
     const initialAmount = currentWorkHours.reduce((sum, entry) => {
-      const rate = entry.project?.hourlyRate ?? 0;
+      const rate = resolveHourlyRate(entry.project, entry.client);
       return sum + entry.hours * rate;
     }, 0);
     setCalculatedAmount(initialAmount);

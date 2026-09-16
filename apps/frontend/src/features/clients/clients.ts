@@ -38,6 +38,8 @@ export interface CreateClientDto {
   email: string;
   phone?: string;
   company: string;
+  /** Fallback hourly rate used to bill WorkHours that have no Project. */
+  hourlyRate?: number;
 }
 
 export interface UpdateClientDto extends Partial<CreateClientDto> {}

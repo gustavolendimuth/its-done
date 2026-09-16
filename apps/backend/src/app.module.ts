@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { WorkHoursModule } from './work-hours/work-hours.module';
 import { ClientsModule } from './clients/clients.module';
 import { ProjectsModule } from './projects/projects.module';
+import { TasksModule } from './tasks/tasks.module';
 import { SettingsModule } from './settings/settings.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { ReportsModule } from './reports/reports.module';
@@ -35,6 +36,7 @@ import { WorkSessionSchedulerService } from './work-sessions/services/work-sessi
     WorkHoursModule,
     ClientsModule,
     ProjectsModule,
+    TasksModule,
     AddressesModule,
     SettingsModule,
     InvoicesModule,

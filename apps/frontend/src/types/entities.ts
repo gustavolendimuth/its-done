@@ -26,6 +26,8 @@ export interface Client {
   phone?: string;
   company: string;
   userId: string;
+  /** Fallback hourly rate used to bill WorkHours that have no Project. */
+  hourlyRate?: number | null;
   createdAt: DateField;
   updatedAt: DateField;
   user?: User;
@@ -33,6 +35,7 @@ export interface Client {
   invoices?: Invoice[];
   addresses?: Address[];
   projects?: Project[];
+  tasks?: Task[];
   _count?: {
     workHours?: number;
     invoices?: number;
@@ -67,11 +70,28 @@ export interface WorkHour {
   userId: string;
   clientId: string;
   projectId?: string;
+  taskId?: string;
   createdAt: DateField;
   updatedAt: DateField;
   user?: User;
   client?: Client;
   project?: Project;
+  task?: Task;
+}
+
+export interface Task {
+  id: string;
+  userId: string;
+  clientId: string;
+  projectId?: string;
+  title: string;
+  link?: string;
+  createdAt: DateField;
+  updatedAt: DateField;
+  client?: Client;
+  project?: Project;
+  /** Sum of actual hours worked across this task's entries. */
+  totalHours?: number;
 }
 
 export interface Address {
@@ -139,17 +159,24 @@ export interface TimeEntry {
   hours: number;
   clientId: string;
   projectId?: string;
+  taskId?: string;
   client?: {
     id: string;
     name?: string;
     company: string;
     email: string;
+    hourlyRate?: number | null;
   };
   project?: {
     id: string;
     name: string;
     description?: string;
   hourlyRate?: number;
+  };
+  task?: {
+    id: string;
+    title: string;
+    link?: string;
   };
   invoiceWorkHours?: {
     invoice: {
@@ -171,4 +198,5 @@ export interface CreateTimeEntryDto {
   endTime?: string;
   clientId: string;
   projectId?: string;
+  taskId?: string;
 }

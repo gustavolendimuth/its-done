@@ -43,4 +43,8 @@ export class UpdateWorkHourDto {
   @IsOptional()
   @IsUUID()
   clientId?: string;
+
+  @IsOptional()
+  @IsUUID(4, { message: 'Task ID must be a valid UUID' })
+  taskId?: string;
 }

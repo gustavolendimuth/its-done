@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { UploadService, UploadResult } from './upload.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
+import { resolveHourlyRate } from '../work-hours/utils/resolve-hourly-rate.util';
 
 interface StatsFilters {
   from?: Date;
@@ -79,7 +80,8 @@ export class InvoicesService {
 
     const clientId = workHours[0].clientId;
 
-    // Compute amount based on project hourly rates when possible
+    // Compute amount based on project hourly rates, falling back to the
+    // client's default rate when a work hour has no project.
     const projectIds = Array.from(
       new Set(
         workHours
@@ -88,22 +90,23 @@ export class InvoicesService {
       ),
     );
 
-    const projects = projectIds.length
-      ? await this.prisma.project.findMany({
-          where: { id: { in: projectIds } },
-        })
-      : [];
+    const [projects, client] = await Promise.all([
+      projectIds.length
+        ? this.prisma.project.findMany({
+            where: { id: { in: projectIds } },
+          })
+        : Promise.resolve([]),
+      this.prisma.client.findUnique({ where: { id: clientId } }),
+    ]);
 
-    type ProjectRate = { id: string; hourlyRate?: number };
+    type ProjectRate = { id: string; hourlyRate?: number | null };
     const rateMap = new Map(
-      (projects as unknown as ProjectRate[]).map((p) => [
-        p.id,
-        p.hourlyRate ?? 0,
-      ]),
+      (projects as unknown as ProjectRate[]).map((p) => [p.id, p]),
     );
 
     const computedAmount = workHours.reduce((sum, wh) => {
-      const rate = wh.projectId ? (rateMap.get(wh.projectId) ?? 0) : 0;
+      const project = wh.projectId ? rateMap.get(wh.projectId) : undefined;
+      const rate = resolveHourlyRate(project, client);
       return sum + wh.hours * rate;
     }, 0);
 
@@ -131,12 +134,8 @@ export class InvoicesService {
       },
     });
 
-    // Enviar notificação ao cliente sobre a nova invoice
-    const client = await this.prisma.client.findUnique({
-      where: { id: clientId },
-      select: { email: true },
-    });
-
+    // Enviar notificação ao cliente sobre a nova invoice (reaproveita o
+    // client já buscado acima para resolver a rate)
     if (client?.email) {
       try {
         await this.notificationsService.sendInvoiceUploadNotification(

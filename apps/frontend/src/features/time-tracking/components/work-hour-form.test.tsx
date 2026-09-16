@@ -95,6 +95,25 @@ jest.mock("@/components/ui/project-combobox", () => ({
   ),
 }));
 
+jest.mock("@/components/ui/task-combobox", () => ({
+  TaskCombobox: ({
+    value,
+    onSelect,
+  }: {
+    value?: string;
+    onSelect: (value: string | null) => void;
+  }) => (
+    <select
+      data-testid="task-combobox"
+      value={value ?? ""}
+      onChange={(e) => onSelect(e.target.value || null)}
+    >
+      <option value="">select</option>
+      <option value="task-1">Fix login bug</option>
+    </select>
+  ),
+}));
+
 const mockCreateMutateAsync = jest.fn();
 const mockUpdateMutateAsync = jest.fn();
 const mockUseUpdateTimeEntry = jest.fn();
@@ -158,6 +177,55 @@ describe("WorkHourForm", () => {
 
     await waitFor(() => expect(mockCreateMutateAsync).toHaveBeenCalled());
     expect(mockUpdateMutateAsync).not.toHaveBeenCalled();
+  });
+
+  it("create mode: renders the task field and submits with the selected taskId", async () => {
+    mockCreateMutateAsync.mockResolvedValueOnce({ id: "wh-new" });
+
+    renderWithQueryClient(<WorkHourForm clients={mockClients} />);
+
+    expect(screen.getByTestId("task-combobox")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId("client-combobox"), {
+      target: { value: "client-1" },
+    });
+    fireEvent.change(screen.getByTestId("project-combobox"), {
+      target: { value: "project-1" },
+    });
+    fireEvent.change(screen.getByTestId("task-combobox"), {
+      target: { value: "task-1" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("HH:mm"), {
+      target: { value: "0130" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "saveWorkHour" }));
+
+    await waitFor(() => expect(mockCreateMutateAsync).toHaveBeenCalled());
+    const payload = mockCreateMutateAsync.mock.calls[0][0];
+    expect(payload.taskId).toBe("task-1");
+  });
+
+  it("create mode: submits without a taskId when none is selected", async () => {
+    mockCreateMutateAsync.mockResolvedValueOnce({ id: "wh-new" });
+
+    renderWithQueryClient(<WorkHourForm clients={mockClients} />);
+
+    fireEvent.change(screen.getByTestId("client-combobox"), {
+      target: { value: "client-1" },
+    });
+    fireEvent.change(screen.getByTestId("project-combobox"), {
+      target: { value: "project-1" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("HH:mm"), {
+      target: { value: "0130" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "saveWorkHour" }));
+
+    await waitFor(() => expect(mockCreateMutateAsync).toHaveBeenCalled());
+    const payload = mockCreateMutateAsync.mock.calls[0][0];
+    expect(payload.taskId).toBeUndefined();
   });
 
   it("create mode: renders the entry-mode selector defaulted to Duração", () => {

@@ -111,6 +111,7 @@ export class WorkSessionsService {
         return this.applyStart(userId, event.sessionId, clientTimestamp, {
           clientId: event.clientId,
           projectId: event.projectId,
+          taskId: event.taskId,
           description: event.description,
         });
       case SyncEventType.CONFIRM:
@@ -130,7 +131,12 @@ export class WorkSessionsService {
     userId: string,
     sessionId: string,
     clientTimestamp: Date,
-    details?: { clientId?: string; projectId?: string; description?: string },
+    details?: {
+      clientId?: string;
+      projectId?: string;
+      taskId?: string;
+      description?: string;
+    },
   ): Promise<{ discarded?: DiscardedInfo } | void> {
     const now = new Date();
 
@@ -148,6 +154,7 @@ export class WorkSessionsService {
     const upfrontDetails = {
       clientId: details?.clientId ?? null,
       projectId: details?.projectId ?? null,
+      taskId: details?.taskId ?? null,
       description: details?.description ?? null,
     };
 

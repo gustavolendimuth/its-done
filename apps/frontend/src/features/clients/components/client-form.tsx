@@ -20,6 +20,7 @@ interface ClientFormData {
   email: string;
   phone?: string;
   company: string;
+  hourlyRate?: string;
 }
 
 interface ClientFormProps {
@@ -33,6 +34,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
     email: "",
     phone: "",
     company: "",
+    hourlyRate: "",
   });
   const [createdClient, setCreatedClient] = useState<Client | null>(null);
   const { data: addresses } = useClientAddresses(createdClient?.id || "");
@@ -62,6 +64,9 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
       email: formData.email.trim(),
       ...(formData.name?.trim() && { name: formData.name.trim() }),
       ...(formData.phone?.trim() && { phone: formData.phone.trim() }),
+      ...(formData.hourlyRate?.trim() && {
+        hourlyRate: Number(formData.hourlyRate),
+      }),
     };
 
     console.log("Clean client data to be sent:", cleanClientData);
@@ -83,6 +88,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           email: "",
           name: "",
           phone: "",
+          hourlyRate: "",
         });
 
         // Invalidate queries to refresh data
@@ -111,7 +117,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
   };
 
   const handleFinish = () => {
-    setFormData({ name: "", email: "", phone: "", company: "" });
+    setFormData({ name: "", email: "", phone: "", company: "", hourlyRate: "" });
     setCreatedClient(null);
     onSuccess?.();
   };
@@ -225,6 +231,28 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           onChange={handleChange}
           placeholder="(11) 99999-9999"
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label
+          htmlFor="hourlyRate"
+          className="text-sm font-medium text-foreground"
+        >
+          {t("hourlyRate")}
+        </Label>
+        <Input
+          type="number"
+          id="hourlyRate"
+          name="hourlyRate"
+          step="0.01"
+          min="0"
+          value={formData.hourlyRate || ""}
+          onChange={handleChange}
+          placeholder={t("enterHourlyRate")}
+        />
+        <p className="text-sm text-muted-foreground">
+          {t("hourlyRateDescription")}
+        </p>
       </div>
 
       {createClientMutation.isError && (

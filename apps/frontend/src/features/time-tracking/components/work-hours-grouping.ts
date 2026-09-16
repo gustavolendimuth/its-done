@@ -17,6 +17,11 @@ export interface WorkHourRow {
     id: string;
     name: string;
   };
+  task?: {
+    id: string;
+    title: string;
+    link?: string | null;
+  };
   createdAt: string | Date;
   invoiceWorkHours?: {
     invoice: {

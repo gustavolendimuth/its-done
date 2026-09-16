@@ -40,6 +40,11 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
     email: z.string().email(t("validationInvalidEmail")),
     phone: z.string().min(1, t("validationPhoneRequired")),
     company: z.string().min(1, t("validationCompanyRequired")),
+    hourlyRate: z
+      .number()
+      .min(0, { message: "Hourly rate must be 0 or greater" })
+      .optional()
+      .nullable(),
   });
 
   type ClientFormData = z.infer<typeof clientFormSchema>;
@@ -58,14 +63,19 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
       email: client.email,
       phone: client.phone,
       company: client.company,
+      hourlyRate: client.hourlyRate ?? null,
     },
   });
 
   const onSubmit = async (data: ClientFormData) => {
     try {
+      const formattedData = {
+        ...data,
+        hourlyRate: data.hourlyRate === null ? undefined : data.hourlyRate,
+      };
       await updateClient.mutateAsync({
         id: client.id,
-        data: data as UpdateClientDto,
+        data: formattedData as UpdateClientDto,
       });
       setOpen(false);
     } catch (error) {
@@ -102,7 +112,11 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
         className="sm:max-w-[600px]"
       >
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            noValidate
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="company"
@@ -150,6 +164,30 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
                   <FormLabel>{t("phone")}</FormLabel>
                   <FormControl>
                     <PhoneInput {...field} placeholder="(11) 99999-9999" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="hourlyRate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("hourlyRate")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === "" ? null : Number(e.target.value)
+                        )
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

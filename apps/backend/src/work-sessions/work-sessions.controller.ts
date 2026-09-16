@@ -128,6 +128,7 @@ export class WorkSessionsController {
       hours: session.hours ?? 0,
       clientId: dto.clientId,
       projectId: dto.projectId,
+      taskId: dto.taskId,
       description: dto.description,
     });
 

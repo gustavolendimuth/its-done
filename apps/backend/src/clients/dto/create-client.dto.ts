@@ -3,6 +3,8 @@ import {
   IsString,
   IsNotEmpty,
   IsOptional,
+  IsNumber,
+  Min,
   MinLength,
   MaxLength,
 } from 'class-validator';
@@ -28,4 +30,9 @@ export class CreateClientDto {
   @MinLength(2, { message: 'Company must be at least 2 characters long' })
   @MaxLength(100, { message: 'Company must not exceed 100 characters' })
   company: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  hourlyRate?: number;
 }

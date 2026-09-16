@@ -55,6 +55,7 @@ export function useWorkTimerEngine(): WorkTimerEngineState {
 export interface FinishWorkSessionDto {
   clientId: string;
   projectId?: string;
+  taskId?: string;
   description: string;
   // WKT-11: ISO date string — the day to log the WorkHour under, which may
   // differ from the session's own startedAt day.

@@ -14,6 +14,7 @@ import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
+import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { Client } from "@/features/clients";
 
@@ -79,6 +80,7 @@ function buildSchema(
   if (includeClientProject) {
     shape.clientId = z.string().min(1, "Client is required");
     shape.projectId = z.string().min(1, "Project is required");
+    shape.taskId = z.string().optional();
   }
 
   return z.object(shape).superRefine((data, ctx) => {
@@ -131,6 +133,7 @@ type WorkHourFormData = {
   endTime: string;
   clientId?: string;
   projectId?: string;
+  taskId?: string;
 };
 
 interface EditableWorkHour {
@@ -189,6 +192,7 @@ export function WorkHourForm({
     defaultValues: {
       date: workHour ? new Date(workHour.date) : new Date(),
       projectId: "",
+      taskId: "",
       hours: workHour ? decimalHoursToHHmm(workHour.hours) : "",
       startTime: workHour?.startTime ?? "",
       endTime: workHour?.endTime ?? "",
@@ -201,9 +205,10 @@ export function WorkHourForm({
   const isInvoiced = !!workHour?.isInvoiced;
   const fieldsDisabled = isEditMode && isInvoiced;
 
-  // Reset project when client changes
+  // Reset project/task when client changes
   useEffect(() => {
     setValue("projectId", "");
+    setValue("taskId", "");
   }, [selectedClientId, setValue]);
 
   const createTimeEntry = useCreateTimeEntry();
@@ -275,6 +280,7 @@ export function WorkHourForm({
         hours: decimalHours,
         clientId: formData.clientId,
         projectId: formData.projectId || undefined,
+        taskId: formData.taskId || undefined,
         description: formData.description || undefined,
       };
       if (entryMode === "interval") {
@@ -409,6 +415,27 @@ export function WorkHourForm({
               {t("selectClientFirst")}
             </p>
           )}
+        </div>
+      )}
+
+      {!isEditMode && (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-foreground">
+            {t("task")}
+          </Label>
+          <Controller
+            name="taskId"
+            control={control}
+            render={({ field }) => (
+              <TaskCombobox
+                clientId={selectedClientId}
+                value={field.value}
+                onSelect={(taskId) => field.onChange(taskId ?? "")}
+                disabled={!selectedClientId}
+                allowClear
+              />
+            )}
+          />
         </div>
       )}
 

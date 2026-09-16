@@ -94,6 +94,7 @@ async function persist(
 export interface StartDetails {
   clientId?: string;
   projectId?: string;
+  taskId?: string;
   description?: string;
 }
 
@@ -122,6 +123,7 @@ export async function start(details?: StartDetails): Promise<LocalWorkSession> {
     hours: null,
     clientId: details?.clientId ?? null,
     projectId: details?.projectId ?? null,
+    taskId: details?.taskId ?? null,
     description: details?.description ?? null,
   };
 
@@ -135,6 +137,7 @@ export async function start(details?: StartDetails): Promise<LocalWorkSession> {
     clientTimestamp: now,
     ...(details?.clientId ? { clientId: details.clientId } : {}),
     ...(details?.projectId ? { projectId: details.projectId } : {}),
+    ...(details?.taskId ? { taskId: details.taskId } : {}),
     ...(details?.description ? { description: details.description } : {}),
   });
 
