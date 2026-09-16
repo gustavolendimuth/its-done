@@ -10,14 +10,14 @@
       "error",
       {
         "groups": [
+          "type",
           "builtin",
           "external",
-          "internal",
-          "parent",
           "sibling",
+          "parent",
+          "internal",
           "index",
-          "object",
-          "type"
+          "object"
         ],
         "newlines-between": "always",
         "alphabetize": {

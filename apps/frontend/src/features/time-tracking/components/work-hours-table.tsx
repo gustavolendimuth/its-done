@@ -1,6 +1,12 @@
 "use client";
 
-import { isSameDay, isSameMonth, isSameWeek, subMonths, format } from "date-fns";
+import {
+  isSameDay,
+  isSameMonth,
+  isSameWeek,
+  subMonths,
+  format,
+} from "date-fns";
 import { enUS, ptBR } from "date-fns/locale";
 import {
   Building2,
@@ -12,6 +18,8 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Fragment, useMemo, useState } from "react";
+
+import { groupByMonthAndWeek, type WorkHourRow } from "./work-hours-grouping";
 
 import {
   AlertDialog,
@@ -37,8 +45,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
-
-import { groupByMonthAndWeek, type WorkHourRow } from "./work-hours-grouping";
 
 export type { WorkHourRow } from "./work-hours-grouping";
 
@@ -89,12 +95,12 @@ export function WorkHoursTable({
 
   const monthGroups = useMemo(
     () => groupByMonthAndWeek(filteredWorkHours),
-    [filteredWorkHours]
+    [filteredWorkHours],
   );
 
   const grandTotal = useMemo(
     () => filteredWorkHours.reduce((sum, w) => sum + w.hours, 0),
-    [filteredWorkHours]
+    [filteredWorkHours],
   );
 
   const capitalize = (label: string) =>
@@ -128,7 +134,7 @@ export function WorkHoursTable({
 
   const dateCellLabel = (date: Date) =>
     `${format(date, "dd/MM")}, ${capitalize(
-      format(date, "EEEE", { locale: dateLocale })
+      format(date, "EEEE", { locale: dateLocale }),
     )}`;
 
   if (workHours.length === 0) {
@@ -157,7 +163,9 @@ export function WorkHoursTable({
         />
         <span className="text-sm text-muted-foreground">
           {filteredWorkHours.length}{" "}
-          {filteredWorkHours.length === 1 ? tCommon("entry") : tCommon("entries")}{" "}
+          {filteredWorkHours.length === 1
+            ? tCommon("entry")
+            : tCommon("entries")}{" "}
           {tCommon("found")}
         </span>
       </div>
@@ -305,7 +313,10 @@ export function WorkHoursTable({
                                     </Badge>
                                   </a>
                                 ) : (
-                                  <Badge variant="outline" className="font-normal gap-1">
+                                  <Badge
+                                    variant="outline"
+                                    className="font-normal gap-1"
+                                  >
                                     <ListChecks className="h-3 w-3" />
                                     <span className="truncate max-w-[160px]">
                                       {workHour.task.title}
@@ -348,7 +359,9 @@ export function WorkHoursTable({
                               )}
                             </TableCell>
 
-                            <TableCell onClick={(event) => event.stopPropagation()}>
+                            <TableCell
+                              onClick={(event) => event.stopPropagation()}
+                            >
                               <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
@@ -371,7 +384,7 @@ export function WorkHoursTable({
                                       <AlertDialogDescription>
                                         {t("deleteWorkHourDescription", {
                                           hours: formatHoursToHHMM(
-                                            workHour.hours
+                                            workHour.hours,
                                           ),
                                           client: clientLabel,
                                         })}

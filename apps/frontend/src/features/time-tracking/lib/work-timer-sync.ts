@@ -1,5 +1,3 @@
-import api from "@/lib/axios";
-
 import {
   getPendingEvents,
   ackEvents,
@@ -10,6 +8,8 @@ import {
   LocalWorkSessionStatus,
 } from "./work-timer-db";
 import { applyAuthoritativeSession } from "./work-timer-engine";
+
+import api from "@/lib/axios";
 
 export interface DiscardedNotice {
   sessionId: string;
@@ -122,7 +122,7 @@ export async function hydrateFromServer(): Promise<void> {
   let remote: RemoteWorkSession | null;
   try {
     const response = await api.get<{ session: RemoteWorkSession | null }>(
-      "/work-sessions/active"
+      "/work-sessions/active",
     );
     remote = response.data.session;
   } catch {

@@ -3,6 +3,9 @@
 import { Bell } from "lucide-react";
 import { useState } from "react";
 
+import { NotificationList } from "./notification-list";
+import { useUnreadNotificationCount } from "./notifications.service";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,9 +13,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-import { NotificationList } from "./notification-list";
-import { useUnreadNotificationCount } from "./notifications.service";
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);

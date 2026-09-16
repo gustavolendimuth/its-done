@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 
@@ -139,9 +139,7 @@ describe("Topbar", () => {
     fireEvent.click(addHoursButton);
 
     // Check if modal is opened
-    expect(
-      screen.getByText("addHoursFormSubtitle")
-    ).toBeInTheDocument();
+    expect(screen.getByText("addHoursFormSubtitle")).toBeInTheDocument();
   });
 
   it("should close add hours modal when clicking outside", () => {
@@ -164,17 +162,13 @@ describe("Topbar", () => {
     fireEvent.click(addHoursButton);
 
     // Check if modal is opened
-    expect(
-      screen.getByText("addHoursFormSubtitle")
-    ).toBeInTheDocument();
+    expect(screen.getByText("addHoursFormSubtitle")).toBeInTheDocument();
 
     // Close the modal (Radix Dialog closes on Escape)
     fireEvent.keyDown(document, { key: "Escape", code: "Escape" });
 
     // Check if modal is closed
-    expect(
-      screen.queryByText("addHoursFormSubtitle")
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("addHoursFormSubtitle")).not.toBeInTheDocument();
   });
 
   it("should display user information in dropdown menu", async () => {

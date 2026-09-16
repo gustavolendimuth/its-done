@@ -1,13 +1,10 @@
 "use client";
 
+import type { InvoiceReport } from "../types";
+
 import { useTranslations } from "next-intl";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -16,8 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import type { InvoiceReport } from "../types";
 
 export interface InvoiceReportSectionProps {
   invoiceReport: InvoiceReport;

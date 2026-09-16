@@ -308,8 +308,7 @@ export class WorkHoursService {
         where: { id: updateWorkHourDto.taskId },
       });
 
-      const effectiveClientId =
-        updateWorkHourDto.clientId ?? workHour.clientId;
+      const effectiveClientId = updateWorkHourDto.clientId ?? workHour.clientId;
 
       if (!task || task.clientId !== effectiveClientId) {
         throw new BadRequestException(

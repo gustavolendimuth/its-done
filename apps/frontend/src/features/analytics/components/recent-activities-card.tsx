@@ -1,5 +1,7 @@
 "use client";
 
+import type { DashboardStats } from "@/features/dashboard";
+
 import { format } from "date-fns";
 import { Activity, Calendar, Clock, FileText, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -12,8 +14,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
-import type { DashboardStats } from "@/features/dashboard";
 
 export interface RecentActivitiesCardProps {
   activities: DashboardStats["recentActivities"];
@@ -62,7 +62,7 @@ export function RecentActivitiesCard({
                   className={cn(
                     "overflow-hidden group relative transition-all duration-200 hover:shadow-lg hover:scale-[1.02]",
                     "bg-gradient-to-br",
-                    gradientClasses
+                    gradientClasses,
                   )}
                 >
                   {/* Accent bar */}
@@ -74,7 +74,7 @@ export function RecentActivitiesCard({
                       <div
                         className={cn(
                           "h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold",
-                          iconBgColor
+                          iconBgColor,
                         )}
                       >
                         {activity.type === "work_hour" && (
@@ -96,9 +96,9 @@ export function RecentActivitiesCard({
                               activity.description.key,
                               Object.fromEntries(
                                 Object.entries(activity.description.values).map(
-                                  ([key, value]) => [key, value ?? ""]
-                                )
-                              )
+                                  ([key, value]) => [key, value ?? ""],
+                                ),
+                              ),
                             )}
                           </h3>
                         </div>
@@ -112,7 +112,9 @@ export function RecentActivitiesCard({
                   <CardContent>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4" />
-                      <span>{format(new Date(activity.date), "MMM dd, HH:mm")}</span>
+                      <span>
+                        {format(new Date(activity.date), "MMM dd, HH:mm")}
+                      </span>
                       {activity.client && (
                         <>
                           <Users className="h-4 w-4 ml-2" />

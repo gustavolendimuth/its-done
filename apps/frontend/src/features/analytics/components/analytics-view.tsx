@@ -1,10 +1,22 @@
 "use client";
 
+import type { ReportFilters, ReportType } from "../types";
+
 import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import { BarChart3, Download, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+
+import { AnalyticsOverviewTab } from "./analytics-overview-tab";
+import { AnalyticsPageSkeleton } from "./analytics-page-skeleton";
+import { AnalyticsReportsTab } from "./analytics-reports-tab";
+
+import {
+  useHoursReport,
+  useInvoiceReport,
+  useSummaryReport,
+} from "../reports.service";
 
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
@@ -13,14 +25,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClients } from "@/features/clients";
 import { useDashboardStats } from "@/features/dashboard";
 import { useTimeEntries } from "@/features/time-tracking";
-
-import { useHoursReport, useInvoiceReport, useSummaryReport } from "../reports.service";
-
-import { AnalyticsOverviewTab } from "./analytics-overview-tab";
-import { AnalyticsPageSkeleton } from "./analytics-page-skeleton";
-import { AnalyticsReportsTab } from "./analytics-reports-tab";
-
-import type { ReportFilters, ReportType } from "../types";
 
 const COLORS = [
   "#0088FE",
@@ -59,7 +63,7 @@ export function AnalyticsView() {
     isLoading: hoursLoading,
     refetch: refetchHours,
   } = useHoursReport(
-    reportType === "hours" || reportType === "summary" ? filters : undefined
+    reportType === "hours" || reportType === "summary" ? filters : undefined,
   );
 
   const {
@@ -67,7 +71,7 @@ export function AnalyticsView() {
     isLoading: invoiceLoading,
     refetch: refetchInvoices,
   } = useInvoiceReport(
-    reportType === "invoices" || reportType === "summary" ? filters : undefined
+    reportType === "invoices" || reportType === "summary" ? filters : undefined,
   );
 
   const {
@@ -77,7 +81,7 @@ export function AnalyticsView() {
   } = useSummaryReport(
     reportType === "summary"
       ? { startDate: filters.startDate, endDate: filters.endDate }
-      : undefined
+      : undefined,
   );
 
   const isLoading =
@@ -132,7 +136,7 @@ export function AnalyticsView() {
   };
 
   const handleQuickDateRange = (
-    range: "thisMonth" | "lastMonth" | "last3Months"
+    range: "thisMonth" | "lastMonth" | "last3Months",
   ) => {
     const now = new Date();
     let startDate: Date;

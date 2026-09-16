@@ -15,6 +15,8 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ProjectEditDialog } from "./project-edit-dialog";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,8 +32,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn, formatTimeAgo } from "@/lib/utils";
-
-import { ProjectEditDialog } from "./project-edit-dialog";
 
 interface ProjectCardProps {
   project: {
@@ -116,7 +116,7 @@ export function ProjectCard({
       <Card
         className={cn(
           "overflow-hidden relative hover:shadow-lg rounded-b-none flex-1",
-          "bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-950/20 dark:to-indigo-900/20 border-indigo-200 dark:border-indigo-800"
+          "bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-950/20 dark:to-indigo-900/20 border-indigo-200 dark:border-indigo-800",
         )}
       >
         {/* Accent bar */}

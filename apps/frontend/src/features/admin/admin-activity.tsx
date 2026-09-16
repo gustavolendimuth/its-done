@@ -3,11 +3,11 @@
 import { format } from "date-fns";
 import { Clock, FileText, UserPlus } from "lucide-react";
 
+import { useRecentActivity } from "./admin.service";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-
-import { useRecentActivity } from "./admin.service";
 
 // Tipos específicos para activity baseados no retorno da API
 interface ActivityWorkHour {

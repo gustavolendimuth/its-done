@@ -1,5 +1,8 @@
 "use client";
 
+import type { ReportFilters, ReportType } from "../types";
+import type { Client } from "@/features/clients";
+
 import { format } from "date-fns";
 import { Filter } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -22,18 +25,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type { ReportFilters, ReportType } from "../types";
-import type { Client } from "@/features/clients";
-
 export interface ReportFiltersCardProps {
   filters: ReportFilters;
   reportType: ReportType;
   clients: Client[] | undefined;
   onFilterChange: (key: keyof ReportFilters, value: string) => void;
   onReportTypeChange: (value: ReportType) => void;
-  onQuickDateRange: (
-    range: "thisMonth" | "lastMonth" | "last3Months"
-  ) => void;
+  onQuickDateRange: (range: "thisMonth" | "lastMonth" | "last3Months") => void;
 }
 
 export function ReportFiltersCard({
@@ -64,7 +62,7 @@ export function ReportFiltersCard({
               onChange={(date) =>
                 onFilterChange(
                   "startDate",
-                  date ? format(date, "yyyy-MM-dd") : ""
+                  date ? format(date, "yyyy-MM-dd") : "",
                 )
               }
               placeholder={t("pickStartDate")}
@@ -81,7 +79,7 @@ export function ReportFiltersCard({
               onChange={(date) =>
                 onFilterChange(
                   "endDate",
-                  date ? format(date, "yyyy-MM-dd") : ""
+                  date ? format(date, "yyyy-MM-dd") : "",
                 )
               }
               placeholder={t("pickEndDate")}

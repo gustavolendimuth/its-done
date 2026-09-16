@@ -1,5 +1,7 @@
 "use client";
 
+import type { Task } from "./tasks.service";
+
 import {
   ListChecks,
   Building2,
@@ -12,6 +14,8 @@ import {
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
+
+import { TaskEditDialog } from "./task-edit-dialog";
 
 import {
   AlertDialog,
@@ -29,17 +33,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-import { TaskEditDialog } from "./task-edit-dialog";
-
-import type { Task } from "./tasks.service";
-
 interface TaskCardProps {
   task: Task;
   onDelete: (taskId: string) => void;
   isDeleting?: boolean;
 }
 
-export function TaskCard({ task, onDelete, isDeleting = false }: TaskCardProps) {
+export function TaskCard({
+  task,
+  onDelete,
+  isDeleting = false,
+}: TaskCardProps) {
   const t = useTranslations("tasks");
   const tCommon = useTranslations("common");
   const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -67,7 +71,7 @@ export function TaskCard({ task, onDelete, isDeleting = false }: TaskCardProps) 
       <Card
         className={cn(
           "overflow-hidden relative hover:shadow-lg rounded-b-none flex-1",
-          "bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-teal-950/20 dark:to-teal-900/20 border-teal-200 dark:border-teal-800"
+          "bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-teal-950/20 dark:to-teal-900/20 border-teal-200 dark:border-teal-800",
         )}
       >
         <div className="h-2 bg-teal-500" />

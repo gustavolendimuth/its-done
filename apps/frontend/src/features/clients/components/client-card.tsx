@@ -20,10 +20,10 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import {
-  BigCardStat,
-  BigCardContactInfo,
-} from "@/components/ui/big-card";
+import { ClientAddresses } from "./client-addresses";
+import { ClientShareMenu } from "./client-share-menu";
+
+import { BigCardStat, BigCardContactInfo } from "@/components/ui/big-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -40,11 +40,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { useClientSpecificStats } from "@/features/clients/client-stats";
 import { useUpdateClient, UpdateClientDto } from "@/features/clients/clients";
 import { Client } from "@/features/clients/types";
-import { cn , formatHoursToHHMM } from "@/lib/utils";
-
-import { ClientAddresses } from "./client-addresses";
-import { ClientShareMenu } from "./client-share-menu";
-
+import { cn, formatHoursToHHMM } from "@/lib/utils";
 
 interface ClientCardProps {
   client: Client;
@@ -95,7 +91,7 @@ export function ClientCard({ client }: ClientCardProps) {
       });
       setIsEditModalOpen(false);
       toast.success(t("clientUpdatedSuccessfully"));
-  } catch (_error) {
+    } catch (_error) {
       console.error("Failed to update client:", _error);
       toast.error(t("failedToUpdateClient"));
     }
@@ -132,7 +128,7 @@ export function ClientCard({ client }: ClientCardProps) {
       <Card
         className={cn(
           "overflow-hidden relative hover:shadow-lg rounded-b-none",
-          "bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20 border-blue-200 dark:border-blue-800"
+          "bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20 border-blue-200 dark:border-blue-800",
         )}
       >
         {/* Accent bar */}

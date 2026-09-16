@@ -1,6 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
+import { useProfile, useUpdateProfile } from "./profile.service";
+import { profileFormSchema, type ProfileFormValues } from "./types";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,9 +17,6 @@ import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-
-import { useProfile, useUpdateProfile } from "./profile.service";
-import { profileFormSchema, type ProfileFormValues } from "./types";
 
 export function ProfileForm() {
   const { toast } = useToast();

@@ -1,10 +1,15 @@
 "use client";
 
+import type { LocalWorkSession } from "../lib/work-timer-db";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+
+import { reset } from "../lib/work-timer-engine";
+import { useFinishWorkSession, useWorkTimerEngine } from "../work-sessions";
 
 import {
   AlertDialog,
@@ -26,14 +31,6 @@ import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { useClients } from "@/features/clients";
-
-import { reset } from "../lib/work-timer-engine";
-import {
-  useFinishWorkSession,
-  useWorkTimerEngine,
-} from "../work-sessions";
-
-import type { LocalWorkSession } from "../lib/work-timer-db";
 
 export interface WorkSessionFinishFormProps {
   session: LocalWorkSession;
@@ -70,7 +67,7 @@ function formatHours(hours: number | null | undefined): string {
 
 function useOnlineStatus(): boolean {
   const [isOnline, setIsOnline] = useState(() =>
-    typeof window === "undefined" ? true : navigator.onLine
+    typeof window === "undefined" ? true : navigator.onLine,
   );
 
   useEffect(() => {
@@ -254,7 +251,10 @@ export function WorkSessionFinishForm({
               name="description"
               control={control}
               render={({ field }) => (
-                <Textarea {...field} placeholder={t("descriptionPlaceholder")} />
+                <Textarea
+                  {...field}
+                  placeholder={t("descriptionPlaceholder")}
+                />
               )}
             />
             {errors.description && (

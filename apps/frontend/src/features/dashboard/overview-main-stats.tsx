@@ -1,9 +1,9 @@
+import type { OverviewStats } from "./overview";
+
 import { CheckCircle, Clock, DollarSign, FileText } from "lucide-react";
 
 import { StatsCard } from "@/components/ui/stats-card";
 import { formatHoursToHHMM } from "@/lib/utils";
-
-import type { OverviewStats } from "./overview";
 
 export interface OverviewMainStatsProps {
   stats: OverviewStats;

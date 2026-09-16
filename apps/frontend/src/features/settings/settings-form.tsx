@@ -8,6 +8,13 @@ import { useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import {
+  ALLOWED_ROUNDING_INCREMENTS,
+  useSettings,
+  useUpdateSettings,
+  type RoundingIncrementMinutes,
+} from "./settings.service";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,14 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import {
-  ALLOWED_ROUNDING_INCREMENTS,
-  useSettings,
-  useUpdateSettings,
-  type RoundingIncrementMinutes,
-} from "./settings.service";
-
 
 const settingsSchema = z.object({
   alertHours: z
@@ -116,7 +115,7 @@ export function SettingsForm() {
           toast.error(errorMessage);
           setIsSubmitting(false);
         },
-      }
+      },
     );
   };
 
@@ -228,9 +227,7 @@ export function SettingsForm() {
                   <Select
                     value={String(field.value)}
                     onValueChange={(value) =>
-                      field.onChange(
-                        Number(value) as RoundingIncrementMinutes
-                      )
+                      field.onChange(Number(value) as RoundingIncrementMinutes)
                     }
                     disabled={isSubmitting}
                   >

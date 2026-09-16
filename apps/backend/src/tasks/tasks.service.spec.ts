@@ -35,10 +35,7 @@ describe('TasksService', () => {
       prismaMock.client.findFirst.mockResolvedValueOnce({ id: 'client-1' });
       prismaMock.task.create.mockResolvedValueOnce({ id: 'task-1' });
 
-      await service.create(
-        { title: 'Fix bug', clientId: 'client-1' },
-        userId,
-      );
+      await service.create({ title: 'Fix bug', clientId: 'client-1' }, userId);
 
       expect(prismaMock.client.findFirst).toHaveBeenCalledWith({
         where: { id: 'client-1', userId },
