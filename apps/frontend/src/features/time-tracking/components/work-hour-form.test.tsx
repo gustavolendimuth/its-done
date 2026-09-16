@@ -228,6 +228,26 @@ describe("WorkHourForm", () => {
     expect(payload.taskId).toBeUndefined();
   });
 
+  it("create mode: submits without a projectId when none is selected (Story 8)", async () => {
+    mockCreateMutateAsync.mockResolvedValueOnce({ id: "wh-new" });
+
+    renderWithQueryClient(<WorkHourForm clients={mockClients} />);
+
+    fireEvent.change(screen.getByTestId("client-combobox"), {
+      target: { value: "client-1" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("HH:mm"), {
+      target: { value: "0130" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "saveWorkHour" }));
+
+    await waitFor(() => expect(mockCreateMutateAsync).toHaveBeenCalled());
+    const payload = mockCreateMutateAsync.mock.calls[0][0];
+    expect(payload.projectId).toBeUndefined();
+    expect(payload.clientId).toBe("client-1");
+  });
+
   it("create mode: renders the entry-mode selector defaulted to Duração", () => {
     renderWithQueryClient(<WorkHourForm clients={mockClients} />);
 

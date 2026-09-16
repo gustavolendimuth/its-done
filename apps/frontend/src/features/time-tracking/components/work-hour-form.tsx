@@ -79,7 +79,11 @@ function buildSchema(
   };
   if (includeClientProject) {
     shape.clientId = z.string().min(1, "Client is required");
-    shape.projectId = z.string().min(1, "Project is required");
+    // Story 8 (MW-5): Project is optional — dev work logged without one
+    // must not be forced into inventing a fake Project just to satisfy the
+    // form. Client is still required (mirrors the backend, which always
+    // needs a clientId).
+    shape.projectId = z.string().optional();
     shape.taskId = z.string().optional();
   }
 
@@ -390,7 +394,7 @@ export function WorkHourForm({
       {!isEditMode && (
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">
-            {t("project")} *
+            {t("project")}
           </Label>
           <Controller
             name="projectId"
@@ -399,9 +403,10 @@ export function WorkHourForm({
               <ProjectCombobox
                 clientId={selectedClientId}
                 value={field.value}
-                onSelect={field.onChange}
+                onSelect={(projectId) => field.onChange(projectId ?? "")}
                 placeholder={t("selectProject")}
                 disabled={!selectedClientId}
+                allowClear
               />
             )}
           />
