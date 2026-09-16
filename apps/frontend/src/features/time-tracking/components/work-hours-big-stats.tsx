@@ -10,14 +10,14 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { useWorkHoursStats } from "../work-hours-stats";
+
 import {
   BigStatsDisplay,
   BigStatItem,
 } from "@/components/ui/big-stats-display";
 import { formatHoursToHHMM } from "@/lib/utils";
 import { TimeEntry } from "@/types";
-
-import { useWorkHoursStats } from "../work-hours-stats";
 
 interface WorkHoursBigStatsProps {
   dateRange?: {
@@ -75,13 +75,13 @@ export function WorkHoursBigStats({
     "📊 WorkHoursBigStats - isPeriodLoading:",
     isPeriodLoading,
     "isPeriodFetching:",
-    isPeriodFetching
+    isPeriodFetching,
   );
   console.log(
     "📊 WorkHoursBigStats - isTotalLoading:",
     isTotalLoading,
     "isTotalFetching:",
-    isTotalFetching
+    isTotalFetching,
   );
 
   // Values for display

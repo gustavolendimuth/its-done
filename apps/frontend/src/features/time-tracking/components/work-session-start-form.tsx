@@ -1,5 +1,7 @@
 "use client";
 
+import type { StartDetails } from "../lib/work-timer-engine";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ClipboardList } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -21,8 +23,6 @@ import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { useClients } from "@/features/clients";
-
-import type { StartDetails } from "../lib/work-timer-engine";
 
 export interface WorkSessionStartFormProps {
   onCancel: () => void;
@@ -48,7 +48,7 @@ type StartFormData = z.infer<ReturnType<typeof buildStartFormSchema>>;
 
 function useOnlineStatus(): boolean {
   const [isOnline, setIsOnline] = useState(() =>
-    typeof window === "undefined" ? true : navigator.onLine
+    typeof window === "undefined" ? true : navigator.onLine,
   );
 
   useEffect(() => {
@@ -110,7 +110,12 @@ export function WorkSessionStartForm({
           {t("offlineNotice")}
         </CardContent>
         <CardContent className="pt-0">
-          <Button type="button" variant="outline" onClick={onCancel} className="w-full">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            className="w-full"
+          >
             {t("cancel")}
           </Button>
         </CardContent>
@@ -194,7 +199,10 @@ export function WorkSessionStartForm({
               name="description"
               control={control}
               render={({ field }) => (
-                <Textarea {...field} placeholder={t("descriptionPlaceholder")} />
+                <Textarea
+                  {...field}
+                  placeholder={t("descriptionPlaceholder")}
+                />
               )}
             />
             {errors.description && (

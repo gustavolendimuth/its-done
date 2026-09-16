@@ -1,13 +1,13 @@
 "use client";
 
+import type { Project } from "@/features/projects";
+
 import { Folder } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { EntityCombobox } from "@/components/ui/entity-combobox";
 import { ProjectCreateDialog, useProjects } from "@/features/projects";
-
-import type { Project } from "@/features/projects";
 
 interface ProjectComboboxProps {
   value?: string;

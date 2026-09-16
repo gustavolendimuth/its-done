@@ -1,17 +1,12 @@
 "use client";
 
+import type { ReportFilters, SummaryReport } from "../types";
+
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatHoursToHHMM } from "@/lib/utils";
-
-import type { ReportFilters, SummaryReport } from "../types";
 
 export interface SummaryReportSectionProps {
   summaryReport: SummaryReport;

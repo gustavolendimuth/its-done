@@ -4,15 +4,15 @@ import { AlertTriangle, Clock, Pause, Play, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { usePushSubscription } from "@/hooks/use-push-subscription";
-import { cn } from "@/lib/utils";
+import { WorkSessionFinishForm } from "./work-session-finish-form";
+import { WorkSessionStartForm } from "./work-session-start-form";
 
 import { hydrateFromServer, startSyncLoop } from "../lib/work-timer-sync";
 import { useWorkTimerEngine } from "../work-sessions";
 
-import { WorkSessionFinishForm } from "./work-session-finish-form";
-import { WorkSessionStartForm } from "./work-session-start-form";
+import { Button } from "@/components/ui/button";
+import { usePushSubscription } from "@/hooks/use-push-subscription";
+import { cn } from "@/lib/utils";
 
 // Mirrors the 12h visual-alert threshold from spec.md P2 "Aviso visual de
 // sessão muito longa" (WKT-07) — a display-only nudge, never auto-pauses.
@@ -30,7 +30,7 @@ function formatElapsed(totalSeconds: number): string {
 
 function useOnlineStatus(): boolean {
   const [isOnline, setIsOnline] = useState(() =>
-    typeof window === "undefined" ? true : navigator.onLine
+    typeof window === "undefined" ? true : navigator.onLine,
   );
 
   useEffect(() => {
@@ -115,13 +115,13 @@ export function WorkTimerWidget() {
         isLongRunning
           ? "border-amber-400 dark:border-amber-600"
           : "border-green-200 dark:border-green-800",
-        isIdle && "w-80"
+        isIdle && "w-80",
       )}
     >
       <div
         className={cn(
           "flex gap-3 px-4 py-3",
-          isIdle ? "items-start" : "items-center"
+          isIdle ? "items-start" : "items-center",
         )}
       >
         {!isOnline && (
@@ -150,7 +150,11 @@ export function WorkTimerWidget() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button size="sm" className="flex-1" onClick={() => handleStart()}>
+              <Button
+                size="sm"
+                className="flex-1"
+                onClick={() => handleStart()}
+              >
                 <Play className="mr-1.5 h-3.5 w-3.5" />
                 {t("start")}
               </Button>
@@ -167,7 +171,10 @@ export function WorkTimerWidget() {
         )}
 
         {isRunning && (
-          <div data-testid="work-timer-running" className="flex items-center gap-3">
+          <div
+            data-testid="work-timer-running"
+            className="flex items-center gap-3"
+          >
             {isLongRunning && (
               <span
                 data-testid="work-timer-12h-alert"
@@ -191,7 +198,10 @@ export function WorkTimerWidget() {
         )}
 
         {isPaused && (
-          <div data-testid="work-timer-paused" className="flex items-center gap-3">
+          <div
+            data-testid="work-timer-paused"
+            className="flex items-center gap-3"
+          >
             <Pause className="h-4 w-4 text-green-600 dark:text-green-400" />
             <span className="text-sm text-muted-foreground">{t("paused")}</span>
             <span className="font-mono text-base font-semibold tabular-nums">

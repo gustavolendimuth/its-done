@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -5,7 +7,6 @@ import { getMessages } from "next-intl/server";
 import { locales } from "@/i18n/request";
 import { Providers } from "@/providers/providers";
 
-import type { Metadata } from "next";
 import "../globals.css";
 import "react-day-picker/dist/style.css";
 

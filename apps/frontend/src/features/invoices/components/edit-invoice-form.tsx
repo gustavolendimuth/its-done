@@ -6,6 +6,10 @@ import { useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { InvoiceFileUpload } from "./invoice-file-upload";
+import { WorkHoursSelectionSummary } from "./work-hours-selection-summary";
+import { WorkHoursSelector } from "./work-hours-selector";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,12 +28,6 @@ import {
 import { useAvailableTimeEntries } from "@/features/time-tracking";
 import { resolveHourlyRate } from "@/lib/utils";
 import { TimeEntry } from "@/types";
-
-import { InvoiceFileUpload } from "./invoice-file-upload";
-import { WorkHoursSelectionSummary } from "./work-hours-selection-summary";
-import { WorkHoursSelector } from "./work-hours-selector";
-
-
 
 const editInvoiceSchema = z.object({
   status: z.enum(["DRAFT", "PENDING", "PAID", "CANCELED"]),
@@ -59,7 +57,9 @@ export function EditInvoiceForm({
 
   // Work hours selection states
   const [selectedWorkHourIds, setSelectedWorkHourIds] = useState<string[]>([]);
-  const [calculatedAmount, setCalculatedAmount] = useState<number>(invoice.amount || 0);
+  const [calculatedAmount, setCalculatedAmount] = useState<number>(
+    invoice.amount || 0,
+  );
 
   const updateInvoiceMutation = useUpdateInvoice();
   const uploadFileMutation = useUploadInvoiceFile();
@@ -71,17 +71,20 @@ export function EditInvoiceForm({
 
   // Extract currently associated work hours from invoice
   const currentWorkHours: TimeEntry[] = (invoice.invoiceWorkHours || []).map(
-    (iwh) => iwh.workHour as TimeEntry
+    (iwh) => iwh.workHour as TimeEntry,
   );
 
   // Combine available entries with current ones (removing duplicates)
   const currentWorkHourIds = currentWorkHours.map((wh) => wh.id);
   const filteredAvailableEntries = availableTimeEntries.filter(
     (entry: TimeEntry) =>
-      !currentWorkHourIds.includes(entry.id) && !entry.invoiceWorkHours?.length
+      !currentWorkHourIds.includes(entry.id) && !entry.invoiceWorkHours?.length,
   );
 
-  const allAvailableEntries = [...currentWorkHours, ...filteredAvailableEntries];
+  const allAvailableEntries = [
+    ...currentWorkHours,
+    ...filteredAvailableEntries,
+  ];
 
   const {
     register,
@@ -113,7 +116,7 @@ export function EditInvoiceForm({
 
   const handleWorkHoursSelection = (
     workHourIds: string[],
-    totalAmount: number
+    totalAmount: number,
   ) => {
     setSelectedWorkHourIds(workHourIds);
     setCalculatedAmount(totalAmount);
@@ -122,12 +125,12 @@ export function EditInvoiceForm({
   };
 
   const selectedEntries = allAvailableEntries.filter((entry) =>
-    selectedWorkHourIds.includes(entry.id)
+    selectedWorkHourIds.includes(entry.id),
   );
 
   const totalHours = selectedEntries.reduce(
     (sum: number, entry: TimeEntry) => sum + entry.hours,
-    0
+    0,
   );
 
   const onSubmit = async (data: EditInvoiceFormData) => {

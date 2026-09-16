@@ -1,10 +1,10 @@
 "use client";
 
-import { Plus, Edit , MapPin } from "lucide-react";
+import type { Address } from "@/features/clients/addresses";
+
+import { Plus, Edit, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useRef, useEffect } from "react";
-
-
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,9 +21,7 @@ import {
 } from "@/components/ui/popover";
 import { AddressForm } from "@/features/clients/components/addresses/address-form";
 import { EditAddressForm } from "@/features/clients/components/addresses/edit-address-form";
-import type { Address } from "@/features/clients/addresses";
 import { cn } from "@/lib/utils";
-
 
 interface AddressComboboxProps {
   addresses: Address[];
@@ -62,7 +60,7 @@ export function AddressCombobox({
 
   const handleAddressCreated = () => {
     console.log(
-      "Address created successfully, closing dialog and calling callback"
+      "Address created successfully, closing dialog and calling callback",
     );
     setAddDialogOpen(false);
     setOpen(false); // Close the popover as well
@@ -71,7 +69,7 @@ export function AddressCombobox({
 
   const handleAddressUpdated = () => {
     console.log(
-      "Address updated successfully, closing dialog and calling callback"
+      "Address updated successfully, closing dialog and calling callback",
     );
     setEditDialogOpen(false);
     setEditingAddress(null);

@@ -8,15 +8,15 @@ import { useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { parseTaskLink } from "./lib/parse-task-link";
+import { useUpdateTask, type Task } from "./tasks.service";
+
 import { Button } from "@/components/ui/button";
 import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { useProjects } from "@/features/projects";
-
-import { parseTaskLink } from "./lib/parse-task-link";
-import { useUpdateTask, type Task } from "./tasks.service";
 
 const taskSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -140,9 +140,7 @@ export function TaskEditDialog({
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         <div className="space-y-2">
           <Label>{t("client")}</Label>
-          <p className="text-sm text-muted-foreground">
-            {task.client.company}
-          </p>
+          <p className="text-sm text-muted-foreground">{task.client.company}</p>
         </div>
 
         <div className="space-y-2">

@@ -11,11 +11,11 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { useWorkHoursStats } from "../work-hours-stats";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
 import { WorkHour } from "@/types";
-
-import { useWorkHoursStats } from "../work-hours-stats";
 
 interface StatCardProps {
   title: string;
@@ -36,7 +36,7 @@ function StatCard({
     <div
       className={cn(
         "bg-brand-green-100/50 dark:bg-brand-green-800/20 rounded-lg p-3",
-        className
+        className,
       )}
     >
       <div className="flex items-center space-x-2 mb-1">
@@ -117,7 +117,7 @@ export function TotalHoursDisplay({
     <Card
       className={cn(
         "bg-gradient-to-br from-brand-green-50 to-brand-green-100/50 dark:from-brand-green-950/20 dark:to-brand-green-900/20 border-brand-green-200 dark:border-brand-green-800 shadow-lg",
-        className
+        className,
       )}
     >
       <CardHeader className="pb-3">

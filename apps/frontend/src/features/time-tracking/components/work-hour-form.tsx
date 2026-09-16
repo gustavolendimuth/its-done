@@ -1,3 +1,5 @@
+import type { CreateTimeEntryDto as FullCreateTimeEntryDto } from "@/types/entities";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -6,6 +8,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import { useCreateTimeEntry, useUpdateTimeEntry } from "../time-entries";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -18,10 +22,6 @@ import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { Client } from "@/features/clients";
 
-import { useCreateTimeEntry, useUpdateTimeEntry } from "../time-entries";
-
-import type { CreateTimeEntryDto as FullCreateTimeEntryDto } from "@/types/entities";
-
 type EntryMode = "duration" | "interval";
 
 /**
@@ -30,7 +30,9 @@ type EntryMode = "duration" | "interval";
  * ReactDOM.findDOMNode.
  */
 function formatHHmm(input: string): string {
-  const digits = String(input ?? "").replace(/\D/g, "").slice(0, 4);
+  const digits = String(input ?? "")
+    .replace(/\D/g, "")
+    .slice(0, 4);
   if (digits.length <= 2) return digits;
   return `${digits.slice(0, 2)}:${digits.slice(2)}`;
 }
@@ -65,7 +67,7 @@ function hasStoredInterval(workHour?: EditableWorkHour | null): boolean {
 function buildSchema(
   t: (key: string) => string,
   mode: EntryMode,
-  includeClientProject: boolean
+  includeClientProject: boolean,
 ) {
   const timeField = z.string().transform(normalizeHourOnly);
   const shape: Record<string, z.ZodTypeAny> = {
@@ -118,7 +120,8 @@ function buildSchema(
     if (
       startOk &&
       endOk &&
-      hmToDecimal(data.endTime as string) <= hmToDecimal(data.startTime as string)
+      hmToDecimal(data.endTime as string) <=
+        hmToDecimal(data.startTime as string)
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -174,13 +177,13 @@ export function WorkHourForm({
   const queryClient = useQueryClient();
 
   const [entryMode, setEntryMode] = useState<EntryMode>(() =>
-    hasStoredInterval(workHour) ? "interval" : "duration"
+    hasStoredInterval(workHour) ? "interval" : "duration",
   );
   const [lastSavedMode, setLastSavedMode] = useState<EntryMode>(entryMode);
 
   const schema = useMemo(
     () => buildSchema(t, entryMode, !isEditMode),
-    [t, entryMode, isEditMode]
+    [t, entryMode, isEditMode],
   );
 
   const {
@@ -224,17 +227,29 @@ export function WorkHourForm({
     if (next === "duration") {
       const st = getValues("startTime");
       const et = getValues("endTime");
-      if (isFullHHmm(st) && isFullHHmm(et) && hmToDecimal(et) > hmToDecimal(st)) {
-        setValue("hours", decimalHoursToHHmm(hmToDecimal(et) - hmToDecimal(st)), {
-          shouldDirty: true,
-        });
+      if (
+        isFullHHmm(st) &&
+        isFullHHmm(et) &&
+        hmToDecimal(et) > hmToDecimal(st)
+      ) {
+        setValue(
+          "hours",
+          decimalHoursToHHmm(hmToDecimal(et) - hmToDecimal(st)),
+          {
+            shouldDirty: true,
+          },
+        );
       }
     }
     setEntryMode(next);
   };
 
   const handleTimeBlur =
-    (field: { value: string; onChange: (v: string) => void; onBlur: () => void }) =>
+    (field: {
+      value: string;
+      onChange: (v: string) => void;
+      onBlur: () => void;
+    }) =>
     () => {
       if (/^\d{1,2}$/.test(field.value ?? "")) {
         field.onChange(normalizeHourOnly(field.value));
@@ -295,7 +310,7 @@ export function WorkHourForm({
       console.log("📝 Submitting work hour form with payload:", payload);
 
       const result = await createTimeEntry.mutateAsync(
-        payload as unknown as FullCreateTimeEntryDto
+        payload as unknown as FullCreateTimeEntryDto,
       );
       console.log("✅ Work hour created successfully:", result);
 

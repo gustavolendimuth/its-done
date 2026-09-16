@@ -1,5 +1,8 @@
 import { User } from "lucide-react";
 
+import { ProfileForm } from "./profile-form";
+import { type ProfilePopoverProps } from "./types";
+
 import { Button } from "@/components/ui/button";
 import { EnhancedUserAvatar } from "@/components/ui/enhanced-user-avatar";
 import {
@@ -7,10 +10,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-import { ProfileForm } from "./profile-form";
-import { type ProfilePopoverProps } from "./types";
-
 
 export function ProfilePopover({ size = "md" }: ProfilePopoverProps) {
   return (

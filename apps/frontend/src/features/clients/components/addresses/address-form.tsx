@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 
+import { ADDRESS_TYPES, BRAZILIAN_STATES } from "./address-constants";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,9 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateAddress, useClientAddresses } from "@/features/clients/addresses";
-
-import { ADDRESS_TYPES, BRAZILIAN_STATES } from "./address-constants";
+import {
+  useCreateAddress,
+  useClientAddresses,
+} from "@/features/clients/addresses";
 
 interface AddressFormData {
   street: string;

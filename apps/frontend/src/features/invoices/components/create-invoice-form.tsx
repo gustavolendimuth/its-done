@@ -5,6 +5,10 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { InvoiceFileUpload } from "./invoice-file-upload";
+import { WorkHoursSelectionSummary } from "./work-hours-selection-summary";
+import { WorkHoursSelector } from "./work-hours-selector";
+
 import { Button } from "@/components/ui/button";
 import { ClientCombobox } from "@/components/ui/client-combobox";
 import { Input } from "@/components/ui/input";
@@ -18,13 +22,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Client } from "@/features/clients";
-import { useCreateInvoice, useUploadInvoiceFile } from "@/features/invoices/invoices";
+import {
+  useCreateInvoice,
+  useUploadInvoiceFile,
+} from "@/features/invoices/invoices";
 import { useAvailableTimeEntries } from "@/features/time-tracking";
 import { TimeEntry } from "@/types";
-
-import { InvoiceFileUpload } from "./invoice-file-upload";
-import { WorkHoursSelectionSummary } from "./work-hours-selection-summary";
-import { WorkHoursSelector } from "./work-hours-selector";
 
 const invoiceSchema = z.object({
   clientId: z.string().min(1, "Client is required"),
@@ -78,7 +81,7 @@ export function CreateInvoiceForm({
   const onValidationError = (formErrors: typeof errors) => {
     if (formErrors.amount) {
       toast.error(
-        "Cannot create invoice: the calculated amount is $0.00. Make sure the selected work hours belong to a project with an hourly rate greater than 0."
+        "Cannot create invoice: the calculated amount is $0.00. Make sure the selected work hours belong to a project with an hourly rate greater than 0.",
       );
     } else if (formErrors.workHourIds) {
       toast.error("Select at least one work hour to invoice.");
@@ -99,11 +102,11 @@ export function CreateInvoiceForm({
   // As horas já vêm filtradas pelo clientId se fornecido
   const filteredTimeEntries =
     availableTimeEntries.filter(
-      (entry: TimeEntry) => !entry.invoiceWorkHours?.length
+      (entry: TimeEntry) => !entry.invoiceWorkHours?.length,
     ) || [];
 
   const selectedEntries = filteredTimeEntries.filter((entry) =>
-    selectedWorkHourIds.includes(entry.id)
+    selectedWorkHourIds.includes(entry.id),
   );
 
   // Clear selected work hours whenever the client changes
@@ -118,7 +121,7 @@ export function CreateInvoiceForm({
 
   const handleWorkHoursSelection = (
     workHourIds: string[],
-    totalAmount: number
+    totalAmount: number,
   ) => {
     setSelectedWorkHourIds(workHourIds);
     setCalculatedAmount(totalAmount);
@@ -163,7 +166,7 @@ export function CreateInvoiceForm({
         } catch (uploadError) {
           console.error("File upload error:", uploadError);
           toast.warning(
-            "Invoice created but file upload failed. You can upload the file later."
+            "Invoice created but file upload failed. You can upload the file later.",
           );
         } finally {
           setIsUploading(false);
@@ -188,7 +191,7 @@ export function CreateInvoiceForm({
 
   const totalHours = selectedEntries.reduce(
     (sum: number, entry: TimeEntry) => sum + entry.hours,
-    0
+    0,
   );
 
   return (
@@ -216,19 +219,18 @@ export function CreateInvoiceForm({
         )}
       </div>
 
-  {/* Project hourly rate is defined per Project; no invoice-level rate field */}
+      {/* Project hourly rate is defined per Project; no invoice-level rate field */}
 
       {/* Work Hours Selection */}
       <div className="space-y-2">
         <Label>Work Hours</Label>
         {watchedClientId ? (
           <div className="space-y-4">
-
             {/* Selection Summary (top) */}
-              <WorkHoursSelectionSummary
-                totalHours={totalHours}
-                totalAmount={calculatedAmount}
-              />
+            <WorkHoursSelectionSummary
+              totalHours={totalHours}
+              totalAmount={calculatedAmount}
+            />
 
             {/* Work Hours Selector */}
             <WorkHoursSelector

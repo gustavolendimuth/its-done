@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import api from "@/lib/axios";
-
 import { LocalWorkSession, LocalWorkSessionStatus } from "./lib/work-timer-db";
 import {
   subscribe,
@@ -13,6 +11,8 @@ import {
   stop,
   discard,
 } from "./lib/work-timer-engine";
+
+import api from "@/lib/axios";
 
 export interface WorkTimerEngineState {
   session: LocalWorkSession | null;
@@ -75,7 +75,7 @@ export const useFinishWorkSession = () => {
     }) => {
       const response = await api.post(
         `/work-sessions/${sessionId}/finish`,
-        data
+        data,
       );
 
       return response.data;

@@ -7,6 +7,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { ClientAddresses } from "./client-addresses";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,9 +23,6 @@ import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useUpdateClient } from "@/features/clients/clients";
 import { Client, UpdateClientDto } from "@/features/clients/types";
-
-import { ClientAddresses } from "./client-addresses";
-
 
 interface EditClientModalProps {
   client: Client;
@@ -53,7 +52,7 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
     "EditClientModal rendered for client:",
     client.company,
     "open:",
-    open
+    open,
   );
 
   const form = useForm<ClientFormData>({
@@ -184,7 +183,7 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
                       value={field.value ?? ""}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value === "" ? null : Number(e.target.value)
+                          e.target.value === "" ? null : Number(e.target.value),
                         )
                       }
                     />

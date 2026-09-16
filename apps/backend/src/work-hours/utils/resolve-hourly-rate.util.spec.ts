@@ -2,9 +2,9 @@ import { resolveHourlyRate } from './resolve-hourly-rate.util';
 
 describe('resolveHourlyRate', () => {
   it('uses the project rate when present', () => {
-    expect(
-      resolveHourlyRate({ hourlyRate: 100 }, { hourlyRate: 50 }),
-    ).toBe(100);
+    expect(resolveHourlyRate({ hourlyRate: 100 }, { hourlyRate: 50 })).toBe(
+      100,
+    );
   });
 
   it('falls back to the client rate when the project has none', () => {

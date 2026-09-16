@@ -1,11 +1,5 @@
 "use client";
 
-
-import { HoursReportSection } from "./hours-report-section";
-import { InvoiceReportSection } from "./invoice-report-section";
-import { ReportFiltersCard } from "./report-filters-card";
-import { SummaryReportSection } from "./summary-report-section";
-
 import type {
   HoursReport,
   InvoiceReport,
@@ -15,15 +9,18 @@ import type {
 } from "../types";
 import type { Client } from "@/features/clients";
 
+import { HoursReportSection } from "./hours-report-section";
+import { InvoiceReportSection } from "./invoice-report-section";
+import { ReportFiltersCard } from "./report-filters-card";
+import { SummaryReportSection } from "./summary-report-section";
+
 export interface AnalyticsReportsTabProps {
   filters: ReportFilters;
   reportType: ReportType;
   clients: Client[] | undefined;
   onFilterChange: (key: keyof ReportFilters, value: string) => void;
   onReportTypeChange: (value: ReportType) => void;
-  onQuickDateRange: (
-    range: "thisMonth" | "lastMonth" | "last3Months"
-  ) => void;
+  onQuickDateRange: (range: "thisMonth" | "lastMonth" | "last3Months") => void;
   hoursReport: HoursReport | undefined;
   clientHoursChartData: {
     name: string;

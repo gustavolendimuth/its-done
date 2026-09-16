@@ -29,7 +29,9 @@ describe('DraftInvoiceService - createDraft()', () => {
     ]);
 
     expect(prismaMock.invoice.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ amount: 200 }) }),
+      expect.objectContaining({
+        data: expect.objectContaining({ amount: 200 }),
+      }),
     );
   });
 
@@ -41,7 +43,9 @@ describe('DraftInvoiceService - createDraft()', () => {
     ]);
 
     expect(prismaMock.invoice.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ amount: 120 }) }),
+      expect.objectContaining({
+        data: expect.objectContaining({ amount: 120 }),
+      }),
     );
   });
 

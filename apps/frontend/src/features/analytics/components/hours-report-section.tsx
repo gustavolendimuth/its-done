@@ -1,5 +1,7 @@
 "use client";
 
+import type { HoursReport } from "../types";
+
 import { useTranslations } from "next-intl";
 import {
   Bar,
@@ -14,12 +16,7 @@ import {
   YAxis,
 } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -29,8 +26,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatHoursToHHMM } from "@/lib/utils";
-
-import type { HoursReport } from "../types";
 
 export interface HoursReportSectionProps {
   hoursReport: HoursReport;

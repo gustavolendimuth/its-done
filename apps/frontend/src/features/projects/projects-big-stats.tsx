@@ -10,13 +10,12 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { useProjects } from "./projects.service";
+
 import {
   BigStatsDisplay,
   BigStatItem,
 } from "@/components/ui/big-stats-display";
-
-import { useProjects } from "./projects.service";
-
 
 interface ProjectsBigStatsProps {
   className?: string;
@@ -31,7 +30,7 @@ export function ProjectsBigStats({
 }: ProjectsBigStatsProps) {
   const t = useTranslations("projects");
   const { data: projects = [] } = useProjects(
-    selectedClientId === "all" ? undefined : selectedClientId
+    selectedClientId === "all" ? undefined : selectedClientId,
   );
 
   // Calculate insights
@@ -39,10 +38,10 @@ export function ProjectsBigStats({
   // Sum of actual hours worked (not the number of entries).
   const totalHours = projects.reduce(
     (sum, project) => sum + (project.totalHours ?? 0),
-    0
+    0,
   );
   const projectsWithWork = projects.filter(
-    (project) => project._count.workHours > 0
+    (project) => project._count.workHours > 0,
   ).length;
   const uniqueClients = new Set(projects.map((project) => project.clientId))
     .size;

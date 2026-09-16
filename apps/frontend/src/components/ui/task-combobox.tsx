@@ -1,13 +1,13 @@
 "use client";
 
+import type { Task } from "@/features/tasks";
+
 import { ListChecks } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { EntityCombobox } from "@/components/ui/entity-combobox";
 import { TaskCreateDialog, useTasks } from "@/features/tasks";
-
-import type { Task } from "@/features/tasks";
 
 interface TaskComboboxProps {
   value?: string;

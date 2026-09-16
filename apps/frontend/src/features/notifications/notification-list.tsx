@@ -14,10 +14,6 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn, formatTimeAgo } from "@/lib/utils";
-
 import {
   useDeleteNotification,
   useMarkAllNotificationsAsRead,
@@ -26,6 +22,10 @@ import {
   type Notification,
   type NotificationType,
 } from "./notifications.service";
+
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn, formatTimeAgo } from "@/lib/utils";
 
 const notificationIcons: Record<NotificationType, React.ReactNode> = {
   INFO: <Info className="h-4 w-4 text-blue-500" />,
@@ -36,9 +36,12 @@ const notificationIcons: Record<NotificationType, React.ReactNode> = {
 
 const notificationColors: Record<NotificationType, string> = {
   INFO: "bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20 border-blue-200 dark:border-blue-800",
-  SUCCESS: "bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/20 dark:to-green-900/20 border-green-200 dark:border-green-800",
-  WARNING: "bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-950/20 dark:to-yellow-900/20 border-yellow-200 dark:border-yellow-800",
-  ERROR: "bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/20 dark:to-red-900/20 border-red-200 dark:border-red-800",
+  SUCCESS:
+    "bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/20 dark:to-green-900/20 border-green-200 dark:border-green-800",
+  WARNING:
+    "bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-950/20 dark:to-yellow-900/20 border-yellow-200 dark:border-yellow-800",
+  ERROR:
+    "bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/20 dark:to-red-900/20 border-red-200 dark:border-red-800",
 };
 
 export function NotificationList() {
@@ -144,7 +147,7 @@ function NotificationItem({
     <div
       className={cn(
         "p-3 rounded-lg border transition-all hover:shadow-sm group",
-        notificationColors[notification.type]
+        notificationColors[notification.type],
       )}
     >
       <div className="flex gap-3">

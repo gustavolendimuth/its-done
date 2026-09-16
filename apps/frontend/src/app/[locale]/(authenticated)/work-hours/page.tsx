@@ -1,5 +1,7 @@
 "use client";
 
+import type { TimeEntry } from "@/types";
+
 import { Clock, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useMemo } from "react";
@@ -24,9 +26,8 @@ import {
   useTimeEntries,
   useDeleteTimeEntry,
   isWorkHourInvoiced,
- WorkHoursSkeleton } from "@/features/time-tracking";
-
-import type { TimeEntry } from "@/types";
+  WorkHoursSkeleton,
+} from "@/features/time-tracking";
 
 export default function WorkHoursPage() {
   const t = useTranslations("workHours");
@@ -55,7 +56,7 @@ export default function WorkHoursPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingWorkHour, setEditingWorkHour] = useState<TimeEntry | null>(
-    null
+    null,
   );
 
   // Memorizar as datas para evitar recriações desnecessárias

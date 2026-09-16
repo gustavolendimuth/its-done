@@ -4,6 +4,8 @@ import { format } from "date-fns";
 import { MoreHorizontal, Shield, ShieldOff, Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { useAllUsers, useUpdateUserRole, useDeleteUser } from "./admin.service";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,12 +38,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ApiError } from "@/types";
 
-import {
-  useAllUsers,
-  useUpdateUserRole,
-  useDeleteUser,
-} from "./admin.service";
-
 export default function AdminUsers() {
   const { data: users, isLoading } = useAllUsers();
   const updateRole = useUpdateUserRole();
@@ -58,7 +54,7 @@ export default function AdminUsers() {
         title: "Role updated",
         description: `User role has been updated to ${newRole}`,
       });
-  } catch (_error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to update user role",

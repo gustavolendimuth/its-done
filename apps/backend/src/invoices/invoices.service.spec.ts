@@ -91,7 +91,10 @@ describe('InvoicesService - create()', () => {
       { id: 'p1', hourlyRate: 100 },
     ]);
     prismaMock.client.findUnique.mockResolvedValueOnce({ hourlyRate: 40 });
-    prismaMock.invoice.create.mockResolvedValueOnce({ id: 'inv2', amount: 320 });
+    prismaMock.invoice.create.mockResolvedValueOnce({
+      id: 'inv2',
+      amount: 320,
+    });
 
     await service.create(dto, userId);
 

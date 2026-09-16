@@ -8,6 +8,8 @@ import { useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { useUpdateProject, type Project } from "./projects.service";
+
 import { Button } from "@/components/ui/button";
 import { ClientCombobox } from "@/components/ui/client-combobox";
 import { FormModal } from "@/components/ui/form-modal";
@@ -16,13 +18,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useClients } from "@/features/clients";
 
-import { useUpdateProject, type Project } from "./projects.service";
-
 const projectSchema = z.object({
   name: z.string().min(1, { message: "Project name is required" }),
   description: z.string().optional(),
-  hourlyRate: z.number().min(0, { message: "Hourly rate must be 0 or greater" }).optional().nullable(),
-  alertHours: z.number().min(0, { message: "Alert hours must be 0 or greater" }).optional().nullable(),
+  hourlyRate: z
+    .number()
+    .min(0, { message: "Hourly rate must be 0 or greater" })
+    .optional()
+    .nullable(),
+  alertHours: z
+    .number()
+    .min(0, { message: "Alert hours must be 0 or greater" })
+    .optional()
+    .nullable(),
   clientId: z.string().min(1, { message: "Client is required" }),
 });
 
@@ -81,7 +89,7 @@ export function ProjectEditDialog({
       const formattedData = {
         ...data,
         hourlyRate: data.hourlyRate === null ? undefined : data.hourlyRate,
-        alertHours: data.alertHours === null ? undefined : data.alertHours
+        alertHours: data.alertHours === null ? undefined : data.alertHours,
       };
 
       const updatedProject = await updateProject.mutateAsync({
@@ -111,11 +119,7 @@ export function ProjectEditDialog({
       icon={FolderPlus}
       className="sm:max-w-[600px]"
     >
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="clientId">{t("client")} *</Label>
           <Controller
@@ -126,7 +130,9 @@ export function ProjectEditDialog({
                 clients={clients}
                 value={field.value}
                 onSelect={field.onChange}
-                placeholder={t("selectClient", { defaultMessage: "Select a client" })}
+                placeholder={t("selectClient", {
+                  defaultMessage: "Select a client",
+                })}
               />
             )}
           />
@@ -142,7 +148,9 @@ export function ProjectEditDialog({
           <Input
             id="name"
             {...register("name")}
-            placeholder={t("enterName", { defaultMessage: "Enter project name" })}
+            placeholder={t("enterName", {
+              defaultMessage: "Enter project name",
+            })}
           />
           {errors.name && (
             <p className="text-sm text-destructive">{errors.name.message}</p>
@@ -156,11 +164,13 @@ export function ProjectEditDialog({
             type="number"
             step="0.01"
             min="0"
-            {...register("hourlyRate", { 
+            {...register("hourlyRate", {
               valueAsNumber: true,
-              setValueAs: v => v === "" ? null : Number(v)
+              setValueAs: (v) => (v === "" ? null : Number(v)),
             })}
-            placeholder={t("enterHourlyRate", { defaultMessage: "Enter hourly rate (optional)" })}
+            placeholder={t("enterHourlyRate", {
+              defaultMessage: "Enter hourly rate (optional)",
+            })}
           />
           {errors && (errors as any).hourlyRate && (
             <p className="text-sm text-destructive">
@@ -178,9 +188,11 @@ export function ProjectEditDialog({
             min="0"
             {...register("alertHours", {
               valueAsNumber: true,
-              setValueAs: v => v === "" ? null : Number(v)
+              setValueAs: (v) => (v === "" ? null : Number(v)),
             })}
-            placeholder={t("alertHoursPlaceholder", { defaultMessage: "e.g., 160" })}
+            placeholder={t("alertHoursPlaceholder", {
+              defaultMessage: "e.g., 160",
+            })}
           />
           <p className="text-sm text-muted-foreground">
             {t("alertHoursDescription")}
@@ -197,7 +209,9 @@ export function ProjectEditDialog({
           <Textarea
             id="description"
             {...register("description")}
-            placeholder={t("enterDescription", { defaultMessage: "Enter project description (optional)" })}
+            placeholder={t("enterDescription", {
+              defaultMessage: "Enter project description (optional)",
+            })}
             rows={3}
           />
           {errors.description && (

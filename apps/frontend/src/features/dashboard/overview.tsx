@@ -3,14 +3,14 @@
 import { XCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
-import { FilterStatus, Invoice, SortBy } from "@/features/invoices";
-import { cn } from "@/lib/utils";
-
 import { OverviewHeader } from "./overview-header";
 import { OverviewInvoicesSection } from "./overview-invoices-section";
 import { OverviewMainStats } from "./overview-main-stats";
 import { OverviewPerformanceCards } from "./overview-performance-cards";
+
+import { LoadingSkeleton } from "@/components/layout/loading-skeleton";
+import { FilterStatus, Invoice, SortBy } from "@/features/invoices";
+import { cn } from "@/lib/utils";
 
 // Types
 export interface OverviewStats {
@@ -64,14 +64,14 @@ export function Overview({ data, isLoading, error, className }: OverviewProps) {
           (invoice.description &&
             invoice.description
               .toLowerCase()
-              .includes(searchTerm.toLowerCase()))
+              .includes(searchTerm.toLowerCase())),
       );
     }
 
     // Filter by status
     if (filterStatus !== "ALL") {
       filtered = filtered.filter(
-        (invoice) => invoice.status.toUpperCase() === filterStatus
+        (invoice) => invoice.status.toUpperCase() === filterStatus,
       );
     }
 
@@ -91,13 +91,13 @@ export function Overview({ data, isLoading, error, className }: OverviewProps) {
             a.invoiceWorkHours?.reduce(
               (sum: number, iwh: { workHour?: { hours: number } }) =>
                 sum + (iwh.workHour?.hours || 0),
-              0
+              0,
             ) || 0;
           const bHours =
             b.invoiceWorkHours?.reduce(
               (sum: number, iwh: { workHour?: { hours: number } }) =>
                 sum + (iwh.workHour?.hours || 0),
-              0
+              0,
             ) || 0;
 
           return bHours - aHours;

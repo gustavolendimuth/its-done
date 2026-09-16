@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, LogOut, PlusCircle } from "lucide-react";
+import { Clock, LogOut } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
