@@ -2,7 +2,14 @@
 
 import { isSameDay, isSameMonth, isSameWeek, subMonths, format } from "date-fns";
 import { enUS, ptBR } from "date-fns/locale";
-import { Building2, Clock, FileText, Trash2 } from "lucide-react";
+import {
+  Building2,
+  Clock,
+  ExternalLink,
+  FileText,
+  ListChecks,
+  Trash2,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Fragment, useMemo, useState } from "react";
 
@@ -70,6 +77,7 @@ export function WorkHoursTable({
         workHour.client?.company,
         workHour.client?.name,
         workHour.project?.name,
+        workHour.task?.title,
       ]
         .filter(Boolean)
         .join(" ")
@@ -171,6 +179,7 @@ export function WorkHoursTable({
                 <TableHead className="w-[140px]">{t("date")}</TableHead>
                 <TableHead>{t("client")}</TableHead>
                 <TableHead>{t("project")}</TableHead>
+                <TableHead>{t("task")}</TableHead>
                 <TableHead>{t("hourDescription")}</TableHead>
                 <TableHead className="text-right">{t("hours")}</TableHead>
                 <TableHead className="w-[92px] text-right">
@@ -183,7 +192,7 @@ export function WorkHoursTable({
                 <Fragment key={month.key}>
                   <TableRow className="bg-brand-green-100/70 dark:bg-brand-green-950/40 hover:bg-brand-green-100/70 dark:hover:bg-brand-green-950/40">
                     <TableCell
-                      colSpan={5}
+                      colSpan={6}
                       className="py-2 font-bold text-sm text-brand-green-900 dark:text-brand-green-200"
                     >
                       {monthLabel(month.date)}
@@ -197,7 +206,7 @@ export function WorkHoursTable({
                     <Fragment key={week.key}>
                       <TableRow className="bg-muted/40 hover:bg-muted/40">
                         <TableCell
-                          colSpan={5}
+                          colSpan={6}
                           className="py-1.5 text-xs font-medium text-muted-foreground"
                         >
                           {weekLabel(week.start, week.end)}
@@ -267,6 +276,42 @@ export function WorkHoursTable({
                                     {workHour.project.name}
                                   </span>
                                 </Badge>
+                              ) : (
+                                <span className="text-sm text-muted-foreground">
+                                  —
+                                </span>
+                              )}
+                            </TableCell>
+
+                            <TableCell>
+                              {workHour.task ? (
+                                workHour.task.link ? (
+                                  <a
+                                    href={workHour.task.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(event) => event.stopPropagation()}
+                                    className="inline-flex"
+                                  >
+                                    <Badge
+                                      variant="outline"
+                                      className="font-normal gap-1 hover:bg-accent"
+                                    >
+                                      <ListChecks className="h-3 w-3" />
+                                      <span className="truncate max-w-[160px]">
+                                        {workHour.task.title}
+                                      </span>
+                                      <ExternalLink className="h-3 w-3 opacity-60" />
+                                    </Badge>
+                                  </a>
+                                ) : (
+                                  <Badge variant="outline" className="font-normal gap-1">
+                                    <ListChecks className="h-3 w-3" />
+                                    <span className="truncate max-w-[160px]">
+                                      {workHour.task.title}
+                                    </span>
+                                  </Badge>
+                                )
                               ) : (
                                 <span className="text-sm text-muted-foreground">
                                   —
@@ -357,7 +402,7 @@ export function WorkHoursTable({
             </TableBody>
             <TableFooter>
               <TableRow className="hover:bg-muted/50">
-                <TableCell colSpan={4} className="font-semibold">
+                <TableCell colSpan={5} className="font-semibold">
                   {t("totalHours")}
                 </TableCell>
                 <TableCell

@@ -59,6 +59,7 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
         accumulatedSeconds: 0,
         clientId: null,
         projectId: null,
+        taskId: null,
         description: null,
       },
     });
@@ -68,7 +69,7 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
     expect(result.session).toEqual({ id: sessionId, status: 'RUNNING' });
   });
 
-  it('start with upfront details (WKT-10) persists clientId/projectId/description on creation', async () => {
+  it('start with upfront details (WKT-10) persists clientId/projectId/taskId/description on creation', async () => {
     const clientTimestamp = '2026-01-15T11:00:00.000Z';
     prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
     prismaMock.workSession.findFirst
@@ -83,6 +84,7 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
         clientTimestamp,
         clientId: 'client-1',
         projectId: 'project-1',
+        taskId: 'task-1',
         description: 'Planejado com antecedência',
       },
     ]);
@@ -97,6 +99,7 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
         accumulatedSeconds: 0,
         clientId: 'client-1',
         projectId: 'project-1',
+        taskId: 'task-1',
         description: 'Planejado com antecedência',
       },
     });
@@ -591,6 +594,7 @@ describe('WorkSessionsService.applyEvents() - single-active-session conflict on 
         accumulatedSeconds: 0,
         clientId: null,
         projectId: null,
+        taskId: null,
         description: null,
       },
     });

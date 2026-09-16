@@ -23,6 +23,7 @@ import { ClientCombobox } from "@/components/ui/client-combobox";
 import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
+import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { useClients } from "@/features/clients";
 
@@ -49,6 +50,7 @@ function buildFinishFormSchema(t: TranslateFn) {
   return z.object({
     clientId: z.string().min(1, t("clientRequired")),
     projectId: z.string().optional(),
+    taskId: z.string().optional(),
     description: z.string().min(1, t("descriptionRequired")),
     date: z.date({ required_error: t("dateRequired") }),
   });
@@ -116,6 +118,7 @@ export function WorkSessionFinishForm({
     defaultValues: {
       clientId: session.clientId ?? "",
       projectId: session.projectId ?? "",
+      taskId: session.taskId ?? "",
       description: session.description ?? "",
       date: new Date(session.startedAt),
     },
@@ -129,6 +132,7 @@ export function WorkSessionFinishForm({
       data: {
         clientId: data.clientId,
         projectId: data.projectId || undefined,
+        taskId: data.taskId || undefined,
         description: data.description,
         date: data.date.toISOString(),
       },
@@ -220,6 +224,23 @@ export function WorkSessionFinishForm({
                   clientId={selectedClientId}
                   value={field.value}
                   onSelect={(projectId) => field.onChange(projectId ?? "")}
+                  disabled={!selectedClientId}
+                  allowClear
+                />
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t("taskLabel")}</Label>
+            <Controller
+              name="taskId"
+              control={control}
+              render={({ field }) => (
+                <TaskCombobox
+                  clientId={selectedClientId}
+                  value={field.value}
+                  onSelect={(taskId) => field.onChange(taskId ?? "")}
                   disabled={!selectedClientId}
                   allowClear
                 />

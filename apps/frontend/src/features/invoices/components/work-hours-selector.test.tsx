@@ -57,4 +57,32 @@ describe("WorkHoursSelector", () => {
   expect(lastCall).toBeTruthy();
   expect(lastCall?.[1]).toBe(360);
   });
+
+  it("falls back to the client's default hourly rate when an entry has no project", async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = jest.fn();
+
+    const entry = makeEntry({
+      hours: 2,
+      projectId: undefined,
+      project: undefined,
+      client: {
+        id: "c1",
+        name: "Client 1",
+        company: "ACME",
+        email: "c1@x.com",
+        hourlyRate: 45,
+      },
+    });
+
+    render(<WorkHoursSelector timeEntries={[entry]} onSelectionChange={onSelectionChange} />);
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    await user.click(checkboxes[1]);
+
+    // Expected total = 2 * 45 (client fallback) = 90
+    const lastCall = (onSelectionChange as jest.Mock).mock.calls.at(-1);
+    expect(lastCall).toBeTruthy();
+    expect(lastCall?.[1]).toBe(90);
+  });
 });

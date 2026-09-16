@@ -4,6 +4,8 @@ export interface Client {
   email: string;
   phone?: string;
   company: string;
+  /** Fallback hourly rate used to bill WorkHours that have no Project. */
+  hourlyRate?: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -13,6 +15,7 @@ export interface CreateClientDto {
   email: string;
   phone?: string;
   company: string;
+  hourlyRate?: number;
 }
 
 export interface UpdateClientDto {
@@ -20,6 +23,7 @@ export interface UpdateClientDto {
   email?: string;
   phone?: string;
   company?: string;
+  hourlyRate?: number;
 }
 
 export interface ClientSpecificStats {

@@ -29,6 +29,7 @@ interface RemoteWorkSession {
   hours: number | null;
   clientId: string | null;
   projectId: string | null;
+  taskId: string | null;
   description: string | null;
 }
 
@@ -57,6 +58,7 @@ function mapRemoteSession(remote: RemoteWorkSession): LocalWorkSession {
     // always overwrites the local mirror.
     clientId: remote.clientId,
     projectId: remote.projectId,
+    taskId: remote.taskId,
     description: remote.description,
   };
 }

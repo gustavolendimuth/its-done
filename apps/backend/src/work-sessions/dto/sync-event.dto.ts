@@ -41,6 +41,10 @@ export class SyncEventDto {
   projectId?: string;
 
   @IsOptional()
+  @IsUUID(4, { message: 'Task ID must be a valid UUID' })
+  taskId?: string;
+
+  @IsOptional()
   @IsString()
   description?: string;
 }

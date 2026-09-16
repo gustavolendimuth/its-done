@@ -7,6 +7,7 @@ import {
   Clock,
   FileText,
   FolderOpen,
+  ListChecks,
   Shield,
   LucideIcon,
 } from "lucide-react";
@@ -42,6 +43,7 @@ export function Navigation() {
     { href: "/work-hours", label: t("workHours"), icon: Clock },
     { href: "/clients", label: t("clients"), icon: Users },
     { href: "/projects", label: t("projects"), icon: FolderOpen },
+    { href: "/tasks", label: t("tasks"), icon: ListChecks },
     { href: "/invoices", label: t("invoices"), icon: FileText },
     { href: "/analytics", label: t("analytics"), icon: BarChart3 },
     ...(session?.user?.role === "ADMIN"

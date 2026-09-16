@@ -1,5 +1,21 @@
 
-import { formatTimeAgo, formatHoursToHHMM, cn } from "../utils";
+import { formatTimeAgo, formatHoursToHHMM, cn, resolveHourlyRate } from "../utils";
+
+describe("resolveHourlyRate", () => {
+  it("uses the project rate when present", () => {
+    expect(resolveHourlyRate({ hourlyRate: 100 }, { hourlyRate: 50 })).toBe(100);
+  });
+
+  it("falls back to the client rate when the project has none", () => {
+    expect(resolveHourlyRate(undefined, { hourlyRate: 50 })).toBe(50);
+    expect(resolveHourlyRate({ hourlyRate: null }, { hourlyRate: 50 })).toBe(50);
+  });
+
+  it("falls back to 0 when neither project nor client have a rate", () => {
+    expect(resolveHourlyRate()).toBe(0);
+    expect(resolveHourlyRate({ hourlyRate: null }, { hourlyRate: null })).toBe(0);
+  });
+});
 
 // Mock da função de tradução (já namespaced para workHours)
 const mockT = (key: string, values?: any): string => {

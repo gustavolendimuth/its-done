@@ -64,6 +64,25 @@ jest.mock("@/components/ui/project-combobox", () => ({
   ),
 }));
 
+jest.mock("@/components/ui/task-combobox", () => ({
+  TaskCombobox: ({
+    value,
+    onSelect,
+  }: {
+    value?: string;
+    onSelect: (value: string | null) => void;
+  }) => (
+    <select
+      data-testid="task-combobox"
+      value={value ?? ""}
+      onChange={(e) => onSelect(e.target.value || null)}
+    >
+      <option value="">no task</option>
+      <option value="task-1">Fix login bug</option>
+    </select>
+  ),
+}));
+
 describe("WorkSessionStartForm", () => {
   const originalOnLine = window.navigator.onLine;
 

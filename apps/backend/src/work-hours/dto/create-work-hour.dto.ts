@@ -44,4 +44,8 @@ export class CreateWorkHourDto {
   @IsOptional()
   @IsUUID(4, { message: 'Project ID must be a valid UUID' })
   projectId?: string;
+
+  @IsOptional()
+  @IsUUID(4, { message: 'Task ID must be a valid UUID' })
+  taskId?: string;
 }

@@ -80,6 +80,19 @@ export function formatHoursToHHMM(hours: number): string {
 }
 
 /**
+ * Resolves the hourly rate to bill a WorkHour/TimeEntry at: the Project's
+ * rate takes precedence when present, falling back to the Client's default
+ * rate, and finally to 0 when neither is set. Mirrors the backend's
+ * resolveHourlyRate (apps/backend/src/work-hours/utils/resolve-hourly-rate.util.ts).
+ */
+export function resolveHourlyRate(
+  project?: { hourlyRate?: number | null } | null,
+  client?: { hourlyRate?: number | null } | null
+): number {
+  return project?.hourlyRate ?? client?.hourlyRate ?? 0;
+}
+
+/**
  * Formata tempo relativo usando o sistema de traduções do projeto
  * @param date - Data para calcular o tempo relativo
  * @param t - Função de tradução

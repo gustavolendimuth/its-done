@@ -24,6 +24,7 @@ export interface LocalWorkSession {
   // only filled in later at finish().
   clientId?: string | null;
   projectId?: string | null;
+  taskId?: string | null;
   description?: string | null;
 }
 
@@ -38,6 +39,7 @@ export interface SyncEvent {
   // Only meaningful on a "start" event (WKT-10) — ignored by every other type.
   clientId?: string;
   projectId?: string;
+  taskId?: string;
   description?: string;
 }
 

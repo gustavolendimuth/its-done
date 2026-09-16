@@ -81,6 +81,18 @@ export class WorkHoursService {
       }
     }
 
+    if (createWorkHourDto.taskId) {
+      const task = await this.prisma.task.findUnique({
+        where: { id: createWorkHourDto.taskId },
+      });
+
+      if (!task || task.clientId !== createWorkHourDto.clientId) {
+        throw new BadRequestException(
+          'Task does not belong to the selected client',
+        );
+      }
+    }
+
     const hours = await this.applyRounding(userId, createWorkHourDto.hours);
 
     const workHour = await this.prisma.workHour.create({
@@ -102,6 +114,13 @@ export class WorkHoursService {
               },
             }
           : undefined,
+        task: createWorkHourDto.taskId
+          ? {
+              connect: {
+                id: createWorkHourDto.taskId,
+              },
+            }
+          : undefined,
         user: {
           connect: {
             id: userId,
@@ -111,6 +130,7 @@ export class WorkHoursService {
       include: {
         client: true,
         project: true,
+        task: true,
       },
     });
 
@@ -139,6 +159,7 @@ export class WorkHoursService {
       include: {
         client: true,
         project: true,
+        task: true,
         invoiceWorkHours: {
           include: {
             invoice: {
@@ -202,6 +223,7 @@ export class WorkHoursService {
       include: {
         client: true,
         project: true,
+        task: true,
         invoiceWorkHours: {
           include: {
             invoice: {
@@ -230,6 +252,7 @@ export class WorkHoursService {
       include: {
         client: true,
         project: true,
+        task: true,
       },
     });
 
@@ -280,6 +303,21 @@ export class WorkHoursService {
       updateWorkHourDto.endTime ?? workHour.endTime,
     );
 
+    if (updateWorkHourDto.taskId) {
+      const task = await this.prisma.task.findUnique({
+        where: { id: updateWorkHourDto.taskId },
+      });
+
+      const effectiveClientId =
+        updateWorkHourDto.clientId ?? workHour.clientId;
+
+      if (!task || task.clientId !== effectiveClientId) {
+        throw new BadRequestException(
+          'Task does not belong to the selected client',
+        );
+      }
+    }
+
     const data =
       updateWorkHourDto.hours !== undefined
         ? {
@@ -294,6 +332,7 @@ export class WorkHoursService {
       include: {
         client: true,
         project: true,
+        task: true,
       },
     });
 

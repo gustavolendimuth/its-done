@@ -40,12 +40,14 @@ docker compose -f docker-compose.dev.yml logs -f
 
 ### Invoice Calculation
 
-**IMPORTANT**: Invoice amounts are calculated from `project.hourlyRate`:
+**IMPORTANT**: Invoice amounts are calculated via `resolveHourlyRate(project, client)` (`apps/backend/src/work-hours/utils/resolve-hourly-rate.util.ts`):
 
-- Each WorkHour associated with a Project uses that project's hourlyRate
-- Total = Σ(workHour.hours × workHour.project.hourlyRate)
-- If no project, hourlyRate defaults to 0
-- This is a recent change - historically the rate was per-invoice
+- Each WorkHour uses `project.hourlyRate` when it has a Project
+- Falls back to `client.hourlyRate` when the WorkHour has no Project (dev work without a Project)
+- Falls back to `0` when neither is set
+- Total = Σ(workHour.hours × resolveHourlyRate(workHour.project, workHour.client))
+- Same fallback applies to both the automatic draft invoice (`DraftInvoiceService.createDraft`) and manually-created invoices (`InvoicesService.create`)
+- This is a recent change - historically the rate was per-invoice, then per-project-only
 
 ### File Upload Strategy (Priority Order)
 
@@ -83,6 +85,20 @@ docker compose -f docker-compose.dev.yml logs -f
 - **Absolute imports**: Use path aliases (`@/components`, not `../../components`)
 - **DTO validation**: Use `class-validator` decorators on all DTOs
 - **Type safety**: Prisma types extended in `apps/backend/src/types/entities.ts`
+
+## Agent skills
+
+### Issue tracker
+
+Jira (projeto MW, site gustavolendimuth.atlassian.net), via MCP Atlassian Rovo. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default label vocabulary (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at repo root. See `docs/agents/domain.md`.
 
 ## Security Notes
 
