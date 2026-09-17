@@ -8,6 +8,14 @@ Sistema de registro de horas e faturamento para profissionais autônomos (MEI/fr
 Entidade que um Colaborador fatura pelas horas trabalhadas. Registro único e compartilhado — não duplicado por Colaborador. Nasce como registro simples (nome, email, telefone), sem credenciais, e pode opcionalmente ser ativada como conta com login próprio para gerenciar Colaboradores e ver o agregado de horas deles.
 _Avoid_: Client, cliente, empresa cliente
 
+**Dashboard da Empresa**:
+Tela autenticada que um Administrador da Empresa vê ao logar: horas agregadas de todos os Colaboradores vinculados, e gestão de Convite Pendente / Domínio Autorizado. Só existe quando a Empresa tem Administrador (ver Ativação da Empresa).
+_Avoid_: painel da empresa
+
+**Portal Público da Empresa**:
+Página pública, sem login, com link compartilhável (hoje em `/client-dashboard/[id]`) que mostra horas e invoices de uma Empresa. Existe pra qualquer Empresa, ativada ou não — é independente e coexiste com o Dashboard da Empresa.
+_Avoid_: client dashboard, dashboard do cliente
+
 **Colaborador**:
 Um User vinculado a uma Empresa — a pessoa MEI que registra horas trabalhadas para ela e a fatura. Um Colaborador pode estar vinculado a N Empresas simultaneamente. Mantém WorkHour, Project, Task e Invoice próprios e privados; nenhum outro Colaborador da mesma Empresa os vê.
 _Avoid_: funcionário, employee, membro
