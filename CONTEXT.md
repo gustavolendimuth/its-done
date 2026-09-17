@@ -13,8 +13,16 @@ Um User vinculado a uma Empresa — a pessoa MEI que registra horas trabalhadas 
 _Avoid_: funcionário, employee, membro
 
 **Administrador da Empresa**:
-Conta com login próprio (credenciais separadas das de User) autorizada a gerenciar uma Empresa: configurar domínio autorizado, cadastrar convites e ver o agregado de horas de todos os Colaboradores vinculados. Uma Empresa pode ter múltiplos Administradores.
+Conta com login próprio (credenciais separadas das de User, tabela própria) autorizada a gerenciar uma Empresa: configurar domínio autorizado, cadastrar convites e ver o agregado de horas de todos os Colaboradores vinculados. Uma Empresa pode ter múltiplos Administradores. O primeiro Administrador nasce por Ativação da Empresa ou por auto-cadastro direto; os demais entram por Convite de Administrador.
 _Avoid_: dono da empresa, empresa (quando o sentido é "quem loga", não o registro em si)
+
+**Ativação da Empresa**:
+Ato de transformar um registro Empresa simples (sem login, criado por um Colaborador que a fatura) em conta com Administrador. Exige provar posse de um email que bate com o email de contato já cadastrado na Empresa, ou com um domínio declarado (sujeito às mesmas regras do Domínio Autorizado). Alternativa a essa via é o auto-cadastro direto, quando não existe registro Empresa prévio.
+_Avoid_: reivindicar, claim
+
+**Convite de Administrador**:
+Convite que um Administrador da Empresa envia a um email para que essa pessoa também vire Administrador daquela Empresa, mediante confirmação por link. Não exige que o email seja do Domínio Autorizado da Empresa (permite contador/consultor externo).
+_Avoid_: convite (sem qualificação — ambíguo com Convite Pendente, que vincula um Colaborador, não um Administrador)
 
 **Convite Pendente**:
 Regra de vínculo automático criada por um Administrador da Empresa para um email específico que ainda não tem conta no It's Done. Vira vínculo de Colaborador assim que alguém se cadastra ou loga com aquele email.
