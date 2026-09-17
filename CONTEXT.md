@@ -34,6 +34,6 @@ _Avoid_: domínio corporativo (usar "Autorizado" para deixar claro que é o meca
 
 ## Relationships
 
-- **Empresa ↔ Colaborador**: N:N. Um Colaborador pode estar vinculado a várias Empresas; uma Empresa tem vários Colaboradores.
+- **Empresa ↔ Colaborador**: N:N. Um Colaborador pode estar vinculado a várias Empresas; uma Empresa tem vários Colaboradores. O vínculo criado por Convite Pendente ou Domínio Autorizado se efetiva sem aprovação prévia do Colaborador, que é avisado por email e in-app logo em seguida. Qualquer um dos dois lados pode encerrar o vínculo depois: o Colaborador se desvincula sozinho, e um Administrador da Empresa pode remover o Colaborador.
 - **Empresa → Administrador da Empresa**: 1:N. Cada Empresa pode ter vários Administradores, cada um com login próprio.
 - **Colaborador → WorkHour / Project / Task / Invoice**: mesma relação de posse que existe hoje entre User e esses registros — privados ao Colaborador, não visíveis a outros Colaboradores da mesma Empresa nem entre Empresas diferentes.
