@@ -25,11 +25,11 @@ Convite que um Administrador da Empresa envia a um email para que essa pessoa ta
 _Avoid_: convite (sem qualificação — ambíguo com Convite Pendente, que vincula um Colaborador, não um Administrador)
 
 **Convite Pendente**:
-Regra de vínculo automático criada por um Administrador da Empresa para um email específico que ainda não tem conta no It's Done. Vira vínculo de Colaborador assim que alguém se cadastra ou loga com aquele email.
+Regra de vínculo automático que um Administrador da Empresa cria pra um email específico, só disponível depois que a Empresa foi ativada. Se o email já tem User associado, o vínculo de Colaborador é criado na hora; senão, fica pendente até a pessoa se cadastrar ou logar com aquele email. Empresas diferentes podem ter Convite Pendente pro mesmo email de forma independente — todos se efetivam.
 _Avoid_: invite, convite (sem qualificação — ambíguo com o vínculo já efetivado)
 
 **Domínio Autorizado**:
-Domínio de email que uma Empresa registra para vínculo automático: todo User que se cadastra ou loga com um email daquele domínio vira Colaborador da Empresa. Domínios de provedores públicos de email (gmail.com, outlook.com etc.) não podem ser registrados como Domínio Autorizado. Exige confirmação por email corporativo antes de valer para vínculo automático.
+Domínio de email que uma Empresa (já ativada) registra para vínculo automático: todo User que se cadastra ou loga com um email daquele domínio vira Colaborador da Empresa. Domínios de provedores públicos de email (lista mantida no próprio código/config do It's Done — gmail.com, outlook.com etc.) não podem ser registrados. A confirmação de posse usa o próprio email que o Administrador já usa pra logar (já provado na Ativação da Empresa), sem exigir endereço genérico do tipo admin@domínio.
 _Avoid_: domínio corporativo (usar "Autorizado" para deixar claro que é o mecanismo de auto-vínculo, não uma propriedade genérica)
 
 ## Relationships
