@@ -8,11 +8,24 @@ import {
   Globe,
   Mail,
   Plus,
+  PowerOff,
   Users,
   X,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +53,8 @@ import {
   downloadEmpresaDashboardExport,
   useCreateEmpresaDomain,
   useCreateEmpresaInvite,
+  useDeactivateEmpresa,
+  useEmpresaAdminAuth,
   useEmpresaDashboardColaboradores,
   useEmpresaDashboardOverview,
   useEmpresaDomains,
@@ -71,12 +86,15 @@ function originBadgeVariant(
 }
 
 export default function EmpresaAdminDashboardPage() {
+  const router = useRouter();
+  const { logout } = useEmpresaAdminAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [domainValue, setDomainValue] = useState("");
   const [isExporting, setIsExporting] = useState(false);
+  const [isDeactivateOpen, setIsDeactivateOpen] = useState(false);
 
   const period = useMemo(
     () => ({ from: from || undefined, to: to || undefined }),
@@ -95,6 +113,7 @@ export default function EmpresaAdminDashboardPage() {
   const createDomain = useCreateEmpresaDomain();
   const revokeDomain = useRevokeEmpresaDomain();
   const requestDomainConfirmation = useRequestEmpresaDomainConfirmation();
+  const deactivateEmpresa = useDeactivateEmpresa();
 
   const pendingInvites = (invites ?? []).filter(
     (invite) => invite.status === "PENDING"
@@ -123,6 +142,17 @@ export default function EmpresaAdminDashboardPage() {
     setDomainValue("");
   };
 
+  // MW-26 — a Empresa some do ponto de vista deste Administrador (o próprio
+  // EmpresaAdmin que chamou o endpoint deixa de existir), então o único
+  // caminho depois é deslogar e voltar pro login — não há dado de dashboard
+  // pra revalidar nesta tela.
+  const handleDeactivate = async () => {
+    await deactivateEmpresa.mutateAsync();
+    setIsDeactivateOpen(false);
+    logout();
+    router.push("/empresa-admin/login?deactivated=1");
+  };
+
   return (
     <PageContainer>
       <PageHeader
@@ -134,6 +164,40 @@ export default function EmpresaAdminDashboardPage() {
           <Download className="w-4 h-4 mr-2" />
           Exportar período
         </Button>
+        <AlertDialog open={isDeactivateOpen} onOpenChange={setIsDeactivateOpen}>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="text-destructive hover:text-destructive"
+            >
+              <PowerOff className="w-4 h-4 mr-2" />
+              Desativar Empresa
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Desativar Empresa</AlertDialogTitle>
+              <AlertDialogDescription>
+                Isso remove todos os Administradores e revoga os convites e
+                domínios pendentes desta Empresa. Os Colaboradores continuam
+                vinculados e seguem registrando e faturando horas
+                normalmente — eles só serão avisados de que a Empresa não
+                tem mais um Administrador ativo. Você pode reativar a
+                Empresa depois pelo mesmo fluxo de Ativação.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeactivate}
+                disabled={deactivateEmpresa.isPending}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Desativar Empresa
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </PageHeader>
 
       <div className="flex flex-wrap items-end gap-4 mb-4">

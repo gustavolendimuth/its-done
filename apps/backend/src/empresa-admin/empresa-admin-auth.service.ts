@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { InAppNotificationsService } from '../in-app-notifications/in-app-notifications.service';
 import { EmpresaAdminsService } from './empresa-admins.service';
 import {
   RegisterEmpresaAdminDto,
@@ -47,6 +48,7 @@ export class EmpresaAdminAuthService {
     private empresaAdminsService: EmpresaAdminsService,
     private jwtService: JwtService,
     private notificationsService: NotificationsService,
+    private inAppNotificationsService: InAppNotificationsService,
   ) {}
 
   async register(dto: RegisterEmpresaAdminDto) {
@@ -305,6 +307,92 @@ export class EmpresaAdminAuthService {
     });
 
     return this.buildAuthResponse(admin);
+  }
+
+  // MW-26 — Desativação de Empresa. Qualquer Administrador da Empresa
+  // desativa sozinho, sem aprovação de outro admin. Hard-delete de todos os
+  // EmpresaAdmin: "Empresa ativada" já é `count(EmpresaAdmin) > 0`
+  // (`assertEmpresaNotActivated` acima), então isso faz o fluxo de
+  // Ativação normal voltar a funcionar sozinho na reativação, sem nenhum
+  // tratamento especial. ConvitePendente/DominioAutorizado só são
+  // revogados (status = REVOKED), nunca apagados — `EmpresaLinkingService`
+  // já só honra PENDING/CONFIRMED, então isso sozinho impede novos
+  // vínculos automáticos sem precisar deletar linhas. Colaborador,
+  // WorkHour, Project, Task, Invoice e Address não são tocados.
+  async deactivateEmpresa(admin: { empresaId: string }) {
+    const empresa = await this.prisma.empresa.findUnique({
+      where: { id: admin.empresaId },
+    });
+    if (!empresa) {
+      throw new NotFoundException('Empresa not found');
+    }
+
+    const colaboradores = await this.prisma.$transaction(async (tx) => {
+      // Read inside the same transaction as the writes below, so the
+      // Colaborador snapshot we notify from matches exactly what existed at
+      // the moment of deactivation.
+      const rows = await tx.colaborador.findMany({
+        where: { empresaId: admin.empresaId },
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+        },
+      });
+
+      await tx.empresaAdmin.deleteMany({
+        where: { empresaId: admin.empresaId },
+      });
+
+      await tx.convitePendente.updateMany({
+        where: { empresaId: admin.empresaId, status: 'PENDING' },
+        data: { status: 'REVOKED' },
+      });
+
+      await tx.dominioAutorizado.updateMany({
+        where: {
+          empresaId: admin.empresaId,
+          status: { in: ['PENDING', 'CONFIRMED'] },
+        },
+        data: { status: 'REVOKED' },
+      });
+
+      return rows;
+    });
+
+    await this.notifyColaboradoresOfDeactivation(colaboradores, empresa);
+
+    return { message: 'Empresa deactivated successfully' };
+  }
+
+  private async notifyColaboradoresOfDeactivation(
+    colaboradores: Array<{
+      user: { id: string; name: string; email: string };
+    }>,
+    empresa: { name: string | null; company: string },
+  ): Promise<void> {
+    const empresaName = empresa.name || empresa.company;
+
+    await Promise.all(
+      colaboradores.map(async ({ user }) => {
+        try {
+          await Promise.all([
+            this.notificationsService.sendEmpresaDeactivatedEmail(
+              user.email,
+              user.name,
+              empresaName,
+            ),
+            this.inAppNotificationsService.createEmpresaDeactivatedNotification(
+              user.id,
+              empresaName,
+            ),
+          ]);
+        } catch (error) {
+          console.error(
+            'Failed to send Empresa deactivated notification:',
+            error,
+          );
+        }
+      }),
+    );
   }
 
   private verifyToken(token: string, expectedType: string) {

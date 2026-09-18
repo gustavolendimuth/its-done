@@ -200,3 +200,18 @@ export async function downloadEmpresaDashboardExport(
   link.remove();
   window.URL.revokeObjectURL(url);
 }
+
+/**
+ * MW-26 — Desativação de Empresa. Nenhuma invalidação de cache no
+ * onSuccess: o próprio EmpresaAdmin que chamou isso deixa de existir (hard
+ * delete), então o passo seguinte é sempre deslogar e sair do Dashboard, não
+ * continuar nele com dados revalidados.
+ */
+export function useDeactivateEmpresa() {
+  return useMutation({
+    mutationFn: async () => {
+      const res = await empresaAdminApi.post("/empresa-admin/auth/deactivate");
+      return res.data;
+    },
+  });
+}

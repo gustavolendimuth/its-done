@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import "@testing-library/jest-dom";
@@ -6,6 +6,8 @@ import EmpresaAdminDashboardPage from "./page";
 
 const mutateAsyncMock = jest.fn().mockResolvedValue(undefined);
 const mutateMock = jest.fn();
+const deactivateMutateAsyncMock = jest.fn().mockResolvedValue(undefined);
+const logoutMock = jest.fn();
 
 jest.mock("@/features/empresa-admin", () => ({
   useEmpresaDashboardOverview: jest.fn(),
@@ -31,6 +33,13 @@ jest.mock("@/features/empresa-admin", () => ({
   useRequestEmpresaDomainConfirmation: jest.fn(() => ({
     mutate: mutateMock,
     isPending: false,
+  })),
+  useDeactivateEmpresa: jest.fn(() => ({
+    mutateAsync: deactivateMutateAsyncMock,
+    isPending: false,
+  })),
+  useEmpresaAdminAuth: jest.fn(() => ({
+    logout: logoutMock,
   })),
   downloadEmpresaDashboardExport: jest.fn(),
 }));
@@ -219,5 +228,46 @@ describe("EmpresaAdminDashboardPage", () => {
     await userEvent.click(screen.getByRole("button", { name: /Convidar/ }));
 
     expect(mutateAsyncMock).toHaveBeenCalledWith("novo@test.local");
+  });
+
+  it("renders the Desativar Empresa button in the header, outside the tabs", () => {
+    render(<EmpresaAdminDashboardPage />);
+
+    expect(
+      screen.getByRole("button", { name: /Desativar Empresa/ })
+    ).toBeInTheDocument();
+  });
+
+  it("desativação exige confirmação: abrir o botão não desativa nada até confirmar no diálogo", async () => {
+    render(<EmpresaAdminDashboardPage />);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /Desativar Empresa/ })
+    );
+    expect(deactivateMutateAsyncMock).not.toHaveBeenCalled();
+
+    // Radix hides everything outside the dialog from the accessibility
+    // tree while it's open (including the header trigger), so only the
+    // dialog's own confirm button matches here. The click goes through
+    // fireEvent (a raw DOM event) instead of userEvent's pointer-events-
+    // aware simulation, since Radix also marks the background inert.
+    const confirmButton = screen.getByRole("button", {
+      name: /Desativar Empresa/,
+    });
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => expect(logoutMock).toHaveBeenCalled());
+    expect(deactivateMutateAsyncMock).toHaveBeenCalled();
+  });
+
+  it("cancelar o diálogo de desativação não chama a mutação", async () => {
+    render(<EmpresaAdminDashboardPage />);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /Desativar Empresa/ })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(deactivateMutateAsyncMock).not.toHaveBeenCalled();
   });
 });

@@ -105,12 +105,16 @@ model ConvitePendente {
   empresaId               String
   email                   String
   status                  ConvitePendenteStatus @default(PENDING)
-  createdByEmpresaAdminId String
+  // MW-26 — opcional + SetNull: Desativação de Empresa faz hard-delete dos
+  // EmpresaAdmin da Empresa, mas o ConvitePendente (mesmo já REVOKED/LINKED)
+  // continua existindo como histórico. Sem isso, o FK original (RESTRICT)
+  // impediria apagar um EmpresaAdmin que criou algum convite.
+  createdByEmpresaAdminId String?
   linkedAt                DateTime?
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @updatedAt
   empresa                 Empresa               @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-  createdByEmpresaAdmin   EmpresaAdmin          @relation(fields: [createdByEmpresaAdminId], references: [id])
+  createdByEmpresaAdmin   EmpresaAdmin?         @relation(fields: [createdByEmpresaAdminId], references: [id], onDelete: SetNull)
 
   @@unique([empresaId, email])
 }

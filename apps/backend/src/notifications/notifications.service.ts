@@ -271,6 +271,32 @@ export class NotificationsService {
     }
   }
 
+  // MW-26 — notifica um Colaborador de que a Empresa foi desativada (todos
+  // os EmpresaAdmin dela removidos). O vínculo Colaborador em si permanece
+  // intacto; isso só avisa que a Empresa não tem mais Administrador ativo.
+  async sendEmpresaDeactivatedEmail(
+    toEmail: string,
+    userName: string,
+    empresaName: string,
+  ) {
+    try {
+      await this.sendEmail({
+        to: toEmail,
+        subject: `${empresaName} was deactivated - Its Done`,
+        html: this.generateEmpresaDeactivatedEmailTemplate(
+          userName,
+          empresaName,
+        ),
+      });
+
+      console.log(`Empresa deactivated email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send Empresa deactivated email:', error);
+      return false;
+    }
+  }
+
   private async sendEmail(options: {
     to: string;
     subject: string;
@@ -585,6 +611,46 @@ export class NotificationsService {
             ${explanation}
           </div>
           <p>This Empresa no longer sees your aggregated hours. Your existing hours, projects, tasks and invoices are untouched and remain available to you.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateEmpresaDeactivatedEmailTemplate(
+    userName: string,
+    empresaName: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Empresa deactivated</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .info { background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Empresa Deactivated</h1>
+        </div>
+        <div class="content">
+          <h2>Hello ${userName},</h2>
+          <div class="info">
+            <strong>${empresaName} deactivated its account.</strong><br>
+            It no longer manages this account.
+          </div>
+          <p>You are still linked to ${empresaName} and can keep logging and invoicing hours against it normally. Your existing hours, projects, tasks and invoices are untouched.</p>
+          <p>If ${empresaName} activates an Administrator again in the future, it will resume seeing your aggregated hours.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>

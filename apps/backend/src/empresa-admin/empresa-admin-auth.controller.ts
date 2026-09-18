@@ -98,4 +98,15 @@ export class EmpresaAdminAuthController {
   async confirmInvite(@Body() dto: ConfirmEmpresaAdminInviteDto) {
     return this.empresaAdminAuthService.confirmEmpresaAdminInvite(dto);
   }
+
+  // MW-26 — Desativação de Empresa. Qualquer Administrador logado desativa
+  // sozinho, sem aprovação de outro admin. MW-27 — 20/min por IP: já exige
+  // um JWT de Administrador válido (diferente de login/forgot-password, que
+  // são alvo de força bruta sem autenticação), mesmo teto de invites/domains.
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @UseGuards(EmpresaAdminJwtAuthGuard)
+  @Post('deactivate')
+  async deactivate(@Request() req) {
+    return this.empresaAdminAuthService.deactivateEmpresa(req.user);
+  }
 }

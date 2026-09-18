@@ -192,4 +192,23 @@ export class InAppNotificationsService {
       },
     });
   }
+
+  // MW-26: notifies a Colaborador that the Empresa they are linked to was
+  // deactivated (all its EmpresaAdmin removed). The Colaborador link itself
+  // is untouched — this only explains why the "Empresa vinculada" badge
+  // disappeared.
+  async createEmpresaDeactivatedNotification(
+    userId: string,
+    empresaName: string,
+  ) {
+    return this.create(userId, {
+      title: `${empresaName} was deactivated`,
+      message: `${empresaName} deactivated its account and no longer manages it. You can keep logging and invoicing hours against it normally.`,
+      type: InAppNotificationType.INFO,
+      metadata: {
+        empresaName,
+        action: 'view_empresas',
+      },
+    });
+  }
 }
