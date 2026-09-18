@@ -31,6 +31,9 @@ describe('Dashboard da Empresa (e2e) — MW-24', () => {
   });
 
   afterAll(async () => {
+    await prisma.invoice.deleteMany({
+      where: { clientId: { in: empresaIds } },
+    });
     await prisma.workHour.deleteMany({
       where: { clientId: { in: empresaIds } },
     });
@@ -116,7 +119,7 @@ describe('Dashboard da Empresa (e2e) — MW-24', () => {
     });
 
     const workDate = withinCurrentMonth();
-    await prisma.workHour.create({
+    const workHourA = await prisma.workHour.create({
       data: {
         date: workDate,
         hours: 2,
@@ -134,6 +137,16 @@ describe('Dashboard da Empresa (e2e) — MW-24', () => {
       },
     });
 
+    // Only userA has an invoice — userB contributes hours but no faturado.
+    await prisma.invoice.create({
+      data: {
+        clientId: admin.empresaId,
+        amount: 200,
+        status: 'PENDING',
+        invoiceWorkHours: { create: [{ workHourId: workHourA.id }] },
+      },
+    });
+
     await request(app.getHttpServer())
       .post('/empresa-admin/invites')
       .set('Authorization', `Bearer ${admin.token}`)
@@ -147,10 +160,53 @@ describe('Dashboard da Empresa (e2e) — MW-24', () => {
 
     expect(res.body.colaboradoresAtivos).toBe(2);
     expect(res.body.horasPeriodo).toBe(5);
-    // userA: 2h * 100 (project rate) = 200; userB: 3h * 0 (no project, no
-    // empresa hourlyRate set on registration) = 0
+    // "Faturado" soma Invoice.amount, não horas * taxa — só userA tem
+    // invoice (200); userB não faturou nada ainda.
     expect(res.body.totalFaturado).toBe(200);
     expect(res.body.convitesPendentes).toBe(1);
+  });
+
+  it('total faturado ignora invoices canceladas e conta só as emitidas dentro do período', async () => {
+    const admin = await registerEmpresaAdmin('Acme Faturado Canceladas');
+    const user = await createUser('mw24-canceled');
+
+    await prisma.colaborador.create({
+      data: { userId: user.id, empresaId: admin.empresaId },
+    });
+
+    const workHour = await prisma.workHour.create({
+      data: {
+        date: withinCurrentMonth(),
+        hours: 1,
+        userId: user.id,
+        clientId: admin.empresaId,
+      },
+    });
+
+    await prisma.invoice.create({
+      data: {
+        clientId: admin.empresaId,
+        amount: 999,
+        status: 'CANCELED',
+        invoiceWorkHours: { create: [{ workHourId: workHour.id }] },
+      },
+    });
+    await prisma.invoice.create({
+      data: {
+        clientId: admin.empresaId,
+        amount: 50,
+        status: 'PAID',
+        invoiceWorkHours: { create: [{ workHourId: workHour.id }] },
+      },
+    });
+
+    const res = await request(app.getHttpServer())
+      .get('/empresa-admin/dashboard/overview')
+      .set('Authorization', `Bearer ${admin.token}`)
+      .expect(200);
+
+    // 999 (CANCELED) fica de fora; só o PAID de 50 entra na soma.
+    expect(res.body.totalFaturado).toBe(50);
   });
 
   it('a tabela de colaboradores lista horas/projetos/faturado por Colaborador, com o tipo de vínculo', async () => {
@@ -179,7 +235,7 @@ describe('Dashboard da Empresa (e2e) — MW-24', () => {
     });
 
     const workDate = withinCurrentMonth();
-    await prisma.workHour.create({
+    const workHourA = await prisma.workHour.create({
       data: {
         date: workDate,
         hours: 1,
@@ -188,13 +244,27 @@ describe('Dashboard da Empresa (e2e) — MW-24', () => {
         projectId: projectA.id,
       },
     });
-    await prisma.workHour.create({
+    const workHourB = await prisma.workHour.create({
       data: {
         date: workDate,
         hours: 4,
         userId: user.id,
         clientId: admin.empresaId,
         projectId: projectB.id,
+      },
+    });
+
+    await prisma.invoice.create({
+      data: {
+        clientId: admin.empresaId,
+        amount: 130,
+        status: 'PENDING',
+        invoiceWorkHours: {
+          create: [
+            { workHourId: workHourA.id },
+            { workHourId: workHourB.id },
+          ],
+        },
       },
     });
 
@@ -210,7 +280,7 @@ describe('Dashboard da Empresa (e2e) — MW-24', () => {
     expect(row.origin).toBe('CONVITE');
     expect(row.horas).toBe(5);
     expect(row.projetos).toBe(2);
-    expect(row.faturado).toBe(130); // 1*50 + 4*20
+    expect(row.faturado).toBe(130); // soma de Invoice.amount, não horas * taxa
   });
 
   it('uma Empresa não vê os Colaboradores/horas de outra Empresa', async () => {
