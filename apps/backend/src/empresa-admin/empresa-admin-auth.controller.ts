@@ -8,6 +8,7 @@ import {
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { EmpresaAdminAuthService } from './empresa-admin-auth.service';
 import { EmpresaAdminJwtAuthGuard } from './guards/empresa-admin-jwt-auth.guard';
 import {
@@ -30,6 +31,9 @@ export class EmpresaAdminAuthController {
     return this.empresaAdminAuthService.register(dto);
   }
 
+  // MW-27 — mesmo teto de auth/login (10/min por IP): freia brute-force sem
+  // travar o Administrador em uso legítimo.
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('login')
   async login(@Body() dto: LoginEmpresaAdminDto) {
     const admin = await this.empresaAdminAuthService.validateEmpresaAdmin(
@@ -50,11 +54,15 @@ export class EmpresaAdminAuthController {
     return req.user;
   }
 
+  // MW-27 — mesmo teto de auth/forgot-password (5/min por IP).
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordEmpresaAdminDto) {
     return this.empresaAdminAuthService.forgotPassword(dto);
   }
 
+  // MW-27 — mesmo teto de auth/reset-password (5/min por IP).
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetPasswordEmpresaAdminDto) {
     return this.empresaAdminAuthService.resetPassword(dto);

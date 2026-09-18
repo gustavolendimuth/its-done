@@ -8,6 +8,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ConvitesPendentesService } from './convites-pendentes.service';
 import { EmpresaAdminJwtAuthGuard } from './guards/empresa-admin-jwt-auth.guard';
 import { CreateConvitePendenteDto } from './dto/convite-pendente.dto';
@@ -17,6 +18,9 @@ import { CreateConvitePendenteDto } from './dto/convite-pendente.dto';
 export class ConvitesPendentesController {
   constructor(private convitesPendentesService: ConvitesPendentesService) {}
 
+  // MW-27 — 20 criações/min por IP: mais restritivo que o teto global,
+  // ainda folgado pra um Administrador convidar um time inteiro de uma vez.
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post()
   create(@Request() req, @Body() dto: CreateConvitePendenteDto) {
     return this.convitesPendentesService.create(
