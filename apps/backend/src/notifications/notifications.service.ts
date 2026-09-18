@@ -223,6 +223,54 @@ export class NotificationsService {
     }
   }
 
+  async sendColaboradorLinkedEmail(
+    toEmail: string,
+    userName: string,
+    empresaName: string,
+  ) {
+    try {
+      await this.sendEmail({
+        to: toEmail,
+        subject: `You were linked to ${empresaName} - Its Done`,
+        html: this.generateColaboradorLinkedEmailTemplate(
+          userName,
+          empresaName,
+        ),
+      });
+
+      console.log(`Colaborador linked email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send Colaborador linked email:', error);
+      return false;
+    }
+  }
+
+  async sendColaboradorUnlinkedEmail(
+    toEmail: string,
+    userName: string,
+    empresaName: string,
+    unlinkedBy: 'colaborador' | 'admin',
+  ) {
+    try {
+      await this.sendEmail({
+        to: toEmail,
+        subject: `You were unlinked from ${empresaName} - Its Done`,
+        html: this.generateColaboradorUnlinkedEmailTemplate(
+          userName,
+          empresaName,
+          unlinkedBy,
+        ),
+      });
+
+      console.log(`Colaborador unlinked email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send Colaborador unlinked email:', error);
+      return false;
+    }
+  }
+
   private async sendEmail(options: {
     to: string;
     subject: string;
@@ -452,6 +500,91 @@ export class NotificationsService {
           <p>Or copy and paste this link into your browser:</p>
           <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">${inviteUrl}</p>
           <p>This link expires in 1 hour. If you didn't expect this invite, you can safely ignore this email.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateColaboradorLinkedEmailTemplate(
+    userName: string,
+    empresaName: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Linked to a new Empresa</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .info { background-color: #f0f9ff; border-left: 4px solid #0284c7; padding: 16px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Empresa Link</h1>
+        </div>
+        <div class="content">
+          <h2>Hello ${userName},</h2>
+          <div class="info">
+            <strong>You were linked to ${empresaName}!</strong><br>
+            You are now a Colaborador of this Empresa.
+          </div>
+          <p>${empresaName} can now see your aggregated hours, projects and invoices — your individual entries stay private, only the totals are shared.</p>
+          <p>You can unlink yourself from this Empresa at any time from your Empresas page.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateColaboradorUnlinkedEmailTemplate(
+    userName: string,
+    empresaName: string,
+    unlinkedBy: 'colaborador' | 'admin',
+  ): string {
+    const explanation =
+      unlinkedBy === 'admin'
+        ? `The Administrator of ${empresaName} removed you as a Colaborador.`
+        : `You unlinked yourself from ${empresaName}.`;
+
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Unlinked from an Empresa</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .info { background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Empresa Unlink</h1>
+        </div>
+        <div class="content">
+          <h2>Hello ${userName},</h2>
+          <div class="info">
+            <strong>You were unlinked from ${empresaName}.</strong><br>
+            ${explanation}
+          </div>
+          <p>This Empresa no longer sees your aggregated hours. Your existing hours, projects, tasks and invoices are untouched and remain available to you.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>

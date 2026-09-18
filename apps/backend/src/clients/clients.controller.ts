@@ -85,6 +85,11 @@ export class ClientsController {
     return this.clientsService.remove(req.user.id, id);
   }
 
+  @Delete(':id/colaborador')
+  removeColaborador(@Request() req, @Param('id') id: string) {
+    return this.clientsService.removeColaborador(req.user.id, id);
+  }
+
   @Get('debug/all')
   async debugGetAllClients(@Request() req) {
     try {
