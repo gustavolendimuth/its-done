@@ -8,17 +8,19 @@ export class ClientsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, createClientDto: CreateClientDto) {
-    return this.prisma.client.create({
+    return this.prisma.empresa.create({
       data: {
         ...createClientDto,
-        userId,
+        colaboradores: {
+          create: { userId },
+        },
       },
     });
   }
 
   async findAll(userId: string) {
-    return this.prisma.client.findMany({
-      where: { userId },
+    return this.prisma.empresa.findMany({
+      where: { colaboradores: { some: { userId } } },
       include: {
         _count: {
           select: {
@@ -31,10 +33,10 @@ export class ClientsService {
   }
 
   async findOne(userId: string, id: string) {
-    const client = await this.prisma.client.findFirst({
+    const client = await this.prisma.empresa.findFirst({
       where: {
         id,
-        userId,
+        colaboradores: { some: { userId } },
       },
       include: {
         _count: {
@@ -54,10 +56,10 @@ export class ClientsService {
   }
 
   async update(userId: string, id: string, updateClientDto: UpdateClientDto) {
-    const client = await this.prisma.client.findFirst({
+    const client = await this.prisma.empresa.findFirst({
       where: {
         id,
-        userId,
+        colaboradores: { some: { userId } },
       },
     });
 
@@ -65,17 +67,17 @@ export class ClientsService {
       throw new NotFoundException('Client not found');
     }
 
-    return this.prisma.client.update({
+    return this.prisma.empresa.update({
       where: { id },
       data: updateClientDto,
     });
   }
 
   async remove(userId: string, id: string) {
-    const client = await this.prisma.client.findFirst({
+    const client = await this.prisma.empresa.findFirst({
       where: {
         id,
-        userId,
+        colaboradores: { some: { userId } },
       },
     });
 
@@ -83,7 +85,7 @@ export class ClientsService {
       throw new NotFoundException('Client not found');
     }
 
-    await this.prisma.client.delete({
+    await this.prisma.empresa.delete({
       where: { id },
     });
 
@@ -91,14 +93,14 @@ export class ClientsService {
   }
 
   async getStats(userId: string) {
-    const totalClients = await this.prisma.client.count({
-      where: { userId },
+    const totalClients = await this.prisma.empresa.count({
+      where: { colaboradores: { some: { userId } } },
     });
 
     const totalHoursResult = await this.prisma.workHour.aggregate({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
       },
       _sum: {
@@ -109,7 +111,7 @@ export class ClientsService {
     const totalInvoices = await this.prisma.invoice.count({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
       },
     });
@@ -118,7 +120,7 @@ export class ClientsService {
     const invoiceAmountResult = await this.prisma.invoice.aggregate({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
       },
       _sum: {
@@ -129,7 +131,7 @@ export class ClientsService {
     const paidInvoicesResult = await this.prisma.invoice.aggregate({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
         status: 'PAID',
       },
@@ -141,7 +143,7 @@ export class ClientsService {
     const pendingInvoicesResult = await this.prisma.invoice.aggregate({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
         status: 'PENDING',
       },
@@ -153,7 +155,7 @@ export class ClientsService {
     const canceledInvoicesResult = await this.prisma.invoice.aggregate({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
         status: 'CANCELED',
       },
@@ -179,10 +181,10 @@ export class ClientsService {
   }
 
   async getClientStats(userId: string, id: string) {
-    const client = await this.prisma.client.findFirst({
+    const client = await this.prisma.empresa.findFirst({
       where: {
         id,
-        userId,
+        colaboradores: { some: { userId } },
       },
       include: {
         workHours: {

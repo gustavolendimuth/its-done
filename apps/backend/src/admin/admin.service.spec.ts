@@ -14,7 +14,7 @@ describe('AdminService', () => {
       delete: jest.fn(),
       findUnique: jest.fn(),
     },
-    client: {
+    empresa: {
       count: jest.fn(),
     },
     project: {
@@ -54,7 +54,7 @@ describe('AdminService', () => {
   describe('getSystemStats', () => {
     it('should return system statistics', async () => {
       mockPrismaService.user.count.mockResolvedValueOnce(10); // total users
-      mockPrismaService.client.count.mockResolvedValue(5);
+      mockPrismaService.empresa.count.mockResolvedValue(5);
       mockPrismaService.project.count.mockResolvedValue(8);
       mockPrismaService.workHour.count.mockResolvedValue(100);
       mockPrismaService.invoice.count.mockResolvedValueOnce(20); // total invoices

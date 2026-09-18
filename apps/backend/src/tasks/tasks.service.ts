@@ -12,8 +12,8 @@ export class TasksService {
   constructor(private prisma: PrismaService) {}
 
   private async assertClientOwnership(clientId: string, userId: string) {
-    const client = await this.prisma.client.findFirst({
-      where: { id: clientId, userId },
+    const client = await this.prisma.empresa.findFirst({
+      where: { id: clientId, colaboradores: { some: { userId } } },
     });
 
     if (!client) {

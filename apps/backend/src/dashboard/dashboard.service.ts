@@ -67,8 +67,8 @@ export class DashboardService {
       }),
 
       // Total clients
-      this.prisma.client.count({
-        where: { userId },
+      this.prisma.empresa.count({
+        where: { colaboradores: { some: { userId } } },
       }),
 
       // Total invoices
@@ -138,8 +138,8 @@ export class DashboardService {
       }),
 
       // Recent clients (last 3)
-      this.prisma.client.findMany({
-        where: { userId },
+      this.prisma.empresa.findMany({
+        where: { colaboradores: { some: { userId } } },
         orderBy: { createdAt: 'desc' },
         take: 2,
       }),
@@ -198,8 +198,8 @@ export class DashboardService {
       .slice(0, 10);
 
     // Get top clients by hours and invoices
-    const clientStats = await this.prisma.client.findMany({
-      where: { userId },
+    const clientStats = await this.prisma.empresa.findMany({
+      where: { colaboradores: { some: { userId } } },
       include: {
         workHours: {
           select: { hours: true },
