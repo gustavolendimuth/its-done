@@ -153,6 +153,14 @@ export function LoginForm() {
             {t("signUp")}
           </a>
         </p>
+        <p className="text-sm text-muted-foreground">
+          <a
+            href="/empresa-admin/login"
+            className="text-primary hover:underline"
+          >
+            {t("empresaAdminLink")}
+          </a>
+        </p>
       </div>
     </div>
   );

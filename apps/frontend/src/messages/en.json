@@ -55,7 +55,8 @@
       "signInWithGoogle": "Continue with Google",
       "forgotPassword": "Forgot password?",
       "noAccount": "Don't have an account?",
-      "signUp": "Sign up"
+      "signUp": "Sign up",
+      "empresaAdminLink": "Are you a company administrator? Sign in here"
     },
     "register": {
       "title": "Create account",
