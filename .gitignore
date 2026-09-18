@@ -42,6 +42,9 @@ next-env.d.ts
 logs
 *.log
 
+# preview de worktree
+.preview-worktree.state
+
 # uploads directory
 uploads/
 

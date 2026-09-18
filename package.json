@@ -9,6 +9,8 @@
     "dev": "./scripts/start-dev.sh",
     "dev:frontend": "pnpm --filter frontend dev",
     "dev:backend": "pnpm --filter backend dev",
+    "preview:start": "./scripts/preview-worktree.sh start",
+    "preview:stop": "./scripts/preview-worktree.sh stop",
     "lint": "turbo run lint",
     "test": "turbo run test",
   "format": "prettier --write \"**/*.{ts,tsx,md}\"",
