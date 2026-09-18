@@ -200,7 +200,7 @@ describe("MobileNav", () => {
       status: "authenticated",
       update: jest.fn(),
     });
-    mockUsePathname.mockReturnValue("/clients");
+    mockUsePathname.mockReturnValue("/empresas");
 
     render(<MobileNav />);
 
@@ -235,7 +235,7 @@ describe("MobileNav", () => {
     );
     expect(screen.getByRole("link", { name: /clients/i })).toHaveAttribute(
       "href",
-      "/clients"
+      "/empresas"
     );
     expect(screen.getByRole("link", { name: /projects/i })).toHaveAttribute(
       "href",

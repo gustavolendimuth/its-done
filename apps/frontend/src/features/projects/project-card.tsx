@@ -70,7 +70,7 @@ export function ProjectCard({
 
   const handleViewClient = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/clients/${project.clientId}`);
+    router.push(`/empresas/${project.clientId}`);
   };
 
   const handleEdit = (e: React.MouseEvent) => {

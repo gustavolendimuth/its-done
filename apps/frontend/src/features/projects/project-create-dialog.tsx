@@ -30,7 +30,7 @@ const projectSchema = z.object({
     .min(0, { message: "Alert hours must be 0 or greater" })
     .optional()
     .nullable(),
-  clientId: z.string().min(1, { message: "Client is required" }),
+  clientId: z.string().min(1, { message: "Empresa is required" }),
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;

@@ -125,7 +125,7 @@ describe("Navigation", () => {
     const settingsLink = screen.getByRole("link", { name: /settings/i });
 
     expect(workHoursLink).toHaveAttribute("href", "/work-hours");
-    expect(clientsLink).toHaveAttribute("href", "/clients");
+    expect(clientsLink).toHaveAttribute("href", "/empresas");
     expect(settingsLink).toHaveAttribute("href", "/settings");
   });
 

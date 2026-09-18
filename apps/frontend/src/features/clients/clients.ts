@@ -15,6 +15,8 @@ export interface Client {
   currency?: string;
   language?: string;
   timezone?: string;
+  /** True when the Empresa has at least one active EmpresaAdmin (MW-25). */
+  hasActiveAdmin?: boolean;
   createdAt: string;
   updatedAt: string;
 }

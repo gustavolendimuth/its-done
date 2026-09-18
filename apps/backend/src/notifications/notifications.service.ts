@@ -270,7 +270,7 @@ export class NotificationsService {
             Invoice ID: <strong>${invoiceId}</strong>
           </div>
           <p>A new invoice has been uploaded and is now available for your review.</p>
-          <p>Please log in to your client dashboard to view and download the invoice.</p>
+          <p>Please log in to your empresa dashboard to view and download the invoice.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>
@@ -309,7 +309,7 @@ export class NotificationsService {
           <p>You can now:</p>
           <ul>
             <li>Track your work hours</li>
-            <li>Manage clients and projects</li>
+            <li>Manage empresas and projects</li>
             <li>Generate reports and analytics</li>
             <li>Configure notification settings</li>
           </ul>

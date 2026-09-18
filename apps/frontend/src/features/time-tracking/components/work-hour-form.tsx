@@ -80,7 +80,7 @@ function buildSchema(
     endTime: timeField,
   };
   if (includeClientProject) {
-    shape.clientId = z.string().min(1, "Client is required");
+    shape.clientId = z.string().min(1, "Empresa is required");
     // Story 8 (MW-5): Project is optional — dev work logged without one
     // must not be forced into inventing a fake Project just to satisfy the
     // form. Client is still required (mirrors the backend, which always
