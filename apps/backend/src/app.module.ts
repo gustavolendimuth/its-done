@@ -19,6 +19,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { InAppNotificationsModule } from './in-app-notifications/in-app-notifications.module';
 import { AdminModule } from './admin/admin.module';
+import { EmpresaAdminModule } from './empresa-admin/empresa-admin.module';
 import { WorkSessionsModule } from './work-sessions/work-sessions.module';
 import { PushModule } from './push/push.module';
 import { WorkSessionSchedulerService } from './work-sessions/services/work-session-scheduler.service';
@@ -45,6 +46,7 @@ import { WorkSessionSchedulerService } from './work-sessions/services/work-sessi
     NotificationsModule,
     InAppNotificationsModule,
     AdminModule,
+    EmpresaAdminModule,
     WorkSessionsModule,
     PushModule,
   ],

@@ -60,6 +60,7 @@ model Empresa {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   colaboradores Colaborador[]
+  empresaAdmins EmpresaAdmin[]
   workHours   WorkHour[]
   invoices    Invoice[]
   addresses   Address[]
@@ -76,6 +77,16 @@ model Colaborador {
   empresa   Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
 
   @@unique([userId, empresaId])
+}
+
+model EmpresaAdmin {
+  id        String   @id @default(uuid())
+  empresaId String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  empresa   Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
 }
 
 model Project {
