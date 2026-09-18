@@ -8,12 +8,7 @@ import {
   useState,
 } from "react";
 
-import {
-  clearEmpresaAdminToken,
-  empresaAdminApi,
-  getEmpresaAdminToken,
-  setEmpresaAdminToken,
-} from "@/lib/empresa-admin-axios";
+import { empresaAdminApi } from "@/lib/empresa-admin-axios";
 
 export interface EmpresaAdminProfile {
   id: string;
@@ -26,7 +21,7 @@ interface EmpresaAdminAuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const EmpresaAdminAuthContext =
@@ -40,35 +35,27 @@ export function EmpresaAdminAuthProvider({
   const [admin, setAdmin] = useState<EmpresaAdminProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Não há token acessível ao JS (mora num cookie httpOnly) — a única forma
+  // de saber se a sessão existe é perguntar ao backend, via proxy.
   useEffect(() => {
-    const token = getEmpresaAdminToken();
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
-
     empresaAdminApi
       .get<EmpresaAdminProfile>("/empresa-admin/auth/profile")
       .then((res) => setAdmin(res.data))
-      .catch(() => {
-        clearEmpresaAdminToken();
-        setAdmin(null);
-      })
+      .catch(() => setAdmin(null))
       .finally(() => setIsLoading(false));
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
+    // O proxy grava o access_token no cookie httpOnly e devolve só `admin`.
     const res = await empresaAdminApi.post<{
-      access_token: string;
       admin: EmpresaAdminProfile;
     }>("/empresa-admin/auth/login", { email, password });
 
-    setEmpresaAdminToken(res.data.access_token);
     setAdmin(res.data.admin);
   }, []);
 
-  const logout = useCallback(() => {
-    clearEmpresaAdminToken();
+  const logout = useCallback(async () => {
+    await empresaAdminApi.post("/empresa-admin/logout").catch(() => {});
     setAdmin(null);
   }, []);
 

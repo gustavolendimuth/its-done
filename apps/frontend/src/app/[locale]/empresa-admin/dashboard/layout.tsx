@@ -27,8 +27,8 @@ export default function EmpresaAdminDashboardLayout({
     }
   }, [isLoading, admin, router]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push("/empresa-admin/login");
   };
 

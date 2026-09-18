@@ -149,7 +149,7 @@ export default function EmpresaAdminDashboardPage() {
   const handleDeactivate = async () => {
     await deactivateEmpresa.mutateAsync();
     setIsDeactivateOpen(false);
-    logout();
+    await logout();
     router.push("/empresa-admin/login?deactivated=1");
   };
 
