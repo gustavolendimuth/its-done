@@ -13,9 +13,32 @@ import {
   RegisterEmpresaAdminDto,
   ForgotPasswordEmpresaAdminDto,
   ResetPasswordEmpresaAdminDto,
+  RequestEmpresaActivationDto,
+  ConfirmEmpresaActivationDto,
+  InviteEmpresaAdminDto,
+  ConfirmEmpresaAdminInviteDto,
 } from './dto/empresa-admin-auth.dto';
 
 export const EMPRESA_ADMIN_ACTOR_TYPE = 'EMPRESA_ADMIN';
+
+const EMPRESA_ACTIVATION_TOKEN_TYPE = 'empresa-activation';
+const EMPRESA_ADMIN_INVITE_TOKEN_TYPE = 'empresa-admin-invite';
+
+// Minimal blocklist of public email providers. MW-19 only needs this to
+// reject an obviously-not-a-company domain on the "domain declared"
+// activation path; Domínio Autorizado (MW-22) owns the real, maintained
+// list later — this is intentionally small and local to this file.
+const PUBLIC_EMAIL_PROVIDER_DOMAINS = new Set([
+  'gmail.com',
+  'googlemail.com',
+  'outlook.com',
+  'hotmail.com',
+  'live.com',
+  'yahoo.com',
+  'icloud.com',
+  'protonmail.com',
+  'aol.com',
+]);
 
 @Injectable()
 export class EmpresaAdminAuthService {
@@ -135,6 +158,190 @@ export class EmpresaAdminAuthService {
         throw new BadRequestException('Invalid reset token');
       }
       throw error;
+    }
+  }
+
+  // MW-19 — Ativação de uma Empresa existente
+  async requestEmpresaActivation(
+    empresaId: string,
+    dto: RequestEmpresaActivationDto,
+  ) {
+    const empresa = await this.prisma.empresa.findUnique({
+      where: { id: empresaId },
+    });
+    if (!empresa) {
+      throw new NotFoundException('Empresa not found');
+    }
+
+    await this.assertEmpresaNotActivated(empresaId);
+
+    const email = dto.email.trim().toLowerCase();
+
+    if (dto.domain) {
+      const domain = dto.domain.trim().toLowerCase();
+      if (PUBLIC_EMAIL_PROVIDER_DOMAINS.has(domain)) {
+        throw new BadRequestException(
+          'Public email provider domains cannot be used to prove domain ownership',
+        );
+      }
+      if (!email.endsWith(`@${domain}`)) {
+        throw new BadRequestException(
+          'The email must belong to the declared domain',
+        );
+      }
+    } else if (email !== empresa.email.trim().toLowerCase()) {
+      throw new BadRequestException(
+        "The email must match the Empresa's registered contact email, or a domain must be declared",
+      );
+    }
+
+    const activationToken = this.jwtService.sign(
+      {
+        empresaId,
+        email,
+        type: EMPRESA_ACTIVATION_TOKEN_TYPE,
+      },
+      { expiresIn: '1h' },
+    );
+
+    await this.notificationsService.sendEmpresaActivationEmail(
+      email,
+      empresa.company,
+      activationToken,
+    );
+
+    return {
+      message: 'If eligible, a confirmation link has been sent.',
+    };
+  }
+
+  async confirmEmpresaActivation(dto: ConfirmEmpresaActivationDto) {
+    const payload = this.verifyToken(dto.token, EMPRESA_ACTIVATION_TOKEN_TYPE);
+    const { empresaId, email } = payload;
+
+    const empresa = await this.prisma.empresa.findUnique({
+      where: { id: empresaId },
+    });
+    if (!empresa) {
+      throw new NotFoundException('Empresa not found');
+    }
+
+    await this.assertEmpresaNotActivated(empresaId);
+    await this.assertEmailNotTaken(email);
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const admin = await this.prisma.empresaAdmin.create({
+      data: {
+        empresaId,
+        email,
+        password: hashedPassword,
+        invitedById: null,
+      },
+    });
+
+    return this.buildAuthResponse(admin);
+  }
+
+  // MW-20 — Convite de Administrador
+  async inviteEmpresaAdmin(
+    admin: { id: string; empresaId: string },
+    dto: InviteEmpresaAdminDto,
+  ) {
+    const empresa = await this.prisma.empresa.findUnique({
+      where: { id: admin.empresaId },
+    });
+    if (!empresa) {
+      throw new NotFoundException('Empresa not found');
+    }
+
+    const email = dto.email.trim().toLowerCase();
+    await this.assertEmailNotTaken(email);
+
+    const inviteToken = this.jwtService.sign(
+      {
+        empresaId: admin.empresaId,
+        email,
+        invitedById: admin.id,
+        type: EMPRESA_ADMIN_INVITE_TOKEN_TYPE,
+      },
+      { expiresIn: '1h' },
+    );
+
+    await this.notificationsService.sendEmpresaAdminInviteEmail(
+      email,
+      empresa.company,
+      inviteToken,
+    );
+
+    return {
+      message: 'Invite sent.',
+    };
+  }
+
+  async confirmEmpresaAdminInvite(dto: ConfirmEmpresaAdminInviteDto) {
+    const payload = this.verifyToken(
+      dto.token,
+      EMPRESA_ADMIN_INVITE_TOKEN_TYPE,
+    );
+    const { empresaId, email, invitedById } = payload;
+
+    const empresa = await this.prisma.empresa.findUnique({
+      where: { id: empresaId },
+    });
+    if (!empresa) {
+      throw new NotFoundException('Empresa not found');
+    }
+
+    await this.assertEmailNotTaken(email);
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const admin = await this.prisma.empresaAdmin.create({
+      data: {
+        empresaId,
+        email,
+        password: hashedPassword,
+        invitedById: invitedById ?? null,
+      },
+    });
+
+    return this.buildAuthResponse(admin);
+  }
+
+  private verifyToken(token: string, expectedType: string) {
+    try {
+      const payload = this.jwtService.verify(token);
+      if (payload.type !== expectedType) {
+        throw new BadRequestException('Invalid token');
+      }
+      return payload;
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new BadRequestException('Token has expired');
+      }
+      if (error.name === 'JsonWebTokenError') {
+        throw new BadRequestException('Invalid token');
+      }
+      throw error;
+    }
+  }
+
+  private async assertEmpresaNotActivated(empresaId: string) {
+    const existingAdminCount = await this.prisma.empresaAdmin.count({
+      where: { empresaId },
+    });
+    if (existingAdminCount > 0) {
+      throw new ConflictException(
+        'Empresa is already activated; use the Convite de Administrador flow instead',
+      );
+    }
+  }
+
+  private async assertEmailNotTaken(email: string) {
+    const existing = await this.empresaAdminsService.findByEmail(email);
+    if (existing) {
+      throw new ConflictException(
+        'An EmpresaAdmin already exists with this email',
+      );
     }
   }
 

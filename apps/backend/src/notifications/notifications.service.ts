@@ -167,6 +167,62 @@ export class NotificationsService {
     }
   }
 
+  async sendEmpresaActivationEmail(
+    toEmail: string,
+    empresaName: string,
+    activationToken: string,
+  ) {
+    try {
+      const frontendUrl = normalizeUrl(
+        this.configService.get('FRONTEND_URL') || 'localhost:3000',
+      );
+      const activationUrl = `${frontendUrl}/empresa-admin/activate?token=${activationToken}`;
+
+      await this.sendEmail({
+        to: toEmail,
+        subject: 'Confirm Empresa Activation - Its Done',
+        html: this.generateEmpresaActivationEmailTemplate(
+          empresaName,
+          activationUrl,
+        ),
+      });
+
+      console.log(`Empresa activation email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send Empresa activation email:', error);
+      return false;
+    }
+  }
+
+  async sendEmpresaAdminInviteEmail(
+    toEmail: string,
+    empresaName: string,
+    inviteToken: string,
+  ) {
+    try {
+      const frontendUrl = normalizeUrl(
+        this.configService.get('FRONTEND_URL') || 'localhost:3000',
+      );
+      const inviteUrl = `${frontendUrl}/empresa-admin/invite?token=${inviteToken}`;
+
+      await this.sendEmail({
+        to: toEmail,
+        subject: 'You were invited as Empresa Administrator - Its Done',
+        html: this.generateEmpresaAdminInviteEmailTemplate(
+          empresaName,
+          inviteUrl,
+        ),
+      });
+
+      console.log(`Empresa admin invite email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send Empresa admin invite email:', error);
+      return false;
+    }
+  }
+
   private async sendEmail(options: {
     to: string;
     subject: string;
@@ -314,6 +370,88 @@ export class NotificationsService {
             <li>Configure notification settings</li>
           </ul>
           <p>Get started by logging your first work session!</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateEmpresaActivationEmailTemplate(
+    empresaName: string,
+    activationUrl: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Confirm Empresa Activation</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Empresa Activation</h1>
+        </div>
+        <div class="content">
+          <p>You're activating <strong>${empresaName}</strong> as an Empresa account on Its Done.</p>
+          <p>Click the button below to confirm and set up the first Administrator password:</p>
+          <div style="text-align: center;">
+            <a href="${activationUrl}" class="button">Confirm Activation</a>
+          </div>
+          <p>Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">${activationUrl}</p>
+          <p>This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateEmpresaAdminInviteEmailTemplate(
+    empresaName: string,
+    inviteUrl: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Empresa Administrator Invite</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Administrator Invite</h1>
+        </div>
+        <div class="content">
+          <p>You were invited to become an Administrator of <strong>${empresaName}</strong> on Its Done.</p>
+          <p>Click the button below to confirm and set your password:</p>
+          <div style="text-align: center;">
+            <a href="${inviteUrl}" class="button">Accept Invite</a>
+          </div>
+          <p>Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">${inviteUrl}</p>
+          <p>This link expires in 1 hour. If you didn't expect this invite, you can safely ignore this email.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>

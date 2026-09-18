@@ -80,13 +80,16 @@ model Colaborador {
 }
 
 model EmpresaAdmin {
-  id        String   @id @default(uuid())
-  empresaId String
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  empresa   Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  id            String         @id @default(uuid())
+  empresaId     String
+  email         String         @unique
+  password      String
+  invitedById   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  empresa       Empresa        @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  invitedBy     EmpresaAdmin?  @relation("EmpresaAdminInvitedBy", fields: [invitedById], references: [id], onDelete: SetNull)
+  invitedAdmins EmpresaAdmin[] @relation("EmpresaAdminInvitedBy")
 }
 
 model Project {

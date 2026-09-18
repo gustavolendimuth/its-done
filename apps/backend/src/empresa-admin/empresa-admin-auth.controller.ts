@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Body,
+  Param,
   UseGuards,
   Get,
   Request,
@@ -14,6 +15,10 @@ import {
   LoginEmpresaAdminDto,
   ForgotPasswordEmpresaAdminDto,
   ResetPasswordEmpresaAdminDto,
+  RequestEmpresaActivationDto,
+  ConfirmEmpresaActivationDto,
+  InviteEmpresaAdminDto,
+  ConfirmEmpresaAdminInviteDto,
 } from './dto/empresa-admin-auth.dto';
 
 @Controller('empresa-admin/auth')
@@ -53,5 +58,36 @@ export class EmpresaAdminAuthController {
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetPasswordEmpresaAdminDto) {
     return this.empresaAdminAuthService.resetPassword(dto);
+  }
+
+  // MW-19 — Ativação de uma Empresa existente. Público: qualquer pessoa
+  // pode iniciar a ativação de uma Empresa que ainda não tem Administrador.
+  @Post('activate/:empresaId/request')
+  async requestActivation(
+    @Param('empresaId') empresaId: string,
+    @Body() dto: RequestEmpresaActivationDto,
+  ) {
+    return this.empresaAdminAuthService.requestEmpresaActivation(
+      empresaId,
+      dto,
+    );
+  }
+
+  @Post('activate/confirm')
+  async confirmActivation(@Body() dto: ConfirmEmpresaActivationDto) {
+    return this.empresaAdminAuthService.confirmEmpresaActivation(dto);
+  }
+
+  // MW-20 — Convite de Administrador. Autenticado: só um Administrador
+  // logado pode convidar outro Administrador pra mesma Empresa.
+  @UseGuards(EmpresaAdminJwtAuthGuard)
+  @Post('invite')
+  async inviteAdmin(@Request() req, @Body() dto: InviteEmpresaAdminDto) {
+    return this.empresaAdminAuthService.inviteEmpresaAdmin(req.user, dto);
+  }
+
+  @Post('invite/confirm')
+  async confirmInvite(@Body() dto: ConfirmEmpresaAdminInviteDto) {
+    return this.empresaAdminAuthService.confirmEmpresaAdminInvite(dto);
   }
 }
