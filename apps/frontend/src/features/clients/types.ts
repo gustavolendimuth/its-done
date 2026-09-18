@@ -6,6 +6,8 @@ export interface Client {
   company: string;
   /** Fallback hourly rate used to bill WorkHours that have no Project. */
   hourlyRate?: number | null;
+  /** True when the Empresa has at least one active EmpresaAdmin (MW-25). */
+  hasActiveAdmin?: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -181,14 +181,14 @@ describe("FormModal Translations E2E", () => {
 
       expect(
         screen.getByText(
-          "Modifique os detalhes e informações de contato do cliente"
+          "Modifique os detalhes e informações de contato da empresa"
         )
       ).toBeInTheDocument();
 
       // Verifica que NÃO está usando a descrição genérica da página
       expect(
         screen.queryByText(
-          "Atualize as informações do cliente, detalhes de contato e gerencie endereços"
+          "Atualize as informações da empresa, detalhes de contato e gerencie endereços"
         )
       ).not.toBeInTheDocument();
     });
@@ -204,7 +204,7 @@ describe("FormModal Translations E2E", () => {
 
       expect(
         screen.getByText(
-          "Digite as informações e detalhes de contato do cliente"
+          "Digite as informações e detalhes de contato da empresa"
         )
       ).toBeInTheDocument();
     });
@@ -219,7 +219,7 @@ describe("FormModal Translations E2E", () => {
       );
 
       expect(
-        screen.getByText("Registre o tempo gasto em projetos de clientes")
+        screen.getByText("Registre o tempo gasto em projetos de empresas")
       ).toBeInTheDocument();
     });
   });
@@ -281,10 +281,10 @@ describe("FormModal Translations E2E", () => {
       );
 
       expect(ptMessages.clients.editClientFormSubtitle).toBe(
-        "Modifique os detalhes e informações de contato do cliente"
+        "Modifique os detalhes e informações de contato da empresa"
       );
       expect(ptMessages.workHours.addHoursFormSubtitle).toBe(
-        "Registre o tempo gasto em projetos de clientes"
+        "Registre o tempo gasto em projetos de empresas"
       );
     });
   });

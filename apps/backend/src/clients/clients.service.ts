@@ -19,17 +19,20 @@ export class ClientsService {
   }
 
   async findAll(userId: string) {
-    return this.prisma.empresa.findMany({
+    const empresas = await this.prisma.empresa.findMany({
       where: { colaboradores: { some: { userId } } },
       include: {
         _count: {
           select: {
             workHours: true,
             invoices: true,
+            empresaAdmins: true,
           },
         },
       },
     });
+
+    return empresas.map((empresa) => this.mapWithHasActiveAdmin(empresa));
   }
 
   async findOne(userId: string, id: string) {
@@ -43,6 +46,7 @@ export class ClientsService {
           select: {
             workHours: true,
             invoices: true,
+            empresaAdmins: true,
           },
         },
       },
@@ -52,7 +56,19 @@ export class ClientsService {
       throw new NotFoundException('Client not found');
     }
 
-    return client;
+    return this.mapWithHasActiveAdmin(client);
+  }
+
+  private mapWithHasActiveAdmin<
+    T extends { _count: { empresaAdmins: number } },
+  >(empresa: T) {
+    const { _count, ...rest } = empresa;
+    const { empresaAdmins, ...restCount } = _count;
+    return {
+      ...rest,
+      _count: restCount,
+      hasActiveAdmin: empresaAdmins > 0,
+    };
   }
 
   async update(userId: string, id: string, updateClientDto: UpdateClientDto) {

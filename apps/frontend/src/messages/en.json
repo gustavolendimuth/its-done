@@ -314,7 +314,9 @@
     "errorCreatingClient": "Error creating client. Please try again.",
     "creating": "Creating",
     "createClient": "Create Client",
-    "selectClient": "Select client"
+    "selectClient": "Select client",
+    "linkedBadge": "Linked company",
+    "linkedBadgeNote": "This company has an active account and sees your aggregated hours."
   },
   "projects": {
     "title": "Projects",

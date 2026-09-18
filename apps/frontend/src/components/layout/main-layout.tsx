@@ -41,7 +41,7 @@ export function Navigation() {
 
   const dashboardItems: NavItem[] = [
     { href: "/work-hours", label: t("workHours"), icon: Clock },
-    { href: "/clients", label: t("clients"), icon: Users },
+    { href: "/empresas", label: t("clients"), icon: Users },
     { href: "/projects", label: t("projects"), icon: FolderOpen },
     { href: "/tasks", label: t("tasks"), icon: ListChecks },
     { href: "/invoices", label: t("invoices"), icon: FileText },

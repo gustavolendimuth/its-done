@@ -83,7 +83,7 @@ export default function ClientDetailPage() {
           : 0
         : ((thisMonthAmount - previousMonthAmount) / previousMonthAmount) * 100;
 
-    const clientName = invoices[0]?.client?.name || "Client";
+    const clientName = invoices[0]?.client?.name || "Empresa";
     const clientEmail = invoices[0]?.client?.email || "";
 
     return {
