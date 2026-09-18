@@ -167,6 +167,41 @@ export class NotificationsService {
     }
   }
 
+  // MW-31 — método próprio, não compartilhado com o `sendPasswordResetEmail`
+  // de `User` (assinatura idêntica, URL diferente): mudar a assinatura do
+  // método genérico pra aceitar um tipo de URL seria breaking change pro
+  // `auth/` de `User`, que já o consome sem esse parâmetro.
+  async sendEmpresaAdminPasswordResetEmail(
+    toEmail: string,
+    adminEmail: string,
+    resetToken: string,
+  ) {
+    try {
+      const frontendUrl = normalizeUrl(
+        this.configService.get('FRONTEND_URL') || 'localhost:3000',
+      );
+      const resetUrl = `${frontendUrl}/empresa-admin/reset-password?token=${resetToken}`;
+
+      await this.sendEmail({
+        to: toEmail,
+        subject: 'Reset Your Password - Its Done',
+        html: this.generateEmpresaAdminPasswordResetEmailTemplate(
+          adminEmail,
+          resetUrl,
+        ),
+      });
+
+      console.log(`Empresa admin password reset email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error(
+        'Failed to send Empresa admin password reset email:',
+        error,
+      );
+      return false;
+    }
+  }
+
   async sendEmpresaActivationEmail(
     toEmail: string,
     empresaName: string,
@@ -485,6 +520,47 @@ export class NotificationsService {
           <p>Or copy and paste this link into your browser:</p>
           <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">${activationUrl}</p>
           <p>This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateEmpresaAdminPasswordResetEmailTemplate(
+    adminEmail: string,
+    resetUrl: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reset Your Password</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Password Reset</h1>
+        </div>
+        <div class="content">
+          <p>We received a request to reset the password for the Administrator account <strong>${adminEmail}</strong>. If you didn't make this request, you can safely ignore this email.</p>
+          <p>Click the button below to reset your password:</p>
+          <div style="text-align: center;">
+            <a href="${resetUrl}" class="button">Reset Password</a>
+          </div>
+          <p>Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">${resetUrl}</p>
+          <p>This link expires in 1 hour. If you continue to have problems, please contact our support team.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>

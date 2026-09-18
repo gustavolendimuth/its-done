@@ -101,7 +101,7 @@ export class EmpresaAdminAuthService {
       { expiresIn: '1h' },
     );
 
-    await this.notificationsService.sendPasswordResetEmail(
+    await this.notificationsService.sendEmpresaAdminPasswordResetEmail(
       admin.email,
       admin.email,
       resetToken,
