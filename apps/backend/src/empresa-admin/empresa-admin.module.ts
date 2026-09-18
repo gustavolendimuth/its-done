@@ -7,6 +7,11 @@ import { EmpresaAdminAuthService } from './empresa-admin-auth.service';
 import { EmpresaAdminsService } from './empresa-admins.service';
 import { EmpresaAdminJwtStrategy } from './strategies/empresa-admin-jwt.strategy';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { EmpresaLinkingService } from './empresa-linking.service';
+import { ConvitesPendentesController } from './convites-pendentes.controller';
+import { ConvitesPendentesService } from './convites-pendentes.service';
+import { DominiosAutorizadosController } from './dominios-autorizados.controller';
+import { DominiosAutorizadosService } from './dominios-autorizados.service';
 
 @Module({
   imports: [
@@ -21,12 +26,23 @@ import { NotificationsModule } from '../notifications/notifications.module';
       inject: [ConfigService],
     }),
   ],
-  controllers: [EmpresaAdminAuthController],
+  controllers: [
+    EmpresaAdminAuthController,
+    ConvitesPendentesController,
+    DominiosAutorizadosController,
+  ],
   providers: [
     EmpresaAdminAuthService,
     EmpresaAdminsService,
     EmpresaAdminJwtStrategy,
+    EmpresaLinkingService,
+    ConvitesPendentesService,
+    DominiosAutorizadosService,
   ],
-  exports: [EmpresaAdminsService, EmpresaAdminAuthService],
+  exports: [
+    EmpresaAdminsService,
+    EmpresaAdminAuthService,
+    EmpresaLinkingService,
+  ],
 })
 export class EmpresaAdminModule {}

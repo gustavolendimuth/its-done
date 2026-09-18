@@ -66,6 +66,8 @@ model Empresa {
   addresses   Address[]
   projects    Project[]
   tasks       Task[]
+  convitesPendentes    ConvitePendente[]
+  dominiosAutorizados  DominioAutorizado[]
 }
 
 model Colaborador {
@@ -90,6 +92,35 @@ model EmpresaAdmin {
   empresa       Empresa        @relation(fields: [empresaId], references: [id], onDelete: Cascade)
   invitedBy     EmpresaAdmin?  @relation("EmpresaAdminInvitedBy", fields: [invitedById], references: [id], onDelete: SetNull)
   invitedAdmins EmpresaAdmin[] @relation("EmpresaAdminInvitedBy")
+  convitesPendentesCriados ConvitePendente[]
+}
+
+model ConvitePendente {
+  id                      String                @id @default(uuid())
+  empresaId               String
+  email                   String
+  status                  ConvitePendenteStatus @default(PENDING)
+  createdByEmpresaAdminId String
+  linkedAt                DateTime?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  empresa                 Empresa               @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  createdByEmpresaAdmin   EmpresaAdmin          @relation(fields: [createdByEmpresaAdminId], references: [id])
+
+  @@unique([empresaId, email])
+}
+
+model DominioAutorizado {
+  id          String                  @id @default(uuid())
+  empresaId   String
+  domain      String
+  status      DominioAutorizadoStatus @default(PENDING)
+  confirmedAt DateTime?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  empresa     Empresa                 @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@unique([empresaId, domain])
 }
 
 model Project {
@@ -277,4 +308,16 @@ enum InvoiceStatus {
 enum UserRole {
   USER
   ADMIN
-} 
+}
+
+enum ConvitePendenteStatus {
+  PENDING
+  LINKED
+  REVOKED
+}
+
+enum DominioAutorizadoStatus {
+  PENDING
+  CONFIRMED
+  REVOKED
+}
