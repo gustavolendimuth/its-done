@@ -17,9 +17,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEmpresaAdminAuth } from "@/features/empresa-admin";
 
-export default function EmpresaAdminLoginPage() {
+function getErrorMessage(error: unknown): string {
+  if (error && typeof error === "object" && "response" in error) {
+    const response = (error as { response?: { data?: { message?: string } } })
+      .response;
+    if (response?.data?.message) {
+      return response.data.message;
+    }
+  }
+  return "Não foi possível criar a conta. Tente novamente.";
+}
+
+export default function EmpresaAdminRegisterPage() {
   const router = useRouter();
-  const { login } = useEmpresaAdminAuth();
+  const { register } = useEmpresaAdminAuth();
+  const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -30,10 +42,10 @@ export default function EmpresaAdminLoginPage() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await login(email, password);
+      await register(company, email, password);
       router.push("/empresa-admin/dashboard");
-    } catch {
-      setError("Email ou senha inválidos.");
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -44,13 +56,24 @@ export default function EmpresaAdminLoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <Building2 className="mx-auto h-8 w-8 text-primary" />
-          <CardTitle>Login da Empresa</CardTitle>
+          <CardTitle>Criar conta da Empresa</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Acesso do Administrador da Empresa
+            Cadastro do Administrador da Empresa
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="company">Empresa</Label>
+              <Input
+                id="company"
+                type="text"
+                autoComplete="organization"
+                value={company}
+                onChange={(event) => setCompany(event.target.value)}
+                required
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -67,7 +90,7 @@ export default function EmpresaAdminLoginPage() {
               <Input
                 id="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 required
@@ -82,22 +105,17 @@ export default function EmpresaAdminLoginPage() {
               {isSubmitting && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Entrar
+              Criar conta
             </Button>
-            <div className="flex items-center justify-between text-sm">
+            <p className="text-center text-sm text-muted-foreground">
+              Já tem conta?{" "}
               <Link
-                href="/empresa-admin/register"
+                href="/empresa-admin/login"
                 className="text-primary hover:underline"
               >
-                Criar conta
+                Entrar
               </Link>
-              <Link
-                href="/empresa-admin/forgot-password"
-                className="text-muted-foreground hover:text-primary"
-              >
-                Esqueci minha senha
-              </Link>
-            </div>
+            </p>
           </form>
         </CardContent>
       </Card>

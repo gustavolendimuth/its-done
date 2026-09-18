@@ -21,6 +21,11 @@ interface EmpresaAdminAuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (
+    company: string,
+    email: string,
+    password: string
+  ) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -54,6 +59,19 @@ export function EmpresaAdminAuthProvider({
     setAdmin(res.data.admin);
   }, []);
 
+  const register = useCallback(
+    async (company: string, email: string, password: string) => {
+      // Mesma forma de resposta do login: o proxy grava o access_token no
+      // cookie httpOnly e devolve só `admin` — sem passo extra de login.
+      const res = await empresaAdminApi.post<{
+        admin: EmpresaAdminProfile;
+      }>("/empresa-admin/auth/register", { company, email, password });
+
+      setAdmin(res.data.admin);
+    },
+    []
+  );
+
   const logout = useCallback(async () => {
     await empresaAdminApi.post("/empresa-admin/logout").catch(() => {});
     setAdmin(null);
@@ -61,7 +79,14 @@ export function EmpresaAdminAuthProvider({
 
   return (
     <EmpresaAdminAuthContext.Provider
-      value={{ admin, isLoading, isAuthenticated: !!admin, login, logout }}
+      value={{
+        admin,
+        isLoading,
+        isAuthenticated: !!admin,
+        login,
+        register,
+        logout,
+      }}
     >
       {children}
     </EmpresaAdminAuthContext.Provider>
