@@ -12,6 +12,7 @@ import {
   CheckCircle,
   Timer,
   Users,
+  Link2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -23,6 +24,7 @@ import { z } from "zod";
 import { ClientAddresses } from "./client-addresses";
 import { ClientShareMenu } from "./client-share-menu";
 
+import { Badge } from "@/components/ui/badge";
 import { BigCardStat, BigCardContactInfo } from "@/components/ui/big-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -74,7 +76,7 @@ export function ClientCard({ client }: ClientCardProps) {
 
   const handleViewClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/clients/${client.id}`);
+    router.push(`/empresas/${client.id}`);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
@@ -131,6 +133,15 @@ export function ClientCard({ client }: ClientCardProps) {
           "bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20 border-blue-200 dark:border-blue-800",
         )}
       >
+        {client.hasActiveAdmin && (
+          <Badge
+            variant="success"
+            className="absolute -top-2 -right-2 z-10 flex items-center gap-1"
+          >
+            <Link2 className="h-3 w-3" /> {t("linkedBadge")}
+          </Badge>
+        )}
+
         {/* Accent bar */}
         <div className="h-2 bg-blue-500" />
 
@@ -182,6 +193,12 @@ export function ClientCard({ client }: ClientCardProps) {
           </div>
         </CardContent>
       </Card>
+
+      {client.hasActiveAdmin && (
+        <p className="text-xs text-muted-foreground px-1 pt-1">
+          {t("linkedBadgeNote")}
+        </p>
+      )}
 
       {/* Action Buttons - Always Visible */}
       <div className="border border-t-0 rounded-t-none rounded-b-lg bg-blue-50/50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 group-hover:shadow-lg">

@@ -151,4 +151,64 @@ export class InAppNotificationsService {
       },
     });
   }
+
+  // MW-23: notifies a User that they were just linked as Colaborador to an
+  // Empresa (via Convite Pendente or Domínio Autorizado).
+  async createColaboradorLinkedNotification(
+    userId: string,
+    empresaName: string,
+  ) {
+    return this.create(userId, {
+      title: `Linked to ${empresaName}`,
+      message: `You were linked as Colaborador to ${empresaName}. They can now see your aggregated hours, projects and invoices.`,
+      type: InAppNotificationType.INFO,
+      metadata: {
+        empresaName,
+        action: 'view_empresas',
+      },
+    });
+  }
+
+  // MW-23: notifies a User that their Colaborador link to an Empresa was
+  // removed, by themselves or by the Empresa's Administrador.
+  async createColaboradorUnlinkedNotification(
+    userId: string,
+    empresaName: string,
+    unlinkedBy: 'colaborador' | 'admin',
+  ) {
+    const message =
+      unlinkedBy === 'admin'
+        ? `The Administrator of ${empresaName} removed you as Colaborador. Your existing hours, projects and invoices remain unchanged.`
+        : `You unlinked yourself from ${empresaName}. Your existing hours, projects and invoices remain unchanged.`;
+
+    return this.create(userId, {
+      title: `Unlinked from ${empresaName}`,
+      message,
+      type: InAppNotificationType.INFO,
+      metadata: {
+        empresaName,
+        unlinkedBy,
+        action: 'view_empresas',
+      },
+    });
+  }
+
+  // MW-26: notifies a Colaborador that the Empresa they are linked to was
+  // deactivated (all its EmpresaAdmin removed). The Colaborador link itself
+  // is untouched — this only explains why the "Empresa vinculada" badge
+  // disappeared.
+  async createEmpresaDeactivatedNotification(
+    userId: string,
+    empresaName: string,
+  ) {
+    return this.create(userId, {
+      title: `${empresaName} was deactivated`,
+      message: `${empresaName} deactivated its account and no longer manages it. You can keep logging and invoicing hours against it normally.`,
+      type: InAppNotificationType.INFO,
+      metadata: {
+        empresaName,
+        action: 'view_empresas',
+      },
+    });
+  }
 }

@@ -19,7 +19,7 @@ export class AdminService {
       regularUsers,
     ] = await Promise.all([
       this.prisma.user.count(),
-      this.prisma.client.count(),
+      this.prisma.empresa.count(),
       this.prisma.project.count(),
       this.prisma.workHour.count(),
       this.prisma.invoice.count(),
@@ -59,7 +59,7 @@ export class AdminService {
   }
 
   async getAllUsers() {
-    return this.prisma.user.findMany({
+    const users = await this.prisma.user.findMany({
       select: {
         id: true,
         email: true,
@@ -69,7 +69,7 @@ export class AdminService {
         updatedAt: true,
         _count: {
           select: {
-            clients: true,
+            colaboradores: true,
             projects: true,
             workHours: true,
           },
@@ -77,6 +77,15 @@ export class AdminService {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    return users.map(({ _count, ...user }) => ({
+      ...user,
+      _count: {
+        clients: _count.colaboradores,
+        projects: _count.projects,
+        workHours: _count.workHours,
+      },
+    }));
   }
 
   async updateUserRole(userId: string, role: 'USER' | 'ADMIN') {

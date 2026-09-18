@@ -14,7 +14,7 @@ const prismaMock = {
   invoice: {
     create: jest.fn(),
   },
-  client: {
+  empresa: {
     findUnique: jest.fn(),
   },
 } as any;
@@ -65,7 +65,7 @@ describe('InvoicesService - create()', () => {
       id: 'inv1',
       amount: 440,
     });
-    prismaMock.client.findUnique.mockResolvedValueOnce({ email: undefined });
+    prismaMock.empresa.findUnique.mockResolvedValueOnce({ email: undefined });
 
     const result = await service.create(dto, userId);
 
@@ -90,7 +90,7 @@ describe('InvoicesService - create()', () => {
     prismaMock.project.findMany.mockResolvedValueOnce([
       { id: 'p1', hourlyRate: 100 },
     ]);
-    prismaMock.client.findUnique.mockResolvedValueOnce({ hourlyRate: 40 });
+    prismaMock.empresa.findUnique.mockResolvedValueOnce({ hourlyRate: 40 });
     prismaMock.invoice.create.mockResolvedValueOnce({
       id: 'inv2',
       amount: 320,
@@ -114,7 +114,7 @@ describe('InvoicesService - create()', () => {
       { id: 'wh1', userId, clientId: 'c1', projectId: null, hours: 5 },
     ]);
     prismaMock.invoiceWorkHour.findMany.mockResolvedValueOnce([]);
-    prismaMock.client.findUnique.mockResolvedValueOnce({ hourlyRate: null });
+    prismaMock.empresa.findUnique.mockResolvedValueOnce({ hourlyRate: null });
     prismaMock.invoice.create.mockResolvedValueOnce({ id: 'inv3', amount: 0 });
 
     await service.create(dto, userId);

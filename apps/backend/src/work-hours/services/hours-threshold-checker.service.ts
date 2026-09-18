@@ -148,7 +148,7 @@ export class HoursThresholdCheckerService {
     );
 
     // Get client info
-    const client = await this.prisma.client.findUnique({
+    const client = await this.prisma.empresa.findUnique({
       where: { id: clientId },
     });
 

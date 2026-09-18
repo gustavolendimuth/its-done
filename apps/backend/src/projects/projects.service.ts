@@ -13,10 +13,10 @@ export class ProjectsService {
 
   async create(createProjectDto: CreateProjectDto, userId: string) {
     // Verificar se o cliente pertence ao usuário
-    const client = await this.prisma.client.findFirst({
+    const client = await this.prisma.empresa.findFirst({
       where: {
         id: createProjectDto.clientId,
-        userId: userId,
+        colaboradores: { some: { userId } },
       },
     });
 
@@ -123,10 +123,10 @@ export class ProjectsService {
 
     // Se está mudando o cliente, verificar se o novo cliente pertence ao usuário
     if (updateProjectDto.clientId) {
-      const client = await this.prisma.client.findFirst({
+      const client = await this.prisma.empresa.findFirst({
         where: {
           id: updateProjectDto.clientId,
-          userId: userId,
+          colaboradores: { some: { userId } },
         },
       });
 

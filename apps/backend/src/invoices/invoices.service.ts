@@ -96,7 +96,7 @@ export class InvoicesService {
             where: { id: { in: projectIds } },
           })
         : Promise.resolve([]),
-      this.prisma.client.findUnique({ where: { id: clientId } }),
+      this.prisma.empresa.findUnique({ where: { id: clientId } }),
     ]);
 
     type ProjectRate = { id: string; hourlyRate?: number | null };

@@ -105,7 +105,7 @@ describe("ProjectCard Component", () => {
 
     fireEvent.click(clientButton);
 
-    expect(mockRouter.push).toHaveBeenCalledWith("/clients/1");
+    expect(mockRouter.push).toHaveBeenCalledWith("/empresas/1");
   });
 
   test("displays all action buttons", () => {

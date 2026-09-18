@@ -2,45 +2,55 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { EmpresaLinkingService } from '../empresa-admin/empresa-linking.service';
 
 @Injectable()
 export class ClientsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private empresaLinkingService: EmpresaLinkingService,
+  ) {}
 
   async create(userId: string, createClientDto: CreateClientDto) {
-    return this.prisma.client.create({
+    return this.prisma.empresa.create({
       data: {
         ...createClientDto,
-        userId,
+        colaboradores: {
+          create: { userId },
+        },
       },
     });
   }
 
   async findAll(userId: string) {
-    return this.prisma.client.findMany({
-      where: { userId },
+    const empresas = await this.prisma.empresa.findMany({
+      where: { colaboradores: { some: { userId } } },
       include: {
         _count: {
           select: {
             workHours: true,
             invoices: true,
+            empresaAdmins: true,
           },
         },
       },
     });
+
+    return empresas.map((empresa) => this.mapWithHasActiveAdmin(empresa));
   }
 
   async findOne(userId: string, id: string) {
-    const client = await this.prisma.client.findFirst({
+    const client = await this.prisma.empresa.findFirst({
       where: {
         id,
-        userId,
+        colaboradores: { some: { userId } },
       },
       include: {
         _count: {
           select: {
             workHours: true,
             invoices: true,
+            empresaAdmins: true,
           },
         },
       },
@@ -50,14 +60,26 @@ export class ClientsService {
       throw new NotFoundException('Client not found');
     }
 
-    return client;
+    return this.mapWithHasActiveAdmin(client);
+  }
+
+  private mapWithHasActiveAdmin<
+    T extends { _count: { empresaAdmins: number } },
+  >(empresa: T) {
+    const { _count, ...rest } = empresa;
+    const { empresaAdmins, ...restCount } = _count;
+    return {
+      ...rest,
+      _count: restCount,
+      hasActiveAdmin: empresaAdmins > 0,
+    };
   }
 
   async update(userId: string, id: string, updateClientDto: UpdateClientDto) {
-    const client = await this.prisma.client.findFirst({
+    const client = await this.prisma.empresa.findFirst({
       where: {
         id,
-        userId,
+        colaboradores: { some: { userId } },
       },
     });
 
@@ -65,17 +87,17 @@ export class ClientsService {
       throw new NotFoundException('Client not found');
     }
 
-    return this.prisma.client.update({
+    return this.prisma.empresa.update({
       where: { id },
       data: updateClientDto,
     });
   }
 
   async remove(userId: string, id: string) {
-    const client = await this.prisma.client.findFirst({
+    const client = await this.prisma.empresa.findFirst({
       where: {
         id,
-        userId,
+        colaboradores: { some: { userId } },
       },
     });
 
@@ -83,22 +105,48 @@ export class ClientsService {
       throw new NotFoundException('Client not found');
     }
 
-    await this.prisma.client.delete({
+    await this.prisma.empresa.delete({
       where: { id },
     });
 
     return { message: 'Client deleted successfully' };
   }
 
+  /**
+   * MW-23: Colaborador self-unlink. Removes only the Colaborador row for
+   * this User↔Empresa pair — the Empresa record and this User's own
+   * WorkHour/Project/Task/Invoice (owned by userId, not by the Colaborador
+   * link) are left untouched.
+   */
+  async removeColaborador(userId: string, empresaId: string) {
+    const colaborador = await this.prisma.colaborador.findUnique({
+      where: { userId_empresaId: { userId, empresaId } },
+    });
+
+    if (!colaborador) {
+      throw new NotFoundException('Colaborador link not found');
+    }
+
+    await this.prisma.colaborador.delete({ where: { id: colaborador.id } });
+
+    await this.empresaLinkingService.notifyColaboradorUnlinked(
+      userId,
+      empresaId,
+      'colaborador',
+    );
+
+    return { message: 'Colaborador link removed successfully' };
+  }
+
   async getStats(userId: string) {
-    const totalClients = await this.prisma.client.count({
-      where: { userId },
+    const totalClients = await this.prisma.empresa.count({
+      where: { colaboradores: { some: { userId } } },
     });
 
     const totalHoursResult = await this.prisma.workHour.aggregate({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
       },
       _sum: {
@@ -109,7 +157,7 @@ export class ClientsService {
     const totalInvoices = await this.prisma.invoice.count({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
       },
     });
@@ -118,7 +166,7 @@ export class ClientsService {
     const invoiceAmountResult = await this.prisma.invoice.aggregate({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
       },
       _sum: {
@@ -129,7 +177,7 @@ export class ClientsService {
     const paidInvoicesResult = await this.prisma.invoice.aggregate({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
         status: 'PAID',
       },
@@ -141,7 +189,7 @@ export class ClientsService {
     const pendingInvoicesResult = await this.prisma.invoice.aggregate({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
         status: 'PENDING',
       },
@@ -153,7 +201,7 @@ export class ClientsService {
     const canceledInvoicesResult = await this.prisma.invoice.aggregate({
       where: {
         client: {
-          userId,
+          colaboradores: { some: { userId } },
         },
         status: 'CANCELED',
       },
@@ -179,10 +227,10 @@ export class ClientsService {
   }
 
   async getClientStats(userId: string, id: string) {
-    const client = await this.prisma.client.findFirst({
+    const client = await this.prisma.empresa.findFirst({
       where: {
         id,
-        userId,
+        colaboradores: { some: { userId } },
       },
       include: {
         workHours: {

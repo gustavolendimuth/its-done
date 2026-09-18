@@ -28,6 +28,21 @@ docker compose -f docker-compose.dev.yml up -d
 docker compose -f docker-compose.dev.yml logs -f
 ```
 
+### Testing changes in a worktree
+
+The main `docker-compose.dev.yml` stack only serves the code from the primary
+checkout, not other git worktrees. To see a worktree's changes in the
+browser, use the preview script instead of the Docker stack:
+
+```bash
+pnpm preview:start   # starts backend + frontend for this worktree on free ports, prints the URLs
+pnpm preview:stop    # tears it down
+```
+
+It reuses the postgres/redis already running from `docker-compose.dev.yml`
+(start that stack first if they're not up). **Always run `pnpm preview:stop`
+once you're done validating** — don't leave preview processes running.
+
 ## Architecture
 
 ### Monorepo Structure

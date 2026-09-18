@@ -149,7 +149,7 @@ describe("ProjectCreateDialog", () => {
     // Wait for validation messages
     await waitFor(() => {
       expect(screen.getByText("Project name is required")).toBeInTheDocument();
-      expect(screen.getByText("Client is required")).toBeInTheDocument();
+      expect(screen.getByText("Empresa is required")).toBeInTheDocument();
     });
   });
 

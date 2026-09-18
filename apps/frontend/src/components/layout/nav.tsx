@@ -20,7 +20,7 @@ export function Nav() {
 
   const navigation = [
     { name: t("workHours"), href: "/work-hours" },
-    { name: t("clients"), href: "/clients" },
+    { name: t("clients"), href: "/empresas" },
     { name: t("projects"), href: "/projects" },
     { name: t("invoices"), href: "/invoices" },
     ...(session?.user?.role === "ADMIN"

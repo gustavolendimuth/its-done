@@ -46,20 +46,20 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
     });
     token = jwtService.sign({ sub: userId });
 
-    const client = await prisma.client.create({
+    const client = await prisma.empresa.create({
       data: {
         email: 'finish-e2e-client@test.local',
         company: 'Finish E2E Co',
-        userId,
+        colaboradores: { create: { userId } },
       },
     });
     clientId = client.id;
 
-    const otherClient = await prisma.client.create({
+    const otherClient = await prisma.empresa.create({
       data: {
         email: 'finish-e2e-other-client@test.local',
         company: 'Finish E2E Other Co',
-        userId,
+        colaboradores: { create: { userId } },
       },
     });
     otherClientId = otherClient.id;
@@ -84,7 +84,7 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
     await prisma.workHour.deleteMany({ where: { userId } });
     await prisma.workSession.deleteMany({ where: { userId } });
     await prisma.project.deleteMany({ where: { userId } });
-    await prisma.client.deleteMany({ where: { userId } });
+    await prisma.empresa.deleteMany({ where: { colaboradores: { some: { userId } } } });
     await prisma.user.delete({ where: { id: userId } });
     await app.close();
   });

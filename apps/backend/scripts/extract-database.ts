@@ -43,7 +43,7 @@ async function extractAllData(): Promise<ExtractedData> {
       notificationLogs,
     ] = await Promise.all([
       prisma.user.findMany(),
-      prisma.client.findMany(),
+      prisma.empresa.findMany(),
       prisma.project.findMany(),
       prisma.workHour.findMany(),
       prisma.invoice.findMany(),

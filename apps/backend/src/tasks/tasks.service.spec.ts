@@ -10,7 +10,7 @@ const prismaMock = {
     update: jest.fn(),
     delete: jest.fn(),
   },
-  client: {
+  empresa: {
     findFirst: jest.fn(),
   },
   project: {
@@ -32,13 +32,13 @@ describe('TasksService', () => {
 
   describe('create()', () => {
     it('creates a task when the client belongs to the user', async () => {
-      prismaMock.client.findFirst.mockResolvedValueOnce({ id: 'client-1' });
+      prismaMock.empresa.findFirst.mockResolvedValueOnce({ id: 'client-1' });
       prismaMock.task.create.mockResolvedValueOnce({ id: 'task-1' });
 
       await service.create({ title: 'Fix bug', clientId: 'client-1' }, userId);
 
-      expect(prismaMock.client.findFirst).toHaveBeenCalledWith({
-        where: { id: 'client-1', userId },
+      expect(prismaMock.empresa.findFirst).toHaveBeenCalledWith({
+        where: { id: 'client-1', colaboradores: { some: { userId } } },
       });
       expect(prismaMock.task.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -52,7 +52,7 @@ describe('TasksService', () => {
     });
 
     it('rejects a client that does not belong to the user', async () => {
-      prismaMock.client.findFirst.mockResolvedValueOnce(null);
+      prismaMock.empresa.findFirst.mockResolvedValueOnce(null);
 
       await expect(
         service.create({ title: 'Fix bug', clientId: 'client-1' }, userId),
@@ -61,7 +61,7 @@ describe('TasksService', () => {
     });
 
     it('rejects a project that belongs to a different client', async () => {
-      prismaMock.client.findFirst.mockResolvedValueOnce({ id: 'client-1' });
+      prismaMock.empresa.findFirst.mockResolvedValueOnce({ id: 'client-1' });
       prismaMock.project.findUnique.mockResolvedValueOnce({
         id: 'project-1',
         clientId: 'client-2',
@@ -77,7 +77,7 @@ describe('TasksService', () => {
     });
 
     it('accepts a project that belongs to the same client', async () => {
-      prismaMock.client.findFirst.mockResolvedValueOnce({ id: 'client-1' });
+      prismaMock.empresa.findFirst.mockResolvedValueOnce({ id: 'client-1' });
       prismaMock.project.findUnique.mockResolvedValueOnce({
         id: 'project-1',
         clientId: 'client-1',
@@ -145,7 +145,7 @@ describe('TasksService', () => {
         clientId: 'client-1',
         projectId: 'project-1',
       });
-      prismaMock.client.findFirst.mockResolvedValueOnce({ id: 'client-2' });
+      prismaMock.empresa.findFirst.mockResolvedValueOnce({ id: 'client-2' });
       prismaMock.project.findUnique.mockResolvedValueOnce({
         id: 'project-1',
         clientId: 'client-1',
@@ -164,7 +164,7 @@ describe('TasksService', () => {
         clientId: 'client-1',
         projectId: null,
       });
-      prismaMock.client.findFirst.mockResolvedValueOnce({ id: 'client-2' });
+      prismaMock.empresa.findFirst.mockResolvedValueOnce({ id: 'client-2' });
       prismaMock.task.update.mockResolvedValueOnce({ id: 'task-1' });
 
       await service.update('task-1', { clientId: 'client-2' }, userId);

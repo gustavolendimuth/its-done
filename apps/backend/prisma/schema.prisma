@@ -20,7 +20,7 @@ model User {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   workHours       WorkHour[]
-  clients         Client[]
+  colaboradores   Colaborador[]
   projects        Project[]
   tasks           Task[]
   settings        Settings?
@@ -44,28 +44,92 @@ model WorkHour {
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   user        User                @relation(fields: [userId], references: [id])
-  client      Client              @relation(fields: [clientId], references: [id])
+  client      Empresa             @relation(fields: [clientId], references: [id])
   project     Project?            @relation(fields: [projectId], references: [id])
   task        Task?               @relation(fields: [taskId], references: [id], onDelete: SetNull)
   invoiceWorkHours InvoiceWorkHour[]
 }
 
-model Client {
+model Empresa {
   id          String    @id @default(uuid())
   name        String?
   email       String
   phone       String?
   company     String
-  userId      String
   hourlyRate  Float?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  user        User      @relation(fields: [userId], references: [id])
+  colaboradores Colaborador[]
+  empresaAdmins EmpresaAdmin[]
   workHours   WorkHour[]
   invoices    Invoice[]
   addresses   Address[]
   projects    Project[]
   tasks       Task[]
+  convitesPendentes    ConvitePendente[]
+  dominiosAutorizados  DominioAutorizado[]
+}
+
+model Colaborador {
+  id        String             @id @default(uuid())
+  userId    String
+  empresaId String
+  // MW-24 — origem do vínculo (Convite Pendente / Domínio Autorizado), pra
+  // exibir o tipo de vínculo na tabela do Dashboard da Empresa. Opcional:
+  // linhas criadas antes desta coluna (ou direto via prisma nos testes)
+  // ficam null e a UI mostra "—".
+  origin    ColaboradorOrigin?
+  createdAt DateTime           @default(now())
+  user      User               @relation(fields: [userId], references: [id])
+  empresa   Empresa            @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, empresaId])
+}
+
+model EmpresaAdmin {
+  id            String         @id @default(uuid())
+  empresaId     String
+  email         String         @unique
+  password      String
+  invitedById   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  empresa       Empresa        @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  invitedBy     EmpresaAdmin?  @relation("EmpresaAdminInvitedBy", fields: [invitedById], references: [id], onDelete: SetNull)
+  invitedAdmins EmpresaAdmin[] @relation("EmpresaAdminInvitedBy")
+  convitesPendentesCriados ConvitePendente[]
+}
+
+model ConvitePendente {
+  id                      String                @id @default(uuid())
+  empresaId               String
+  email                   String
+  status                  ConvitePendenteStatus @default(PENDING)
+  // MW-26 — opcional + SetNull: Desativação de Empresa faz hard-delete dos
+  // EmpresaAdmin da Empresa, mas o ConvitePendente (mesmo já REVOKED/LINKED)
+  // continua existindo como histórico. Sem isso, o FK original (RESTRICT)
+  // impediria apagar um EmpresaAdmin que criou algum convite.
+  createdByEmpresaAdminId String?
+  linkedAt                DateTime?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  empresa                 Empresa               @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  createdByEmpresaAdmin   EmpresaAdmin?         @relation(fields: [createdByEmpresaAdminId], references: [id], onDelete: SetNull)
+
+  @@unique([empresaId, email])
+}
+
+model DominioAutorizado {
+  id          String                  @id @default(uuid())
+  empresaId   String
+  domain      String
+  status      DominioAutorizadoStatus @default(PENDING)
+  confirmedAt DateTime?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  empresa     Empresa                 @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@unique([empresaId, domain])
 }
 
 model Project {
@@ -78,7 +142,7 @@ model Project {
   alertHours  Float?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  client      Client     @relation(fields: [clientId], references: [id])
+  client      Empresa    @relation(fields: [clientId], references: [id])
   user        User       @relation(fields: [userId], references: [id])
   workHours   WorkHour[]
   tasks       Task[]
@@ -94,7 +158,7 @@ model Task {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   user         User          @relation(fields: [userId], references: [id])
-  client       Client        @relation(fields: [clientId], references: [id])
+  client       Empresa       @relation(fields: [clientId], references: [id])
   project      Project?      @relation(fields: [projectId], references: [id])
   workHours    WorkHour[]
   workSessions WorkSession[]
@@ -112,7 +176,7 @@ model Address {
   clientId    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client      Empresa  @relation(fields: [clientId], references: [id], onDelete: Cascade)
 }
 
 model Settings {
@@ -136,7 +200,7 @@ model Invoice {
   description String?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
-  client      Client              @relation(fields: [clientId], references: [id])
+  client      Empresa             @relation(fields: [clientId], references: [id])
   invoiceWorkHours InvoiceWorkHour[]
 }
 
@@ -253,4 +317,21 @@ enum InvoiceStatus {
 enum UserRole {
   USER
   ADMIN
-} 
+}
+
+enum ConvitePendenteStatus {
+  PENDING
+  LINKED
+  REVOKED
+}
+
+enum DominioAutorizadoStatus {
+  PENDING
+  CONFIRMED
+  REVOKED
+}
+
+enum ColaboradorOrigin {
+  CONVITE
+  DOMINIO
+}
