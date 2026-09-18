@@ -26,6 +26,12 @@ import {
 export class EmpresaAdminAuthController {
   constructor(private empresaAdminAuthService: EmpresaAdminAuthService) {}
 
+  // MW-27 — 20/min por IP: cria uma Empresa+Admin novos a cada chamada (sem
+  // alvo fixo pra adivinhar credencial), mesmo teto de criar Convite
+  // Pendente/Domínio Autorizado — não o teto mais apertado de
+  // login/forgot-password, que protegem uma conta específica contra tentativa
+  // e erro.
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post('register')
   async register(@Body() dto: RegisterEmpresaAdminDto) {
     return this.empresaAdminAuthService.register(dto);
@@ -70,6 +76,10 @@ export class EmpresaAdminAuthController {
 
   // MW-19 — Ativação de uma Empresa existente. Público: qualquer pessoa
   // pode iniciar a ativação de uma Empresa que ainda não tem Administrador.
+  // MW-27 — 20/min por IP: pode ser chamado por uma Empresa com vários
+  // Colaboradores tentando ativar em sequência; sem alvo fixo pra adivinhar
+  // credencial, mesmo teto de criar Convite Pendente/Domínio Autorizado.
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post('activate/:empresaId/request')
   async requestActivation(
     @Param('empresaId') empresaId: string,
@@ -81,6 +91,10 @@ export class EmpresaAdminAuthController {
     );
   }
 
+  // MW-27 — 10/min por IP: cria credenciais a partir de um token JWT de alta
+  // entropia (não é alvo prático de força bruta), teto só um pouco mais
+  // apertado que o de disparar o pedido.
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('activate/confirm')
   async confirmActivation(@Body() dto: ConfirmEmpresaActivationDto) {
     return this.empresaAdminAuthService.confirmEmpresaActivation(dto);
@@ -94,6 +108,9 @@ export class EmpresaAdminAuthController {
     return this.empresaAdminAuthService.inviteEmpresaAdmin(req.user, dto);
   }
 
+  // MW-27 — cria credenciais a partir de um token público, mesmo teto de
+  // register/forgot-password (5/min por IP).
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('invite/confirm')
   async confirmInvite(@Body() dto: ConfirmEmpresaAdminInviteDto) {
     return this.empresaAdminAuthService.confirmEmpresaAdminInvite(dto);

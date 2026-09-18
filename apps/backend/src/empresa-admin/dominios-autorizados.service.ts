@@ -28,12 +28,12 @@ export class DominiosAutorizadosService {
     const domain = normalizeDomain(domainRaw);
 
     if (!isValidDomainFormat(domain)) {
-      throw new BadRequestException('Domínio inválido');
+      throw new BadRequestException('Invalid domain');
     }
 
     if (isPublicProviderDomain(domain)) {
       throw new BadRequestException(
-        'Domínios de provedores públicos de email não podem ser registrados como Domínio Autorizado',
+        'Public email provider domains cannot be registered as a Domínio Autorizado',
       );
     }
 
@@ -43,7 +43,7 @@ export class DominiosAutorizadosService {
 
     if (existing && existing.status !== 'REVOKED') {
       throw new ConflictException(
-        'Este domínio já está registrado para esta Empresa',
+        'This domain is already registered for this Empresa',
       );
     }
 
@@ -81,11 +81,11 @@ export class DominiosAutorizadosService {
       where: { id, empresaId },
     });
     if (!dominioAutorizado) {
-      throw new NotFoundException('Domínio Autorizado não encontrado');
+      throw new NotFoundException('Domínio Autorizado not found');
     }
     if (dominioAutorizado.status !== 'PENDING') {
       throw new BadRequestException(
-        'Domínio Autorizado não está pendente de confirmação',
+        'Domínio Autorizado is not pending confirmation',
       );
     }
 
@@ -132,11 +132,11 @@ export class DominiosAutorizadosService {
       where: { id: payload.sub },
     });
     if (!dominioAutorizado || dominioAutorizado.empresaId !== payload.empresaId) {
-      throw new NotFoundException('Domínio Autorizado não encontrado');
+      throw new NotFoundException('Domínio Autorizado not found');
     }
     if (dominioAutorizado.status !== 'PENDING') {
       throw new BadRequestException(
-        'Domínio Autorizado não está pendente de confirmação',
+        'Domínio Autorizado is not pending confirmation',
       );
     }
 
@@ -151,7 +151,7 @@ export class DominiosAutorizadosService {
       where: { id, empresaId },
     });
     if (!dominioAutorizado) {
-      throw new NotFoundException('Domínio Autorizado não encontrado');
+      throw new NotFoundException('Domínio Autorizado not found');
     }
 
     return this.prisma.dominioAutorizado.update({

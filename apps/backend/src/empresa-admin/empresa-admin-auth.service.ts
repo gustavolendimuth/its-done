@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { InAppNotificationsService } from '../in-app-notifications/in-app-notifications.service';
 import { EmpresaAdminsService } from './empresa-admins.service';
+import { isPublicProviderDomain } from './utils/domain-blocklist.util';
 import {
   RegisterEmpresaAdminDto,
   ForgotPasswordEmpresaAdminDto,
@@ -24,22 +25,6 @@ export const EMPRESA_ADMIN_ACTOR_TYPE = 'EMPRESA_ADMIN';
 
 const EMPRESA_ACTIVATION_TOKEN_TYPE = 'empresa-activation';
 const EMPRESA_ADMIN_INVITE_TOKEN_TYPE = 'empresa-admin-invite';
-
-// Minimal blocklist of public email providers. MW-19 only needs this to
-// reject an obviously-not-a-company domain on the "domain declared"
-// activation path; Domínio Autorizado (MW-22) owns the real, maintained
-// list later — this is intentionally small and local to this file.
-const PUBLIC_EMAIL_PROVIDER_DOMAINS = new Set([
-  'gmail.com',
-  'googlemail.com',
-  'outlook.com',
-  'hotmail.com',
-  'live.com',
-  'yahoo.com',
-  'icloud.com',
-  'protonmail.com',
-  'aol.com',
-]);
 
 @Injectable()
 export class EmpresaAdminAuthService {
@@ -181,7 +166,7 @@ export class EmpresaAdminAuthService {
 
     if (dto.domain) {
       const domain = dto.domain.trim().toLowerCase();
-      if (PUBLIC_EMAIL_PROVIDER_DOMAINS.has(domain)) {
+      if (isPublicProviderDomain(domain)) {
         throw new BadRequestException(
           'Public email provider domains cannot be used to prove domain ownership',
         );

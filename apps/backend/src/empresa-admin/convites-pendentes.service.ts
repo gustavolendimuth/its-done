@@ -28,7 +28,7 @@ export class ConvitesPendentesService {
     if (existing) {
       if (existing.status !== 'REVOKED') {
         throw new ConflictException(
-          'Já existe um Convite Pendente para este email nesta Empresa',
+          'A pending invite already exists for this email in this Empresa',
         );
       }
       invite = await this.prisma.convitePendente.update({
@@ -74,11 +74,11 @@ export class ConvitesPendentesService {
       where: { id, empresaId },
     });
     if (!invite) {
-      throw new NotFoundException('Convite Pendente não encontrado');
+      throw new NotFoundException('Convite Pendente not found');
     }
     if (invite.status === 'LINKED') {
       throw new BadRequestException(
-        'Convite Pendente já efetivado não pode ser revogado',
+        'A Convite Pendente that has already linked cannot be revoked',
       );
     }
 

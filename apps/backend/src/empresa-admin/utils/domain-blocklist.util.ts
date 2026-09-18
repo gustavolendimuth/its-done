@@ -1,6 +1,7 @@
 // Minimal list of major public email providers. Not exhaustive — grow as needed.
 export const PUBLIC_EMAIL_PROVIDER_DOMAINS = [
   'gmail.com',
+  'googlemail.com',
   'outlook.com',
   'hotmail.com',
   'yahoo.com',
