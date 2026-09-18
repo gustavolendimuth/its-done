@@ -48,7 +48,11 @@ export class ConvitesPendentesService {
     // If the User already exists, effectuate the Colaborador link right away.
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (user) {
-      await this.empresaLinkingService.ensureColaborador(user.id, empresaId);
+      await this.empresaLinkingService.ensureColaborador(
+        user.id,
+        empresaId,
+        'CONVITE',
+      );
       invite = await this.prisma.convitePendente.update({
         where: { id: invite.id },
         data: { status: 'LINKED', linkedAt: new Date() },

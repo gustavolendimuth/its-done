@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ColaboradorOrigin } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { InAppNotificationsService } from '../in-app-notifications/in-app-notifications.service';
@@ -23,8 +24,16 @@ export class EmpresaLinkingService {
     private inAppNotificationsService: InAppNotificationsService,
   ) {}
 
-  /** Idempotent: never duplicates a Colaborador row for the same pair. */
-  async ensureColaborador(userId: string, empresaId: string) {
+  /**
+   * Idempotent: never duplicates a Colaborador row for the same pair.
+   * `origin` (MW-24 — Convite Pendente vs Domínio Autorizado) is recorded
+   * only on first creation; an idempotent no-op call never overwrites it.
+   */
+  async ensureColaborador(
+    userId: string,
+    empresaId: string,
+    origin?: ColaboradorOrigin,
+  ) {
     const existing = await this.prisma.colaborador.findUnique({
       where: { userId_empresaId: { userId, empresaId } },
     });
@@ -33,7 +42,7 @@ export class EmpresaLinkingService {
     }
 
     const colaborador = await this.prisma.colaborador.create({
-      data: { userId, empresaId },
+      data: { userId, empresaId, origin },
     });
 
     // Only notify when the link is actually new — never on the idempotent
@@ -129,7 +138,7 @@ export class EmpresaLinkingService {
     });
 
     for (const invite of invites) {
-      await this.ensureColaborador(userId, invite.empresaId);
+      await this.ensureColaborador(userId, invite.empresaId, 'CONVITE');
       await this.prisma.convitePendente.update({
         where: { id: invite.id },
         data: { status: 'LINKED', linkedAt: new Date() },
@@ -148,7 +157,11 @@ export class EmpresaLinkingService {
     });
 
     for (const dominioAutorizado of domains) {
-      await this.ensureColaborador(userId, dominioAutorizado.empresaId);
+      await this.ensureColaborador(
+        userId,
+        dominioAutorizado.empresaId,
+        'DOMINIO',
+      );
     }
   }
 }

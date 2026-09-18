@@ -15,6 +15,8 @@ import { DominiosAutorizadosController } from './dominios-autorizados.controller
 import { DominiosAutorizadosService } from './dominios-autorizados.service';
 import { ColaboradoresController } from './colaboradores.controller';
 import { ColaboradoresService } from './colaboradores.service';
+import { EmpresaDashboardController } from './empresa-dashboard.controller';
+import { EmpresaDashboardService } from './empresa-dashboard.service';
 
 @Module({
   imports: [
@@ -35,6 +37,7 @@ import { ColaboradoresService } from './colaboradores.service';
     ConvitesPendentesController,
     DominiosAutorizadosController,
     ColaboradoresController,
+    EmpresaDashboardController,
   ],
   providers: [
     EmpresaAdminAuthService,
@@ -44,6 +47,7 @@ import { ColaboradoresService } from './colaboradores.service';
     ConvitesPendentesService,
     DominiosAutorizadosService,
     ColaboradoresService,
+    EmpresaDashboardService,
   ],
   exports: [
     EmpresaAdminsService,

@@ -71,12 +71,17 @@ model Empresa {
 }
 
 model Colaborador {
-  id        String   @id @default(uuid())
+  id        String             @id @default(uuid())
   userId    String
   empresaId String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  empresa   Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  // MW-24 — origem do vínculo (Convite Pendente / Domínio Autorizado), pra
+  // exibir o tipo de vínculo na tabela do Dashboard da Empresa. Opcional:
+  // linhas criadas antes desta coluna (ou direto via prisma nos testes)
+  // ficam null e a UI mostra "—".
+  origin    ColaboradorOrigin?
+  createdAt DateTime           @default(now())
+  user      User               @relation(fields: [userId], references: [id])
+  empresa   Empresa            @relation(fields: [empresaId], references: [id], onDelete: Cascade)
 
   @@unique([userId, empresaId])
 }
@@ -320,4 +325,9 @@ enum DominioAutorizadoStatus {
   PENDING
   CONFIRMED
   REVOKED
+}
+
+enum ColaboradorOrigin {
+  CONVITE
+  DOMINIO
 }
