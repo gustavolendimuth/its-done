@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { EmpresaLinkingService } from '../empresa-admin/empresa-linking.service';
 
 @Injectable()
 export class ClientsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private empresaLinkingService: EmpresaLinkingService,
+  ) {}
 
   async create(userId: string, createClientDto: CreateClientDto) {
     return this.prisma.empresa.create({
@@ -106,6 +110,32 @@ export class ClientsService {
     });
 
     return { message: 'Client deleted successfully' };
+  }
+
+  /**
+   * MW-23: Colaborador self-unlink. Removes only the Colaborador row for
+   * this User↔Empresa pair — the Empresa record and this User's own
+   * WorkHour/Project/Task/Invoice (owned by userId, not by the Colaborador
+   * link) are left untouched.
+   */
+  async removeColaborador(userId: string, empresaId: string) {
+    const colaborador = await this.prisma.colaborador.findUnique({
+      where: { userId_empresaId: { userId, empresaId } },
+    });
+
+    if (!colaborador) {
+      throw new NotFoundException('Colaborador link not found');
+    }
+
+    await this.prisma.colaborador.delete({ where: { id: colaborador.id } });
+
+    await this.empresaLinkingService.notifyColaboradorUnlinked(
+      userId,
+      empresaId,
+      'colaborador',
+    );
+
+    return { message: 'Colaborador link removed successfully' };
   }
 
   async getStats(userId: string) {

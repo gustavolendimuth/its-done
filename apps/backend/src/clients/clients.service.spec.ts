@@ -5,6 +5,14 @@ const prismaMock = {
     findMany: jest.fn(),
     findFirst: jest.fn(),
   },
+  colaborador: {
+    findUnique: jest.fn(),
+    delete: jest.fn(),
+  },
+} as any;
+
+const empresaLinkingServiceMock = {
+  notifyColaboradorUnlinked: jest.fn(),
 } as any;
 
 describe('ClientsService', () => {
@@ -13,7 +21,7 @@ describe('ClientsService', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    service = new ClientsService(prismaMock);
+    service = new ClientsService(prismaMock, empresaLinkingServiceMock);
   });
 
   describe('findAll()', () => {

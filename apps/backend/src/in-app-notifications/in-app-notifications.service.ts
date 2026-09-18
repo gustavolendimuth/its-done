@@ -151,4 +151,45 @@ export class InAppNotificationsService {
       },
     });
   }
+
+  // MW-23: notifies a User that they were just linked as Colaborador to an
+  // Empresa (via Convite Pendente or Domínio Autorizado).
+  async createColaboradorLinkedNotification(
+    userId: string,
+    empresaName: string,
+  ) {
+    return this.create(userId, {
+      title: `Linked to ${empresaName}`,
+      message: `You were linked as Colaborador to ${empresaName}. They can now see your aggregated hours, projects and invoices.`,
+      type: InAppNotificationType.INFO,
+      metadata: {
+        empresaName,
+        action: 'view_empresas',
+      },
+    });
+  }
+
+  // MW-23: notifies a User that their Colaborador link to an Empresa was
+  // removed, by themselves or by the Empresa's Administrador.
+  async createColaboradorUnlinkedNotification(
+    userId: string,
+    empresaName: string,
+    unlinkedBy: 'colaborador' | 'admin',
+  ) {
+    const message =
+      unlinkedBy === 'admin'
+        ? `The Administrator of ${empresaName} removed you as Colaborador. Your existing hours, projects and invoices remain unchanged.`
+        : `You unlinked yourself from ${empresaName}. Your existing hours, projects and invoices remain unchanged.`;
+
+    return this.create(userId, {
+      title: `Unlinked from ${empresaName}`,
+      message,
+      type: InAppNotificationType.INFO,
+      metadata: {
+        empresaName,
+        unlinkedBy,
+        action: 'view_empresas',
+      },
+    });
+  }
 }
