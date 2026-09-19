@@ -195,7 +195,7 @@ describe("Topbar", () => {
     expect(addHoursButton).toBeInTheDocument();
   });
 
-  it("should open the add hours modal when clicking the shortcut button", () => {
+  it("should navigate to work hours page when clicking the shortcut button", () => {
     // Mock authenticated session
     (useSession as any).mockReturnValue({
       data: {
@@ -207,6 +207,10 @@ describe("Topbar", () => {
       status: "authenticated",
     });
 
+    const mockRouter = { push: jest.fn() };
+
+    (useRouter as any).mockReturnValue(mockRouter);
+
     render(<Topbar />);
 
     // Click the add hours button
@@ -214,7 +218,8 @@ describe("Topbar", () => {
 
     fireEvent.click(addHoursButton);
 
-    expect(screen.getByText("addHoursFormSubtitle")).toBeInTheDocument();
+    // Verify navigation
+    expect(mockRouter.push).toHaveBeenCalledWith("/work-hours");
   });
 
   it("should not render add hours button when not authenticated", () => {
