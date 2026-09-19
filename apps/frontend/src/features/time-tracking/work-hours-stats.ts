@@ -10,7 +10,7 @@ export interface WorkHoursStats {
   averageHoursPerMonth: number;
   activeClients: number;
   totalHoursByClient: {
-    clientId: string;
+    companyId: string;
     clientName: string;
     totalHours: number;
   }[];
@@ -23,7 +23,7 @@ export interface WorkHoursStats {
 export const useWorkHoursStats = (params?: {
   from?: string;
   to?: string;
-  clientId?: string;
+  companyId?: string;
 }) => {
   console.log("📈 useWorkHoursStats called with params:", params);
 

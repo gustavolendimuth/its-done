@@ -92,7 +92,7 @@ async function persist(
 }
 
 export interface StartDetails {
-  clientId?: string;
+  companyId?: string;
   projectId?: string;
   taskId?: string;
   description?: string;
@@ -121,7 +121,7 @@ export async function start(details?: StartDetails): Promise<LocalWorkSession> {
     lastPromptAt: null,
     lastConfirmedAt: null,
     hours: null,
-    clientId: details?.clientId ?? null,
+    companyId: details?.companyId ?? null,
     projectId: details?.projectId ?? null,
     taskId: details?.taskId ?? null,
     description: details?.description ?? null,
@@ -135,7 +135,7 @@ export async function start(details?: StartDetails): Promise<LocalWorkSession> {
     sessionId,
     type: "start",
     clientTimestamp: now,
-    ...(details?.clientId ? { clientId: details.clientId } : {}),
+    ...(details?.companyId ? { companyId: details.companyId } : {}),
     ...(details?.projectId ? { projectId: details.projectId } : {}),
     ...(details?.taskId ? { taskId: details.taskId } : {}),
     ...(details?.description ? { description: details.description } : {}),

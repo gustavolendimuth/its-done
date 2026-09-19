@@ -23,16 +23,16 @@ jest.mock("sonner", () => ({
 jest.mock("@/features/projects", () => ({
   ProjectCreateDialog: ({
     onOpenChange,
-    clientId,
+    companyId,
     onSuccess,
   }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    clientId: string;
+    companyId: string;
     onSuccess: () => void;
   }) => (
     <div data-testid="project-create-dialog">
-      <p>Client ID: {clientId}</p>
+      <p>Client ID: {companyId}</p>
       <button onClick={() => onSuccess()}>Create</button>
       <button onClick={() => onOpenChange(false)}>Cancel</button>
     </div>
@@ -64,9 +64,9 @@ jest.mock("@/features/projects", () => ({
       <p>Stats for client: {selectedClientId}</p>
     </div>
   ),
-  useProjects: jest.fn((clientId?: string) => ({
-    data: clientId
-      ? mockProjects.filter((p) => p.clientId === clientId)
+  useProjects: jest.fn((companyId?: string) => ({
+    data: companyId
+      ? mockProjects.filter((p) => p.companyId === companyId)
       : mockProjects,
     isLoading: false,
   })),
@@ -140,7 +140,7 @@ const mockProjects: Project[] = [
     id: "1",
     name: "Web App",
     description: "Company website",
-    clientId: "client1",
+    companyId: "client1",
     userId: "user1",
     createdAt: "2024-03-01T00:00:00Z",
     updatedAt: "2024-03-01T00:00:00Z",
@@ -153,7 +153,7 @@ const mockProjects: Project[] = [
     id: "2",
     name: "Mobile App",
     description: "iOS application",
-    clientId: "client2",
+    companyId: "client2",
     userId: "user1",
     createdAt: "2024-03-02T00:00:00Z",
     updatedAt: "2024-03-02T00:00:00Z",
@@ -177,9 +177,9 @@ describe("ProjectsPage", () => {
     // Restore the default implementation (previous tests may have overridden it via
     // mockReturnValue, which clearAllMocks does not undo)
     const { useProjects } = require("@/features/projects");
-    useProjects.mockImplementation((clientId?: string) => ({
-      data: clientId
-        ? mockProjects.filter((p) => p.clientId === clientId)
+    useProjects.mockImplementation((companyId?: string) => ({
+      data: companyId
+        ? mockProjects.filter((p) => p.companyId === companyId)
         : mockProjects,
       isLoading: false,
     }));

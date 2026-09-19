@@ -117,7 +117,7 @@ export function HoursReportSection({
             </TableHeader>
             <TableBody>
               {hoursReport.clientBreakdown?.map((client) => (
-                <TableRow key={client.clientId}>
+                <TableRow key={client.companyId}>
                   <TableCell className="font-medium">
                     {client.clientName}
                   </TableCell>

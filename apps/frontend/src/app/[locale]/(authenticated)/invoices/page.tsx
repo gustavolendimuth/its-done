@@ -163,10 +163,10 @@ export default function InvoicesPage() {
                   id={invoice.id}
                   number={invoice.number}
                   clientName={
-                    clients.find((c) => c.id === invoice.clientId)?.name
+                    clients.find((c) => c.id === invoice.companyId)?.name
                   }
                   clientEmail={
-                    clients.find((c) => c.id === invoice.clientId)?.email
+                    clients.find((c) => c.id === invoice.companyId)?.email
                   }
                   amount={invoice.amount}
                   status={invoice.status}

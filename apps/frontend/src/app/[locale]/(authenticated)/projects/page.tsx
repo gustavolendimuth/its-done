@@ -135,7 +135,7 @@ export default function ProjectsPage() {
         <ProjectCreateDialog
           open={showCreateDialog}
           onOpenChange={setShowCreateDialog}
-          clientId={clients[0].id} // Will be changeable in the dialog
+          companyId={clients[0].id} // Will be changeable in the dialog
           onSuccess={() => setShowCreateDialog(false)}
         />
       )}

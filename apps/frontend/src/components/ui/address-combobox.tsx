@@ -29,7 +29,7 @@ interface AddressComboboxProps {
   disabled?: boolean;
   showAddButton?: boolean;
   onAddressAdded?: () => void;
-  clientId: string; // Required for creating new addresses
+  companyId: string; // Required for creating new addresses
 }
 
 export function AddressCombobox({
@@ -38,7 +38,7 @@ export function AddressCombobox({
   disabled = false,
   showAddButton = true,
   onAddressAdded,
-  clientId,
+  companyId,
 }: AddressComboboxProps) {
   const [open, setOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -189,7 +189,7 @@ export function AddressCombobox({
         icon={MapPin}
         className="sm:max-w-[600px]"
       >
-        <AddressForm clientId={clientId} onSuccess={handleAddressCreated} />
+        <AddressForm companyId={companyId} onSuccess={handleAddressCreated} />
       </FormModal>
 
       {/* Edit Address Dialog */}

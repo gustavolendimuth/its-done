@@ -48,7 +48,7 @@ export interface Project {
   name: string;
   description?: string;
   hourlyRate?: number;
-  clientId: string;
+  companyId: string;
   userId: string;
   createdAt: DateField;
   updatedAt: DateField;
@@ -68,7 +68,7 @@ export interface WorkHour {
   startTime?: string | null;
   endTime?: string | null;
   userId: string;
-  clientId: string;
+  companyId: string;
   projectId?: string;
   taskId?: string;
   createdAt: DateField;
@@ -82,7 +82,7 @@ export interface WorkHour {
 export interface Task {
   id: string;
   userId: string;
-  clientId: string;
+  companyId: string;
   projectId?: string;
   title: string;
   link?: string;
@@ -103,7 +103,7 @@ export interface Address {
   country: string;
   type: string;
   isPrimary: boolean;
-  clientId: string;
+  companyId: string;
   createdAt: DateField;
   updatedAt: DateField;
   client?: Client;
@@ -122,7 +122,7 @@ export interface Settings {
 export interface Invoice {
   id: string;
   number?: string;
-  clientId: string;
+  companyId: string;
   fileUrl?: string;
   amount: number;
   status: "PENDING" | "PAID" | "CANCELED";
@@ -157,7 +157,7 @@ export interface TimeEntry {
   date: string;
   description?: string;
   hours: number;
-  clientId: string;
+  companyId: string;
   projectId?: string;
   taskId?: string;
   client?: {
@@ -196,7 +196,7 @@ export interface CreateTimeEntryDto {
   hours: number;
   startTime?: string;
   endTime?: string;
-  clientId: string;
+  companyId: string;
   projectId?: string;
   taskId?: string;
 }

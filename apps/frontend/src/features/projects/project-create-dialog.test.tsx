@@ -26,11 +26,11 @@ const mockCreateProject = jest.fn(
       id: "1",
       name: data.name,
       description: data.description,
-      clientId: data.clientId,
+      companyId: data.companyId,
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      client: mockClients.find((c) => c.id === data.clientId)!,
+      client: mockClients.find((c) => c.id === data.companyId)!,
       _count: {
         workHours: 0,
       },
@@ -135,7 +135,7 @@ describe("ProjectCreateDialog", () => {
   });
 
   it("renders with preselected client", () => {
-    render(<ProjectCreateDialog {...defaultProps} clientId="1" />);
+    render(<ProjectCreateDialog {...defaultProps} companyId="1" />);
 
     expect(screen.getByTestId("client-combobox")).toHaveValue("1");
   });
@@ -158,7 +158,7 @@ describe("ProjectCreateDialog", () => {
       id: "1",
       name: "Test Project",
       description: "Test Description",
-      clientId: "1",
+      companyId: "1",
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -192,7 +192,7 @@ describe("ProjectCreateDialog", () => {
       expect(mockCreateProject).toHaveBeenCalledWith({
         name: "Test Project",
         description: "Test Description",
-        clientId: "1",
+        companyId: "1",
         hourlyRate: undefined
       });
       expect(defaultProps.onSuccess).toHaveBeenCalledWith(mockProject);
@@ -271,7 +271,7 @@ describe("ProjectCreateDialog", () => {
       id: "1",
       name: "Test Project",
       description: "Test Description",
-      clientId: "1",
+      companyId: "1",
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

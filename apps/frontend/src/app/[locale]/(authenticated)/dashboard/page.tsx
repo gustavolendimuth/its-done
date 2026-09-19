@@ -99,20 +99,20 @@ export default function DashboardPage() {
     // Calculate top clients by hours worked
     const clientHours = timeEntries.reduce(
       (acc, entry) => {
-        const clientId = entry.clientId;
+        const companyId = entry.companyId;
 
-        if (!acc[clientId]) {
-          const client = clients.find((c) => c.id === clientId);
+        if (!acc[companyId]) {
+          const client = clients.find((c) => c.id === companyId);
 
-          acc[clientId] = {
-            id: clientId,
+          acc[companyId] = {
+            id: companyId,
             name: client?.name || "Unknown Client",
             company: client?.company || "",
             hours: 0,
             invoices: 0,
           };
         }
-        acc[clientId].hours += entry.hours;
+        acc[companyId].hours += entry.hours;
 
         return acc;
       },
@@ -130,8 +130,8 @@ export default function DashboardPage() {
 
     // Add invoice counts to clients
     invoices.forEach((invoice) => {
-      if (clientHours[invoice.clientId]) {
-        clientHours[invoice.clientId].invoices++;
+      if (clientHours[invoice.companyId]) {
+        clientHours[invoice.companyId].invoices++;
       }
     });
 

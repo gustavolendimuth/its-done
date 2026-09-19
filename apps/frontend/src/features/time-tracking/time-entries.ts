@@ -6,7 +6,7 @@ import { TimeEntry, CreateTimeEntryDto } from "@/types";
 export const useTimeEntries = (params?: {
   from?: string;
   to?: string;
-  clientId?: string;
+  companyId?: string;
 }) => {
   console.log("⏰ useTimeEntries called with params:", params);
 
@@ -32,7 +32,7 @@ export const useTimeEntries = (params?: {
 export const useAvailableTimeEntries = (params?: {
   from?: string;
   to?: string;
-  clientId?: string;
+  companyId?: string;
 }) => {
   return useQuery({
     queryKey: ["timeEntries", "available", params],

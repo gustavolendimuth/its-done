@@ -245,7 +245,7 @@ describe("WorkHourForm", () => {
     await waitFor(() => expect(mockCreateMutateAsync).toHaveBeenCalled());
     const payload = mockCreateMutateAsync.mock.calls[0][0];
     expect(payload.projectId).toBeUndefined();
-    expect(payload.clientId).toBe("client-1");
+    expect(payload.companyId).toBe("client-1");
   });
 
   it("create mode: renders the entry-mode selector defaulted to Duração", () => {

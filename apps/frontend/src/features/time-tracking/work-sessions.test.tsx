@@ -146,7 +146,7 @@ describe("useFinishWorkSession", () => {
     const payload = {
       sessionId: "session-1",
       data: {
-        clientId: "client-1",
+        companyId: "client-1",
         description: "Worked on feature X",
       },
     };
@@ -180,7 +180,7 @@ describe("useFinishWorkSession", () => {
     await expect(
       result.current.mutateAsync({
         sessionId: "session-1",
-        data: { clientId: "client-1", description: "desc" },
+        data: { companyId: "client-1", description: "desc" },
       })
     ).rejects.toThrow("Session not ready");
 

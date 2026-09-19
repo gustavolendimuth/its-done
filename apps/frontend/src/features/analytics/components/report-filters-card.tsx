@@ -92,8 +92,8 @@ export function ReportFiltersCard({
           <div className="space-y-2">
             <Label htmlFor="client">{t("client")}</Label>
             <Select
-              value={filters.clientId || "all"}
-              onValueChange={(value) => onFilterChange("clientId", value)}
+              value={filters.companyId || "all"}
+              onValueChange={(value) => onFilterChange("companyId", value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder={t("selectClient")} />

@@ -37,7 +37,7 @@ type TranslateFn = (key: string) => string;
 
 function buildStartFormSchema(t: TranslateFn) {
   return z.object({
-    clientId: z.string().min(1, t("clientRequired")),
+    companyId: z.string().min(1, t("clientRequired")),
     projectId: z.string().optional(),
     taskId: z.string().optional(),
     description: z.string().min(1, t("descriptionRequired")),
@@ -86,14 +86,14 @@ export function WorkSessionStartForm({
     formState: { errors, isSubmitting },
   } = useForm<StartFormData>({
     resolver: zodResolver(startFormSchema),
-    defaultValues: { clientId: "", projectId: "", taskId: "", description: "" },
+    defaultValues: { companyId: "", projectId: "", taskId: "", description: "" },
   });
 
-  const selectedClientId = watch("clientId");
+  const selectedClientId = watch("companyId");
 
   const onSubmit = async (data: StartFormData) => {
     await onStart({
-      clientId: data.clientId,
+      companyId: data.companyId,
       projectId: data.projectId || undefined,
       taskId: data.taskId || undefined,
       description: data.description,
@@ -142,7 +142,7 @@ export function WorkSessionStartForm({
           <div className="space-y-2">
             <Label>{t("clientLabel")}</Label>
             <Controller
-              name="clientId"
+              name="companyId"
               control={control}
               render={({ field }) => (
                 <ClientCombobox
@@ -152,9 +152,9 @@ export function WorkSessionStartForm({
                 />
               )}
             />
-            {errors.clientId && (
+            {errors.companyId && (
               <p className="text-sm text-destructive">
-                {errors.clientId.message}
+                {errors.companyId.message}
               </p>
             )}
           </div>
@@ -166,7 +166,7 @@ export function WorkSessionStartForm({
               control={control}
               render={({ field }) => (
                 <ProjectCombobox
-                  clientId={selectedClientId}
+                  companyId={selectedClientId}
                   value={field.value}
                   onSelect={(projectId) => field.onChange(projectId ?? "")}
                   disabled={!selectedClientId}
@@ -183,7 +183,7 @@ export function WorkSessionStartForm({
               control={control}
               render={({ field }) => (
                 <TaskCombobox
-                  clientId={selectedClientId}
+                  companyId={selectedClientId}
                   value={field.value}
                   onSelect={(taskId) => field.onChange(taskId ?? "")}
                   disabled={!selectedClientId}

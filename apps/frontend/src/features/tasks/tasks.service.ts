@@ -6,7 +6,7 @@ export interface Task {
   id: string;
   title: string;
   link?: string;
-  clientId: string;
+  companyId: string;
   projectId?: string;
   userId: string;
   createdAt: string;
@@ -28,23 +28,23 @@ export interface Task {
 export interface CreateTaskData {
   title: string;
   link?: string;
-  clientId: string;
+  companyId: string;
   projectId?: string;
 }
 
 export interface UpdateTaskData {
   title?: string;
   link?: string;
-  clientId?: string;
+  companyId?: string;
   projectId?: string;
 }
 
 // React Query hooks for tasks
-export const useTasks = (clientId?: string) => {
+export const useTasks = (companyId?: string) => {
   return useQuery({
-    queryKey: ["tasks", clientId],
+    queryKey: ["tasks", companyId],
     queryFn: async () => {
-      const params = clientId ? { clientId } : {};
+      const params = companyId ? { companyId } : {};
       const { data } = await api.get<Task[]>("/tasks", { params });
 
       return data;
@@ -81,7 +81,7 @@ export const useCreateTask = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["tasks", data.clientId] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", data.companyId] });
       queryClient.invalidateQueries({ queryKey: ["clients"] });
     },
   });
@@ -105,7 +105,7 @@ export const useUpdateTask = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks", data.id] });
-      queryClient.invalidateQueries({ queryKey: ["tasks", data.clientId] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", data.companyId] });
       queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
     },
   });

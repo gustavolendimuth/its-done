@@ -131,7 +131,7 @@ describe("WorkSessionStartForm", () => {
 
     await waitFor(() => {
       expect(mockOnStart).toHaveBeenCalledWith({
-        clientId: "client-1",
+        companyId: "client-1",
         projectId: "project-1",
         description: "About to work on the landing page",
       });

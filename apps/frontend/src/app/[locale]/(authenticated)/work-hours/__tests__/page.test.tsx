@@ -216,7 +216,7 @@ describe("WorkHoursPage", () => {
     // Check if useTimeEntries was called with correct filter
     expect(useTimeEntries).toHaveBeenCalledWith(
       expect.objectContaining({
-        clientId: "client1",
+        companyId: "client1",
       })
     );
   });

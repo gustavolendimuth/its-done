@@ -86,7 +86,7 @@ const mockInvoices: Invoice[] = [
     createdAt: "2024-03-01T00:00:00Z",
     updatedAt: "2024-03-01T00:00:00Z",
     description: "Web development",
-    clientId: "client1",
+    companyId: "client1",
     fileUrl: null,
   },
   {
@@ -97,7 +97,7 @@ const mockInvoices: Invoice[] = [
     createdAt: "2024-03-02T00:00:00Z",
     updatedAt: "2024-03-02T00:00:00Z",
     description: "App design",
-    clientId: "client2",
+    companyId: "client2",
     fileUrl: null,
   },
 ];

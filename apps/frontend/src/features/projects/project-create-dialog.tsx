@@ -30,7 +30,7 @@ const projectSchema = z.object({
     .min(0, { message: "Alert hours must be 0 or greater" })
     .optional()
     .nullable(),
-  clientId: z.string().min(1, { message: "Empresa is required" }),
+  companyId: z.string().min(1, { message: "Empresa is required" }),
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
@@ -38,14 +38,14 @@ type ProjectFormData = z.infer<typeof projectSchema>;
 interface ProjectCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  clientId?: string;
+  companyId?: string;
   onSuccess?: (project: Project) => void;
 }
 
 export function ProjectCreateDialog({
   open,
   onOpenChange,
-  clientId,
+  companyId,
   onSuccess,
 }: ProjectCreateDialogProps) {
   const createProject = useCreateProject();
@@ -61,7 +61,7 @@ export function ProjectCreateDialog({
   } = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
-      clientId: clientId || "",
+      companyId: companyId || "",
       hourlyRate: null,
       alertHours: null,
     },
@@ -103,9 +103,9 @@ export function ProjectCreateDialog({
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="clientId">{t("client")} *</Label>
+          <Label htmlFor="companyId">{t("client")} *</Label>
           <Controller
-            name="clientId"
+            name="companyId"
             control={control}
             render={({ field }) => (
               <ClientCombobox
@@ -118,9 +118,9 @@ export function ProjectCreateDialog({
               />
             )}
           />
-          {errors.clientId && (
+          {errors.companyId && (
             <p className="text-sm text-destructive">
-              {errors.clientId.message}
+              {errors.companyId.message}
             </p>
           )}
         </div>

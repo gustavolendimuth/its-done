@@ -40,7 +40,7 @@ interface ProjectCardProps {
     description?: string;
     createdAt: string;
     updatedAt: string;
-    clientId: string;
+    companyId: string;
     userId: string;
     hourlyRate?: number;
     client: {
@@ -70,7 +70,7 @@ export function ProjectCard({
 
   const handleViewClient = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/empresas/${project.clientId}`);
+    router.push(`/companies/${project.companyId}`);
   };
 
   const handleEdit = (e: React.MouseEvent) => {

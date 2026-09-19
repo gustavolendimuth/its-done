@@ -22,12 +22,12 @@ const mockCreateTask = jest.fn((data: CreateTaskData): Promise<Task> => {
     id: "task-1",
     title: data.title,
     link: data.link,
-    clientId: data.clientId,
+    companyId: data.companyId,
     projectId: data.projectId,
     userId: "user1",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    client: mockClients.find((c) => c.id === data.clientId)!,
+    client: mockClients.find((c) => c.id === data.companyId)!,
   });
 });
 
@@ -115,7 +115,7 @@ describe("TaskCreateDialog", () => {
     open: true,
     onOpenChange: jest.fn(),
     onSuccess: jest.fn(),
-    clientId: "1",
+    companyId: "1",
   };
 
   beforeEach(() => {
@@ -270,7 +270,7 @@ describe("TaskCreateDialog", () => {
     expect(titleInput).toHaveValue("[estafeito.app] ");
   });
 
-  it("submits with clientId, title and optional projectId/link", async () => {
+  it("submits with companyId, title and optional projectId/link", async () => {
     render(<TaskCreateDialog {...defaultProps} />);
 
     fireEvent.change(screen.getByTestId("client-combobox"), {
@@ -283,7 +283,7 @@ describe("TaskCreateDialog", () => {
     await waitFor(() => {
       expect(mockCreateTask).toHaveBeenCalledWith({
         title: "Fix bug",
-        clientId: "1",
+        companyId: "1",
         projectId: undefined,
         link: undefined,
       });

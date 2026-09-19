@@ -127,7 +127,7 @@ export default function TasksPage() {
         <TaskCreateDialog
           open={showCreateDialog}
           onOpenChange={setShowCreateDialog}
-          clientId={
+          companyId={
             selectedClientId === "all" ? clients[0].id : selectedClientId
           }
           onSuccess={() => setShowCreateDialog(false)}

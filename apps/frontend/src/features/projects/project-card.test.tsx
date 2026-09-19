@@ -18,7 +18,7 @@ const mockProject = {
   id: "1",
   name: "Test Project",
   description: "Test Description",
-  clientId: "1",
+  companyId: "1",
   client: {
     id: "1",
     name: "Test Client",
@@ -105,7 +105,7 @@ describe("ProjectCard Component", () => {
 
     fireEvent.click(clientButton);
 
-    expect(mockRouter.push).toHaveBeenCalledWith("/empresas/1");
+    expect(mockRouter.push).toHaveBeenCalledWith("/companies/1");
   });
 
   test("displays all action buttons", () => {

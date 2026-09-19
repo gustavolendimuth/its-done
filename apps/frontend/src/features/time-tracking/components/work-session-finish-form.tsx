@@ -45,7 +45,7 @@ type TranslateFn = (key: string) => string;
 
 function buildFinishFormSchema(t: TranslateFn) {
   return z.object({
-    clientId: z.string().min(1, t("clientRequired")),
+    companyId: z.string().min(1, t("clientRequired")),
     projectId: z.string().optional(),
     taskId: z.string().optional(),
     description: z.string().min(1, t("descriptionRequired")),
@@ -113,7 +113,7 @@ export function WorkSessionFinishForm({
     // defaults to the day the session actually STARTED, not today, since
     // the person may only be filling this in days later.
     defaultValues: {
-      clientId: session.clientId ?? "",
+      companyId: session.companyId ?? "",
       projectId: session.projectId ?? "",
       taskId: session.taskId ?? "",
       description: session.description ?? "",
@@ -121,13 +121,13 @@ export function WorkSessionFinishForm({
     },
   });
 
-  const selectedClientId = watch("clientId");
+  const selectedClientId = watch("companyId");
 
   const onSubmit = async (data: FinishFormData) => {
     await finishMutation.mutateAsync({
       sessionId: session.id,
       data: {
-        clientId: data.clientId,
+        companyId: data.companyId,
         projectId: data.projectId || undefined,
         taskId: data.taskId || undefined,
         description: data.description,
@@ -194,7 +194,7 @@ export function WorkSessionFinishForm({
           <div className="space-y-2">
             <Label>{t("clientLabel")}</Label>
             <Controller
-              name="clientId"
+              name="companyId"
               control={control}
               render={({ field }) => (
                 <ClientCombobox
@@ -204,9 +204,9 @@ export function WorkSessionFinishForm({
                 />
               )}
             />
-            {errors.clientId && (
+            {errors.companyId && (
               <p className="text-sm text-destructive">
-                {errors.clientId.message}
+                {errors.companyId.message}
               </p>
             )}
           </div>
@@ -218,7 +218,7 @@ export function WorkSessionFinishForm({
               control={control}
               render={({ field }) => (
                 <ProjectCombobox
-                  clientId={selectedClientId}
+                  companyId={selectedClientId}
                   value={field.value}
                   onSelect={(projectId) => field.onChange(projectId ?? "")}
                   disabled={!selectedClientId}
@@ -235,7 +235,7 @@ export function WorkSessionFinishForm({
               control={control}
               render={({ field }) => (
                 <TaskCombobox
-                  clientId={selectedClientId}
+                  companyId={selectedClientId}
                   value={field.value}
                   onSelect={(taskId) => field.onChange(taskId ?? "")}
                   disabled={!selectedClientId}

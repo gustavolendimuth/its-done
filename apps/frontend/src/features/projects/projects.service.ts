@@ -7,7 +7,7 @@ export interface Project {
   name: string;
   description?: string;
   hourlyRate?: number;
-  clientId: string;
+  companyId: string;
   userId: string;
   createdAt: string;
   updatedAt: string;
@@ -28,22 +28,22 @@ export interface CreateProjectData {
   name: string;
   description?: string;
   hourlyRate?: number;
-  clientId: string;
+  companyId: string;
 }
 
 export interface UpdateProjectData {
   name?: string;
   description?: string;
   hourlyRate?: number;
-  clientId?: string;
+  companyId?: string;
 }
 
 // React Query hooks for projects
-export const useProjects = (clientId?: string) => {
+export const useProjects = (companyId?: string) => {
   return useQuery({
-    queryKey: ["projects", clientId],
+    queryKey: ["projects", companyId],
     queryFn: async () => {
-      const params = clientId ? { clientId } : {};
+      const params = companyId ? { companyId } : {};
       const { data } = await api.get<Project[]>("/projects", { params });
 
       return data;
@@ -81,10 +81,10 @@ export const useCreateProject = () => {
     onSuccess: (data) => {
       // Invalidate all projects queries
       queryClient.invalidateQueries({ queryKey: ["projects"] });
-      queryClient.invalidateQueries({ queryKey: ["projects", data.clientId] });
+      queryClient.invalidateQueries({ queryKey: ["projects", data.companyId] });
       // Invalidate client data (project count may have changed)
       queryClient.invalidateQueries({ queryKey: ["clients"] });
-      queryClient.invalidateQueries({ queryKey: ["clients", data.clientId] });
+      queryClient.invalidateQueries({ queryKey: ["clients", data.companyId] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
@@ -110,10 +110,10 @@ export const useUpdateProject = () => {
       // Invalidate all projects queries
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects", data.id] });
-      queryClient.invalidateQueries({ queryKey: ["projects", data.clientId] });
+      queryClient.invalidateQueries({ queryKey: ["projects", data.companyId] });
       // Invalidate client data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
-      queryClient.invalidateQueries({ queryKey: ["clients", data.clientId] });
+      queryClient.invalidateQueries({ queryKey: ["clients", data.companyId] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       // Invalidate time entries (project may have been associated)

@@ -60,7 +60,7 @@ interface TotalHoursDisplayProps {
     startDate: Date | null;
     endDate: Date | null;
   };
-  clientId?: string;
+  companyId?: string;
   hourlyRate?: number;
   className?: string;
   workHours?: WorkHour[]; // Array of work hours to calculate worked days
@@ -69,7 +69,7 @@ interface TotalHoursDisplayProps {
 
 export function TotalHoursDisplay({
   dateRange,
-  clientId,
+  companyId,
   hourlyRate = 50,
   className,
   workHours = [],
@@ -82,7 +82,7 @@ export function TotalHoursDisplay({
       ? {
           from: dateRange.startDate.toISOString(),
           to: dateRange.endDate.toISOString(),
-          clientId: clientId !== "all" ? clientId : undefined,
+          companyId: companyId !== "all" ? companyId : undefined,
         }
       : undefined;
 
@@ -91,7 +91,7 @@ export function TotalHoursDisplay({
 
   // Total stats (without date filters)
   const { data: totalStats } = useWorkHoursStats({
-    clientId: clientId !== "all" ? clientId : undefined,
+    companyId: companyId !== "all" ? companyId : undefined,
   });
 
   // Only show green loading spinner during refetch, not initial load

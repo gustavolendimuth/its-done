@@ -5,7 +5,7 @@ import api from "@/lib/axios";
 export interface Invoice {
   id: string;
   number?: string;
-  clientId: string;
+  companyId: string;
   client?: {
     id: string;
     name: string;
@@ -41,7 +41,7 @@ export interface Invoice {
 }
 
 export interface CreateInvoiceDto {
-  clientId: string;
+  companyId: string;
   amount: number;
   workHourIds: string[];
   fileUrl?: string;
@@ -61,7 +61,7 @@ export interface UpdateInvoiceDto {
 export const useInvoices = (params?: {
   from?: string;
   to?: string;
-  clientId?: string;
+  companyId?: string;
   status?: Invoice["status"];
 }) => {
   return useQuery({
@@ -108,7 +108,7 @@ export const useCreateInvoice = () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       // Invalidate client invoices
       queryClient.invalidateQueries({
-        queryKey: ["clients", invoice.clientId, "invoices"],
+        queryKey: ["clients", invoice.companyId, "invoices"],
       });
       // Invalidate time entries (may affect available entries)
       queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
@@ -143,7 +143,7 @@ export const useUpdateInvoice = () => {
       queryClient.invalidateQueries({ queryKey: ["invoices", id] });
       // Invalidate client invoices
       queryClient.invalidateQueries({
-        queryKey: ["clients", invoice.clientId, "invoices"],
+        queryKey: ["clients", invoice.companyId, "invoices"],
       });
       // Invalidate invoice stats
       queryClient.invalidateQueries({ queryKey: ["invoices", "stats"] });
@@ -169,9 +169,9 @@ export const useDeleteInvoice = () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["invoices", id] });
       // Invalidate client invoices
-      if (invoice?.clientId) {
+      if (invoice?.companyId) {
         queryClient.invalidateQueries({
-          queryKey: ["clients", invoice.clientId, "invoices"],
+          queryKey: ["clients", invoice.companyId, "invoices"],
         });
       }
       // Invalidate time entries (may affect available entries)
@@ -213,7 +213,7 @@ export const useUploadInvoiceFile = () => {
       queryClient.invalidateQueries({ queryKey: ["invoices", id] });
       // Invalidate client invoices
       queryClient.invalidateQueries({
-        queryKey: ["clients", invoice.clientId, "invoices"],
+        queryKey: ["clients", invoice.companyId, "invoices"],
       });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -221,17 +221,17 @@ export const useUploadInvoiceFile = () => {
   });
 };
 
-export const useClientInvoices = (clientId: string) => {
+export const useClientInvoices = (companyId: string) => {
   return useQuery({
-    queryKey: ["clients", clientId, "invoices"],
+    queryKey: ["clients", companyId, "invoices"],
     queryFn: async () => {
       const { data } = await api.get<Invoice[]>(
-        `/clients/${clientId}/invoices`
+        `/companies/${companyId}/invoices`
       );
 
       return data;
     },
-    enabled: !!clientId,
+    enabled: !!companyId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -270,9 +270,9 @@ export const useDownloadInvoice = () => {
 
 // Legacy service object for compatibility
 export const invoicesService = {
-  async findByClient(clientId: string): Promise<Invoice[]> {
+  async findByClient(companyId: string): Promise<Invoice[]> {
     const { data } = await api.get<Invoice[]>(
-      `/public/client/${clientId}/invoices`
+      `/public/company/${companyId}/invoices`
     );
 
     return data;

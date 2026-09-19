@@ -64,7 +64,7 @@ export interface CreateReportDto {
 export interface ReportFilters {
   startDate?: string;
   endDate?: string;
-  clientId?: string;
+  companyId?: string;
 }
 
 export interface HoursReport {
@@ -72,7 +72,7 @@ export interface HoursReport {
   totalDays: number;
   averageHoursPerDay: number;
   clientBreakdown: {
-    clientId: string;
+    companyId: string;
     clientName: string;
     totalHours: number;
     percentage: number;
@@ -92,7 +92,7 @@ export interface InvoiceReport {
   pendingInvoices: number;
   paidInvoices: number;
   clientBreakdown: {
-    clientId: string;
+    companyId: string;
     clientName: string;
     totalInvoices: number;
     pendingInvoices: number;
@@ -118,7 +118,7 @@ export const useHoursReport = (filters?: ReportFilters) => {
 
       if (filters?.startDate) params.append("startDate", filters.startDate);
       if (filters?.endDate) params.append("endDate", filters.endDate);
-      if (filters?.clientId) params.append("clientId", filters.clientId);
+      if (filters?.companyId) params.append("companyId", filters.companyId);
 
       const { data } = await api.get<HoursReport>(`/reports/hours?${params}`);
 
@@ -137,7 +137,7 @@ export const useInvoiceReport = (filters?: ReportFilters) => {
 
       if (filters?.startDate) params.append("startDate", filters.startDate);
       if (filters?.endDate) params.append("endDate", filters.endDate);
-      if (filters?.clientId) params.append("clientId", filters.clientId);
+      if (filters?.companyId) params.append("companyId", filters.companyId);
 
       const { data } = await api.get<InvoiceReport>(
         `/reports/invoices?${params}`
@@ -150,7 +150,7 @@ export const useInvoiceReport = (filters?: ReportFilters) => {
   });
 };
 
-export const useSummaryReport = (filters?: Omit<ReportFilters, "clientId">) => {
+export const useSummaryReport = (filters?: Omit<ReportFilters, "companyId">) => {
   return useQuery({
     queryKey: ["reports", "summary", filters],
     queryFn: async () => {

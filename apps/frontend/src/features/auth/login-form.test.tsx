@@ -20,19 +20,19 @@ jest.mock("next/image", () => ({
 }));
 
 describe("LoginForm", () => {
-  it("shows the empresa-admin login link pointing to /empresa-admin/login", () => {
+  it("shows the company-admin login link pointing to /company-admin/login", () => {
     render(<LoginForm />);
 
     expect(
-      screen.getByRole("link", { name: "empresaAdminLink" })
-    ).toHaveAttribute("href", "/empresa-admin/login");
+      screen.getByRole("link", { name: "companyAdminLink" })
+    ).toHaveAttribute("href", "/company-admin/login");
   });
 
-  it("shows the empresa-admin login link without any session mocked", () => {
+  it("shows the company-admin login link without any session mocked", () => {
     render(<LoginForm />);
 
     expect(
-      screen.getByRole("link", { name: "empresaAdminLink" })
+      screen.getByRole("link", { name: "companyAdminLink" })
     ).toBeInTheDocument();
   });
 });

@@ -31,7 +31,7 @@ const projectSchema = z.object({
     .min(0, { message: "Alert hours must be 0 or greater" })
     .optional()
     .nullable(),
-  clientId: z.string().min(1, { message: "Empresa is required" }),
+  companyId: z.string().min(1, { message: "Empresa is required" }),
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
@@ -66,7 +66,7 @@ export function ProjectEditDialog({
       description: project.description || "",
       hourlyRate: project.hourlyRate || null,
       alertHours: (project as any).alertHours || null,
-      clientId: project.clientId,
+      companyId: project.companyId,
     },
   });
 
@@ -78,7 +78,7 @@ export function ProjectEditDialog({
         description: project.description || "",
         hourlyRate: project.hourlyRate || null,
         alertHours: (project as any).alertHours || null,
-        clientId: project.clientId,
+        companyId: project.companyId,
       });
     }
   }, [project, reset]);
@@ -121,9 +121,9 @@ export function ProjectEditDialog({
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="clientId">{t("client")} *</Label>
+          <Label htmlFor="companyId">{t("client")} *</Label>
           <Controller
-            name="clientId"
+            name="companyId"
             control={control}
             render={({ field }) => (
               <ClientCombobox
@@ -136,9 +136,9 @@ export function ProjectEditDialog({
               />
             )}
           />
-          {errors.clientId && (
+          {errors.companyId && (
             <p className="text-sm text-destructive">
-              {errors.clientId.message}
+              {errors.companyId.message}
             </p>
           )}
         </div>

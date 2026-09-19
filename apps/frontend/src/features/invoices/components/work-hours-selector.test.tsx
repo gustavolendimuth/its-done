@@ -7,7 +7,7 @@ const makeEntry = (overrides: Partial<any> = {}) => ({
   date: new Date().toISOString(),
   description: "",
   hours: 1,
-  clientId: "c1",
+  companyId: "c1",
   projectId: "p1",
   client: { id: "c1", name: "Client 1", company: "ACME", email: "c1@x.com" },
   project: { id: "p1", name: "Project 1", hourlyRate: 100 },

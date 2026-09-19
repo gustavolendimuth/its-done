@@ -55,7 +55,7 @@ jest.mock("./work-session-start-form", () => ({
   }: {
     onCancel: () => void;
     onStart: (details: {
-      clientId?: string;
+      companyId?: string;
       projectId?: string;
       description?: string;
     }) => void;
@@ -64,7 +64,7 @@ jest.mock("./work-session-start-form", () => ({
       <button onClick={onCancel}>stub-cancel</button>
       <button
         onClick={() =>
-          onStart({ clientId: "client-1", description: "Planned ahead" })
+          onStart({ companyId: "client-1", description: "Planned ahead" })
         }
       >
         stub-start
@@ -174,7 +174,7 @@ describe("WorkTimerWidget", () => {
 
     expect(mockSubscribe).toHaveBeenCalledTimes(1);
     expect(mockStart).toHaveBeenCalledWith({
-      clientId: "client-1",
+      companyId: "client-1",
       description: "Planned ahead",
     });
   });

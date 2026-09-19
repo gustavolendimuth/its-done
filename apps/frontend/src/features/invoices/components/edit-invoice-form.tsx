@@ -66,7 +66,7 @@ export function EditInvoiceForm({
 
   // Fetch available time entries for the invoice's client
   const { data: availableTimeEntries = [] } = useAvailableTimeEntries({
-    clientId: invoice.clientId,
+    companyId: invoice.companyId,
   });
 
   // Extract currently associated work hours from invoice
@@ -241,7 +241,7 @@ export function EditInvoiceForm({
             {/* Work Hours Selector */}
             {allAvailableEntries.length > 0 ? (
               <WorkHoursSelector
-                key={`${invoice.clientId}-${invoice.id}`}
+                key={`${invoice.companyId}-${invoice.id}`}
                 timeEntries={allAvailableEntries}
                 initialSelectedIds={selectedWorkHourIds}
                 onSelectionChange={(workHourIds, totalAmount) =>

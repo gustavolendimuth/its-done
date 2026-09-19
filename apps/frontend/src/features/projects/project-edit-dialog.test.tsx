@@ -28,11 +28,11 @@ const mockUpdateProject = jest.fn(
       name: data.name || "Test Project",
       description: data.description,
       hourlyRate: data.hourlyRate,
-      clientId: data.clientId || "1",
+      companyId: data.companyId || "1",
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      client: mockClients.find((c) => c.id === (data.clientId || "1"))!,
+      client: mockClients.find((c) => c.id === (data.companyId || "1"))!,
       _count: {
         workHours: 0,
       },
@@ -115,7 +115,7 @@ describe("ProjectEditDialog", () => {
     name: "Existing Project",
     description: "Existing Description",
     hourlyRate: 100,
-    clientId: "1",
+    companyId: "1",
     userId: "user1",
     createdAt: "2024-03-01T00:00:00Z",
     updatedAt: "2024-03-01T00:00:00Z",
@@ -230,7 +230,7 @@ describe("ProjectEditDialog", () => {
           description: "Updated Description",
           hourlyRate: 150,
           alertHours: undefined,
-          clientId: "1",
+          companyId: "1",
         },
       });
       expect(defaultProps.onSuccess).toHaveBeenCalledWith(updatedProject);
@@ -378,7 +378,7 @@ describe("ProjectEditDialog", () => {
       expect(mockUpdateProject).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            clientId: "2",
+            companyId: "2",
           }),
         })
       );

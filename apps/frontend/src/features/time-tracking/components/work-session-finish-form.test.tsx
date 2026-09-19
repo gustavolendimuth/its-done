@@ -204,7 +204,7 @@ describe("WorkSessionFinishForm", () => {
       expect(mockMutateAsync).toHaveBeenCalledWith({
         sessionId: "session-1",
         data: {
-          clientId: "client-1",
+          companyId: "client-1",
           projectId: undefined,
           description: "Worked on the landing page",
           date: "2026-01-01T00:00:00.000Z",
@@ -260,7 +260,7 @@ describe("WorkSessionFinishForm", () => {
     render(
       <WorkSessionFinishForm
         session={baseSession({
-          clientId: "client-1",
+          companyId: "client-1",
           projectId: "project-1",
           description: "Planejado com antecedência",
         })}

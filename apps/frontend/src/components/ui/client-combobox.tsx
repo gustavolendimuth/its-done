@@ -11,7 +11,7 @@ import { ClientForm, Client } from "@/features/companies";
 interface ClientComboboxProps {
   clients: Client[];
   value?: string;
-  onSelect: (clientId: string) => void;
+  onSelect: (companyId: string) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;

@@ -49,7 +49,7 @@ describe("Invoice Services", () => {
   const mockInvoice: Invoice = {
     id: "1",
     number: "INV-001",
-    clientId: "client-1",
+    companyId: "client-1",
     client: {
       id: "client-1",
       name: "John Doe",
@@ -104,7 +104,7 @@ describe("Invoice Services", () => {
       const params = {
         from: "2024-01-01",
         to: "2024-12-31",
-        clientId: "client-1",
+        companyId: "client-1",
         status: "PENDING" as Invoice["status"],
       };
 
@@ -159,7 +159,7 @@ describe("Invoice Services", () => {
   describe("useCreateInvoice", () => {
     it("creates an invoice successfully", async () => {
       const createData: CreateInvoiceDto = {
-        clientId: "client-1",
+        companyId: "client-1",
         amount: 1000,
         workHourIds: ["wh-1", "wh-2"],
         description: "Test Invoice",
@@ -190,7 +190,7 @@ describe("Invoice Services", () => {
 
     it("handles create error", async () => {
       const createData: CreateInvoiceDto = {
-        clientId: "client-1",
+        companyId: "client-1",
         amount: 1000,
         workHourIds: ["wh-1"],
       };
@@ -348,10 +348,12 @@ describe("Invoice Services", () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(result.current.data).toEqual(mockInvoices);
-      expect(mockedApi.get).toHaveBeenCalledWith("/clients/client-1/invoices");
+      expect(mockedApi.get).toHaveBeenCalledWith(
+        "/companies/client-1/invoices"
+      );
     });
 
-    it("does not fetch when clientId is empty", () => {
+    it("does not fetch when companyId is empty", () => {
       const { result } = renderHook(() => useClientInvoices(""), {
         wrapper: createWrapper(),
       });
@@ -437,7 +439,7 @@ describe("Invoice Services", () => {
 
       expect(result).toEqual(mockInvoices);
       expect(mockedApi.get).toHaveBeenCalledWith(
-        "/public/client/client-1/invoices"
+        "/public/company/client-1/invoices"
       );
     });
 
@@ -480,7 +482,7 @@ describe("Invoice Services", () => {
     it("handles invoice without optional fields", async () => {
       const minimalInvoice: Invoice = {
         id: "2",
-        clientId: "client-2",
+        companyId: "client-2",
         amount: 500,
         status: "PENDING",
         createdAt: "2024-03-01T00:00:00Z",
@@ -533,7 +535,7 @@ describe("Invoice Services", () => {
       });
 
       await result.current.mutateAsync({
-        clientId: "client-1",
+        companyId: "client-1",
         amount: 1000,
         workHourIds: ["wh-1"],
       });

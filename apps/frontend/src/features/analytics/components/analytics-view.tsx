@@ -43,7 +43,7 @@ export function AnalyticsView() {
   const [filters, setFilters] = useState<ReportFilters>({
     startDate: format(startOfMonth(new Date()), "yyyy-MM-dd"),
     endDate: format(endOfMonth(new Date()), "yyyy-MM-dd"),
-    clientId: "all",
+    companyId: "all",
   });
 
   // Dashboard stats for overview

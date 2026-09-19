@@ -34,7 +34,7 @@ const mockProjects: Project[] = [
     id: "1",
     name: "Project A",
     description: "Description A",
-    clientId: "client1",
+    companyId: "client1",
     userId: "user1",
     createdAt: "2024-03-01T00:00:00Z",
     updatedAt: "2024-03-01T00:00:00Z",
@@ -53,7 +53,7 @@ const mockProjects: Project[] = [
     id: "2",
     name: "Project B",
     description: "Description B",
-    clientId: "client2",
+    companyId: "client2",
     userId: "user1",
     createdAt: "2024-03-02T00:00:00Z",
     updatedAt: "2024-03-02T00:00:00Z",
@@ -72,7 +72,7 @@ const mockProjects: Project[] = [
     id: "3",
     name: "Project C",
     description: "Description C",
-    clientId: "client1",
+    companyId: "client1",
     userId: "user1",
     createdAt: "2024-03-03T00:00:00Z",
     updatedAt: "2024-03-03T00:00:00Z",
@@ -91,9 +91,9 @@ const mockProjects: Project[] = [
 
 // Mock services
 jest.mock("./projects.service", () => ({
-  useProjects: jest.fn((clientId?: string) => ({
-    data: clientId
-      ? mockProjects.filter((p) => p.clientId === clientId)
+  useProjects: jest.fn((companyId?: string) => ({
+    data: companyId
+      ? mockProjects.filter((p) => p.companyId === companyId)
       : mockProjects,
     isLoading: false,
   })),
@@ -105,9 +105,9 @@ describe("ProjectsBigStats", () => {
     // which would otherwise leak into later tests)
     const { useProjects } = require("./projects.service");
 
-    useProjects.mockImplementation((clientId?: string) => ({
-      data: clientId
-        ? mockProjects.filter((p) => p.clientId === clientId)
+    useProjects.mockImplementation((companyId?: string) => ({
+      data: companyId
+        ? mockProjects.filter((p) => p.companyId === companyId)
         : mockProjects,
       isLoading: false,
     }));

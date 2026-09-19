@@ -66,7 +66,7 @@ export default function WorkHoursPage() {
     return {
       from: dateRange.startDate.toISOString(),
       to: dateRange.endDate.toISOString(),
-      clientId: selectedClient !== "all" ? selectedClient : undefined,
+      companyId: selectedClient !== "all" ? selectedClient : undefined,
     };
   }, [dateRange.startDate, dateRange.endDate, selectedClient]);
 
@@ -201,7 +201,7 @@ export default function WorkHoursPage() {
       <div className="mb-8">
         <WorkHoursBigStats
           dateRange={dateRange}
-          clientId={selectedClient}
+          companyId={selectedClient}
           hourlyRate={50} // Pode ser dinâmico no futuro
           workHours={workHours || []}
           isRefetching={isRefetching}

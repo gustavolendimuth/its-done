@@ -30,7 +30,7 @@ import { useAvailableTimeEntries } from "@/features/time-tracking";
 import { TimeEntry } from "@/types";
 
 const invoiceSchema = z.object({
-  clientId: z.string().min(1, "Empresa is required"),
+  companyId: z.string().min(1, "Empresa is required"),
   workHourIds: z
     .array(z.string())
     .min(1, "At least one work hour must be selected"),
@@ -85,21 +85,21 @@ export function CreateInvoiceForm({
       );
     } else if (formErrors.workHourIds) {
       toast.error("Select at least one work hour to invoice.");
-    } else if (formErrors.clientId) {
+    } else if (formErrors.companyId) {
       toast.error("Select a client.");
     } else {
       toast.error("Please review the highlighted fields before submitting.");
     }
   };
 
-  const watchedClientId = watch("clientId");
+  const watchedClientId = watch("companyId");
 
   // Buscar horas disponíveis (não faturadas ou de faturas canceladas)
   const { data: availableTimeEntries = [] } = useAvailableTimeEntries({
-    clientId: watchedClientId,
+    companyId: watchedClientId,
   });
 
-  // As horas já vêm filtradas pelo clientId se fornecido
+  // As horas já vêm filtradas pelo companyId se fornecido
   const filteredTimeEntries =
     availableTimeEntries.filter(
       (entry: TimeEntry) => !entry.invoiceWorkHours?.length,
@@ -147,7 +147,7 @@ export function CreateInvoiceForm({
     try {
       // Create invoice using the mutation
       const createdInvoice = await createInvoiceMutation.mutateAsync({
-        clientId: data.clientId,
+        companyId: data.companyId,
         amount: data.amount,
         workHourIds: data.workHourIds,
         description: data.description,
@@ -201,9 +201,9 @@ export function CreateInvoiceForm({
     >
       {/* Client Selection */}
       <div className="space-y-2">
-        <Label htmlFor="clientId">Empresa</Label>
+        <Label htmlFor="companyId">Empresa</Label>
         <Controller
-          name="clientId"
+          name="companyId"
           control={control}
           render={({ field }) => (
             <ClientCombobox
@@ -214,8 +214,8 @@ export function CreateInvoiceForm({
             />
           )}
         />
-        {errors.clientId && (
-          <p className="text-sm text-red-500">{errors.clientId.message}</p>
+        {errors.companyId && (
+          <p className="text-sm text-red-500">{errors.companyId.message}</p>
         )}
       </div>
 
