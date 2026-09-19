@@ -16,7 +16,7 @@ jest.mock("sonner", () => ({
   toast: {
     success: jest.fn(),
     error: jest.fn(),
-  }
+  },
 }));
 
 // Mock services
@@ -30,12 +30,12 @@ const mockCreateProject = jest.fn(
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      company: mockClients.find((c) => c.id === data.companyId)!,
+      company: mockCompanies.find((c) => c.id === data.companyId)!,
       _count: {
         workHours: 0,
       },
     });
-  }
+  },
 );
 
 jest.mock("./projects.service", () => ({
@@ -45,7 +45,7 @@ jest.mock("./projects.service", () => ({
   })),
 }));
 
-const mockClients: Company[] = [
+const mockCompanies: Company[] = [
   {
     id: "1",
     name: "John Doe",
@@ -66,7 +66,7 @@ const mockClients: Company[] = [
 
 jest.mock("@/features/companies", () => ({
   useCompanies: () => ({
-    data: mockClients,
+    data: mockCompanies,
     isLoading: false,
   }),
 }));
@@ -88,9 +88,9 @@ jest.mock("@/components/ui/company-combobox", () => ({
       onChange={(e) => onSelect(e.target.value)}
     >
       <option value="">{placeholder}</option>
-      {mockClients.map((client) => (
-        <option key={client.id} value={client.id}>
-          {client.company}
+      {mockCompanies.map((company) => (
+        <option key={company.id} value={company.id}>
+          {company.company}
         </option>
       ))}
     </select>
@@ -122,16 +122,10 @@ describe("ProjectCreateDialog", () => {
     expect(screen.getByText("title")).toBeInTheDocument();
     expect(screen.getByText("formSubtitle")).toBeInTheDocument();
     expect(screen.getByTestId("client-combobox")).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText("enterName")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText("enterDescription")
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("enterName")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("enterDescription")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "cancel" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "create" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "create" })).toBeInTheDocument();
   });
 
   it("renders with preselected client", () => {
@@ -162,7 +156,7 @@ describe("ProjectCreateDialog", () => {
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      company: mockClients[0],
+      company: mockCompanies[0],
       _count: {
         workHours: 0,
       },
@@ -174,11 +168,11 @@ describe("ProjectCreateDialog", () => {
     // Fill form
     await userEvent.type(
       screen.getByPlaceholderText("enterName"),
-      "Test Project"
+      "Test Project",
     );
     await userEvent.type(
       screen.getByPlaceholderText("enterDescription"),
-      "Test Description"
+      "Test Description",
     );
     fireEvent.change(screen.getByTestId("client-combobox"), {
       target: { value: "1" },
@@ -193,7 +187,7 @@ describe("ProjectCreateDialog", () => {
         name: "Test Project",
         description: "Test Description",
         companyId: "1",
-        hourlyRate: undefined
+        hourlyRate: undefined,
       });
       expect(defaultProps.onSuccess).toHaveBeenCalledWith(mockProject);
       const { toast } = require("sonner");
@@ -212,7 +206,7 @@ describe("ProjectCreateDialog", () => {
     // Fill form
     await userEvent.type(
       screen.getByPlaceholderText("enterName"),
-      "Test Project"
+      "Test Project",
     );
     fireEvent.change(screen.getByTestId("client-combobox"), {
       target: { value: "1" },
@@ -225,7 +219,7 @@ describe("ProjectCreateDialog", () => {
     await waitFor(() => {
       expect(consoleError).toHaveBeenCalledWith(
         "Error creating project:",
-        expect.any(Error)
+        expect.any(Error),
       );
       expect(defaultProps.onSuccess).not.toHaveBeenCalled();
       const { toast } = require("sonner");
@@ -248,9 +242,7 @@ describe("ProjectCreateDialog", () => {
     const { rerender } = render(<ProjectCreateDialog {...defaultProps} />);
 
     // Initial state
-    expect(
-      screen.getByRole("button", { name: "create" })
-    ).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: "create" })).not.toBeDisabled();
 
     // Mock pending state
     const { useCreateProject } = require("./projects.service");
@@ -275,7 +267,7 @@ describe("ProjectCreateDialog", () => {
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      company: mockClients[0],
+      company: mockCompanies[0],
       _count: {
         workHours: 0,
       },
@@ -287,11 +279,11 @@ describe("ProjectCreateDialog", () => {
     // Fill form
     await userEvent.type(
       screen.getByPlaceholderText("enterName"),
-      "Test Project"
+      "Test Project",
     );
     await userEvent.type(
       screen.getByPlaceholderText("enterDescription"),
-      "Test Description"
+      "Test Description",
     );
     fireEvent.change(screen.getByTestId("client-combobox"), {
       target: { value: "1" },
@@ -303,9 +295,7 @@ describe("ProjectCreateDialog", () => {
     // Wait for form reset
     await waitFor(() => {
       expect(screen.getByPlaceholderText("enterName")).toHaveValue("");
-      expect(
-        screen.getByPlaceholderText("enterDescription")
-      ).toHaveValue("");
+      expect(screen.getByPlaceholderText("enterDescription")).toHaveValue("");
       expect(screen.getByTestId("client-combobox")).toHaveValue("");
     });
   });

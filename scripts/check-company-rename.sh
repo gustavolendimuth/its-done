@@ -40,6 +40,19 @@ if rg --line-number --with-filename \
   exit 1
 fi
 
+# Fixture values and translated labels may retain the old word, but executable
+# Company-domain identifiers may not hide beside them in test code.
+if rg --line-number --with-filename \
+  --glob '*.ts' --glob '*.tsx' \
+  --regexp '\b(const|let|var)\s+client\b' \
+  --regexp '\(\s*client\s*[:)]' \
+  --regexp '\bclient\.[[:alpha:]_]' \
+  "${search_roots[@]}" > "$unclassified_hits"; then
+  echo "Company-domain variables named client remain:" >&2
+  cat "$unclassified_hits" >&2
+  exit 1
+fi
+
 # Each surviving exact Client/client occurrence belongs to one reviewed class:
 # framework/package vocabulary, translated copy, generic HTTP/browser clients,
 # test fixtures/assertions, OAuth, or the stable public legacy dashboard URL.
@@ -56,7 +69,11 @@ grep -Ev \
   -e "\\bt\\([\"']client[\"']\\)" \
   -e 'client: clientLabel' \
   -e "(Client Component|server/client|client-only|client-side|on the client|to the client|from the client|client's outbox)" \
-  -e '\.(test|spec|e2e-spec)\.(ts|tsx):' \
+  -e '\.(test|spec|e2e-spec)\.(ts|tsx):.*"[^"]*(Client|client)[^"]*"' \
+  -e "\\.(test|spec|e2e-spec)\\.(ts|tsx):.*'[^']*(Client|client)[^']*'" \
+  -e '\.(test|spec|e2e-spec)\.(ts|tsx):.*`[^`]*(Client|client)[^`]*`' \
+  -e '\.(test|spec|e2e-spec)\.(ts|tsx):.*//.*\b(Client|client)\b' \
+  -e '\.(test|spec|e2e-spec)\.(ts|tsx):.*[/]client[/]i' \
   "$raw_hits" > "$unclassified_hits" || true
 
 if [ -s "$unclassified_hits" ]; then

@@ -32,12 +32,12 @@ const mockUpdateProject = jest.fn(
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      company: mockClients.find((c) => c.id === (data.companyId || "1"))!,
+      company: mockCompanies.find((c) => c.id === (data.companyId || "1"))!,
       _count: {
         workHours: 0,
       },
     });
-  }
+  },
 );
 
 jest.mock("./projects.service", () => ({
@@ -47,7 +47,7 @@ jest.mock("./projects.service", () => ({
   })),
 }));
 
-const mockClients: Company[] = [
+const mockCompanies: Company[] = [
   {
     id: "1",
     name: "John Doe",
@@ -68,7 +68,7 @@ const mockClients: Company[] = [
 
 jest.mock("@/features/companies", () => ({
   useCompanies: () => ({
-    data: mockClients,
+    data: mockCompanies,
     isLoading: false,
   }),
 }));
@@ -90,9 +90,9 @@ jest.mock("@/components/ui/company-combobox", () => ({
       onChange={(e) => onSelect(e.target.value)}
     >
       <option value="">{placeholder}</option>
-      {mockClients.map((client) => (
-        <option key={client.id} value={client.id}>
-          {client.company}
+      {mockCompanies.map((company) => (
+        <option key={company.id} value={company.id}>
+          {company.company}
         </option>
       ))}
     </select>
@@ -119,7 +119,7 @@ describe("ProjectEditDialog", () => {
     userId: "user1",
     createdAt: "2024-03-01T00:00:00Z",
     updatedAt: "2024-03-01T00:00:00Z",
-    company: mockClients[0],
+    company: mockCompanies[0],
     _count: {
       workHours: 5,
     },
@@ -152,7 +152,7 @@ describe("ProjectEditDialog", () => {
     expect(screen.getByTestId("client-combobox")).toHaveValue("1");
     expect(screen.getByDisplayValue("Existing Project")).toBeInTheDocument();
     expect(
-      screen.getByDisplayValue("Existing Description")
+      screen.getByDisplayValue("Existing Description"),
     ).toBeInTheDocument();
     expect(screen.getByDisplayValue("100")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "cancel" })).toBeInTheDocument();
@@ -161,7 +161,9 @@ describe("ProjectEditDialog", () => {
 
   it("renders with project without hourlyRate", () => {
     const projectWithoutRate = { ...mockProject, hourlyRate: null };
-    render(<ProjectEditDialog {...defaultProps} project={projectWithoutRate} />);
+    render(
+      <ProjectEditDialog {...defaultProps} project={projectWithoutRate} />,
+    );
 
     expect(screen.getByLabelText("hourlyRate")).toHaveValue(null);
   });
@@ -254,7 +256,7 @@ describe("ProjectEditDialog", () => {
           data: expect.objectContaining({
             hourlyRate: 125.5,
           }),
-        })
+        }),
       );
     });
   });
@@ -262,11 +264,11 @@ describe("ProjectEditDialog", () => {
   it("handles alertHours update", async () => {
     const projectWithAlertHours = {
       ...mockProject,
-      alertHours: 160
+      alertHours: 160,
     } as Project & { alertHours: number };
 
     const { rerender } = render(
-      <ProjectEditDialog {...defaultProps} project={projectWithAlertHours} />
+      <ProjectEditDialog {...defaultProps} project={projectWithAlertHours} />,
     );
 
     const alertHoursInput = screen.getByDisplayValue("160");
@@ -281,7 +283,7 @@ describe("ProjectEditDialog", () => {
           data: expect.objectContaining({
             alertHours: 200,
           }),
-        })
+        }),
       );
     });
   });
@@ -291,7 +293,9 @@ describe("ProjectEditDialog", () => {
       ...mockProject,
       hourlyRate: null,
     };
-    render(<ProjectEditDialog {...defaultProps} project={projectWithNullValues} />);
+    render(
+      <ProjectEditDialog {...defaultProps} project={projectWithNullValues} />,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "update" }));
 
@@ -302,7 +306,7 @@ describe("ProjectEditDialog", () => {
             hourlyRate: undefined,
             alertHours: undefined,
           }),
-        })
+        }),
       );
     });
   });
@@ -322,7 +326,7 @@ describe("ProjectEditDialog", () => {
     await waitFor(() => {
       expect(consoleError).toHaveBeenCalledWith(
         "Error updating project:",
-        expect.any(Error)
+        expect.any(Error),
       );
       expect(defaultProps.onSuccess).not.toHaveBeenCalled();
       const { toast } = require("sonner");
@@ -380,7 +384,7 @@ describe("ProjectEditDialog", () => {
           data: expect.objectContaining({
             companyId: "2",
           }),
-        })
+        }),
       );
     });
   });
@@ -396,7 +400,7 @@ describe("ProjectEditDialog", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Hourly rate must be 0 or greater")
+        screen.getByText("Hourly rate must be 0 or greater"),
       ).toBeInTheDocument();
     });
   });
@@ -411,7 +415,7 @@ describe("ProjectEditDialog", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Alert hours must be 0 or greater")
+        screen.getByText("Alert hours must be 0 or greater"),
       ).toBeInTheDocument();
     });
   });
@@ -449,7 +453,7 @@ describe("ProjectEditDialog", () => {
           data: expect.objectContaining({
             description: "",
           }),
-        })
+        }),
       );
     });
   });

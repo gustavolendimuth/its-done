@@ -61,7 +61,7 @@ jest.mock("@/features/projects", () => ({
   ),
   ProjectsBigStats: ({ selectedClientId }: { selectedClientId: string }) => (
     <div data-testid="projects-big-stats">
-      <p>Stats for client: {selectedClientId}</p>
+      <p>Stats for company: {selectedClientId}</p>
     </div>
   ),
   useProjects: jest.fn((companyId?: string) => ({
@@ -281,7 +281,7 @@ describe("ProjectsPage", () => {
     // Check if dialog is open
     expect(screen.getByTestId("project-create-dialog")).toBeInTheDocument();
     expect(
-      screen.getByText(`Company ID: ${mockClients[0].id}`)
+      screen.getByText(`Company ID: ${mockClients[0].id}`),
     ).toBeInTheDocument();
   });
 
@@ -298,7 +298,7 @@ describe("ProjectsPage", () => {
 
     // Check if dialog is closed
     expect(
-      screen.queryByTestId("project-create-dialog")
+      screen.queryByTestId("project-create-dialog"),
     ).not.toBeInTheDocument();
   });
 

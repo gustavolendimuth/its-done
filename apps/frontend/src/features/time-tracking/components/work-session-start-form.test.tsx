@@ -39,7 +39,7 @@ jest.mock("@/components/ui/company-combobox", () => ({
       value={value}
       onChange={(e) => onSelect(e.target.value)}
     >
-      <option value="">select client</option>
+      <option value="">select company</option>
       <option value="client-1">Acme</option>
     </select>
   ),
@@ -158,7 +158,7 @@ describe("WorkSessionStartForm", () => {
     render(<WorkSessionStartForm onCancel={onCancel} onStart={mockOnStart} />);
 
     expect(
-      screen.getByTestId("work-session-start-form-offline")
+      screen.getByTestId("work-session-start-form-offline"),
     ).toBeInTheDocument();
     expect(screen.queryByTestId("client-combobox")).not.toBeInTheDocument();
 

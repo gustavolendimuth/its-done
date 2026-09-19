@@ -27,7 +27,7 @@ const mockCreateTask = jest.fn((data: CreateTaskData): Promise<Task> => {
     userId: "user1",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    company: mockClients.find((c) => c.id === data.companyId)!,
+    company: mockCompanies.find((c) => c.id === data.companyId)!,
   });
 });
 
@@ -38,7 +38,7 @@ jest.mock("./tasks.service", () => ({
   })),
 }));
 
-const mockClients: Company[] = [
+const mockCompanies: Company[] = [
   {
     id: "1",
     name: "John Doe",
@@ -50,7 +50,7 @@ const mockClients: Company[] = [
 ];
 
 jest.mock("@/features/companies", () => ({
-  useCompanies: () => ({ data: mockClients, isLoading: false }),
+  useCompanies: () => ({ data: mockCompanies, isLoading: false }),
 }));
 
 const mockProjects = [
@@ -78,9 +78,9 @@ jest.mock("@/components/ui/company-combobox", () => ({
       onChange={(e) => onSelect(e.target.value)}
     >
       <option value="">{placeholder}</option>
-      {mockClients.map((client) => (
-        <option key={client.id} value={client.id}>
-          {client.company}
+      {mockCompanies.map((company) => (
+        <option key={company.id} value={company.id}>
+          {company.company}
         </option>
       ))}
     </select>
@@ -169,7 +169,7 @@ describe("TaskCreateDialog", () => {
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText("enterTitle")).toHaveValue(
-        "ENG-42 Fix login bug"
+        "ENG-42 Fix login bug",
       );
     });
   });
@@ -235,9 +235,7 @@ describe("TaskCreateDialog", () => {
       target: { value: "p1" },
     });
 
-    await waitFor(() =>
-      expect(titleInput).toHaveValue("[estafeito.app] ")
-    );
+    await waitFor(() => expect(titleInput).toHaveValue("[estafeito.app] "));
 
     await userEvent.type(titleInput, "Fix login bug");
     expect(titleInput).toHaveValue("[estafeito.app] Fix login bug");
