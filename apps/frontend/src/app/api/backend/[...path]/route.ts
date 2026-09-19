@@ -3,6 +3,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getApiUrl } from "@/lib/utils";
 
+function removeAccessTokens(data: unknown): unknown {
+  if (Array.isArray(data)) {
+    return data.map(removeAccessTokens);
+  }
+
+  if (data && typeof data === "object") {
+    return Object.fromEntries(
+      Object.entries(data)
+        .filter(([key]) => key !== "access_token")
+        .map(([key, value]) => [key, removeAccessTokens(value)])
+    );
+  }
+
+  return data;
+}
+
 async function proxy(req: NextRequest, path: string[]) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   const targetUrl = `${getApiUrl()}/${path.join("/")}${req.nextUrl.search}`;
@@ -32,7 +48,9 @@ async function proxy(req: NextRequest, path: string[]) {
 
   if (contentType.includes("application/json")) {
     const data = await upstream.json();
-    return NextResponse.json(data, { status: upstream.status });
+    return NextResponse.json(removeAccessTokens(data), {
+      status: upstream.status,
+    });
   }
 
   const blob = await upstream.blob();

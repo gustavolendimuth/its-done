@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getApiUrl } from "@/lib/utils";
 
 export default function CompanyAdminRegisterPage() {
   const router = useRouter();
@@ -32,7 +31,7 @@ export default function CompanyAdminRegisterPage() {
     setIsSubmitting(true);
     try {
       const response = await fetch(
-        `${getApiUrl()}/company-admin/auth/register`,
+        "/api/backend/company-admin/auth/register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

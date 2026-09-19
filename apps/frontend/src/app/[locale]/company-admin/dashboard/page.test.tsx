@@ -6,7 +6,7 @@ import CompanyAdminDashboardPage from "./page";
 
 const mutateAsyncMock = jest.fn().mockResolvedValue(undefined);
 const mutateMock = jest.fn();
-const deactivateMutateAsyncMock = jest.fn().mockResolvedValue(undefined);
+const deactivateMutateAsyncMock = jest.fn();
 const signOutMock = jest.fn();
 const pushMock = jest.fn();
 
@@ -141,6 +141,7 @@ function mockHooks() {
 describe("CompanyAdminDashboardPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    deactivateMutateAsyncMock.mockResolvedValue(undefined);
     mockHooks();
   });
 
@@ -245,6 +246,13 @@ describe("CompanyAdminDashboardPage", () => {
   });
 
   it("deactivates only after the confirmation dialog is accepted", async () => {
+    let resolveDeactivation: () => void;
+    deactivateMutateAsyncMock.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveDeactivation = resolve;
+        })
+    );
     render(<CompanyAdminDashboardPage />);
 
     await userEvent.click(
@@ -261,6 +269,14 @@ describe("CompanyAdminDashboardPage", () => {
       name: /Desativar Empresa/,
     });
     fireEvent.click(confirmButton);
+
+    await waitFor(() =>
+      expect(deactivateMutateAsyncMock).toHaveBeenCalledTimes(1)
+    );
+    expect(signOutMock).not.toHaveBeenCalled();
+    expect(pushMock).not.toHaveBeenCalled();
+
+    resolveDeactivation!();
 
     await waitFor(() =>
       expect(signOutMock).toHaveBeenCalledWith({ redirect: false })

@@ -1,4 +1,4 @@
-import { GET, PATCH } from "./route";
+import { GET, PATCH, POST } from "./route";
 
 const mockGetToken = jest.fn();
 
@@ -132,6 +132,47 @@ describe("backend proxy", () => {
         headers: { Authorization: "Bearer internal-token" },
       })
     );
+  });
+
+  it("removes access_token while preserving the JSON response status and fields", async () => {
+    mockGetToken.mockResolvedValueOnce({ accessToken: "internal-token" });
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonUpstream(
+        {
+          access_token: "backend-jwt-that-must-not-reach-the-browser",
+          admin: { id: "admin-1", email: "admin@acme.com" },
+          nested: {
+            access_token: "nested-token-that-must-not-reach-the-browser",
+            preserved: true,
+          },
+          message: "CompanyAdmin registered",
+        },
+        201
+      )
+    );
+    const req = request(
+      "http://frontend.test/api/backend/company-admin/auth/register",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          company: "Acme Inc",
+          email: "admin@acme.com",
+          password: "supersecret",
+        }),
+        contentType: "application/json",
+      }
+    );
+
+    const response = await POST(req, {
+      params: Promise.resolve({ path: ["company-admin", "auth", "register"] }),
+    });
+
+    expect(response.status).toBe(201);
+    await expect(response.json()).resolves.toEqual({
+      admin: { id: "admin-1", email: "admin@acme.com" },
+      nested: { preserved: true },
+      message: "CompanyAdmin registered",
+    });
   });
 
   it("preserves the upstream HTTP contract", async () => {

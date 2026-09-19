@@ -41,6 +41,10 @@ describe("CompanyAdminRegisterPage", () => {
       screen.getByRole("button", { name: "Criar conta" })
     );
 
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/backend/company-admin/auth/register",
+      expect.objectContaining({ method: "POST" })
+    );
     expect(signInMock).toHaveBeenCalledWith("credentials", {
       email: "admin@acme.com",
       password: "supersecret",
@@ -52,6 +56,7 @@ describe("CompanyAdminRegisterPage", () => {
   it("shows the backend's 409 error message and keeps the entered fields", async () => {
     fetchMock.mockResolvedValueOnce({
       ok: false,
+      status: 409,
       json: async () => ({
         message: "An CompanyAdmin already exists with this email",
       }),

@@ -64,6 +64,7 @@ describe("CompanyAdminDashboardLayout", () => {
     );
 
     await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/login"));
+    expect(screen.queryByText("dashboard content")).not.toBeInTheDocument();
   });
 
   it("shows a loading state while the session is resolving", () => {
