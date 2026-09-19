@@ -37,7 +37,7 @@ O schema e os contratos residuais passam a usar `companyId`/`company` sem mudar 
 Proof: `pnpm --filter @its-done/backend exec prisma validate && ! rg -n '\\bclientId\\b' apps/backend/prisma/schema.prisma`
 
 **C2** - A migration residual renomeia as duas colunas e o índice composto de `NotificationLog`, sem `DROP`, `DELETE` ou recriação de tabela.
-Proof: `bash -c 'migration=$(find apps/backend/prisma/migrations -maxdepth 2 -path "*finish_company_rename/migration.sql" -print -quit); test -n "$migration"; rg -q "NotificationLog.*clientId.*companyId|RENAME COLUMN.*clientId.*companyId" "$migration"; test "$(rg -c "RENAME COLUMN.*clientId.*companyId" "$migration")" -eq 2; rg -q "RENAME INDEX.*NotificationLog" "$migration"; ! rg -n "DROP|DELETE|CREATE TABLE" "$migration"'`
+Proof: `bash -c 'migration=$(find apps/backend/prisma/migrations -maxdepth 2 -path "*finish_company_rename/migration.sql" -print -quit); test -n "$migration"; rg -q "NotificationLog.*clientId.*companyId|RENAME COLUMN.*clientId.*companyId" "$migration"; test "$(rg -c "RENAME COLUMN.*clientId.*companyId" "$migration")" -eq 2; rg -q "ALTER INDEX.*NotificationLog.*RENAME TO" "$migration"; ! rg -n "DROP|DELETE|CREATE TABLE" "$migration"'`
 
 **C3** - A cadeia completa de migrations aplica no banco local e termina sem drift pendente.
 Proof: `pnpm --filter @its-done/backend exec prisma migrate status`
