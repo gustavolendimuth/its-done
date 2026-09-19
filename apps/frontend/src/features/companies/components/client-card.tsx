@@ -76,7 +76,7 @@ export function ClientCard({ client }: ClientCardProps) {
 
   const handleViewClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/empresas/${client.id}`);
+    router.push(`/companies/${client.id}`);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
@@ -290,7 +290,7 @@ export function ClientCard({ client }: ClientCardProps) {
                 </FormItem>
               )}
             />
-            <ClientAddresses clientId={client.id} />
+            <ClientAddresses companyId={client.id} />
             <Button type="submit" className="w-full">
               {t("saveChanges")}
             </Button>

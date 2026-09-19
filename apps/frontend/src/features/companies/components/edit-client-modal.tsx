@@ -192,7 +192,7 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
                 </FormItem>
               )}
             />
-            <ClientAddresses clientId={client.id} />
+            <ClientAddresses companyId={client.id} />
             <Button type="submit" className="w-full">
               {t("saveChanges")}
             </Button>

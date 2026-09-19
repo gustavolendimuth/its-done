@@ -13,12 +13,12 @@ export interface ClientStats {
   totalCanceled: number;
   totalOverdue: number;
   totalHoursByClient: {
-    clientId: string;
+    companyId: string;
     clientName: string;
     totalHours: number;
   }[];
   totalAmountByClient: {
-    clientId: string;
+    companyId: string;
     clientName: string;
     totalAmount: number;
   }[];
@@ -32,11 +32,11 @@ export interface ClientStats {
   }[];
 }
 
-export function useClientSpecificStats(clientId: string) {
+export function useClientSpecificStats(companyId: string) {
   return useQuery<ClientSpecificStats>({
-    queryKey: ["clients", clientId, "stats"],
+    queryKey: ["clients", companyId, "stats"],
     queryFn: async () => {
-      const response = await api.get(`/clients/${clientId}/stats`);
+      const response = await api.get(`/clients/${companyId}/stats`);
 
       return response.data;
     },

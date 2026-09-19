@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { ADDRESS_TYPES, BRAZILIAN_STATES } from "./address-constants";
 
@@ -16,7 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUpdateAddress, Address } from "@/features/clients/addresses";
+import {
+  useCreateAddress,
+  useClientAddresses,
+} from "@/features/clients/addresses";
 
 interface AddressFormData {
   street: string;
@@ -28,27 +31,40 @@ interface AddressFormData {
   isPrimary: boolean;
 }
 
-interface EditAddressFormProps {
-  address: Address;
+interface AddressFormProps {
+  companyId: string;
   onSuccess?: () => void;
 }
 
-export function EditAddressForm({ address, onSuccess }: EditAddressFormProps) {
+export function AddressForm({ companyId, onSuccess }: AddressFormProps) {
+  const { data: existingAddresses } = useClientAddresses(companyId);
+  const isFirstAddress = !existingAddresses || existingAddresses.length === 0;
+
   const [formData, setFormData] = useState<AddressFormData>({
-    street: address.street,
-    city: address.city,
-    state: address.state,
-    zipCode: address.zipCode,
-    country: address.country,
-    type: address.type,
-    isPrimary: address.isPrimary,
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "Brazil",
+    type: "billing",
+    isPrimary: isFirstAddress,
   });
 
-  const updateAddressMutation = useUpdateAddress();
+  useEffect(() => {
+    const isFirst = !existingAddresses || existingAddresses.length === 0;
+
+    setFormData((prev) => ({
+      ...prev,
+      isPrimary: isFirst,
+    }));
+  }, [existingAddresses]);
+
+  const createAddressMutation = useCreateAddress();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Updating address with data:", formData);
+    console.log("Submitting address form with data:", formData);
+    console.log("Client ID being sent:", companyId);
 
     // Basic validation
     if (!formData.street.trim()) {
@@ -75,6 +91,12 @@ export function EditAddressForm({ address, onSuccess }: EditAddressFormProps) {
       return;
     }
 
+    if (!companyId) {
+      console.error("Client ID is required but not provided");
+
+      return;
+    }
+
     // Clean data
     const cleanData = {
       street: formData.street.trim(),
@@ -84,28 +106,45 @@ export function EditAddressForm({ address, onSuccess }: EditAddressFormProps) {
       country: formData.country.trim(),
       type: formData.type,
       isPrimary: formData.isPrimary,
-      clientId: address.clientId,
+      companyId,
     };
 
     console.log("Clean data to be sent:", cleanData);
 
-    updateAddressMutation.mutate(
-      { id: address.id, data: cleanData },
-      {
-        onSuccess: (data) => {
-          console.log("Address updated successfully:", data);
-          onSuccess?.();
-        },
-        onError: (error: unknown) => {
-          console.error("Error updating address:", error);
-          if (error && typeof error === "object" && "response" in error) {
-            const axiosError = error as { response?: { data?: unknown } };
+    createAddressMutation.mutate(cleanData, {
+      onSuccess: (data) => {
+        console.log("Address created successfully:", data);
+        // Reset form but keep isPrimary logic for potential next address
+        const willBeFirstAfterReset = false; // After creating one, it's no longer the first
 
-            console.error("Error details:", axiosError.response?.data);
-          }
-        },
+        setFormData({
+          street: "",
+          city: "",
+          state: "",
+          zipCode: "",
+          country: "Brazil",
+          type: "billing",
+          isPrimary: willBeFirstAfterReset,
+        });
+        onSuccess?.();
       },
-    );
+      onError: (error: unknown) => {
+        console.error("Error creating address:", error);
+        if (error && typeof error === "object" && "response" in error) {
+          const axiosError = error as {
+            response?: { data?: unknown; status?: number; headers?: unknown };
+          };
+
+          console.error("Error details:", axiosError.response?.data);
+          if (axiosError.response?.status) {
+            console.error("Response status:", axiosError.response.status);
+          }
+          if (axiosError.response?.headers) {
+            console.error("Response headers:", axiosError.response.headers);
+          }
+        }
+      },
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -252,20 +291,26 @@ export function EditAddressForm({ address, onSuccess }: EditAddressFormProps) {
           id="isPrimary"
           checked={formData.isPrimary}
           onCheckedChange={handleCheckboxChange}
+          disabled={isFirstAddress}
         />
         <Label
           htmlFor="isPrimary"
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
           Set as primary address
+          {isFirstAddress && (
+            <span className="text-xs text-muted-foreground ml-2">
+              (automatically set for first address)
+            </span>
+          )}
         </Label>
       </div>
 
-      {updateAddressMutation.isError && (
+      {createAddressMutation.isError && (
         <Alert variant="destructive">
           <AlertDescription>
             {(() => {
-              const error = updateAddressMutation.error;
+              const error = createAddressMutation.error;
 
               if (error && typeof error === "object" && "response" in error) {
                 const response = (
@@ -274,10 +319,11 @@ export function EditAddressForm({ address, onSuccess }: EditAddressFormProps) {
 
                 return response?.data?.message;
               }
+              if (error && typeof error === "object" && "message" in error) {
+                return (error as { message: string }).message;
+              }
 
-              return (
-                error?.message || "Error updating address. Please try again."
-              );
+              return "Error creating address. Please try again.";
             })()}
           </AlertDescription>
         </Alert>
@@ -286,10 +332,10 @@ export function EditAddressForm({ address, onSuccess }: EditAddressFormProps) {
       <div className="space-y-4">
         <Button
           type="submit"
-          disabled={updateAddressMutation.isPending}
+          disabled={createAddressMutation.isPending}
           className="w-full"
         >
-          {updateAddressMutation.isPending ? (
+          {createAddressMutation.isPending ? (
             <>
               <svg
                 className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -311,10 +357,10 @@ export function EditAddressForm({ address, onSuccess }: EditAddressFormProps) {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              Updating...
+              Creating...
             </>
           ) : (
-            "Update Address"
+            "Create Address"
           )}
         </Button>
       </div>

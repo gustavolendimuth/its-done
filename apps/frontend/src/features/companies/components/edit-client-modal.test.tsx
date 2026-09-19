@@ -21,7 +21,7 @@ jest.mock("./client-addresses", () => ({
   ClientAddresses: () => null,
 }));
 
-// Mock das traduções
+// Mock translations
 const messages = {
   clients: {
     editClient: "Edit Client",
@@ -78,7 +78,7 @@ describe("EditClientModal", () => {
       </TestWrapper>
     );
 
-    // Verifica se o botão de editar está presente
+    // Check that the edit button is present
     expect(screen.getByText("Edit Client")).toBeInTheDocument();
   });
 

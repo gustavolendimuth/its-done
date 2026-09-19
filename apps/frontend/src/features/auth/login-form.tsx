@@ -155,10 +155,10 @@ export function LoginForm() {
         </p>
         <p className="text-sm text-muted-foreground">
           <a
-            href="/empresa-admin/login"
+            href="/company-admin/login"
             className="text-primary hover:underline"
           >
-            {t("empresaAdminLink")}
+            {t("companyAdminLink")}
           </a>
         </p>
       </div>

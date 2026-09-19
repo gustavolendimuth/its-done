@@ -12,7 +12,7 @@ export interface Address {
   country: string;
   type: string;
   isPrimary: boolean;
-  clientId: string;
+  companyId: string;
   createdAt: string;
   updatedAt: string;
   client?: {
@@ -30,16 +30,16 @@ export interface CreateAddressDto {
   country?: string;
   type?: string;
   isPrimary?: boolean;
-  clientId: string;
+  companyId: string;
 }
 
 export interface UpdateAddressDto extends Partial<CreateAddressDto> {}
 
-export const useAddresses = (clientId?: string) => {
+export const useAddresses = (companyId?: string) => {
   return useQuery({
-    queryKey: ["addresses", clientId],
+    queryKey: ["addresses", companyId],
     queryFn: async () => {
-      const params = clientId ? { clientId } : {};
+      const params = companyId ? { companyId } : {};
       const { data } = await api.get<Address[]>("/addresses", { params });
 
       return data;
@@ -65,16 +65,16 @@ export const useAddress = (id: string) => {
   });
 };
 
-export const useClientAddresses = (clientId: string) => {
+export const useClientAddresses = (companyId: string) => {
   return useQuery({
-    queryKey: ["clients", clientId, "addresses"],
+    queryKey: ["clients", companyId, "addresses"],
     queryFn: async () => {
-      console.log("Fetching addresses for client:", clientId);
+      console.log("Fetching addresses for client:", companyId);
       console.log("API base URL:", getApiUrl());
 
       try {
         const { data } = await api.get<Address[]>(
-          `/addresses/client/${clientId}`
+          `/addresses/company/${companyId}`
         );
 
         console.log("Addresses fetched successfully:", data);
@@ -85,7 +85,7 @@ export const useClientAddresses = (clientId: string) => {
         throw error;
       }
     },
-    enabled: !!clientId,
+    enabled: !!companyId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -105,12 +105,12 @@ export const useCreateAddress = () => {
       // Invalidate all addresses queries
       queryClient.invalidateQueries({ queryKey: ["addresses"] });
       queryClient.invalidateQueries({
-        queryKey: ["clients", variables.clientId, "addresses"],
+        queryKey: ["clients", variables.companyId, "addresses"],
       });
       // Invalidate client data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({
-        queryKey: ["clients", variables.clientId],
+        queryKey: ["clients", variables.companyId],
       });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -137,11 +137,11 @@ export const useUpdateAddress = () => {
       // Invalidate all addresses queries
       queryClient.invalidateQueries({ queryKey: ["addresses"] });
       queryClient.invalidateQueries({ queryKey: ["addresses", id] });
-      if (data.clientId) {
+      if (data.companyId) {
         queryClient.invalidateQueries({
-          queryKey: ["clients", data.clientId, "addresses"],
+          queryKey: ["clients", data.companyId, "addresses"],
         });
-        queryClient.invalidateQueries({ queryKey: ["clients", data.clientId] });
+        queryClient.invalidateQueries({ queryKey: ["clients", data.companyId] });
       }
       // Invalidate client data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
@@ -186,11 +186,11 @@ export const useSetPrimaryAddress = () => {
       // Invalidate all addresses queries
       queryClient.invalidateQueries({ queryKey: ["addresses"] });
       queryClient.invalidateQueries({
-        queryKey: ["clients", data.clientId, "addresses"],
+        queryKey: ["clients", data.companyId, "addresses"],
       });
       // Invalidate client data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
-      queryClient.invalidateQueries({ queryKey: ["clients", data.clientId] });
+      queryClient.invalidateQueries({ queryKey: ["clients", data.companyId] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },

@@ -8,16 +8,16 @@ import { useClientAddresses } from "@/features/clients/addresses";
 
 
 interface ClientAddressesProps {
-  clientId: string;
+  companyId: string;
 }
 
-export function ClientAddresses({ clientId }: ClientAddressesProps) {
-  const { data: addresses } = useClientAddresses(clientId);
+export function ClientAddresses({ companyId }: ClientAddressesProps) {
+  const { data: addresses } = useClientAddresses(companyId);
   const queryClient = useQueryClient();
 
   const handleAddressAdded = () => {
     queryClient.invalidateQueries({
-      queryKey: ["clients", clientId, "addresses"],
+      queryKey: ["clients", companyId, "addresses"],
     });
   };
 
@@ -26,7 +26,7 @@ export function ClientAddresses({ clientId }: ClientAddressesProps) {
       <Label className="text-sm font-medium text-foreground">Addresses</Label>
       <AddressCombobox
         addresses={addresses || []}
-        clientId={clientId}
+        companyId={companyId}
         showAddButton={true}
         onAddressAdded={handleAddressAdded}
       />

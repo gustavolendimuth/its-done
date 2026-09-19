@@ -45,7 +45,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
     e.preventDefault();
     console.log("Submitting client form with data:", formData);
 
-    // Validação básica
+    // Basic validation
     if (!formData.company.trim()) {
       console.error("Company is required");
 
@@ -58,7 +58,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
       return;
     }
 
-    // Limpar campos vazios - apenas dados do cliente
+    // Strip empty fields - client data only
     const cleanClientData = {
       company: formData.company.trim(),
       email: formData.email.trim(),
@@ -122,7 +122,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
     onSuccess?.();
   };
 
-  // Se o cliente foi criado, mostrar a seção de endereços
+  // If the client was created, show the addresses section
   if (createdClient) {
     console.log("Created client:", createdClient);
 
@@ -148,7 +148,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           {createdClient.id ? (
             <AddressCombobox
               addresses={addresses || []}
-              clientId={createdClient.id}
+              companyId={createdClient.id}
               showAddButton={true}
               onAddressAdded={handleAddressAdded}
             />
