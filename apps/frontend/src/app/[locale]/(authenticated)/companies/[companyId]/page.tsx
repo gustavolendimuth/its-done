@@ -9,16 +9,16 @@ import { Overview, OverviewData } from "@/features/dashboard";
 import { invoicesService } from "@/features/invoices";
 
 export default function ClientDetailPage() {
-  const { clientId } = useParams();
+  const { companyId } = useParams();
 
   const {
     data: invoices = [],
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["clientInvoices", clientId],
-    queryFn: () => invoicesService.findByClient(clientId as string),
-    enabled: !!clientId,
+    queryKey: ["clientInvoices", companyId],
+    queryFn: () => invoicesService.findByClient(companyId as string),
+    enabled: !!companyId,
   });
 
   // Prepare data for overview
@@ -83,7 +83,7 @@ export default function ClientDetailPage() {
           : 0
         : ((thisMonthAmount - previousMonthAmount) / previousMonthAmount) * 100;
 
-    const clientName = invoices[0]?.client?.name || "Empresa";
+    const clientName = invoices[0]?.client?.name || "Company";
     const clientEmail = invoices[0]?.client?.email || "";
 
     return {

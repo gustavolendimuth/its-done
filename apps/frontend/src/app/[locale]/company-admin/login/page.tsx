@@ -15,23 +15,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEmpresaAdminAuth } from "@/features/empresa-admin";
+import { useCompanyAdminAuth } from "@/features/company-admin";
 
-function getErrorMessage(error: unknown): string {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { message?: string } } })
-      .response;
-    if (response?.data?.message) {
-      return response.data.message;
-    }
-  }
-  return "Não foi possível criar a conta. Tente novamente.";
-}
-
-export default function EmpresaAdminRegisterPage() {
+export default function CompanyAdminLoginPage() {
   const router = useRouter();
-  const { register } = useEmpresaAdminAuth();
-  const [company, setCompany] = useState("");
+  const { login } = useCompanyAdminAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -42,10 +30,10 @@ export default function EmpresaAdminRegisterPage() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await register(company, email, password);
-      router.push("/empresa-admin/dashboard");
-    } catch (err) {
-      setError(getErrorMessage(err));
+      await login(email, password);
+      router.push("/company-admin/dashboard");
+    } catch {
+      setError("Email ou senha inválidos.");
     } finally {
       setIsSubmitting(false);
     }
@@ -56,24 +44,13 @@ export default function EmpresaAdminRegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <Building2 className="mx-auto h-8 w-8 text-primary" />
-          <CardTitle>Criar conta da Empresa</CardTitle>
+          <CardTitle>Login da Company</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Cadastro do Administrador da Empresa
+            Acesso do Administrador da Company
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="company">Empresa</Label>
-              <Input
-                id="company"
-                type="text"
-                autoComplete="organization"
-                value={company}
-                onChange={(event) => setCompany(event.target.value)}
-                required
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -90,7 +67,7 @@ export default function EmpresaAdminRegisterPage() {
               <Input
                 id="password"
                 type="password"
-                autoComplete="new-password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 required
@@ -105,17 +82,22 @@ export default function EmpresaAdminRegisterPage() {
               {isSubmitting && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Criar conta
+              Entrar
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Já tem conta?{" "}
+            <div className="flex items-center justify-between text-sm">
               <Link
-                href="/empresa-admin/login"
+                href="/company-admin/register"
                 className="text-primary hover:underline"
               >
-                Entrar
+                Criar conta
               </Link>
-            </p>
+              <Link
+                href="/company-admin/forgot-password"
+                className="text-muted-foreground hover:text-primary"
+              >
+                Esqueci minha senha
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useResetPasswordEmpresaAdmin } from "@/features/empresa-admin";
+import { useResetPasswordCompanyAdmin } from "@/features/company-admin";
 
 function getErrorMessage(error: unknown): string {
   if (error && typeof error === "object" && "response" in error) {
@@ -41,7 +41,7 @@ function TokenErrorCard({ message }: { message: string }) {
         </Alert>
         <div className="text-center">
           <Link
-            href="/empresa-admin/forgot-password"
+            href="/company-admin/forgot-password"
             className="inline-flex items-center text-primary hover:underline"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -53,11 +53,11 @@ function TokenErrorCard({ message }: { message: string }) {
   );
 }
 
-function EmpresaAdminResetPasswordContent() {
+function CompanyAdminResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  const resetPasswordMutation = useResetPasswordEmpresaAdmin();
+  const resetPasswordMutation = useResetPasswordCompanyAdmin();
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -86,7 +86,7 @@ function EmpresaAdminResetPasswordContent() {
         newPassword,
       });
       setSuccess(true);
-      setTimeout(() => router.push("/empresa-admin/login"), 3000);
+      setTimeout(() => router.push("/company-admin/login"), 3000);
     } catch (err) {
       setTokenError(getErrorMessage(err));
     }
@@ -98,7 +98,7 @@ function EmpresaAdminResetPasswordContent() {
         <Building2 className="mx-auto h-8 w-8 text-primary" />
         <CardTitle>Redefinir senha</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Administrador da Empresa
+          Administrador da Company
         </p>
       </CardHeader>
       <CardContent>
@@ -155,12 +155,12 @@ function EmpresaAdminResetPasswordContent() {
   );
 }
 
-export default function EmpresaAdminResetPasswordPage() {
+export default function CompanyAdminResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4">
       <div className="w-full max-w-md">
         <Suspense fallback={<div>Carregando…</div>}>
-          <EmpresaAdminResetPasswordContent />
+          <CompanyAdminResetPasswordContent />
         </Suspense>
       </div>
     </div>

@@ -2,71 +2,71 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import "@testing-library/jest-dom";
-import EmpresaAdminDashboardPage from "./page";
+import CompanyAdminDashboardPage from "./page";
 
 const mutateAsyncMock = jest.fn().mockResolvedValue(undefined);
 const mutateMock = jest.fn();
 const deactivateMutateAsyncMock = jest.fn().mockResolvedValue(undefined);
 const logoutMock = jest.fn();
 
-jest.mock("@/features/empresa-admin", () => ({
-  useEmpresaDashboardOverview: jest.fn(),
-  useEmpresaDashboardColaboradores: jest.fn(),
-  useEmpresaInvites: jest.fn(),
-  useEmpresaDomains: jest.fn(),
-  useCreateEmpresaInvite: jest.fn(() => ({
+jest.mock("@/features/company-admin", () => ({
+  useCompanyDashboardOverview: jest.fn(),
+  useCompanyDashboardCollaborators: jest.fn(),
+  useCompanyInvites: jest.fn(),
+  useCompanyDomains: jest.fn(),
+  useCreateCompanyInvite: jest.fn(() => ({
     mutateAsync: mutateAsyncMock,
     isPending: false,
   })),
-  useRevokeEmpresaInvite: jest.fn(() => ({
+  useRevokeCompanyInvite: jest.fn(() => ({
     mutate: mutateMock,
     isPending: false,
   })),
-  useCreateEmpresaDomain: jest.fn(() => ({
+  useCreateCompanyDomain: jest.fn(() => ({
     mutateAsync: mutateAsyncMock,
     isPending: false,
   })),
-  useRevokeEmpresaDomain: jest.fn(() => ({
+  useRevokeCompanyDomain: jest.fn(() => ({
     mutate: mutateMock,
     isPending: false,
   })),
-  useRequestEmpresaDomainConfirmation: jest.fn(() => ({
+  useRequestCompanyDomainConfirmation: jest.fn(() => ({
     mutate: mutateMock,
     isPending: false,
   })),
-  useDeactivateEmpresa: jest.fn(() => ({
+  useDeactivateCompany: jest.fn(() => ({
     mutateAsync: deactivateMutateAsyncMock,
     isPending: false,
   })),
-  useEmpresaAdminAuth: jest.fn(() => ({
+  useCompanyAdminAuth: jest.fn(() => ({
     logout: logoutMock,
   })),
-  downloadEmpresaDashboardExport: jest.fn(),
+  downloadCompanyDashboardExport: jest.fn(),
 }));
 
 import {
-  useEmpresaDashboardColaboradores,
-  useEmpresaDashboardOverview,
-  useEmpresaDomains,
-  useEmpresaInvites,
-} from "@/features/empresa-admin";
+  useCompanyDashboardCollaborators,
+  useCompanyDashboardOverview,
+  useCompanyDomains,
+  useCompanyInvites,
+} from "@/features/company-admin";
 
 const mockOverview = {
-  colaboradoresAtivos: 4,
+  collaboratorsAtivos: 4,
   horasPeriodo: 32.5,
   totalFaturado: 1234.5,
-  convitesPendentes: 2,
+  pendingInvites: 2,
   from: "2026-09-01T00:00:00.000Z",
   to: "2026-09-30T23:59:59.999Z",
 };
 
-const mockColaboradores = [
+const mockCollaborators = [
   {
     id: "c1",
     userId: "u1",
     name: "Ana Souza",
     email: "ana@test.local",
-    origin: "CONVITE" as const,
+    origin: "INVITE" as const,
     horas: 10,
     projetos: 2,
     faturado: 500,
@@ -76,7 +76,7 @@ const mockColaboradores = [
     userId: "u2",
     name: "Bruno Lima",
     email: "bruno@test.local",
-    origin: "DOMINIO" as const,
+    origin: "DOMAIN" as const,
     horas: 22.5,
     projetos: 1,
     faturado: 734.5,
@@ -86,7 +86,7 @@ const mockColaboradores = [
 const mockInvites = [
   {
     id: "i1",
-    empresaId: "e1",
+    companyId: "e1",
     email: "pendente@test.local",
     status: "PENDING" as const,
     linkedAt: null,
@@ -94,7 +94,7 @@ const mockInvites = [
   },
   {
     id: "i2",
-    empresaId: "e1",
+    companyId: "e1",
     email: "outro-pendente@test.local",
     status: "PENDING" as const,
     linkedAt: null,
@@ -105,7 +105,7 @@ const mockInvites = [
 const mockDomains = [
   {
     id: "d1",
-    empresaId: "e1",
+    companyId: "e1",
     domain: "acme.com",
     status: "CONFIRMED" as const,
     confirmedAt: "2026-09-01T00:00:00.000Z",
@@ -114,34 +114,34 @@ const mockDomains = [
 ];
 
 function mockHooks() {
-  (useEmpresaDashboardOverview as jest.Mock).mockReturnValue({
+  (useCompanyDashboardOverview as jest.Mock).mockReturnValue({
     data: mockOverview,
     isLoading: false,
   });
-  (useEmpresaDashboardColaboradores as jest.Mock).mockReturnValue({
-    data: mockColaboradores,
+  (useCompanyDashboardCollaborators as jest.Mock).mockReturnValue({
+    data: mockCollaborators,
     isLoading: false,
   });
-  (useEmpresaInvites as jest.Mock).mockReturnValue({
+  (useCompanyInvites as jest.Mock).mockReturnValue({
     data: mockInvites,
     isLoading: false,
   });
-  (useEmpresaDomains as jest.Mock).mockReturnValue({
+  (useCompanyDomains as jest.Mock).mockReturnValue({
     data: mockDomains,
     isLoading: false,
   });
 }
 
-describe("EmpresaAdminDashboardPage", () => {
+describe("CompanyAdminDashboardPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockHooks();
   });
 
   it("renders the overview cards with the aggregated stats", () => {
-    render(<EmpresaAdminDashboardPage />);
+    render(<CompanyAdminDashboardPage />);
 
-    expect(screen.getByText("Colaboradores ativos")).toBeInTheDocument();
+    expect(screen.getByText("Collaborators ativos")).toBeInTheDocument();
     expect(screen.getByText("4")).toBeInTheDocument();
 
     expect(screen.getByText("Horas no período")).toBeInTheDocument();
@@ -155,9 +155,9 @@ describe("EmpresaAdminDashboardPage", () => {
     expect(screen.getAllByText("2").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders the Colaboradores table with name/email, vínculo, horas, projetos and faturado", async () => {
-    render(<EmpresaAdminDashboardPage />);
-    await userEvent.click(screen.getByRole("tab", { name: "Colaboradores" }));
+  it("renders the Collaborators table with name/email, vínculo, horas, projetos and faturado", async () => {
+    render(<CompanyAdminDashboardPage />);
+    await userEvent.click(screen.getByRole("tab", { name: "Collaborators" }));
 
     expect(screen.getByText("Ana Souza")).toBeInTheDocument();
     expect(screen.getByText("ana@test.local")).toBeInTheDocument();
@@ -172,28 +172,28 @@ describe("EmpresaAdminDashboardPage", () => {
   });
 
   it("shows the pending invites counter as a badge on the Vínculos tab", () => {
-    render(<EmpresaAdminDashboardPage />);
+    render(<CompanyAdminDashboardPage />);
 
     const tab = screen.getByRole("tab", { name: /Vínculos/ });
     expect(tab).toHaveTextContent("2");
   });
 
-  it("shows the empty state when there are no Colaboradores", async () => {
-    (useEmpresaDashboardColaboradores as jest.Mock).mockReturnValue({
+  it("shows the empty state when there are no Collaborators", async () => {
+    (useCompanyDashboardCollaborators as jest.Mock).mockReturnValue({
       data: [],
       isLoading: false,
     });
 
-    render(<EmpresaAdminDashboardPage />);
-    await userEvent.click(screen.getByRole("tab", { name: "Colaboradores" }));
+    render(<CompanyAdminDashboardPage />);
+    await userEvent.click(screen.getByRole("tab", { name: "Collaborators" }));
 
     expect(
-      screen.getByText("Nenhum Colaborador vinculado ainda.")
+      screen.getByText("Nenhum Collaborator vinculado ainda.")
     ).toBeInTheDocument();
   });
 
   it("renders the export button in the header, outside the tabs", () => {
-    render(<EmpresaAdminDashboardPage />);
+    render(<CompanyAdminDashboardPage />);
 
     expect(
       screen.getByRole("button", { name: /Exportar período/ })
@@ -201,7 +201,7 @@ describe("EmpresaAdminDashboardPage", () => {
   });
 
   it("Vínculos tab lists Convites Pendentes and Domínios Autorizados, with a revoke action for each", async () => {
-    render(<EmpresaAdminDashboardPage />);
+    render(<CompanyAdminDashboardPage />);
     await userEvent.click(screen.getByRole("tab", { name: /Vínculos/ }));
 
     expect(screen.getByText("pendente@test.local")).toBeInTheDocument();
@@ -218,11 +218,11 @@ describe("EmpresaAdminDashboardPage", () => {
   });
 
   it("creates a new Convite Pendente from the Vínculos tab form", async () => {
-    render(<EmpresaAdminDashboardPage />);
+    render(<CompanyAdminDashboardPage />);
     await userEvent.click(screen.getByRole("tab", { name: /Vínculos/ }));
 
     await userEvent.type(
-      screen.getByPlaceholderText("email@colaborador.com"),
+      screen.getByPlaceholderText("email@collaborator.com"),
       "novo@test.local"
     );
     await userEvent.click(screen.getByRole("button", { name: /Convidar/ }));
@@ -230,19 +230,19 @@ describe("EmpresaAdminDashboardPage", () => {
     expect(mutateAsyncMock).toHaveBeenCalledWith("novo@test.local");
   });
 
-  it("renders the Desativar Empresa button in the header, outside the tabs", () => {
-    render(<EmpresaAdminDashboardPage />);
+  it("renders the Desativar Company button in the header, outside the tabs", () => {
+    render(<CompanyAdminDashboardPage />);
 
     expect(
-      screen.getByRole("button", { name: /Desativar Empresa/ })
+      screen.getByRole("button", { name: /Desativar Company/ })
     ).toBeInTheDocument();
   });
 
   it("desativação exige confirmação: abrir o botão não desativa nada até confirmar no diálogo", async () => {
-    render(<EmpresaAdminDashboardPage />);
+    render(<CompanyAdminDashboardPage />);
 
     await userEvent.click(
-      screen.getByRole("button", { name: /Desativar Empresa/ })
+      screen.getByRole("button", { name: /Desativar Company/ })
     );
     expect(deactivateMutateAsyncMock).not.toHaveBeenCalled();
 
@@ -252,7 +252,7 @@ describe("EmpresaAdminDashboardPage", () => {
     // fireEvent (a raw DOM event) instead of userEvent's pointer-events-
     // aware simulation, since Radix also marks the background inert.
     const confirmButton = screen.getByRole("button", {
-      name: /Desativar Empresa/,
+      name: /Desativar Company/,
     });
     fireEvent.click(confirmButton);
 
@@ -261,10 +261,10 @@ describe("EmpresaAdminDashboardPage", () => {
   });
 
   it("cancelar o diálogo de desativação não chama a mutação", async () => {
-    render(<EmpresaAdminDashboardPage />);
+    render(<CompanyAdminDashboardPage />);
 
     await userEvent.click(
-      screen.getByRole("button", { name: /Desativar Empresa/ })
+      screen.getByRole("button", { name: /Desativar Company/ })
     );
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
 

@@ -3,24 +3,25 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getApiUrl } from "@/lib/utils";
 import {
-  EMPRESA_ADMIN_COOKIE_NAME,
-  empresaAdminCookieOptions,
-} from "@/lib/empresa-admin-session";
+  COMPANY_ADMIN_COOKIE_NAME,
+  companyAdminCookieOptions,
+} from "@/lib/company-admin-session";
 
 /**
- * Proxy server-side pro backend NestJS de tudo sob `/empresa-admin/*`. O
- * browser nunca vê o JWT do Administrador: este route handler lê o token do
- * cookie httpOnly (quando existe), anexa como `Authorization: Bearer` na
- * chamada real pro backend, e — se a resposta do backend trouxer um
- * `access_token` novo (login/register/activate/invite confirm) — grava esse
- * token de volta no cookie httpOnly e o remove do corpo devolvido ao
- * cliente, que nunca chega a lê-lo.
+ * Server-side proxy to the NestJS backend for everything under
+ * `/company-admin/*`. The browser never sees the admin's JWT: this route
+ * handler reads the token from the httpOnly cookie (when present), attaches
+ * it as `Authorization: Bearer` on the real backend call, and — if the
+ * backend response carries a new `access_token` (login/register/activate/
+ * invite confirm) — writes that token back into the httpOnly cookie and
+ * strips it from the body returned to the client, which never gets to read
+ * it.
  */
 async function proxy(req: NextRequest, path: string[]) {
   const cookieStore = await cookies();
-  const token = cookieStore.get(EMPRESA_ADMIN_COOKIE_NAME)?.value;
+  const token = cookieStore.get(COMPANY_ADMIN_COOKIE_NAME)?.value;
 
-  const targetUrl = `${getApiUrl()}/empresa-admin/${path.join("/")}${req.nextUrl.search}`;
+  const targetUrl = `${getApiUrl()}/company-admin/${path.join("/")}${req.nextUrl.search}`;
 
   const headers: Record<string, string> = {};
   if (token) {
@@ -55,9 +56,9 @@ async function proxy(req: NextRequest, path: string[]) {
       };
       const res = NextResponse.json(rest, { status: upstream.status });
       res.cookies.set(
-        EMPRESA_ADMIN_COOKIE_NAME,
+        COMPANY_ADMIN_COOKIE_NAME,
         accessToken,
-        empresaAdminCookieOptions(),
+        companyAdminCookieOptions(),
       );
       return res;
     }
@@ -65,7 +66,7 @@ async function proxy(req: NextRequest, path: string[]) {
     return NextResponse.json(data, { status: upstream.status });
   }
 
-  // Passa binários (ex: export CSV) direto, sem tentar interpretar como JSON.
+  // Pass binaries (e.g. CSV export) through directly, without trying to parse as JSON.
   const blob = await upstream.blob();
   return new NextResponse(blob, {
     status: upstream.status,

@@ -49,20 +49,20 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  ColaboradorOrigin,
-  downloadEmpresaDashboardExport,
-  useCreateEmpresaDomain,
-  useCreateEmpresaInvite,
-  useDeactivateEmpresa,
-  useEmpresaAdminAuth,
-  useEmpresaDashboardColaboradores,
-  useEmpresaDashboardOverview,
-  useEmpresaDomains,
-  useEmpresaInvites,
-  useRequestEmpresaDomainConfirmation,
-  useRevokeEmpresaDomain,
-  useRevokeEmpresaInvite,
-} from "@/features/empresa-admin";
+  CollaboradorOrigin,
+  downloadCompanyDashboardExport,
+  useCreateCompanyDomain,
+  useCreateCompanyInvite,
+  useDeactivateCompany,
+  useCompanyAdminAuth,
+  useCompanyDashboardCollaborators,
+  useCompanyDashboardOverview,
+  useCompanyDomains,
+  useCompanyInvites,
+  useRequestCompanyDomainConfirmation,
+  useRevokeCompanyDomain,
+  useRevokeCompanyInvite,
+} from "@/features/company-admin";
 
 function formatCurrency(value: number): string {
   return `R$ ${value.toLocaleString("pt-BR", {
@@ -71,23 +71,23 @@ function formatCurrency(value: number): string {
   })}`;
 }
 
-function originLabel(origin: ColaboradorOrigin): string {
-  if (origin === "CONVITE") return "Convite";
-  if (origin === "DOMINIO") return "Domínio";
+function originLabel(origin: CollaboradorOrigin): string {
+  if (origin === "INVITE") return "Convite";
+  if (origin === "DOMAIN") return "Domínio";
   return "—";
 }
 
 function originBadgeVariant(
-  origin: ColaboradorOrigin
+  origin: CollaboradorOrigin
 ): "info" | "secondary" | "neutral" {
-  if (origin === "DOMINIO") return "info";
-  if (origin === "CONVITE") return "secondary";
+  if (origin === "DOMAIN") return "info";
+  if (origin === "INVITE") return "secondary";
   return "neutral";
 }
 
-export default function EmpresaAdminDashboardPage() {
+export default function CompanyAdminDashboardPage() {
   const router = useRouter();
-  const { logout } = useEmpresaAdminAuth();
+  const { logout } = useCompanyAdminAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -102,18 +102,18 @@ export default function EmpresaAdminDashboardPage() {
   );
 
   const { data: overview, isLoading: isOverviewLoading } =
-    useEmpresaDashboardOverview(period);
-  const { data: colaboradores, isLoading: isColaboradoresLoading } =
-    useEmpresaDashboardColaboradores(period);
-  const { data: invites, isLoading: isInvitesLoading } = useEmpresaInvites();
-  const { data: domains, isLoading: isDomainsLoading } = useEmpresaDomains();
+    useCompanyDashboardOverview(period);
+  const { data: collaborators, isLoading: isCollaboratorsLoading } =
+    useCompanyDashboardCollaborators(period);
+  const { data: invites, isLoading: isInvitesLoading } = useCompanyInvites();
+  const { data: domains, isLoading: isDomainsLoading } = useCompanyDomains();
 
-  const createInvite = useCreateEmpresaInvite();
-  const revokeInvite = useRevokeEmpresaInvite();
-  const createDomain = useCreateEmpresaDomain();
-  const revokeDomain = useRevokeEmpresaDomain();
-  const requestDomainConfirmation = useRequestEmpresaDomainConfirmation();
-  const deactivateEmpresa = useDeactivateEmpresa();
+  const createInvite = useCreateCompanyInvite();
+  const revokeInvite = useRevokeCompanyInvite();
+  const createDomain = useCreateCompanyDomain();
+  const revokeDomain = useRevokeCompanyDomain();
+  const requestDomainConfirmation = useRequestCompanyDomainConfirmation();
+  const deactivateCompany = useDeactivateCompany();
 
   const pendingInvites = (invites ?? []).filter(
     (invite) => invite.status === "PENDING"
@@ -122,7 +122,7 @@ export default function EmpresaAdminDashboardPage() {
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      await downloadEmpresaDashboardExport(period);
+      await downloadCompanyDashboardExport(period);
     } finally {
       setIsExporting(false);
     }
@@ -142,22 +142,22 @@ export default function EmpresaAdminDashboardPage() {
     setDomainValue("");
   };
 
-  // MW-26 — a Empresa some do ponto de vista deste Administrador (o próprio
-  // EmpresaAdmin que chamou o endpoint deixa de existir), então o único
-  // caminho depois é deslogar e voltar pro login — não há dado de dashboard
-  // pra revalidar nesta tela.
+  // MW-26 — the Company disappears from this admin's point of view (the
+  // CompanyAdmin that called the endpoint stops existing), so the only path
+  // afterward is to log out and return to login — there's no dashboard data
+  // left to revalidate on this screen.
   const handleDeactivate = async () => {
-    await deactivateEmpresa.mutateAsync();
+    await deactivateCompany.mutateAsync();
     setIsDeactivateOpen(false);
     await logout();
-    router.push("/empresa-admin/login?deactivated=1");
+    router.push("/company-admin/login?deactivated=1");
   };
 
   return (
     <PageContainer>
       <PageHeader
-        title="Dashboard da Empresa"
-        subtitle="Visão agregada dos Colaboradores vinculados"
+        title="Dashboard da Company"
+        subtitle="Visão agregada dos Collaborators vinculados"
         icon={Building2}
       >
         <Button variant="outline" onClick={handleExport} disabled={isExporting}>
@@ -171,29 +171,29 @@ export default function EmpresaAdminDashboardPage() {
               className="text-destructive hover:text-destructive"
             >
               <PowerOff className="w-4 h-4 mr-2" />
-              Desativar Empresa
+              Desativar Company
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Desativar Empresa</AlertDialogTitle>
+              <AlertDialogTitle>Desativar Company</AlertDialogTitle>
               <AlertDialogDescription>
                 Isso remove todos os Administradores e revoga os convites e
-                domínios pendentes desta Empresa. Os Colaboradores continuam
+                domínios pendentes desta Company. Os Collaborators continuam
                 vinculados e seguem registrando e faturando horas
-                normalmente — eles só serão avisados de que a Empresa não
+                normalmente — eles só serão avisados de que a Company não
                 tem mais um Administrador ativo. Você pode reativar a
-                Empresa depois pelo mesmo fluxo de Ativação.
+                Company depois pelo mesmo fluxo de Ativação.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeactivate}
-                disabled={deactivateEmpresa.isPending}
+                disabled={deactivateCompany.isPending}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                Desativar Empresa
+                Desativar Company
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -232,7 +232,7 @@ export default function EmpresaAdminDashboardPage() {
       >
         <TabsList>
           <TabsTrigger value="overview">Visão geral</TabsTrigger>
-          <TabsTrigger value="colaboradores">Colaboradores</TabsTrigger>
+          <TabsTrigger value="collaborators">Collaborators</TabsTrigger>
           <TabsTrigger value="vinculos">
             Vínculos
             {pendingInvites.length > 0 && (
@@ -263,16 +263,16 @@ export default function EmpresaAdminDashboardPage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Colaboradores ativos
+                    Collaborators ativos
                   </CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {overview?.colaboradoresAtivos ?? 0}
+                    {overview?.collaboratorsAtivos ?? 0}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    vinculados à Empresa
+                    vinculados à Company
                   </p>
                 </CardContent>
               </Card>
@@ -311,7 +311,7 @@ export default function EmpresaAdminDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {overview?.convitesPendentes ?? 0}
+                    {overview?.pendingInvites ?? 0}
                   </div>
                 </CardContent>
               </Card>
@@ -319,10 +319,10 @@ export default function EmpresaAdminDashboardPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="colaboradores">
+        <TabsContent value="collaborators">
           <Card>
             <CardContent className="p-0">
-              {isColaboradoresLoading ? (
+              {isCollaboratorsLoading ? (
                 <div className="p-4 space-y-2">
                   {[...Array(3)].map((_, i) => (
                     <Skeleton key={i} className="h-8 w-full" />
@@ -332,7 +332,7 @@ export default function EmpresaAdminDashboardPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Colaborador</TableHead>
+                      <TableHead>Collaborator</TableHead>
                       <TableHead>Vínculo</TableHead>
                       <TableHead className="text-right">Horas</TableHead>
                       <TableHead className="text-right">Projetos</TableHead>
@@ -340,7 +340,7 @@ export default function EmpresaAdminDashboardPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {(colaboradores ?? []).map((c) => (
+                    {(collaborators ?? []).map((c) => (
                       <TableRow key={c.id}>
                         <TableCell>
                           <div className="font-medium">{c.name}</div>
@@ -364,13 +364,13 @@ export default function EmpresaAdminDashboardPage() {
                         </TableCell>
                       </TableRow>
                     ))}
-                    {(colaboradores ?? []).length === 0 && (
+                    {(collaborators ?? []).length === 0 && (
                       <TableRow>
                         <TableCell
                           colSpan={5}
                           className="text-center text-muted-foreground py-8"
                         >
-                          Nenhum Colaborador vinculado ainda.
+                          Nenhum Collaborator vinculado ainda.
                         </TableCell>
                       </TableRow>
                     )}
@@ -392,7 +392,7 @@ export default function EmpresaAdminDashboardPage() {
               <CardContent className="space-y-3">
                 <form onSubmit={handleCreateInvite} className="flex gap-2">
                   <Input
-                    placeholder="email@colaborador.com"
+                    placeholder="email@collaborator.com"
                     type="email"
                     value={inviteEmail}
                     onChange={(event) => setInviteEmail(event.target.value)}

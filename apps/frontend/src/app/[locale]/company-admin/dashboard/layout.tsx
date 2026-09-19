@@ -5,31 +5,31 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useEmpresaAdminAuth } from "@/features/empresa-admin";
+import { useCompanyAdminAuth } from "@/features/company-admin";
 
 /**
- * MW-24 — Layout mínimo do Dashboard da Empresa: sem MainLayout/menu do
- * Colaborador (ticket explícito sobre isso), só um header com a sessão do
- * Administrador + logout, e o guard que manda pro login quando não há
- * sessão de EmpresaAdmin válida.
+ * MW-24 — Minimal Company Dashboard layout: no Collaborator MainLayout/menu
+ * (explicit ticket requirement), just a header with the admin session +
+ * logout, and the guard that redirects to login when there is no valid
+ * CompanyAdmin session.
  */
-export default function EmpresaAdminDashboardLayout({
+export default function CompanyAdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { admin, isLoading, logout } = useEmpresaAdminAuth();
+  const { admin, isLoading, logout } = useCompanyAdminAuth();
 
   useEffect(() => {
     if (!isLoading && !admin) {
-      router.replace("/empresa-admin/login");
+      router.replace("/company-admin/login");
     }
   }, [isLoading, admin, router]);
 
   const handleLogout = async () => {
     await logout();
-    router.push("/empresa-admin/login");
+    router.push("/company-admin/login");
   };
 
   if (isLoading) {
@@ -49,7 +49,7 @@ export default function EmpresaAdminDashboardLayout({
       <header className="border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold">Dashboard da Empresa</p>
+            <p className="text-sm font-semibold">Dashboard da Company</p>
             <p className="text-xs text-muted-foreground">{admin.email}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={handleLogout}>

@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useForgotPasswordEmpresaAdmin } from "@/features/empresa-admin";
+import { useForgotPasswordCompanyAdmin } from "@/features/company-admin";
 
-export default function EmpresaAdminForgotPasswordPage() {
-  const forgotPasswordMutation = useForgotPasswordEmpresaAdmin();
+export default function CompanyAdminForgotPasswordPage() {
+  const forgotPasswordMutation = useForgotPasswordCompanyAdmin();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export default function EmpresaAdminForgotPasswordPage() {
           <Building2 className="mx-auto h-8 w-8 text-primary" />
           <CardTitle>Esqueci minha senha</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Administrador da Empresa
+            Administrador da Company
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -81,7 +81,7 @@ export default function EmpresaAdminForgotPasswordPage() {
           )}
           <div className="text-center">
             <Link
-              href="/empresa-admin/login"
+              href="/company-admin/login"
               className="inline-flex items-center text-sm text-primary hover:underline"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />

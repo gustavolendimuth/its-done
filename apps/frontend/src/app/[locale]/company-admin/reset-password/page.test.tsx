@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import "@testing-library/jest-dom";
-import EmpresaAdminResetPasswordPage from "./page";
+import CompanyAdminResetPasswordPage from "./page";
 
 const pushMock = jest.fn();
 const mutateAsyncMock = jest.fn();
@@ -15,14 +15,14 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-jest.mock("@/features/empresa-admin", () => ({
-  useResetPasswordEmpresaAdmin: jest.fn(() => ({
+jest.mock("@/features/company-admin", () => ({
+  useResetPasswordCompanyAdmin: jest.fn(() => ({
     mutateAsync: mutateAsyncMock,
     isPending: false,
   })),
 }));
 
-describe("EmpresaAdminResetPasswordPage", () => {
+describe("CompanyAdminResetPasswordPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     tokenParam = "valid-token";
@@ -34,7 +34,7 @@ describe("EmpresaAdminResetPasswordPage", () => {
       message: "Password reset successfully",
     });
 
-    render(<EmpresaAdminResetPasswordPage />);
+    render(<CompanyAdminResetPasswordPage />);
 
     await userEvent.type(screen.getByLabelText("Nova senha"), "newpass123");
     await userEvent.type(
@@ -54,7 +54,7 @@ describe("EmpresaAdminResetPasswordPage", () => {
     ).toBeInTheDocument();
 
     jest.advanceTimersByTime(3000);
-    expect(pushMock).toHaveBeenCalledWith("/empresa-admin/login");
+    expect(pushMock).toHaveBeenCalledWith("/company-admin/login");
 
     jest.useRealTimers();
   });
@@ -62,14 +62,14 @@ describe("EmpresaAdminResetPasswordPage", () => {
   it("shows an error and a link back to forgot-password when the token is missing", () => {
     tokenParam = null;
 
-    render(<EmpresaAdminResetPasswordPage />);
+    render(<CompanyAdminResetPasswordPage />);
 
     expect(
       screen.getByText("Link de redefinição inválido ou incompleto.")
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /Pedir um novo link/ })
-    ).toHaveAttribute("href", "/empresa-admin/forgot-password");
+    ).toHaveAttribute("href", "/company-admin/forgot-password");
     expect(
       screen.queryByRole("button", { name: "Redefinir senha" })
     ).not.toBeInTheDocument();
@@ -81,7 +81,7 @@ describe("EmpresaAdminResetPasswordPage", () => {
       response: { status: 400, data: { message: "Reset token has expired" } },
     });
 
-    render(<EmpresaAdminResetPasswordPage />);
+    render(<CompanyAdminResetPasswordPage />);
 
     await userEvent.type(screen.getByLabelText("Nova senha"), "newpass123");
     await userEvent.type(
@@ -97,7 +97,7 @@ describe("EmpresaAdminResetPasswordPage", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /Pedir um novo link/ })
-    ).toHaveAttribute("href", "/empresa-admin/forgot-password");
+    ).toHaveAttribute("href", "/company-admin/forgot-password");
     expect(pushMock).not.toHaveBeenCalled();
   });
 });

@@ -2,18 +2,18 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import "@testing-library/jest-dom";
-import EmpresaAdminForgotPasswordPage from "./page";
+import CompanyAdminForgotPasswordPage from "./page";
 
 const mutateAsyncMock = jest.fn();
 
-jest.mock("@/features/empresa-admin", () => ({
-  useForgotPasswordEmpresaAdmin: jest.fn(() => ({
+jest.mock("@/features/company-admin", () => ({
+  useForgotPasswordCompanyAdmin: jest.fn(() => ({
     mutateAsync: mutateAsyncMock,
     isPending: false,
   })),
 }));
 
-describe("EmpresaAdminForgotPasswordPage", () => {
+describe("CompanyAdminForgotPasswordPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -23,7 +23,7 @@ describe("EmpresaAdminForgotPasswordPage", () => {
       message: "If the email exists, a reset link has been sent.",
     });
 
-    render(<EmpresaAdminForgotPasswordPage />);
+    render(<CompanyAdminForgotPasswordPage />);
 
     await userEvent.type(screen.getByLabelText("Email"), "admin@acme.com");
     await userEvent.click(
