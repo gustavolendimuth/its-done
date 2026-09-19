@@ -1,9 +1,9 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
-import { DominiosAutorizadosService } from './dominios-autorizados.service';
+import { AuthorizedDomainsService } from './authorized-domains.service';
 
 const prismaMock = {
-  dominioAutorizado: {
+  authorizedDomain: {
     findUnique: jest.fn(),
     findFirst: jest.fn(),
     create: jest.fn(),
@@ -20,13 +20,13 @@ const notificationsServiceMock = {
   sendPasswordResetEmail: jest.fn(),
 } as any;
 
-describe('DominiosAutorizadosService', () => {
-  let service: DominiosAutorizadosService;
-  const empresaId = 'empresa-1';
+describe('AuthorizedDomainsService', () => {
+  let service: AuthorizedDomainsService;
+  const companyId = 'company-1';
 
   beforeEach(() => {
     jest.resetAllMocks();
-    service = new DominiosAutorizadosService(
+    service = new AuthorizedDomainsService(
       prismaMock,
       jwtServiceMock,
       notificationsServiceMock,
@@ -35,47 +35,47 @@ describe('DominiosAutorizadosService', () => {
 
   describe('create() — public provider domain blocklist', () => {
     it('rejects a well-known public provider domain', async () => {
-      await expect(service.create(empresaId, 'gmail.com')).rejects.toThrow(
+      await expect(service.create(companyId, 'gmail.com')).rejects.toThrow(
         BadRequestException,
       );
-      expect(prismaMock.dominioAutorizado.create).not.toHaveBeenCalled();
+      expect(prismaMock.authorizedDomain.create).not.toHaveBeenCalled();
     });
 
     it('rejects the same domain written in uppercase', async () => {
-      await expect(service.create(empresaId, 'GMAIL.COM')).rejects.toThrow(
+      await expect(service.create(companyId, 'GMAIL.COM')).rejects.toThrow(
         BadRequestException,
       );
-      expect(prismaMock.dominioAutorizado.create).not.toHaveBeenCalled();
+      expect(prismaMock.authorizedDomain.create).not.toHaveBeenCalled();
     });
 
     it('rejects a subdomain of a blocked provider', async () => {
       await expect(
-        service.create(empresaId, 'mail.gmail.com'),
+        service.create(companyId, 'mail.gmail.com'),
       ).rejects.toThrow(BadRequestException);
-      expect(prismaMock.dominioAutorizado.create).not.toHaveBeenCalled();
+      expect(prismaMock.authorizedDomain.create).not.toHaveBeenCalled();
     });
 
     it('rejects a mixed-case subdomain of a blocked provider', async () => {
       await expect(
-        service.create(empresaId, 'Mail.GMAIL.com'),
+        service.create(companyId, 'Mail.GMAIL.com'),
       ).rejects.toThrow(BadRequestException);
-      expect(prismaMock.dominioAutorizado.create).not.toHaveBeenCalled();
+      expect(prismaMock.authorizedDomain.create).not.toHaveBeenCalled();
     });
 
     it('does NOT reject a domain that merely contains a blocked name as a substring', async () => {
-      prismaMock.dominioAutorizado.findUnique.mockResolvedValueOnce(null);
-      prismaMock.dominioAutorizado.create.mockResolvedValueOnce({
+      prismaMock.authorizedDomain.findUnique.mockResolvedValueOnce(null);
+      prismaMock.authorizedDomain.create.mockResolvedValueOnce({
         id: 'dom-1',
-        empresaId,
+        companyId,
         domain: 'notgmail.com',
         status: 'PENDING',
       });
 
       await expect(
-        service.create(empresaId, 'notgmail.com'),
+        service.create(companyId, 'notgmail.com'),
       ).resolves.toMatchObject({ domain: 'notgmail.com' });
-      expect(prismaMock.dominioAutorizado.create).toHaveBeenCalledWith({
-        data: { empresaId, domain: 'notgmail.com' },
+      expect(prismaMock.authorizedDomain.create).toHaveBeenCalledWith({
+        data: { companyId, domain: 'notgmail.com' },
       });
     });
 
@@ -94,53 +94,53 @@ describe('DominiosAutorizadosService', () => {
       ];
 
       for (const domain of blocked) {
-        await expect(service.create(empresaId, domain)).rejects.toThrow(
+        await expect(service.create(companyId, domain)).rejects.toThrow(
           BadRequestException,
         );
       }
-      expect(prismaMock.dominioAutorizado.create).not.toHaveBeenCalled();
+      expect(prismaMock.authorizedDomain.create).not.toHaveBeenCalled();
     });
 
     it('rejects a malformed domain', async () => {
-      await expect(service.create(empresaId, 'not a domain')).rejects.toThrow(
+      await expect(service.create(companyId, 'not a domain')).rejects.toThrow(
         BadRequestException,
       );
-      expect(prismaMock.dominioAutorizado.create).not.toHaveBeenCalled();
+      expect(prismaMock.authorizedDomain.create).not.toHaveBeenCalled();
     });
   });
 
   describe('create() — duplicates', () => {
-    it('rejects a domain already active (PENDING/CONFIRMED) for this Empresa', async () => {
-      prismaMock.dominioAutorizado.findUnique.mockResolvedValueOnce({
+    it('rejects a domain already active (PENDING/CONFIRMED) for this Company', async () => {
+      prismaMock.authorizedDomain.findUnique.mockResolvedValueOnce({
         id: 'dom-1',
-        empresaId,
+        companyId,
         domain: 'acme.com',
         status: 'PENDING',
       });
 
-      await expect(service.create(empresaId, 'acme.com')).rejects.toThrow(
+      await expect(service.create(companyId, 'acme.com')).rejects.toThrow(
         ConflictException,
       );
-      expect(prismaMock.dominioAutorizado.create).not.toHaveBeenCalled();
+      expect(prismaMock.authorizedDomain.create).not.toHaveBeenCalled();
     });
 
     it('reactivates a previously revoked domain instead of erroring', async () => {
-      prismaMock.dominioAutorizado.findUnique.mockResolvedValueOnce({
+      prismaMock.authorizedDomain.findUnique.mockResolvedValueOnce({
         id: 'dom-1',
-        empresaId,
+        companyId,
         domain: 'acme.com',
         status: 'REVOKED',
       });
-      prismaMock.dominioAutorizado.update.mockResolvedValueOnce({
+      prismaMock.authorizedDomain.update.mockResolvedValueOnce({
         id: 'dom-1',
-        empresaId,
+        companyId,
         domain: 'acme.com',
         status: 'PENDING',
       });
 
-      const result = await service.create(empresaId, 'acme.com');
+      const result = await service.create(companyId, 'acme.com');
 
-      expect(prismaMock.dominioAutorizado.update).toHaveBeenCalledWith({
+      expect(prismaMock.authorizedDomain.update).toHaveBeenCalledWith({
         where: { id: 'dom-1' },
         data: { status: 'PENDING', confirmedAt: null },
       });
@@ -152,26 +152,26 @@ describe('DominiosAutorizadosService', () => {
     it('marks a PENDING domain as CONFIRMED with a valid token', async () => {
       jwtServiceMock.verify.mockReturnValueOnce({
         sub: 'dom-1',
-        empresaId,
-        actorType: 'EMPRESA_ADMIN',
+        companyId,
+        actorType: 'COMPANY_ADMIN',
         type: 'domain-confirmation',
       });
-      prismaMock.dominioAutorizado.findUnique.mockResolvedValueOnce({
+      prismaMock.authorizedDomain.findUnique.mockResolvedValueOnce({
         id: 'dom-1',
-        empresaId,
+        companyId,
         domain: 'acme.com',
         status: 'PENDING',
       });
-      prismaMock.dominioAutorizado.update.mockResolvedValueOnce({
+      prismaMock.authorizedDomain.update.mockResolvedValueOnce({
         id: 'dom-1',
-        empresaId,
+        companyId,
         domain: 'acme.com',
         status: 'CONFIRMED',
       });
 
       const result = await service.confirm('a-valid-token');
 
-      expect(prismaMock.dominioAutorizado.update).toHaveBeenCalledWith({
+      expect(prismaMock.authorizedDomain.update).toHaveBeenCalledWith({
         where: { id: 'dom-1' },
         data: { status: 'CONFIRMED', confirmedAt: expect.any(Date) },
       });
@@ -181,7 +181,7 @@ describe('DominiosAutorizadosService', () => {
     it('rejects a token for the wrong actor type', async () => {
       jwtServiceMock.verify.mockReturnValueOnce({
         sub: 'dom-1',
-        empresaId,
+        companyId,
         actorType: 'USER',
         type: 'domain-confirmation',
       });
@@ -189,7 +189,7 @@ describe('DominiosAutorizadosService', () => {
       await expect(service.confirm('bad-token')).rejects.toThrow(
         BadRequestException,
       );
-      expect(prismaMock.dominioAutorizado.update).not.toHaveBeenCalled();
+      expect(prismaMock.authorizedDomain.update).not.toHaveBeenCalled();
     });
 
     it('rejects an expired/invalid token', async () => {

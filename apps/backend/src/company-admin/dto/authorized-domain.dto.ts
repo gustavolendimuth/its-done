@@ -1,12 +1,12 @@
 import { IsString, MinLength } from 'class-validator';
 
-export class CreateDominioAutorizadoDto {
+export class CreateAuthorizedDomainDto {
   @IsString()
   @MinLength(3)
   domain: string;
 }
 
-export class ConfirmDominioAutorizadoDto {
+export class ConfirmAuthorizedDomainDto {
   @IsString()
   token: string;
 }

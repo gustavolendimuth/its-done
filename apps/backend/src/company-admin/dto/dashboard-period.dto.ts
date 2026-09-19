@@ -1,9 +1,9 @@
 import { IsDateString, IsOptional } from 'class-validator';
 
 /**
- * MW-24 — período (from/to) aceito pelos endpoints de agregação do Dashboard
- * da Empresa. Ambos opcionais: sem eles, o service usa o mês corrente como
- * default (ver EmpresaDashboardService.resolvePeriod).
+ * MW-24 — period (from/to) accepted by the Company dashboard's aggregation
+ * endpoints. Both optional: without them, the service defaults to the
+ * current month (see CompanyDashboardService.resolvePeriod).
  */
 export class DashboardPeriodDto {
   @IsOptional()

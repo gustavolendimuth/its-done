@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { CollaboradorOrigin } from '@prisma/client';
+import { CollaboratorOrigin } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { InAppNotificationsService } from '../in-app-notifications/in-app-notifications.service';
 import { extractDomain } from './utils/domain-blocklist.util';
 
 /**
- * Shared logic to turn a Convite Pendente / Domínio Autorizado match into an
+ * Shared logic to turn a Pending Invite / Authorized Domain match into an
  * actual Collaborator link. Used both by the company-admin endpoints
- * (immediate link when a Convite Pendente is created for an existing User)
+ * (immediate link when a Pending Invite is created for an existing User)
  * and by AuthService's signup/login hooks (MW-21/MW-22).
  *
  * Also owns the notification side of the Collaborator↔Company relationship
@@ -26,13 +26,13 @@ export class CompanyLinkingService {
 
   /**
    * Idempotent: never duplicates a Collaborator row for the same pair.
-   * `origin` (MW-24 — Convite Pendente vs Domínio Autorizado) is recorded
+   * `origin` (MW-24 — Pending Invite vs Authorized Domain) is recorded
    * only on first creation; an idempotent no-op call never overwrites it.
    */
   async ensureCollaborator(
     userId: string,
     companyId: string,
-    origin?: CollaboradorOrigin,
+    origin?: CollaboratorOrigin,
   ) {
     const existing = await this.prisma.collaborator.findUnique({
       where: { userId_companyId: { userId, companyId } },
@@ -55,7 +55,7 @@ export class CompanyLinkingService {
   /**
    * MW-23: notifies the Collaborator that their link to an Company was
    * removed — either by themselves (`ClientsService.removeCollaborator`) or
-   * by an Administrador (`CollaboratorsService.remove`). Call this AFTER
+   * by an Admin (`CollaboratorsService.remove`). Call this AFTER
    * the Collaborator row has been deleted.
    */
   async notifyCollaboratorUnlinked(
@@ -123,8 +123,8 @@ export class CompanyLinkingService {
 
   /**
    * Call on every signup and every login (password or Google). Effectuates
-   * any Convite Pendente and any confirmed Domínio Autorizado matching this
-   * email. Different Companys match independently — all are honored.
+   * any Pending Invite and any confirmed Authorized Domain matching this
+   * email. Different Companies match independently — all are honored.
    */
   async syncAutoLinks(userId: string, email: string): Promise<void> {
     await this.linkPendingInvites(userId, email);

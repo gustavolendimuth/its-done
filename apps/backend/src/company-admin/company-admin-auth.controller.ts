@@ -26,11 +26,11 @@ import {
 export class CompanyAdminAuthController {
   constructor(private companyAdminAuthService: CompanyAdminAuthService) {}
 
-  // MW-27 — 20/min por IP: cria uma Company+Admin novos a cada chamada (sem
-  // alvo fixo pra adivinhar credencial), mesmo teto de criar Convite
-  // Pendente/Domínio Autorizado — não o teto mais apertado de
-  // login/forgot-password, que protegem uma conta específica contra tentativa
-  // e erro.
+  // MW-27 — 20/min per IP: creates a new Company+Admin on every call (no
+  // fixed target to guess a credential against), same cap as creating a
+  // Pending Invite/Authorized Domain — not the tighter cap on
+  // login/forgot-password, which protect one specific account against
+  // trial and error.
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post('register')
   async register(@Body() dto: RegisterCompanyAdminDto) {
@@ -74,11 +74,12 @@ export class CompanyAdminAuthController {
     return this.companyAdminAuthService.resetPassword(dto);
   }
 
-  // MW-19 — Ativação de uma Company existente. Público: qualquer pessoa
-  // pode iniciar a ativação de uma Company que ainda não tem Administrador.
-  // MW-27 — 20/min por IP: pode ser chamado por uma Company com vários
-  // Collaborators tentando ativar em sequência; sem alvo fixo pra adivinhar
-  // credencial, mesmo teto de criar Convite Pendente/Domínio Autorizado.
+  // MW-19 — Activation of an existing Company. Public: anyone can start
+  // activating a Company that has no Admin yet.
+  // MW-27 — 20/min per IP: may be called by a Company with several
+  // Collaborators trying to activate one after another; no fixed target to
+  // guess a credential against, same cap as creating a Pending
+  // Invite/Authorized Domain.
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post('activate/:companyId/request')
   async requestActivation(
@@ -100,8 +101,8 @@ export class CompanyAdminAuthController {
     return this.companyAdminAuthService.confirmCompanyActivation(dto);
   }
 
-  // MW-20 — Convite de Administrador. Autenticado: só um Administrador
-  // logado pode convidar outro Administrador pra mesma Company.
+  // MW-20 — Admin invite. Authenticated: only a logged-in Admin can invite
+  // another Admin to the same Company.
   @UseGuards(CompanyAdminJwtAuthGuard)
   @Post('invite')
   async inviteAdmin(@Request() req, @Body() dto: InviteCompanyAdminDto) {

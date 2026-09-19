@@ -229,7 +229,7 @@ export class CompanyAdminAuthService {
     return this.buildAuthResponse(admin);
   }
 
-  // MW-20 — Convite de Administrador
+  // MW-20 — Admin invite
   async inviteCompanyAdmin(
     admin: { id: string; companyId: string },
     dto: InviteCompanyAdminDto,
@@ -404,7 +404,7 @@ export class CompanyAdminAuthService {
     });
     if (existingAdminCount > 0) {
       throw new ConflictException(
-        'Company is already activated; use the Convite de Administrador flow instead',
+        'Company is already activated; use the Admin invite flow instead',
       );
     }
   }

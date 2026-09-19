@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ColaboradorOrigin } from '@prisma/client';
+import { CollaboratorOrigin } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface DashboardPeriod {
@@ -7,21 +7,21 @@ export interface DashboardPeriod {
   to: Date;
 }
 
-export interface EmpresaDashboardOverview {
-  colaboradoresAtivos: number;
+export interface CompanyDashboardOverview {
+  collaboratorsAtivos: number;
   horasPeriodo: number;
   totalFaturado: number;
-  convitesPendentes: number;
+  pendingInvites: number;
   from: string;
   to: string;
 }
 
-export interface ColaboradorDashboardRow {
+export interface CollaboratorDashboardRow {
   id: string;
   userId: string;
   name: string;
   email: string;
-  origin: ColaboradorOrigin | null;
+  origin: CollaboratorOrigin | null;
   horas: number;
   projetos: number;
   faturado: number;
@@ -33,26 +33,25 @@ type WorkHourForMetrics = {
 };
 
 /**
- * MW-24 — Endpoints de agregação pro Dashboard da Empresa. Tudo escopado a
- * uma única Empresa (req.user.empresaId, checado no controller) — nunca
- * recebe/aceita um empresaId vindo do cliente.
+ * MW-24 — Aggregation endpoints for the Company dashboard. Everything is
+ * scoped to a single Company (req.user.companyId, checked in the
+ * controller) — never accepts a companyId coming from the client.
  *
- * "Valor faturado" é a soma de `Invoice.amount` (invoices não canceladas,
- * emitidas — `createdAt` — dentro do período). `Invoice` não carrega um
- * `userId` próprio, mas cada Invoice só agrega WorkHour de um único usuário
- * (`InvoicesService.create` filtra os work hours por `userId` na criação),
- * então atribuir a invoice a um Colaborador via `invoiceWorkHours.workHour
- * .userId` é seguro. "Horas no período" e "projetos" continuam vindo de
- * `WorkHour` diretamente — são contagens de trabalho registrado, não de
- * faturamento.
+ * "Amount invoiced" is the sum of `Invoice.amount` (non-canceled invoices,
+ * issued — `createdAt` — within the period). `Invoice` has no `userId` of
+ * its own, but each Invoice only aggregates WorkHours from a single user
+ * (`InvoicesService.create` filters work hours by `userId` on creation), so
+ * attributing an invoice to a Collaborator via `invoiceWorkHours.workHour
+ * .userId` is safe. "Hours in period" and "projects" still come from
+ * `WorkHour` directly — they count logged work, not billing.
  */
 @Injectable()
-export class EmpresaDashboardService {
+export class CompanyDashboardService {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Período default quando from/to não são informados: mês corrente (dia 1
-   * até o último dia do mês, inclusive).
+   * Default period when from/to are not given: current month (day 1
+   * through the last day of the month, inclusive).
    */
   resolvePeriod(from?: string, to?: string): DashboardPeriod {
     const now = new Date();
@@ -80,9 +79,9 @@ export class EmpresaDashboardService {
   }
 
   /**
-   * Pure aggregation over an already-fetched set of WorkHours: sums hours e
-   * conta projetos distintos. Separado das queries Prisma de propósito, pra
-   * ser testável com fixtures à mão.
+   * Pure aggregation over an already-fetched set of WorkHours: sums hours
+   * and counts distinct projects. Kept separate from the Prisma queries on
+   * purpose, so it's testable with hand-built fixtures.
    */
   private aggregateWorkHours(
     workHours: WorkHourForMetrics[],
@@ -108,12 +107,12 @@ export class EmpresaDashboardService {
   }
 
   /**
-   * Soma `Invoice.amount` das invoices não canceladas dessa Empresa, criadas
-   * dentro do período, cujos work hours pertencem a algum dos `userIds`
-   * informados.
+   * Sums `Invoice.amount` across this Company's non-canceled invoices,
+   * created within the period, whose work hours belong to one of the given
+   * `userIds`.
    */
   private async sumFaturado(
-    empresaId: string,
+    companyId: string,
     userIds: string[],
     period: DashboardPeriod,
   ): Promise<number> {
@@ -123,7 +122,7 @@ export class EmpresaDashboardService {
 
     const result = await this.prisma.invoice.aggregate({
       where: {
-        clientId: empresaId,
+        clientId: companyId,
         status: { not: 'CANCELED' },
         createdAt: { gte: period.from, lte: period.to },
         invoiceWorkHours: {
@@ -137,73 +136,73 @@ export class EmpresaDashboardService {
   }
 
   async getOverview(
-    empresaId: string,
+    companyId: string,
     from?: string,
     to?: string,
-  ): Promise<EmpresaDashboardOverview> {
+  ): Promise<CompanyDashboardOverview> {
     const period = this.resolvePeriod(from, to);
 
-    const [colaboradores, convitesPendentes] = await Promise.all([
-      this.prisma.colaborador.findMany({ where: { empresaId } }),
-      this.prisma.convitePendente.count({
-        where: { empresaId, status: 'PENDING' },
+    const [collaborators, pendingInvites] = await Promise.all([
+      this.prisma.collaborator.findMany({ where: { companyId } }),
+      this.prisma.pendingInvite.count({
+        where: { companyId, status: 'PENDING' },
       }),
     ]);
 
-    const userIds = colaboradores.map((c) => c.userId);
+    const userIds = collaborators.map((c) => c.userId);
     const [workHours, faturado] = await Promise.all([
       userIds.length
         ? this.prisma.workHour.findMany({
             where: {
-              clientId: empresaId,
+              clientId: companyId,
               userId: { in: userIds },
               date: { gte: period.from, lte: period.to },
             },
             select: this.workHourSelect(),
           })
         : Promise.resolve([]),
-      this.sumFaturado(empresaId, userIds, period),
+      this.sumFaturado(companyId, userIds, period),
     ]);
 
     const { horas } = this.aggregateWorkHours(workHours as WorkHourForMetrics[]);
 
     return {
-      colaboradoresAtivos: colaboradores.length,
+      collaboratorsAtivos: collaborators.length,
       horasPeriodo: horas,
       totalFaturado: faturado,
-      convitesPendentes,
+      pendingInvites,
       from: period.from.toISOString(),
       to: period.to.toISOString(),
     };
   }
 
-  async getColaboradoresTable(
-    empresaId: string,
+  async getCollaboratorsTable(
+    companyId: string,
     from?: string,
     to?: string,
-  ): Promise<ColaboradorDashboardRow[]> {
+  ): Promise<CollaboratorDashboardRow[]> {
     const period = this.resolvePeriod(from, to);
 
-    const colaboradores = await this.prisma.colaborador.findMany({
-      where: { empresaId },
+    const collaborators = await this.prisma.collaborator.findMany({
+      where: { companyId },
       include: {
         user: { select: { id: true, name: true, email: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
 
-    const rows: ColaboradorDashboardRow[] = [];
-    for (const colaborador of colaboradores) {
+    const rows: CollaboratorDashboardRow[] = [];
+    for (const collaborator of collaborators) {
       const [workHours, faturado] = await Promise.all([
         this.prisma.workHour.findMany({
           where: {
-            clientId: empresaId,
-            userId: colaborador.userId,
+            clientId: companyId,
+            userId: collaborator.userId,
             date: { gte: period.from, lte: period.to },
           },
           select: this.workHourSelect(),
         }),
-        this.sumFaturado(empresaId, [colaborador.userId], period),
+        this.sumFaturado(companyId, [collaborator.userId], period),
       ]);
 
       const { horas, projetos } = this.aggregateWorkHours(
@@ -211,11 +210,11 @@ export class EmpresaDashboardService {
       );
 
       rows.push({
-        id: colaborador.id,
-        userId: colaborador.userId,
-        name: colaborador.user.name,
-        email: colaborador.user.email,
-        origin: colaborador.origin,
+        id: collaborator.id,
+        userId: collaborator.userId,
+        name: collaborator.user.name,
+        email: collaborator.user.email,
+        origin: collaborator.origin,
         horas,
         projetos,
         faturado,
@@ -225,9 +224,9 @@ export class EmpresaDashboardService {
     return rows;
   }
 
-  private originLabel(origin: ColaboradorOrigin | null): string {
-    if (origin === 'CONVITE') return 'Convite';
-    if (origin === 'DOMINIO') return 'Domínio';
+  private originLabel(origin: CollaboratorOrigin | null): string {
+    if (origin === 'INVITE') return 'Convite';
+    if (origin === 'DOMAIN') return 'Domínio';
     return '';
   }
 
@@ -239,14 +238,14 @@ export class EmpresaDashboardService {
   }
 
   async exportCsv(
-    empresaId: string,
+    companyId: string,
     from?: string,
     to?: string,
   ): Promise<string> {
-    const rows = await this.getColaboradoresTable(empresaId, from, to);
+    const rows = await this.getCollaboratorsTable(companyId, from, to);
 
     const header = [
-      'Colaborador',
+      'Collaborator',
       'Email',
       'Vinculo',
       'Horas',

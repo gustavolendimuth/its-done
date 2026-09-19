@@ -7,7 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { EMPRESA_ADMIN_ACTOR_TYPE } from './empresa-admin-auth.service';
+import { COMPANY_ADMIN_ACTOR_TYPE } from './company-admin-auth.service';
 import {
   isPublicProviderDomain,
   isValidDomainFormat,
@@ -17,14 +17,14 @@ import {
 const DOMAIN_CONFIRMATION_TOKEN_TYPE = 'domain-confirmation';
 
 @Injectable()
-export class DominiosAutorizadosService {
+export class AuthorizedDomainsService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
     private notificationsService: NotificationsService,
   ) {}
 
-  async create(empresaId: string, domainRaw: string) {
+  async create(companyId: string, domainRaw: string) {
     const domain = normalizeDomain(domainRaw);
 
     if (!isValidDomainFormat(domain)) {
@@ -33,67 +33,67 @@ export class DominiosAutorizadosService {
 
     if (isPublicProviderDomain(domain)) {
       throw new BadRequestException(
-        'Public email provider domains cannot be registered as a Domínio Autorizado',
+        'Public email provider domains cannot be registered as an authorized domain',
       );
     }
 
-    const existing = await this.prisma.dominioAutorizado.findUnique({
-      where: { empresaId_domain: { empresaId, domain } },
+    const existing = await this.prisma.authorizedDomain.findUnique({
+      where: { companyId_domain: { companyId, domain } },
     });
 
     if (existing && existing.status !== 'REVOKED') {
       throw new ConflictException(
-        'This domain is already registered for this Empresa',
+        'This domain is already registered for this Company',
       );
     }
 
     if (existing) {
-      return this.prisma.dominioAutorizado.update({
+      return this.prisma.authorizedDomain.update({
         where: { id: existing.id },
         data: { status: 'PENDING', confirmedAt: null },
       });
     }
 
-    return this.prisma.dominioAutorizado.create({
-      data: { empresaId, domain },
+    return this.prisma.authorizedDomain.create({
+      data: { companyId, domain },
     });
   }
 
-  findAll(empresaId: string) {
-    return this.prisma.dominioAutorizado.findMany({
-      where: { empresaId },
+  findAll(companyId: string) {
+    return this.prisma.authorizedDomain.findMany({
+      where: { companyId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   /**
-   * Sends a confirmation link to the currently logged-in Administrador's own
-   * email (not to the domain being registered) — the Administrador already
-   * proved ownership of that email at Ativação/login time, so this avoids
+   * Sends a confirmation link to the currently logged-in Admin's own
+   * email (not to the domain being registered) — the Admin already
+   * proved ownership of that email at Activation/login time, so this avoids
    * needing a generic admin@domain address.
    */
   async requestConfirmation(
-    empresaId: string,
+    companyId: string,
     id: string,
     adminEmail: string,
   ) {
-    const dominioAutorizado = await this.prisma.dominioAutorizado.findFirst({
-      where: { id, empresaId },
+    const authorizedDomain = await this.prisma.authorizedDomain.findFirst({
+      where: { id, companyId },
     });
-    if (!dominioAutorizado) {
-      throw new NotFoundException('Domínio Autorizado not found');
+    if (!authorizedDomain) {
+      throw new NotFoundException('Authorized domain not found');
     }
-    if (dominioAutorizado.status !== 'PENDING') {
+    if (authorizedDomain.status !== 'PENDING') {
       throw new BadRequestException(
-        'Domínio Autorizado is not pending confirmation',
+        'Authorized domain is not pending confirmation',
       );
     }
 
     const token = this.jwtService.sign(
       {
-        sub: dominioAutorizado.id,
-        empresaId,
-        actorType: EMPRESA_ADMIN_ACTOR_TYPE,
+        sub: authorizedDomain.id,
+        companyId,
+        actorType: COMPANY_ADMIN_ACTOR_TYPE,
         type: DOMAIN_CONFIRMATION_TOKEN_TYPE,
       },
       { expiresIn: '1h' },
@@ -123,38 +123,38 @@ export class DominiosAutorizadosService {
 
     if (
       payload.type !== DOMAIN_CONFIRMATION_TOKEN_TYPE ||
-      payload.actorType !== EMPRESA_ADMIN_ACTOR_TYPE
+      payload.actorType !== COMPANY_ADMIN_ACTOR_TYPE
     ) {
       throw new BadRequestException('Invalid confirmation token');
     }
 
-    const dominioAutorizado = await this.prisma.dominioAutorizado.findUnique({
+    const authorizedDomain = await this.prisma.authorizedDomain.findUnique({
       where: { id: payload.sub },
     });
-    if (!dominioAutorizado || dominioAutorizado.empresaId !== payload.empresaId) {
-      throw new NotFoundException('Domínio Autorizado not found');
+    if (!authorizedDomain || authorizedDomain.companyId !== payload.companyId) {
+      throw new NotFoundException('Authorized domain not found');
     }
-    if (dominioAutorizado.status !== 'PENDING') {
+    if (authorizedDomain.status !== 'PENDING') {
       throw new BadRequestException(
-        'Domínio Autorizado is not pending confirmation',
+        'Authorized domain is not pending confirmation',
       );
     }
 
-    return this.prisma.dominioAutorizado.update({
-      where: { id: dominioAutorizado.id },
+    return this.prisma.authorizedDomain.update({
+      where: { id: authorizedDomain.id },
       data: { status: 'CONFIRMED', confirmedAt: new Date() },
     });
   }
 
-  async revoke(empresaId: string, id: string) {
-    const dominioAutorizado = await this.prisma.dominioAutorizado.findFirst({
-      where: { id, empresaId },
+  async revoke(companyId: string, id: string) {
+    const authorizedDomain = await this.prisma.authorizedDomain.findFirst({
+      where: { id, companyId },
     });
-    if (!dominioAutorizado) {
-      throw new NotFoundException('Domínio Autorizado not found');
+    if (!authorizedDomain) {
+      throw new NotFoundException('Authorized domain not found');
     }
 
-    return this.prisma.dominioAutorizado.update({
+    return this.prisma.authorizedDomain.update({
       where: { id },
       data: { status: 'REVOKED' },
     });

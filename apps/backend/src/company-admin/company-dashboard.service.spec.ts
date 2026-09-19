@@ -1,10 +1,10 @@
-import { EmpresaDashboardService } from './empresa-dashboard.service';
+import { CompanyDashboardService } from './company-dashboard.service';
 
 const prismaMock = {
-  colaborador: {
+  collaborator: {
     findMany: jest.fn(),
   },
-  convitePendente: {
+  pendingInvite: {
     count: jest.fn(),
   },
   workHour: {
@@ -15,13 +15,13 @@ const prismaMock = {
   },
 } as any;
 
-describe('EmpresaDashboardService', () => {
-  let service: EmpresaDashboardService;
-  const empresaId = 'empresa-1';
+describe('CompanyDashboardService', () => {
+  let service: CompanyDashboardService;
+  const companyId = 'company-1';
 
   beforeEach(() => {
     jest.resetAllMocks();
-    service = new EmpresaDashboardService(prismaMock);
+    service = new CompanyDashboardService(prismaMock);
   });
 
   describe('resolvePeriod()', () => {
@@ -47,12 +47,12 @@ describe('EmpresaDashboardService', () => {
   });
 
   describe('getOverview()', () => {
-    it('sums hours from WorkHour and faturado from Invoice across multiple Colaboradores', async () => {
-      prismaMock.colaborador.findMany.mockResolvedValueOnce([
-        { id: 'c1', userId: 'user-1', empresaId },
-        { id: 'c2', userId: 'user-2', empresaId },
+    it('sums hours from WorkHour and faturado from Invoice across multiple Collaborators', async () => {
+      prismaMock.collaborator.findMany.mockResolvedValueOnce([
+        { id: 'c1', userId: 'user-1', companyId },
+        { id: 'c2', userId: 'user-2', companyId },
       ]);
-      prismaMock.convitePendente.count.mockResolvedValueOnce(3);
+      prismaMock.pendingInvite.count.mockResolvedValueOnce(3);
       prismaMock.workHour.findMany.mockResolvedValueOnce([
         { hours: 2, projectId: 'p1' },
         { hours: 3, projectId: null },
@@ -61,17 +61,17 @@ describe('EmpresaDashboardService', () => {
         _sum: { amount: 350 },
       });
 
-      const result = await service.getOverview(empresaId);
+      const result = await service.getOverview(companyId);
 
-      expect(result.colaboradoresAtivos).toBe(2);
+      expect(result.collaboratorsAtivos).toBe(2);
       expect(result.horasPeriodo).toBe(5);
       expect(result.totalFaturado).toBe(350);
-      expect(result.convitesPendentes).toBe(3);
+      expect(result.pendingInvites).toBe(3);
 
       expect(prismaMock.workHour.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            clientId: empresaId,
+            clientId: companyId,
             userId: { in: ['user-1', 'user-2'] },
           }),
         }),
@@ -80,7 +80,7 @@ describe('EmpresaDashboardService', () => {
       expect(prismaMock.invoice.aggregate).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            clientId: empresaId,
+            clientId: companyId,
             status: { not: 'CANCELED' },
             invoiceWorkHours: {
               some: { workHour: { userId: { in: ['user-1', 'user-2'] } } },
@@ -90,13 +90,13 @@ describe('EmpresaDashboardService', () => {
       );
     });
 
-    it('returns zeroed stats and skips the WorkHour/Invoice queries when there are no Colaboradores', async () => {
-      prismaMock.colaborador.findMany.mockResolvedValueOnce([]);
-      prismaMock.convitePendente.count.mockResolvedValueOnce(0);
+    it('returns zeroed stats and skips the WorkHour/Invoice queries when there are no Collaborators', async () => {
+      prismaMock.collaborator.findMany.mockResolvedValueOnce([]);
+      prismaMock.pendingInvite.count.mockResolvedValueOnce(0);
 
-      const result = await service.getOverview(empresaId);
+      const result = await service.getOverview(companyId);
 
-      expect(result.colaboradoresAtivos).toBe(0);
+      expect(result.collaboratorsAtivos).toBe(0);
       expect(result.horasPeriodo).toBe(0);
       expect(result.totalFaturado).toBe(0);
       expect(prismaMock.workHour.findMany).not.toHaveBeenCalled();
@@ -104,10 +104,10 @@ describe('EmpresaDashboardService', () => {
     });
 
     it('falls back to 0 when no invoice matches the period', async () => {
-      prismaMock.colaborador.findMany.mockResolvedValueOnce([
-        { id: 'c1', userId: 'user-1', empresaId },
+      prismaMock.collaborator.findMany.mockResolvedValueOnce([
+        { id: 'c1', userId: 'user-1', companyId },
       ]);
-      prismaMock.convitePendente.count.mockResolvedValueOnce(0);
+      prismaMock.pendingInvite.count.mockResolvedValueOnce(0);
       prismaMock.workHour.findMany.mockResolvedValueOnce([
         { hours: 4, projectId: null },
       ]);
@@ -115,28 +115,28 @@ describe('EmpresaDashboardService', () => {
         _sum: { amount: null },
       });
 
-      const result = await service.getOverview(empresaId);
+      const result = await service.getOverview(companyId);
 
       expect(result.horasPeriodo).toBe(4);
       expect(result.totalFaturado).toBe(0);
     });
   });
 
-  describe('getColaboradoresTable()', () => {
-    it('computes horas/projetos from WorkHour and faturado from Invoice, independently per Colaborador', async () => {
-      prismaMock.colaborador.findMany.mockResolvedValueOnce([
+  describe('getCollaboratorsTable()', () => {
+    it('computes horas/projetos from WorkHour and faturado from Invoice, independently per Collaborator', async () => {
+      prismaMock.collaborator.findMany.mockResolvedValueOnce([
         {
           id: 'c1',
           userId: 'user-1',
-          empresaId,
-          origin: 'CONVITE',
+          companyId,
+          origin: 'INVITE',
           user: { id: 'user-1', name: 'Ana', email: 'ana@test.local' },
         },
         {
           id: 'c2',
           userId: 'user-2',
-          empresaId,
-          origin: 'DOMINIO',
+          companyId,
+          origin: 'DOMAIN',
           user: { id: 'user-2', name: 'Bruno', email: 'bruno@test.local' },
         },
       ]);
@@ -153,7 +153,7 @@ describe('EmpresaDashboardService', () => {
         .mockResolvedValueOnce({ _sum: { amount: 360 } })
         .mockResolvedValueOnce({ _sum: { amount: 100 } });
 
-      const rows = await service.getColaboradoresTable(empresaId);
+      const rows = await service.getCollaboratorsTable(companyId);
 
       expect(rows).toEqual([
         {
@@ -161,7 +161,7 @@ describe('EmpresaDashboardService', () => {
           userId: 'user-1',
           name: 'Ana',
           email: 'ana@test.local',
-          origin: 'CONVITE',
+          origin: 'INVITE',
           horas: 6,
           projetos: 2,
           faturado: 360,
@@ -171,7 +171,7 @@ describe('EmpresaDashboardService', () => {
           userId: 'user-2',
           name: 'Bruno',
           email: 'bruno@test.local',
-          origin: 'DOMINIO',
+          origin: 'DOMAIN',
           horas: 5,
           projetos: 0,
           faturado: 100,
@@ -196,10 +196,10 @@ describe('EmpresaDashboardService', () => {
       );
     });
 
-    it('returns an empty list when the Empresa has no Colaboradores', async () => {
-      prismaMock.colaborador.findMany.mockResolvedValueOnce([]);
+    it('returns an empty list when the Company has no Collaborators', async () => {
+      prismaMock.collaborator.findMany.mockResolvedValueOnce([]);
 
-      const rows = await service.getColaboradoresTable(empresaId);
+      const rows = await service.getCollaboratorsTable(companyId);
 
       expect(rows).toEqual([]);
       expect(prismaMock.workHour.findMany).not.toHaveBeenCalled();
@@ -208,19 +208,19 @@ describe('EmpresaDashboardService', () => {
   });
 
   describe('exportCsv()', () => {
-    it('renders a header row plus one row per Colaborador, mapping origin to a label', async () => {
-      prismaMock.colaborador.findMany.mockResolvedValueOnce([
+    it('renders a header row plus one row per Collaborator, mapping origin to a label', async () => {
+      prismaMock.collaborator.findMany.mockResolvedValueOnce([
         {
           id: 'c1',
           userId: 'user-1',
-          empresaId,
-          origin: 'CONVITE',
+          companyId,
+          origin: 'INVITE',
           user: { id: 'user-1', name: 'Ana', email: 'ana@test.local' },
         },
         {
           id: 'c2',
           userId: 'user-2',
-          empresaId,
+          companyId,
           origin: null,
           user: { id: 'user-2', name: 'Carlos', email: 'carlos@test.local' },
         },
@@ -232,10 +232,10 @@ describe('EmpresaDashboardService', () => {
         .mockResolvedValueOnce({ _sum: { amount: 40 } })
         .mockResolvedValueOnce({ _sum: { amount: null } });
 
-      const csv = await service.exportCsv(empresaId);
+      const csv = await service.exportCsv(companyId);
       const lines = csv.split('\n');
 
-      expect(lines[0]).toBe('Colaborador,Email,Vinculo,Horas,Projetos,Faturado');
+      expect(lines[0]).toBe('Collaborator,Email,Vinculo,Horas,Projetos,Faturado');
       expect(lines[1]).toBe('Ana,ana@test.local,Convite,2.00,0,40.00');
       expect(lines[2]).toBe('Carlos,carlos@test.local,,0.00,0,0.00');
     });

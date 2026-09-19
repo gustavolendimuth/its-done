@@ -72,7 +72,7 @@ export class ConfirmCompanyActivationDto {
   password: string;
 }
 
-// MW-20 — Convite de Administrador
+// MW-20 — Admin invite
 export class InviteCompanyAdminDto {
   @IsEmail()
   email: string;
