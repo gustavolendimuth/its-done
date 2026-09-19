@@ -50,8 +50,8 @@ describe('InvoicesService - create()', () => {
     } as any;
 
     prismaMock.workHour.findMany.mockResolvedValueOnce([
-      { id: 'wh1', userId, clientId: 'c1', projectId: 'p1', hours: 2 },
-      { id: 'wh2', userId, clientId: 'c1', projectId: 'p2', hours: 3 },
+      { id: 'wh1', userId, companyId: 'c1', projectId: 'p1', hours: 2 },
+      { id: 'wh2', userId, companyId: 'c1', projectId: 'p2', hours: 3 },
     ]);
 
     prismaMock.invoiceWorkHour.findMany.mockResolvedValueOnce([]);
@@ -78,13 +78,13 @@ describe('InvoicesService - create()', () => {
     expect(result).toEqual({ id: 'inv1', amount: 440 });
   });
 
-  it("falls back to the client's default hourly rate when a work hour has no project", async () => {
+  it("falls back to the company's default hourly rate when a work hour has no project", async () => {
     const userId = 'user-1';
     const dto = { workHourIds: ['wh1', 'wh2'] } as any;
 
     prismaMock.workHour.findMany.mockResolvedValueOnce([
-      { id: 'wh1', userId, clientId: 'c1', projectId: 'p1', hours: 2 },
-      { id: 'wh2', userId, clientId: 'c1', projectId: null, hours: 3 },
+      { id: 'wh1', userId, companyId: 'c1', projectId: 'p1', hours: 2 },
+      { id: 'wh2', userId, companyId: 'c1', projectId: null, hours: 3 },
     ]);
     prismaMock.invoiceWorkHour.findMany.mockResolvedValueOnce([]);
     prismaMock.project.findMany.mockResolvedValueOnce([
@@ -98,7 +98,7 @@ describe('InvoicesService - create()', () => {
 
     await service.create(dto, userId);
 
-    // 2*100 (project rate) + 3*40 (client fallback) = 320
+    // 2*100 (project rate) + 3*40 (company fallback) = 320
     expect(prismaMock.invoice.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ amount: 320 }),
@@ -106,12 +106,12 @@ describe('InvoicesService - create()', () => {
     );
   });
 
-  it('computes 0 when a work hour has neither a project nor a client rate', async () => {
+  it('computes 0 when a work hour has neither a project nor a company rate', async () => {
     const userId = 'user-1';
     const dto = { workHourIds: ['wh1'] } as any;
 
     prismaMock.workHour.findMany.mockResolvedValueOnce([
-      { id: 'wh1', userId, clientId: 'c1', projectId: null, hours: 5 },
+      { id: 'wh1', userId, companyId: 'c1', projectId: null, hours: 5 },
     ]);
     prismaMock.invoiceWorkHour.findMany.mockResolvedValueOnce([]);
     prismaMock.company.findUnique.mockResolvedValueOnce({ hourlyRate: null });
@@ -131,13 +131,13 @@ describe('InvoicesService - create()', () => {
     const dto = { workHourIds: ['wh1', 'wh2'] } as any;
 
     prismaMock.workHour.findMany.mockResolvedValueOnce([
-      { id: 'wh1', userId, clientId: 'c1', projectId: 'p1', hours: 1 },
-      { id: 'wh2', userId, clientId: 'c2', projectId: 'p1', hours: 1 },
+      { id: 'wh1', userId, companyId: 'c1', projectId: 'p1', hours: 1 },
+      { id: 'wh2', userId, companyId: 'c2', projectId: 'p1', hours: 1 },
     ]);
     prismaMock.invoiceWorkHour.findMany.mockResolvedValueOnce([]);
 
     await expect(service.create(dto, userId)).rejects.toThrow(
-      'All work hours must belong to the same client',
+      'All work hours must belong to the same company',
     );
   });
 
@@ -146,7 +146,7 @@ describe('InvoicesService - create()', () => {
     const dto = { workHourIds: ['wh1'] } as any;
 
     prismaMock.workHour.findMany.mockResolvedValueOnce([
-      { id: 'wh1', userId, clientId: 'c1', projectId: 'p1', hours: 1 },
+      { id: 'wh1', userId, companyId: 'c1', projectId: 'p1', hours: 1 },
     ]);
 
     prismaMock.invoiceWorkHour.findMany.mockResolvedValueOnce([

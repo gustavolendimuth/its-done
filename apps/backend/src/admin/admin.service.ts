@@ -131,7 +131,7 @@ export class AdminService {
           user: {
             select: { name: true, email: true },
           },
-          client: {
+          company: {
             select: { name: true, company: true },
           },
           project: {
@@ -143,7 +143,7 @@ export class AdminService {
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          client: {
+          company: {
             select: { name: true, company: true },
           },
         },

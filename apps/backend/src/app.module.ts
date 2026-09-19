@@ -10,7 +10,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { WorkHoursModule } from './work-hours/work-hours.module';
-import { ClientsModule } from './clients/clients.module';
+import { CompaniesModule } from './companies/companies.module';
 import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
 import { SettingsModule } from './settings/settings.module';
@@ -51,7 +51,7 @@ import { WorkSessionSchedulerService } from './work-sessions/services/work-sessi
     AuthModule,
     UsersModule,
     WorkHoursModule,
-    ClientsModule,
+    CompaniesModule,
     ProjectsModule,
     TasksModule,
     AddressesModule,

@@ -54,7 +54,7 @@ export class CompanyLinkingService {
 
   /**
    * MW-23: notifies the Collaborator that their link to an Company was
-   * removed — either by themselves (`ClientsService.removeCollaborator`) or
+   * removed — either by themselves (`CompaniesService.removeCollaborator`) or
    * by an Admin (`CollaboratorsService.remove`). Call this AFTER
    * the Collaborator row has been deleted.
    */

@@ -11,38 +11,38 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 export class TasksService {
   constructor(private prisma: PrismaService) {}
 
-  private async assertClientOwnership(clientId: string, userId: string) {
-    const client = await this.prisma.company.findFirst({
-      where: { id: clientId, collaborators: { some: { userId } } },
+  private async assertClientOwnership(companyId: string, userId: string) {
+    const company = await this.prisma.company.findFirst({
+      where: { id: companyId, collaborators: { some: { userId } } },
     });
 
-    if (!client) {
+    if (!company) {
       throw new NotFoundException('Client not found or access denied');
     }
   }
 
   private async assertProjectBelongsToClient(
     projectId: string,
-    clientId: string,
+    companyId: string,
   ) {
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
     });
 
-    if (!project || project.clientId !== clientId) {
+    if (!project || project.companyId !== companyId) {
       throw new BadRequestException(
-        'Project does not belong to the selected client',
+        'Project does not belong to the selected company',
       );
     }
   }
 
   async create(createTaskDto: CreateTaskDto, userId: string) {
-    await this.assertClientOwnership(createTaskDto.clientId, userId);
+    await this.assertClientOwnership(createTaskDto.companyId, userId);
 
     if (createTaskDto.projectId) {
       await this.assertProjectBelongsToClient(
         createTaskDto.projectId,
-        createTaskDto.clientId,
+        createTaskDto.companyId,
       );
     }
 
@@ -52,20 +52,20 @@ export class TasksService {
         userId,
       },
       include: {
-        client: true,
+        company: true,
         project: true,
       },
     });
   }
 
-  async findAll(userId: string, clientId?: string) {
+  async findAll(userId: string, companyId?: string) {
     const tasks = await this.prisma.task.findMany({
       where: {
         userId,
-        ...(clientId && { clientId }),
+        ...(companyId && { companyId }),
       },
       include: {
-        client: true,
+        company: true,
         project: true,
       },
       orderBy: {
@@ -96,7 +96,7 @@ export class TasksService {
     const task = await this.prisma.task.findFirst({
       where: { id, userId },
       include: {
-        client: true,
+        company: true,
         project: true,
         workHours: {
           orderBy: { date: 'desc' },
@@ -120,18 +120,18 @@ export class TasksService {
       throw new NotFoundException('Task not found');
     }
 
-    if (updateTaskDto.clientId) {
-      await this.assertClientOwnership(updateTaskDto.clientId, userId);
+    if (updateTaskDto.companyId) {
+      await this.assertClientOwnership(updateTaskDto.companyId, userId);
     }
 
     if (updateTaskDto.projectId) {
       await this.assertProjectBelongsToClient(
         updateTaskDto.projectId,
-        updateTaskDto.clientId ?? task.clientId,
+        updateTaskDto.companyId ?? task.companyId,
       );
     } else if (
-      updateTaskDto.clientId &&
-      updateTaskDto.clientId !== task.clientId &&
+      updateTaskDto.companyId &&
+      updateTaskDto.companyId !== task.companyId &&
       task.projectId
     ) {
       // Client is changing but projectId wasn't given in this update — the
@@ -140,7 +140,7 @@ export class TasksService {
       // the Task" (Story 28). Require the caller to also update/clear it.
       await this.assertProjectBelongsToClient(
         task.projectId,
-        updateTaskDto.clientId,
+        updateTaskDto.companyId,
       );
     }
 
@@ -148,7 +148,7 @@ export class TasksService {
       where: { id },
       data: updateTaskDto,
       include: {
-        client: true,
+        company: true,
         project: true,
       },
     });

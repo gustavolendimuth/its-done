@@ -11,8 +11,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
-import { CreateClientDto } from './dto/create-client.dto';
-import { UpdateClientDto } from './dto/update-client.dto';
+import { CreateCompanyDto } from './dto/create-company.dto';
+import { UpdateCompanyDto } from './dto/update-company.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { InvoicesService } from '../invoices/invoices.service';
 
@@ -20,51 +20,54 @@ import { InvoicesService } from '../invoices/invoices.service';
 @UseGuards(JwtAuthGuard)
 export class CompaniesController {
   constructor(
-    private readonly clientsService: CompaniesService,
+    private readonly companiesService: CompaniesService,
     private readonly invoicesService: InvoicesService,
   ) {}
 
   @Post()
-  create(@Request() req, @Body() createClientDto: CreateClientDto) {
-    return this.clientsService.create(req.user.id, createClientDto);
+  create(@Request() req, @Body() createCompanyDto: CreateCompanyDto) {
+    return this.companiesService.create(req.user.id, createCompanyDto);
   }
 
   @Get()
   findAll(@Request() req) {
-    return this.clientsService.findAll(req.user.id);
+    return this.companiesService.findAll(req.user.id);
   }
 
   @Get('stats')
   getStats(@Request() req) {
-    return this.clientsService.getStats(req.user.id);
+    return this.companiesService.getStats(req.user.id);
   }
 
   @Get(':id')
   findOne(@Request() req, @Param('id') id: string) {
-    return this.clientsService.findOne(req.user.id, id);
+    return this.companiesService.findOne(req.user.id, id);
   }
 
   @Get(':id/stats')
   getClientStats(@Request() req, @Param('id') id: string) {
-    return this.clientsService.getClientStats(req.user.id, id);
+    return this.companiesService.getClientStats(req.user.id, id);
   }
 
   @Get(':id/invoices')
-  async getClientInvoices(@Request() req, @Param('id') clientId: string) {
+  async getClientInvoices(@Request() req, @Param('id') companyId: string) {
     try {
-      // Verify client belongs to user first
-      const client = await this.clientsService.findOne(req.user.id, clientId);
-      if (!client) {
-        throw new NotFoundException(`Client with id ${clientId} not found`);
+      // Verify company belongs to user first
+      const company = await this.companiesService.findOne(
+        req.user.id,
+        companyId,
+      );
+      if (!company) {
+        throw new NotFoundException(`Client with id ${companyId} not found`);
       }
 
-      // Return invoices for this client
-      const invoices = await this.invoicesService.findByClient(clientId);
+      // Return invoices for this company
+      const invoices = await this.invoicesService.findByClient(companyId);
       return invoices;
     } catch (error) {
       // Log the error for debugging
       console.error(
-        `Error fetching invoices for client ${clientId}:`,
+        `Error fetching invoices for company ${companyId}:`,
         error.message,
       );
       throw error;
@@ -75,29 +78,29 @@ export class CompaniesController {
   update(
     @Request() req,
     @Param('id') id: string,
-    @Body() updateClientDto: UpdateClientDto,
+    @Body() updateCompanyDto: UpdateCompanyDto,
   ) {
-    return this.clientsService.update(req.user.id, id, updateClientDto);
+    return this.companiesService.update(req.user.id, id, updateCompanyDto);
   }
 
   @Delete(':id')
   remove(@Request() req, @Param('id') id: string) {
-    return this.clientsService.remove(req.user.id, id);
+    return this.companiesService.remove(req.user.id, id);
   }
 
   @Delete(':id/collaborator')
   removeCollaborator(@Request() req, @Param('id') id: string) {
-    return this.clientsService.removeCollaborator(req.user.id, id);
+    return this.companiesService.removeCollaborator(req.user.id, id);
   }
 
   @Get('debug/all')
   async debugGetAllCompanies(@Request() req) {
     try {
-      const clients = await this.clientsService.findAll(req.user.id);
+      const companies = await this.companiesService.findAll(req.user.id);
       return {
         userId: req.user.id,
-        clientCount: clients.length,
-        clients: clients.map((c) => ({
+        clientCount: companies.length,
+        clients: companies.map((c) => ({
           id: c.id,
           name: c.name,
           email: c.email,

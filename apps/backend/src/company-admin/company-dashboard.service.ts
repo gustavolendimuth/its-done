@@ -122,7 +122,7 @@ export class CompanyDashboardService {
 
     const result = await this.prisma.invoice.aggregate({
       where: {
-        clientId: companyId,
+        companyId,
         status: { not: 'CANCELED' },
         createdAt: { gte: period.from, lte: period.to },
         invoiceWorkHours: {
@@ -154,7 +154,7 @@ export class CompanyDashboardService {
       userIds.length
         ? this.prisma.workHour.findMany({
             where: {
-              clientId: companyId,
+              companyId,
               userId: { in: userIds },
               date: { gte: period.from, lte: period.to },
             },
@@ -196,7 +196,7 @@ export class CompanyDashboardService {
       const [workHours, faturado] = await Promise.all([
         this.prisma.workHour.findMany({
           where: {
-            clientId: companyId,
+            companyId,
             userId: collaborator.userId,
             date: { gte: period.from, lte: period.to },
           },

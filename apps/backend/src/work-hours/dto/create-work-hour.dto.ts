@@ -39,7 +39,7 @@ export class CreateWorkHourDto {
   endTime?: string;
 
   @IsUUID(4, { message: 'Client ID must be a valid UUID' })
-  clientId: string;
+  companyId: string;
 
   @IsOptional()
   @IsUUID(4, { message: 'Project ID must be a valid UUID' })

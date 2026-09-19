@@ -48,5 +48,5 @@ export class CreateAddressDto {
 
   @IsString()
   @IsNotEmpty({ message: 'Client ID is required' })
-  clientId: string;
+  companyId: string;
 }

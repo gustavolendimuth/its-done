@@ -7,15 +7,15 @@ export class DraftInvoiceService {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Create a draft invoice for a client with available hours
+   * Create a draft invoice for a company with available hours
    */
-  async createDraft(userId: string, clientId: string, workHours: any[]) {
+  async createDraft(userId: string, companyId: string, workHours: any[]) {
     // Calculate total amount from work hours
     let totalAmount = 0;
     const workHourIds: string[] = [];
 
     for (const wh of workHours) {
-      const hourlyRate = resolveHourlyRate(wh.project, wh.client);
+      const hourlyRate = resolveHourlyRate(wh.project, wh.company);
       totalAmount += wh.hours * hourlyRate;
       workHourIds.push(wh.id);
     }
@@ -28,7 +28,7 @@ export class DraftInvoiceService {
     // Create draft invoice
     const invoice = await this.prisma.invoice.create({
       data: {
-        clientId,
+        companyId,
         amount: totalAmount,
         status: 'DRAFT',
         description: `Auto-generated draft - ${totalHours.toFixed(2)}h (${workHours.length} entries)`,
@@ -39,7 +39,7 @@ export class DraftInvoiceService {
         },
       },
       include: {
-        client: true,
+        company: true,
         invoiceWorkHours: {
           include: {
             workHour: {
@@ -63,7 +63,7 @@ export class DraftInvoiceService {
     const invoice = await this.prisma.invoice.findFirst({
       where: {
         id: invoiceId,
-        client: {
+        company: {
           collaborators: { some: { userId } },
         },
         status: 'DRAFT',
@@ -80,7 +80,7 @@ export class DraftInvoiceService {
         status: 'PENDING',
       },
       include: {
-        client: true,
+        company: true,
         invoiceWorkHours: {
           include: {
             workHour: true,
@@ -98,7 +98,7 @@ export class DraftInvoiceService {
     const invoice = await this.prisma.invoice.findFirst({
       where: {
         id: invoiceId,
-        client: {
+        company: {
           collaborators: { some: { userId } },
         },
         status: 'DRAFT',

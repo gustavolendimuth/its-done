@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export interface ReportFilters {
   startDate?: Date;
   endDate?: Date;
-  clientId?: string;
+  companyId?: string;
 }
 
 export interface HoursReport {
@@ -12,7 +12,7 @@ export interface HoursReport {
   totalDays: number;
   averageHoursPerDay: number;
   clientBreakdown: {
-    clientId: string;
+    companyId: string;
     clientName: string;
     totalHours: number;
     percentage: number;
@@ -33,7 +33,7 @@ export interface InvoiceReport {
   paidInvoices: number;
   totalValue?: number;
   clientBreakdown: {
-    clientId: string;
+    companyId: string;
     clientName: string;
     totalInvoices: number;
     pendingInvoices: number;
@@ -59,13 +59,13 @@ export class ReportsService {
             },
           }
         : {}),
-      ...(filters.clientId ? { clientId: filters.clientId } : {}),
+      ...(filters.companyId ? { companyId: filters.companyId } : {}),
     };
 
     const workHours = await this.prisma.workHour.findMany({
       where,
       include: {
-        client: true,
+        company: true,
       },
       orderBy: {
         date: 'asc',
@@ -83,20 +83,20 @@ export class ReportsService {
     // Client breakdown
     const clientMap = new Map();
     workHours.forEach((wh) => {
-      const key = wh.clientId;
+      const key = wh.companyId;
       if (!clientMap.has(key)) {
         clientMap.set(key, {
-          clientId: wh.clientId,
-          clientName: wh.client.name,
+          companyId: wh.companyId,
+          clientName: wh.company.name,
           totalHours: 0,
         });
       }
       clientMap.get(key).totalHours += wh.hours;
     });
 
-    const clientBreakdown = Array.from(clientMap.values()).map((client) => ({
-      ...client,
-      percentage: totalHours > 0 ? (client.totalHours / totalHours) * 100 : 0,
+    const clientBreakdown = Array.from(clientMap.values()).map((company) => ({
+      ...company,
+      percentage: totalHours > 0 ? (company.totalHours / totalHours) * 100 : 0,
     }));
 
     // Weekly breakdown
@@ -167,13 +167,13 @@ export class ReportsService {
           },
         },
       },
-      ...(filters.clientId ? { clientId: filters.clientId } : {}),
+      ...(filters.companyId ? { companyId: filters.companyId } : {}),
     };
 
     const invoices = await this.prisma.invoice.findMany({
       where,
       include: {
-        client: true,
+        company: true,
         invoiceWorkHours: {
           include: {
             workHour: true,
@@ -194,22 +194,22 @@ export class ReportsService {
     // Client breakdown
     const clientMap = new Map();
     invoices.forEach((inv) => {
-      const key = inv.clientId;
+      const key = inv.companyId;
       if (!clientMap.has(key)) {
         clientMap.set(key, {
-          clientId: inv.clientId,
-          clientName: inv.client.name,
+          companyId: inv.companyId,
+          clientName: inv.company.name,
           totalInvoices: 0,
           pendingInvoices: 0,
           paidInvoices: 0,
         });
       }
-      const client = clientMap.get(key);
-      client.totalInvoices++;
-      if (inv.status === 'PENDING') client.pendingInvoices++;
-      if (inv.status === 'PAID') client.paidInvoices++;
+      const company = clientMap.get(key);
+      company.totalInvoices++;
+      if (inv.status === 'PENDING') company.pendingInvoices++;
+      if (inv.status === 'PAID') company.paidInvoices++;
       if (inv.status === 'CANCELED')
-        client.canceledInvoices = (client.canceledInvoices || 0) + 1;
+        company.canceledInvoices = (company.canceledInvoices || 0) + 1;
     });
 
     const clientBreakdown = Array.from(clientMap.values());

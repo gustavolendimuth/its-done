@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateClientDto } from './dto/create-client.dto';
-import { UpdateClientDto } from './dto/update-client.dto';
+import { CreateCompanyDto } from './dto/create-company.dto';
+import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompanyLinkingService } from '../company-admin/company-linking.service';
 
 @Injectable()
@@ -11,10 +11,10 @@ export class CompaniesService {
     private companyLinkingService: CompanyLinkingService,
   ) {}
 
-  async create(userId: string, createClientDto: CreateClientDto) {
+  async create(userId: string, createCompanyDto: CreateCompanyDto) {
     return this.prisma.company.create({
       data: {
-        ...createClientDto,
+        ...createCompanyDto,
         collaborators: {
           create: { userId },
         },
@@ -40,7 +40,7 @@ export class CompaniesService {
   }
 
   async findOne(userId: string, id: string) {
-    const client = await this.prisma.company.findFirst({
+    const company = await this.prisma.company.findFirst({
       where: {
         id,
         collaborators: { some: { userId } },
@@ -56,11 +56,11 @@ export class CompaniesService {
       },
     });
 
-    if (!client) {
+    if (!company) {
       throw new NotFoundException('Client not found');
     }
 
-    return this.mapWithHasActiveAdmin(client);
+    return this.mapWithHasActiveAdmin(company);
   }
 
   private mapWithHasActiveAdmin<
@@ -75,33 +75,33 @@ export class CompaniesService {
     };
   }
 
-  async update(userId: string, id: string, updateClientDto: UpdateClientDto) {
-    const client = await this.prisma.company.findFirst({
+  async update(userId: string, id: string, updateCompanyDto: UpdateCompanyDto) {
+    const company = await this.prisma.company.findFirst({
       where: {
         id,
         collaborators: { some: { userId } },
       },
     });
 
-    if (!client) {
+    if (!company) {
       throw new NotFoundException('Client not found');
     }
 
     return this.prisma.company.update({
       where: { id },
-      data: updateClientDto,
+      data: updateCompanyDto,
     });
   }
 
   async remove(userId: string, id: string) {
-    const client = await this.prisma.company.findFirst({
+    const company = await this.prisma.company.findFirst({
       where: {
         id,
         collaborators: { some: { userId } },
       },
     });
 
-    if (!client) {
+    if (!company) {
       throw new NotFoundException('Client not found');
     }
 
@@ -145,7 +145,7 @@ export class CompaniesService {
 
     const totalHoursResult = await this.prisma.workHour.aggregate({
       where: {
-        client: {
+        company: {
           collaborators: { some: { userId } },
         },
       },
@@ -156,7 +156,7 @@ export class CompaniesService {
 
     const totalInvoices = await this.prisma.invoice.count({
       where: {
-        client: {
+        company: {
           collaborators: { some: { userId } },
         },
       },
@@ -165,7 +165,7 @@ export class CompaniesService {
     // Get invoice stats
     const invoiceAmountResult = await this.prisma.invoice.aggregate({
       where: {
-        client: {
+        company: {
           collaborators: { some: { userId } },
         },
       },
@@ -176,7 +176,7 @@ export class CompaniesService {
 
     const paidInvoicesResult = await this.prisma.invoice.aggregate({
       where: {
-        client: {
+        company: {
           collaborators: { some: { userId } },
         },
         status: 'PAID',
@@ -188,7 +188,7 @@ export class CompaniesService {
 
     const pendingInvoicesResult = await this.prisma.invoice.aggregate({
       where: {
-        client: {
+        company: {
           collaborators: { some: { userId } },
         },
         status: 'PENDING',
@@ -200,7 +200,7 @@ export class CompaniesService {
 
     const canceledInvoicesResult = await this.prisma.invoice.aggregate({
       where: {
-        client: {
+        company: {
           collaborators: { some: { userId } },
         },
         status: 'CANCELED',
@@ -227,7 +227,7 @@ export class CompaniesService {
   }
 
   async getClientStats(userId: string, id: string) {
-    const client = await this.prisma.company.findFirst({
+    const company = await this.prisma.company.findFirst({
       where: {
         id,
         collaborators: { some: { userId } },
@@ -248,28 +248,28 @@ export class CompaniesService {
       },
     });
 
-    if (!client) {
+    if (!company) {
       throw new NotFoundException('Client not found');
     }
 
-    const totalHours = client.workHours.reduce(
+    const totalHours = company.workHours.reduce(
       (sum, workHour) => sum + workHour.hours,
       0,
     );
 
-    const paidInvoicesAmount = client.invoices
+    const paidInvoicesAmount = company.invoices
       .filter((invoice) => invoice.status === 'PAID')
       .reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
 
-    const pendingInvoicesAmount = client.invoices
+    const pendingInvoicesAmount = company.invoices
       .filter((invoice) => invoice.status === 'PENDING')
       .reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
 
-    const canceledInvoicesAmount = client.invoices
+    const canceledInvoicesAmount = company.invoices
       .filter((invoice) => invoice.status === 'CANCELED')
       .reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
 
-    const totalValue = client.invoices.reduce(
+    const totalValue = company.invoices.reduce(
       (sum, invoice) => sum + (invoice.amount || 0),
       0,
     );
@@ -280,7 +280,7 @@ export class CompaniesService {
       paidValue: paidInvoicesAmount,
       pendingValue: pendingInvoicesAmount,
       canceledValue: canceledInvoicesAmount,
-      totalInvoices: client.invoices.length,
+      totalInvoices: company.invoices.length,
     };
   }
 }

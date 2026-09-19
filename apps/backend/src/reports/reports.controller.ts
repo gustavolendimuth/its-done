@@ -12,12 +12,12 @@ export class ReportsController {
     @Request() req,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('clientId') clientId?: string,
+    @Query('companyId') companyId?: string,
   ) {
     const filters: ReportFilters = {
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
-      clientId: clientId || undefined,
+      companyId: companyId || undefined,
     };
 
     return this.reportsService.generateHoursReport(req.user.id, filters);
@@ -28,12 +28,12 @@ export class ReportsController {
     @Request() req,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('clientId') clientId?: string,
+    @Query('companyId') companyId?: string,
   ) {
     const filters: ReportFilters = {
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
-      clientId: clientId || undefined,
+      companyId: companyId || undefined,
     };
 
     return this.reportsService.generateInvoiceReport(req.user.id, filters);

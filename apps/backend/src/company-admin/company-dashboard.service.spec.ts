@@ -71,7 +71,7 @@ describe('CompanyDashboardService', () => {
       expect(prismaMock.workHour.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            clientId: companyId,
+            companyId,
             userId: { in: ['user-1', 'user-2'] },
           }),
         }),
@@ -80,7 +80,7 @@ describe('CompanyDashboardService', () => {
       expect(prismaMock.invoice.aggregate).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            clientId: companyId,
+            companyId,
             status: { not: 'CANCELED' },
             invoiceWorkHours: {
               some: { workHour: { userId: { in: ['user-1', 'user-2'] } } },

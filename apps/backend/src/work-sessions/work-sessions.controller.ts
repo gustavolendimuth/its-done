@@ -126,7 +126,7 @@ export class WorkSessionsController {
     const workHour = await this.workHoursService.create(req.user.id, {
       date: dto.date ? new Date(dto.date) : session.startedAt,
       hours: session.hours ?? 0,
-      clientId: dto.clientId,
+      companyId: dto.clientId,
       projectId: dto.projectId,
       taskId: dto.taskId,
       description: dto.description,
