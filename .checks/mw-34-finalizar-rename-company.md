@@ -84,7 +84,7 @@ Proof: `pnpm --filter @its-done/backend test -- --runInBand`
 Proof: `pnpm --filter frontend test:ci`
 
 **C15** - O smoke local confirma login comum, listagem e detalhe de Company, cadastro de CompanyAdmin e acesso a colaboradores e convites sem resposta 404 ou 500; o preview é encerrado no fim.
-Proof: `pnpm preview:start && scripts/smoke-mw34.sh; status=$?; pnpm preview:stop; exit $status`
+Proof: `pnpm preview:start && scripts/smoke-mw34.sh; task_status=$?; pnpm preview:stop; exit $task_status`
 
 ## Swept
 
