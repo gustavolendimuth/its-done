@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ClientsPage from "../page";
 
-import type { Client } from "@/features/companies";
+import type { Company } from "@/features/companies";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -49,7 +49,7 @@ jest.mock("@/components/layout/empty-state", () => ({
 }));
 
 // Mock data
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "1",
     company: "Company A",
@@ -71,41 +71,41 @@ const mockClients: Client[] = [
 // Mock the clients feature barrel (components + hooks), never an internal path
 jest.mock("@/features/companies", () => ({
   ...jest.requireActual("@/features/companies"),
-  useClients: jest.fn(() => ({
+  useCompanies: jest.fn(() => ({
     data: mockClients,
     isLoading: false,
   })),
-  ClientForm: ({ onSuccess }: { onSuccess: () => void }) => (
+  CompanyForm: ({ onSuccess }: { onSuccess: () => void }) => (
     <div data-testid="client-form">
       <button onClick={onSuccess}>Submit</button>
     </div>
   ),
-  ClientCard: ({ client }: { client: Client }) => (
+  CompanyCard: ({ company }: { company: Company }) => (
     <div data-testid="client-card">
-      <p>Company: {client.company}</p>
-      <p>Name: {client.name}</p>
-      <p>Email: {client.email}</p>
+      <p>Company: {company.company}</p>
+      <p>Name: {company.name}</p>
+      <p>Email: {company.email}</p>
     </div>
   ),
-  ClientsBigStats: () => <div data-testid="clients-big-stats">Stats</div>,
-  ClientsPageSkeleton: () => <div data-testid="loading-skeleton" />,
+  CompaniesBigStats: () => <div data-testid="clients-big-stats">Stats</div>,
+  CompaniesPageSkeleton: () => <div data-testid="loading-skeleton" />,
 }));
 
 describe("ClientsPage", () => {
   beforeEach(() => {
     // Restore the default (some tests below override it via mockReturnValue,
     // which is not undone automatically between tests)
-    const { useClients } = require("@/features/companies");
+    const { useCompanies } = require("@/features/companies");
 
-    useClients.mockReturnValue({
+    useCompanies.mockReturnValue({
       data: mockClients,
       isLoading: false,
     });
   });
 
   it("should render loading skeleton when loading", () => {
-    const { useClients } = require("@/features/companies");
-    useClients.mockReturnValue({
+    const { useCompanies } = require("@/features/companies");
+    useCompanies.mockReturnValue({
       data: null,
       isLoading: true,
     });
@@ -148,8 +148,8 @@ describe("ClientsPage", () => {
   });
 
   it("should show empty state when no clients", () => {
-    const { useClients } = require("@/features/companies");
-    useClients.mockReturnValue({
+    const { useCompanies } = require("@/features/companies");
+    useCompanies.mockReturnValue({
       data: [],
       isLoading: false,
     });

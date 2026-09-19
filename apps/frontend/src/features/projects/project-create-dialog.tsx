@@ -10,12 +10,12 @@ import { z } from "zod";
 import { useCreateProject, type Project } from "./projects.service";
 
 import { Button } from "@/components/ui/button";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useClients } from "@/features/companies";
+import { useCompanies } from "@/features/companies";
 
 const projectSchema = z.object({
   name: z.string().min(1, { message: "Project name is required" }),
@@ -49,7 +49,7 @@ export function ProjectCreateDialog({
   onSuccess,
 }: ProjectCreateDialogProps) {
   const createProject = useCreateProject();
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const t = useTranslations("ProjectCreateDialog");
 
   const {
@@ -108,7 +108,7 @@ export function ProjectCreateDialog({
             name="companyId"
             control={control}
             render={({ field }) => (
-              <ClientCombobox
+              <CompanyCombobox
                 clients={clients}
                 value={field.value}
                 onSelect={field.onChange}

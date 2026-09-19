@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { WorkSessionFinishForm } from "./work-session-finish-form";
 
 import type { LocalWorkSession } from "../lib/work-timer-db";
-import type { Client } from "@/features/companies";
+import type { Company } from "@/features/companies";
 
 const mockMutateAsync = jest.fn();
 const mockDiscard = jest.fn();
@@ -34,7 +34,7 @@ jest.mock("../work-sessions", () => ({
   }),
 }));
 
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "client-1",
     company: "Acme",
@@ -45,11 +45,11 @@ const mockClients: Client[] = [
 ];
 
 jest.mock("@/features/companies", () => ({
-  useClients: () => ({ data: mockClients }),
+  useCompanies: () => ({ data: mockClients }),
 }));
 
-jest.mock("@/components/ui/client-combobox", () => ({
-  ClientCombobox: ({
+jest.mock("@/components/ui/company-combobox", () => ({
+  CompanyCombobox: ({
     value,
     onSelect,
   }: {

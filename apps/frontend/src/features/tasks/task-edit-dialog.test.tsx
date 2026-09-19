@@ -24,7 +24,7 @@ const mockUpdateTask = jest.fn(
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      client: mockClient,
+      company: mockClient,
     });
   }
 );
@@ -85,7 +85,7 @@ const baseTask: Task = {
   userId: "user1",
   createdAt: "2024-03-01T00:00:00Z",
   updatedAt: "2024-03-01T00:00:00Z",
-  client: mockClient,
+  company: mockClient,
 };
 
 describe("TaskEditDialog", () => {

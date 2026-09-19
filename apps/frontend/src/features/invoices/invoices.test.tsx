@@ -50,7 +50,7 @@ describe("Invoice Services", () => {
     id: "1",
     number: "INV-001",
     companyId: "client-1",
-    client: {
+    company: {
       id: "client-1",
       name: "John Doe",
       email: "john@example.com",

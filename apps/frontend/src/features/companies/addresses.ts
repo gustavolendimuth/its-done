@@ -15,7 +15,7 @@ export interface Address {
   companyId: string;
   createdAt: string;
   updatedAt: string;
-  client?: {
+  company?: {
     id: string;
     company: string;
     name?: string;
@@ -65,7 +65,7 @@ export const useAddress = (id: string) => {
   });
 };
 
-export const useClientAddresses = (companyId: string) => {
+export const useCompanyAddresses = (companyId: string) => {
   return useQuery({
     queryKey: ["clients", companyId, "addresses"],
     queryFn: async () => {

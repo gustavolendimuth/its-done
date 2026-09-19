@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import { TaskCreateDialog } from "./task-create-dialog";
 
-import type { Client } from "@/features/companies";
+import type { Company } from "@/features/companies";
 import type { Task, CreateTaskData } from "./tasks.service";
 
 jest.mock("next-intl", () => ({
@@ -27,7 +27,7 @@ const mockCreateTask = jest.fn((data: CreateTaskData): Promise<Task> => {
     userId: "user1",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    client: mockClients.find((c) => c.id === data.companyId)!,
+    company: mockClients.find((c) => c.id === data.companyId)!,
   });
 });
 
@@ -38,7 +38,7 @@ jest.mock("./tasks.service", () => ({
   })),
 }));
 
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "1",
     name: "John Doe",
@@ -50,7 +50,7 @@ const mockClients: Client[] = [
 ];
 
 jest.mock("@/features/companies", () => ({
-  useClients: () => ({ data: mockClients, isLoading: false }),
+  useCompanies: () => ({ data: mockClients, isLoading: false }),
 }));
 
 const mockProjects = [
@@ -62,8 +62,8 @@ jest.mock("@/features/projects", () => ({
   useProjects: () => ({ data: mockProjects, isLoading: false }),
 }));
 
-jest.mock("@/components/ui/client-combobox", () => ({
-  ClientCombobox: ({
+jest.mock("@/components/ui/company-combobox", () => ({
+  CompanyCombobox: ({
     value,
     onSelect,
     placeholder,

@@ -4,15 +4,15 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { AddressCombobox } from "@/components/ui/address-combobox";
 import { Label } from "@/components/ui/label";
-import { useClientAddresses } from "@/features/companies/addresses";
+import { useCompanyAddresses } from "@/features/companies/addresses";
 
 
-interface ClientAddressesProps {
+interface CompanyAddressesProps {
   companyId: string;
 }
 
-export function ClientAddresses({ companyId }: ClientAddressesProps) {
-  const { data: addresses } = useClientAddresses(companyId);
+export function CompanyAddresses({ companyId }: CompanyAddressesProps) {
+  const { data: addresses } = useCompanyAddresses(companyId);
   const queryClient = useQueryClient();
 
   const handleAddressAdded = () => {

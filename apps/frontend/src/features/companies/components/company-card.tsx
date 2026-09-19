@@ -21,8 +21,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { ClientAddresses } from "./client-addresses";
-import { ClientShareMenu } from "./client-share-menu";
+import { CompanyAddresses } from "./company-addresses";
+import { CompanyShareMenu } from "./company-share-menu";
 
 import { Badge } from "@/components/ui/badge";
 import { BigCardStat, BigCardContactInfo } from "@/components/ui/big-card";
@@ -39,57 +39,57 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { useClientSpecificStats } from "@/features/companies/client-stats";
-import { useUpdateClient, UpdateClientDto } from "@/features/companies/clients";
-import { Client } from "@/features/companies/types";
+import { useCompanySpecificStats } from "@/features/companies/company-stats";
+import { useUpdateCompany, UpdateCompanyDto } from "@/features/companies/companies";
+import { Company } from "@/features/companies/types";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
 
-interface ClientCardProps {
-  client: Client;
+interface CompanyCardProps {
+  company: Company;
 }
 
-export function ClientCard({ client }: ClientCardProps) {
+export function CompanyCard({ company }: CompanyCardProps) {
   const t = useTranslations("clients");
-  const { data: stats, isLoading } = useClientSpecificStats(client.id);
+  const { data: stats, isLoading } = useCompanySpecificStats(company.id);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const router = useRouter();
-  const updateClient = useUpdateClient();
+  const updateCompany = useUpdateCompany();
 
-  const clientFormSchema = z.object({
+  const companyFormSchema = z.object({
     name: z.string().min(1, t("validationNameRequired")),
     email: z.string().email(t("validationInvalidEmail")),
     phone: z.string().min(1, t("validationPhoneRequired")),
     company: z.string().min(1, t("validationCompanyRequired")),
   });
 
-  type ClientFormData = z.infer<typeof clientFormSchema>;
+  type CompanyFormData = z.infer<typeof companyFormSchema>;
 
-  const form = useForm<ClientFormData>({
-    resolver: zodResolver(clientFormSchema),
+  const form = useForm<CompanyFormData>({
+    resolver: zodResolver(companyFormSchema),
     defaultValues: {
-      name: client.name,
-      email: client.email,
-      phone: client.phone,
-      company: client.company,
+      name: company.name,
+      email: company.email,
+      phone: company.phone,
+      company: company.company,
     },
   });
 
   const handleViewClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/companies/${client.id}`);
+    router.push(`/companies/${company.id}`);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log("Edit button clicked for client:", client.company);
+    console.log("Edit button clicked for client:", company.company);
     setIsEditModalOpen(true);
   };
 
-  const onSubmit = async (data: ClientFormData) => {
+  const onSubmit = async (data: CompanyFormData) => {
     try {
-      await updateClient.mutateAsync({
-        id: client.id,
-        data: data as UpdateClientDto,
+      await updateCompany.mutateAsync({
+        id: company.id,
+        data: data as UpdateCompanyDto,
       });
       setIsEditModalOpen(false);
       toast.success(t("clientUpdatedSuccessfully"));
@@ -101,9 +101,9 @@ export function ClientCard({ client }: ClientCardProps) {
 
   // Prepare contact info
   const contactInfo: BigCardContactInfo[] = [
-    { icon: User, value: client.name || t("noContactName") },
-    { icon: Mail, value: client.email },
-    ...(client.phone ? [{ icon: Phone, value: client.phone }] : []),
+    { icon: User, value: company.name || t("noContactName") },
+    { icon: Mail, value: company.email },
+    ...(company.phone ? [{ icon: Phone, value: company.phone }] : []),
   ];
 
   // Prepare stats
@@ -133,7 +133,7 @@ export function ClientCard({ client }: ClientCardProps) {
           "bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20 border-blue-200 dark:border-blue-800",
         )}
       >
-        {client.hasActiveAdmin && (
+        {company.hasActiveAdmin && (
           <Badge
             variant="success"
             className="absolute -top-2 -right-2 z-10 flex items-center gap-1"
@@ -151,7 +151,7 @@ export function ClientCard({ client }: ClientCardProps) {
               <Building2 className="h-6 w-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-xl font-bold truncate">{client.company}</h3>
+              <h3 className="text-xl font-bold truncate">{company.company}</h3>
             </div>
           </div>
         </CardHeader>
@@ -194,7 +194,7 @@ export function ClientCard({ client }: ClientCardProps) {
         </CardContent>
       </Card>
 
-      {client.hasActiveAdmin && (
+      {company.hasActiveAdmin && (
         <p className="text-xs text-muted-foreground px-1 pt-1">
           {t("linkedBadgeNote")}
         </p>
@@ -222,7 +222,7 @@ export function ClientCard({ client }: ClientCardProps) {
               <Edit2 className="h-4 w-4 mr-1" />
               {t("edit")}
             </Button>
-            <ClientShareMenu client={client} />
+            <CompanyShareMenu company={company} />
           </div>
         </div>
       </div>
@@ -290,7 +290,7 @@ export function ClientCard({ client }: ClientCardProps) {
                 </FormItem>
               )}
             />
-            <ClientAddresses companyId={client.id} />
+            <CompanyAddresses companyId={company.id} />
             <Button type="submit" className="w-full">
               {t("saveChanges")}
             </Button>

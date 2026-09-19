@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
 
-export interface Client {
+export interface Company {
   id: string;
   name?: string;
   email: string;
@@ -35,7 +35,7 @@ export interface Address {
   updatedAt: string;
 }
 
-export interface CreateClientDto {
+export interface CreateCompanyDto {
   name?: string;
   email: string;
   phone?: string;
@@ -44,13 +44,13 @@ export interface CreateClientDto {
   hourlyRate?: number;
 }
 
-export interface UpdateClientDto extends Partial<CreateClientDto> {}
+export interface UpdateCompanyDto extends Partial<CreateCompanyDto> {}
 
-export const useClients = () => {
+export const useCompanies = () => {
   return useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
-      const { data } = await api.get<Client[]>("/clients");
+      const { data } = await api.get<Company[]>("/companies");
 
       return data;
     },
@@ -60,11 +60,11 @@ export const useClients = () => {
   });
 };
 
-export const useClient = (id: string) => {
+export const useCompany = (id: string) => {
   return useQuery({
     queryKey: ["clients", id],
     queryFn: async () => {
-      const { data } = await api.get<Client>(`/clients/${id}`);
+      const { data } = await api.get<Company>(`/companies/${id}`);
 
       return data;
     },
@@ -75,14 +75,14 @@ export const useClient = (id: string) => {
   });
 };
 
-export const useCreateClient = () => {
+export const useCreateCompany = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: CreateClientDto) => {
+    mutationFn: async (data: CreateCompanyDto) => {
       console.log("Making API request to create client with data:", data);
       try {
-        const response = await api.post<Client>("/clients", data);
+        const response = await api.post<Company>("/companies", data);
 
         console.log("API response:", response.data);
 
@@ -105,12 +105,12 @@ export const useCreateClient = () => {
   });
 };
 
-export const useUpdateClient = () => {
+export const useUpdateCompany = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: UpdateClientDto }) => {
-      const response = await api.patch<Client>(`/clients/${id}`, data);
+    mutationFn: async ({ id, data }: { id: string; data: UpdateCompanyDto }) => {
+      const response = await api.patch<Company>(`/companies/${id}`, data);
 
       return response.data;
     },
@@ -128,12 +128,12 @@ export const useUpdateClient = () => {
   });
 };
 
-export const useDeleteClient = () => {
+export const useDeleteCompany = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await api.delete<Client>(`/clients/${id}`);
+      const response = await api.delete<Company>(`/companies/${id}`);
 
       return response.data;
     },
@@ -153,7 +153,7 @@ export const useDeleteClient = () => {
   });
 };
 
-export const useClientStats = (params?: { from?: string; to?: string }) => {
+export const useCompanyStats = (params?: { from?: string; to?: string }) => {
   return useQuery({
     queryKey: ["clients", "stats", params],
     queryFn: async () => {
@@ -161,7 +161,7 @@ export const useClientStats = (params?: { from?: string; to?: string }) => {
         totalClients: number;
         totalHours: number;
         totalInvoices: number;
-      }>("/clients/stats", {
+      }>("/companies/stats", {
         params,
       });
 

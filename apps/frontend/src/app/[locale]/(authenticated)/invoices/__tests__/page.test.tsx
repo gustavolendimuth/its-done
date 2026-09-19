@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import InvoicesPage from "../page";
 
-import type { Client } from "@/features/companies";
+import type { Company } from "@/features/companies";
 import type { Invoice } from "@/features/invoices";
 
 // Mock next-intl
@@ -58,7 +58,7 @@ jest.mock("@/components/layout/empty-state", () => ({
 }));
 
 // Mock data
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "client1",
     name: "John Doe",
@@ -153,7 +153,7 @@ jest.mock("@/features/invoices", () => ({
   }: any) => (
     <div data-testid="invoice-card">
       <p>Invoice: {number}</p>
-      <p>Client: {clientName}</p>
+      <p>Company: {clientName}</p>
       <p>Amount: ${amount}</p>
       <p>Status: {status}</p>
       <button onClick={onEdit}>Edit</button>
@@ -174,7 +174,7 @@ jest.mock("@/features/invoices", () => ({
 }));
 
 jest.mock("@/features/companies", () => ({
-  useClients: jest.fn(() => ({
+  useCompanies: jest.fn(() => ({
     data: mockClients,
     isLoading: false,
   })),
@@ -234,10 +234,10 @@ describe("InvoicesPage", () => {
     expect(cards).toHaveLength(2);
     // Default sort is newest first, so INV-002 (2024-03-02) leads INV-001 (2024-03-01)
     expect(cards[0]).toHaveTextContent("Invoice: INV-002");
-    expect(cards[0]).toHaveTextContent("Client: Jane Smith");
+    expect(cards[0]).toHaveTextContent("Company: Jane Smith");
     expect(cards[0]).toHaveTextContent("Amount: $1500");
     expect(cards[1]).toHaveTextContent("Invoice: INV-001");
-    expect(cards[1]).toHaveTextContent("Client: John Doe");
+    expect(cards[1]).toHaveTextContent("Company: John Doe");
     expect(cards[1]).toHaveTextContent("Amount: $1000");
   });
 

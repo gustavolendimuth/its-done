@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { ProjectEditDialog } from "./project-edit-dialog";
 import { render } from "@/test-utils";
 
-import type { Client } from "@/features/companies";
+import type { Company } from "@/features/companies";
 import type { Project, UpdateProjectData } from "./projects.service";
 
 // Mock next-intl
@@ -32,7 +32,7 @@ const mockUpdateProject = jest.fn(
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      client: mockClients.find((c) => c.id === (data.companyId || "1"))!,
+      company: mockClients.find((c) => c.id === (data.companyId || "1"))!,
       _count: {
         workHours: 0,
       },
@@ -47,7 +47,7 @@ jest.mock("./projects.service", () => ({
   })),
 }));
 
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "1",
     name: "John Doe",
@@ -67,15 +67,15 @@ const mockClients: Client[] = [
 ];
 
 jest.mock("@/features/companies", () => ({
-  useClients: () => ({
+  useCompanies: () => ({
     data: mockClients,
     isLoading: false,
   }),
 }));
 
 // Mock components
-jest.mock("@/components/ui/client-combobox", () => ({
-  ClientCombobox: ({
+jest.mock("@/components/ui/company-combobox", () => ({
+  CompanyCombobox: ({
     value,
     onSelect,
     placeholder,
@@ -119,7 +119,7 @@ describe("ProjectEditDialog", () => {
     userId: "user1",
     createdAt: "2024-03-01T00:00:00Z",
     updatedAt: "2024-03-01T00:00:00Z",
-    client: mockClients[0],
+    company: mockClients[0],
     _count: {
       workHours: 5,
     },

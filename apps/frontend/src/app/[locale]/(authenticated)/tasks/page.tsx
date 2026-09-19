@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useClients } from "@/features/companies";
+import { useCompanies } from "@/features/companies";
 import {
   TaskCard,
   TaskCreateDialog,
@@ -30,7 +30,7 @@ export default function TasksPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>("all");
 
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const { data: tasks = [], isLoading } = useTasks(
     selectedClientId === "all" ? undefined : selectedClientId
   );

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 
 import { ProjectsBigStats } from "./projects-big-stats";
 
-import type { Client } from "@/features/companies";
+import type { Company } from "@/features/companies";
 import type { Project } from "./projects.service";
 
 // Mock next-intl
@@ -11,7 +11,7 @@ jest.mock("next-intl", () => ({
 }));
 
 // Mock data
-const mockClient1: Client = {
+const mockClient1: Company = {
   id: "client1",
   name: "John Doe",
   company: "Company A",
@@ -20,7 +20,7 @@ const mockClient1: Client = {
   updatedAt: "2024-03-01T00:00:00Z",
 };
 
-const mockClient2: Client = {
+const mockClient2: Company = {
   id: "client2",
   name: "Jane Smith",
   company: "Company B",
@@ -38,7 +38,7 @@ const mockProjects: Project[] = [
     userId: "user1",
     createdAt: "2024-03-01T00:00:00Z",
     updatedAt: "2024-03-01T00:00:00Z",
-    client: {
+    company: {
       id: mockClient1.id,
       name: mockClient1.name,
       company: mockClient1.company,
@@ -57,7 +57,7 @@ const mockProjects: Project[] = [
     userId: "user1",
     createdAt: "2024-03-02T00:00:00Z",
     updatedAt: "2024-03-02T00:00:00Z",
-    client: {
+    company: {
       id: mockClient2.id,
       name: mockClient2.name,
       company: mockClient2.company,
@@ -76,7 +76,7 @@ const mockProjects: Project[] = [
     userId: "user1",
     createdAt: "2024-03-03T00:00:00Z",
     updatedAt: "2024-03-03T00:00:00Z",
-    client: {
+    company: {
       id: mockClient1.id,
       name: mockClient1.name,
       company: mockClient1.company,

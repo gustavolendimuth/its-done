@@ -17,7 +17,7 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { useClients } from "@/features/companies";
+import { useCompanies } from "@/features/companies";
 import { NotificationBell } from "@/features/notifications";
 import { WorkHourForm } from "@/features/time-tracking";
 import { useAvatar } from "@/hooks/use-avatar";
@@ -34,7 +34,7 @@ export function Topbar({ children }: TopbarProps) {
   const [isAddHoursOpen, setIsAddHoursOpen] = useState(false);
 
   // Fetch clients for the work hour form
-  const { data: clients, isLoading: isLoadingClients } = useClients();
+  const { data: clients, isLoading: isLoadingClients } = useCompanies();
 
   const handleLogout = () => {
     signOut();

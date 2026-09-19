@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReportFilters, ReportType } from "../types";
-import type { Client } from "@/features/companies";
+import type { Company } from "@/features/companies";
 
 import { format } from "date-fns";
 import { Filter } from "lucide-react";
@@ -28,7 +28,7 @@ import {
 export interface ReportFiltersCardProps {
   filters: ReportFilters;
   reportType: ReportType;
-  clients: Client[] | undefined;
+  clients: Company[] | undefined;
   onFilterChange: (key: keyof ReportFilters, value: string) => void;
   onReportTypeChange: (value: ReportType) => void;
   onQuickDateRange: (range: "thisMonth" | "lastMonth" | "last3Months") => void;

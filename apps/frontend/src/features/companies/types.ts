@@ -1,4 +1,4 @@
-export interface Client {
+export interface Company {
   id: string;
   name?: string;
   email: string;
@@ -12,7 +12,7 @@ export interface Client {
   updatedAt: string;
 }
 
-export interface CreateClientDto {
+export interface CreateCompanyDto {
   name?: string;
   email: string;
   phone?: string;
@@ -20,7 +20,7 @@ export interface CreateClientDto {
   hourlyRate?: number;
 }
 
-export interface UpdateClientDto {
+export interface UpdateCompanyDto {
   name?: string;
   email?: string;
   phone?: string;
@@ -28,7 +28,7 @@ export interface UpdateClientDto {
   hourlyRate?: number;
 }
 
-export interface ClientSpecificStats {
+export interface CompanySpecificStats {
   totalHours: number;
   totalValue: number;
   paidValue: number;

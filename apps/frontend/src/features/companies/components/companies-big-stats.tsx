@@ -7,21 +7,21 @@ import {
   BigStatsDisplay,
   BigStatItem,
 } from "@/components/ui/big-stats-display";
-import { useClientStats } from "@/features/companies/client-stats";
+import { useCompanyStats } from "@/features/companies/company-stats";
 import { formatHoursToHHMM } from "@/lib/utils";
 
 
-interface ClientsBigStatsProps {
+interface CompaniesBigStatsProps {
   className?: string;
   isRefetching?: boolean;
 }
 
-export function ClientsBigStats({
+export function CompaniesBigStats({
   className,
   isRefetching = false,
-}: ClientsBigStatsProps) {
+}: CompaniesBigStatsProps) {
   const t = useTranslations("clients");
-  const { data: stats } = useClientStats();
+  const { data: stats } = useCompanyStats();
 
   if (!stats) {
     return null;

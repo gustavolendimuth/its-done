@@ -70,7 +70,7 @@ const mockClients = [
 ];
 
 jest.mock("@/features/companies", () => ({
-  useClients: () => ({ data: mockClients, isLoading: false, error: null }),
+  useCompanies: () => ({ data: mockClients, isLoading: false, error: null }),
 }));
 
 const mockWorkHour = {
@@ -78,7 +78,7 @@ const mockWorkHour = {
   date: "2026-01-05T00:00:00.000Z",
   description: "Existing work",
   hours: 1.5,
-  client: { id: "client1", name: "John Doe", email: "john@example.com" },
+  company: { id: "client1", name: "John Doe", email: "john@example.com" },
 };
 
 const mockUpdateMutateAsync = jest.fn();

@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { WorkSessionStartForm } from "./work-session-start-form";
 
-import type { Client } from "@/features/companies";
+import type { Company } from "@/features/companies";
 
 const mockOnStart = jest.fn();
 
@@ -12,7 +12,7 @@ jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "client-1",
     company: "Acme",
@@ -23,11 +23,11 @@ const mockClients: Client[] = [
 ];
 
 jest.mock("@/features/companies", () => ({
-  useClients: () => ({ data: mockClients }),
+  useCompanies: () => ({ data: mockClients }),
 }));
 
-jest.mock("@/components/ui/client-combobox", () => ({
-  ClientCombobox: ({
+jest.mock("@/components/ui/company-combobox", () => ({
+  CompanyCombobox: ({
     value,
     onSelect,
   }: {

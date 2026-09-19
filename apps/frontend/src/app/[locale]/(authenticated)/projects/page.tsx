@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useClients } from "@/features/companies";
+import { useCompanies } from "@/features/companies";
 import {
   ProjectCard,
   ProjectCreateDialog,
@@ -30,7 +30,7 @@ export default function ProjectsPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>("all");
 
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const { data: projects = [], isLoading } = useProjects(
     selectedClientId === "all" ? undefined : selectedClientId
   );

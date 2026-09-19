@@ -50,7 +50,7 @@ export function RecentActivitiesCard({
                 gradientClasses =
                   "from-purple-50 to-purple-100/50 dark:from-purple-950/20 dark:to-purple-900/20 border-purple-200 dark:border-purple-800";
                 iconBgColor = "bg-purple-500";
-              } else if (activity.type === "client") {
+              } else if (activity.type === "company") {
                 gradientClasses =
                   "from-green-50 to-green-100/50 dark:from-green-950/20 dark:to-green-900/20 border-green-200 dark:border-green-800";
                 iconBgColor = "bg-green-500";
@@ -83,7 +83,7 @@ export function RecentActivitiesCard({
                         {activity.type === "invoice" && (
                           <FileText className="h-6 w-6" />
                         )}
-                        {activity.type === "client" && (
+                        {activity.type === "company" && (
                           <Users className="h-6 w-6" />
                         )}
                       </div>
@@ -115,10 +115,10 @@ export function RecentActivitiesCard({
                       <span>
                         {format(new Date(activity.date), "MMM dd, HH:mm")}
                       </span>
-                      {activity.client && (
+                      {activity.company && (
                         <>
                           <Users className="h-4 w-4 ml-2" />
-                          <span>{activity.client}</span>
+                          <span>{activity.company}</span>
                         </>
                       )}
                     </div>

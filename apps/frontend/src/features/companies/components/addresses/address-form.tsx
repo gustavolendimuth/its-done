@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import {
   useCreateAddress,
-  useClientAddresses,
+  useCompanyAddresses,
 } from "@/features/companies/addresses";
 
 interface AddressFormData {
@@ -37,7 +37,7 @@ interface AddressFormProps {
 }
 
 export function AddressForm({ companyId, onSuccess }: AddressFormProps) {
-  const { data: existingAddresses } = useClientAddresses(companyId);
+  const { data: existingAddresses } = useCompanyAddresses(companyId);
   const isFirstAddress = !existingAddresses || existingAddresses.length === 0;
 
   const [formData, setFormData] = useState<AddressFormData>({
@@ -64,7 +64,7 @@ export function AddressForm({ companyId, onSuccess }: AddressFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Submitting address form with data:", formData);
-    console.log("Client ID being sent:", companyId);
+    console.log("Company ID being sent:", companyId);
 
     // Basic validation
     if (!formData.street.trim()) {
@@ -92,7 +92,7 @@ export function AddressForm({ companyId, onSuccess }: AddressFormProps) {
     }
 
     if (!companyId) {
-      console.error("Client ID is required but not provided");
+      console.error("Company ID is required but not provided");
 
       return;
     }

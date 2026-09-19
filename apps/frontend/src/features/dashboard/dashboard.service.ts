@@ -14,13 +14,13 @@ export interface DashboardStats {
   lastMonthHours: number;
   hoursGrowth: number;
   recentActivities: {
-    type: "work_hour" | "invoice" | "client";
+    type: "work_hour" | "invoice" | "company";
     description: {
       key: string;
       values: Record<string, ActivityDescriptionValue>;
     };
     date: string;
-    client?: string;
+    company?: string;
   }[];
   topClients: {
     id: string;

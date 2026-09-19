@@ -16,7 +16,7 @@ interface ActivityWorkHour {
   hours: number;
   description: string;
   user?: { name: string };
-  client: { name: string; company?: string };
+  company: { name: string; company?: string };
   project?: { name: string };
   createdAt?: string;
 }
@@ -26,7 +26,7 @@ interface ActivityInvoice {
   number: string;
   amount: number;
   status: string;
-  client: { name: string; company?: string };
+  company: { name: string; company?: string };
   createdAt: string;
 }
 
@@ -81,7 +81,7 @@ export default function AdminActivity() {
                     {entry.user?.name} - {entry.hours}h
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {entry.client?.company || entry.client?.name}{" "}
+                    {entry.company?.company || entry.company?.name}{" "}
                     {entry.project && `• ${entry.project.name}`}
                   </p>
                   {entry.description && (
@@ -119,7 +119,7 @@ export default function AdminActivity() {
                     Invoice #{invoice.number || invoice.id.slice(0, 8)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {invoice.client?.company || invoice.client?.name} • $
+                    {invoice.company?.company || invoice.company?.name} • $
                     {invoice.amount}
                   </p>
                 </div>

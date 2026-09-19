@@ -17,12 +17,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { useClients } from "@/features/companies";
+import { useCompanies } from "@/features/companies";
 
 export interface WorkSessionStartFormProps {
   onCancel: () => void;
@@ -76,7 +76,7 @@ export function WorkSessionStartForm({
 }: WorkSessionStartFormProps) {
   const t = useTranslations("WorkSessionStartForm");
   const isOnline = useOnlineStatus();
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const startFormSchema = useMemo(() => buildStartFormSchema(t), [t]);
 
   const {
@@ -145,7 +145,7 @@ export function WorkSessionStartForm({
               name="companyId"
               control={control}
               render={({ field }) => (
-                <ClientCombobox
+                <CompanyCombobox
                   clients={clients}
                   value={field.value}
                   onSelect={field.onChange}

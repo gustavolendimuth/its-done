@@ -108,7 +108,7 @@ export function EditInvoiceForm({
     setSelectedWorkHourIds(initialIds);
 
     const initialAmount = currentWorkHours.reduce((sum, entry) => {
-      const rate = resolveHourlyRate(entry.project, entry.client);
+      const rate = resolveHourlyRate(entry.project, entry.company);
       return sum + entry.hours * rate;
     }, 0);
     setCalculatedAmount(initialAmount);

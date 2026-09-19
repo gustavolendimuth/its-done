@@ -24,13 +24,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { useClients } from "@/features/companies";
+import { useCompanies } from "@/features/companies";
 
 export interface WorkSessionFinishFormProps {
   session: LocalWorkSession;
@@ -95,7 +95,7 @@ export function WorkSessionFinishForm({
 }: WorkSessionFinishFormProps) {
   const t = useTranslations("WorkSessionFinishForm");
   const isOnline = useOnlineStatus();
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const { discard } = useWorkTimerEngine();
   const finishMutation = useFinishWorkSession();
   const [discardOpen, setDiscardOpen] = useState(false);
@@ -197,7 +197,7 @@ export function WorkSessionFinishForm({
               name="companyId"
               control={control}
               render={({ field }) => (
-                <ClientCombobox
+                <CompanyCombobox
                   clients={clients}
                   value={field.value}
                   onSelect={field.onChange}

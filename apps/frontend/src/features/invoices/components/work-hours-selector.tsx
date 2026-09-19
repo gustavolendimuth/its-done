@@ -51,7 +51,7 @@ export function WorkHoursSelector({
         let key: string;
 
         if (groupBy === "client") {
-          key = entry.client?.name || entry.client?.email || "Unknown Client";
+          key = entry.company?.name || entry.company?.email || "Unknown Client";
         } else if (groupBy === "project") {
           key = entry.project?.name || "No Project";
         } else {
@@ -84,7 +84,7 @@ export function WorkHoursSelector({
       newSelectedIds.has(entry.id)
     );
     const totalAmount = selectedEntries.reduce((sum, entry) => {
-      const rate = resolveHourlyRate(entry.project, entry.client);
+      const rate = resolveHourlyRate(entry.project, entry.company);
       return sum + entry.hours * rate;
     }, 0);
     onSelectionChange(Array.from(newSelectedIds), totalAmount);
@@ -108,7 +108,7 @@ export function WorkHoursSelector({
       newSelectedIds.has(entry.id)
     );
     const totalAmount = selectedEntries.reduce((sum, entry) => {
-      const rate = resolveHourlyRate(entry.project, entry.client);
+      const rate = resolveHourlyRate(entry.project, entry.company);
       return sum + entry.hours * rate;
     }, 0);
     onSelectionChange(Array.from(newSelectedIds), totalAmount);
@@ -253,8 +253,8 @@ export function WorkHoursSelector({
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium">${(entry.hours * resolveHourlyRate(entry.project, entry.client)).toFixed(2)}</div>
-                        <div className="text-xs text-muted-foreground">@ ${resolveHourlyRate(entry.project, entry.client)}/hr</div>
+                        <div className="font-medium">${(entry.hours * resolveHourlyRate(entry.project, entry.company)).toFixed(2)}</div>
+                        <div className="text-xs text-muted-foreground">@ ${resolveHourlyRate(entry.project, entry.company)}/hr</div>
                       </div>
                     </div>
                   ))}

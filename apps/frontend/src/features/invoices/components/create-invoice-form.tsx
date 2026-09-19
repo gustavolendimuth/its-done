@@ -10,7 +10,7 @@ import { WorkHoursSelectionSummary } from "./work-hours-selection-summary";
 import { WorkHoursSelector } from "./work-hours-selector";
 
 import { Button } from "@/components/ui/button";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Client } from "@/features/companies";
+import { Company } from "@/features/companies";
 import {
   useCreateInvoice,
   useUploadInvoiceFile,
@@ -43,7 +43,7 @@ const invoiceSchema = z.object({
 type InvoiceFormData = z.infer<typeof invoiceSchema>;
 
 interface CreateInvoiceFormProps {
-  clients: Client[];
+  clients: Company[];
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -199,14 +199,14 @@ export function CreateInvoiceForm({
       onSubmit={handleSubmit(onSubmit, onValidationError)}
       className="space-y-6"
     >
-      {/* Client Selection */}
+      {/* Company Selection */}
       <div className="space-y-2">
         <Label htmlFor="companyId">Empresa</Label>
         <Controller
           name="companyId"
           control={control}
           render={({ field }) => (
-            <ClientCombobox
+            <CompanyCombobox
               clients={clients || []}
               value={field.value}
               onSelect={field.onChange}

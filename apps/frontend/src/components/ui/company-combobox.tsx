@@ -6,10 +6,10 @@ import { useState } from "react";
 
 import { EntityCombobox } from "@/components/ui/entity-combobox";
 import { FormModal } from "@/components/ui/form-modal";
-import { ClientForm, Client } from "@/features/companies";
+import { CompanyForm, Company } from "@/features/companies";
 
-interface ClientComboboxProps {
-  clients: Client[];
+interface CompanyComboboxProps {
+  clients: Company[];
   value?: string;
   onSelect: (companyId: string) => void;
   placeholder?: string;
@@ -19,7 +19,7 @@ interface ClientComboboxProps {
   onClientAdded?: () => void;
 }
 
-export function ClientCombobox({
+export function CompanyCombobox({
   clients,
   value,
   onSelect,
@@ -27,7 +27,7 @@ export function ClientCombobox({
   disabled = false,
   showAddButton = true,
   onClientAdded,
-}: ClientComboboxProps) {
+}: CompanyComboboxProps) {
   const t = useTranslations("clients");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
@@ -40,7 +40,7 @@ export function ClientCombobox({
     onClientAdded?.();
   };
 
-  const getSearchString = (client: Client) => {
+  const getSearchString = (client: Company) => {
     const searchParts = [client.company, client.name, client.email].filter(
       Boolean
     );
@@ -84,7 +84,7 @@ export function ClientCombobox({
         )}
       />
 
-      {/* Add Client Dialog */}
+      {/* Add Company Dialog */}
       {addDialogOpen && (
         <FormModal
           open={addDialogOpen}
@@ -94,7 +94,7 @@ export function ClientCombobox({
           icon={Building2}
           className="sm:max-w-[600px]"
         >
-          <ClientForm onSuccess={handleClientCreated} />
+          <CompanyForm onSuccess={handleClientCreated} />
         </FormModal>
       )}
     </>

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { WorkHourForm } from "./work-hour-form";
 
-import type { Client } from "@/features/companies";
+import type { Company } from "@/features/companies";
 
 function renderWithQueryClient(ui: ReactNode) {
   const queryClient = new QueryClient({
@@ -28,7 +28,7 @@ jest.mock("sonner", () => ({
   },
 }));
 
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "client-1",
     company: "Acme",
@@ -57,8 +57,8 @@ jest.mock("@/components/ui/date-picker", () => ({
   ),
 }));
 
-jest.mock("@/components/ui/client-combobox", () => ({
-  ClientCombobox: ({
+jest.mock("@/components/ui/company-combobox", () => ({
+  CompanyCombobox: ({
     value,
     onSelect,
   }: {

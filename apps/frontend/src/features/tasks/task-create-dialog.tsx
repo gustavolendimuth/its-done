@@ -12,12 +12,12 @@ import { parseTaskLink } from "./lib/parse-task-link";
 import { useCreateTask, type Task } from "./tasks.service";
 
 import { Button } from "@/components/ui/button";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
-import { useClients } from "@/features/companies";
+import { useCompanies } from "@/features/companies";
 import { useProjects } from "@/features/projects";
 
 const taskSchema = z.object({
@@ -43,7 +43,7 @@ export function TaskCreateDialog({
   onSuccess,
 }: TaskCreateDialogProps) {
   const createTask = useCreateTask();
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const t = useTranslations("TaskCreateDialog");
 
   const {
@@ -142,7 +142,7 @@ export function TaskCreateDialog({
             name="companyId"
             control={control}
             render={({ field }) => (
-              <ClientCombobox
+              <CompanyCombobox
                 clients={clients}
                 value={field.value}
                 onSelect={field.onChange}

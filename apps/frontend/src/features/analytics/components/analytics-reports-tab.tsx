@@ -7,7 +7,7 @@ import type {
   ReportType,
   SummaryReport,
 } from "../types";
-import type { Client } from "@/features/companies";
+import type { Company } from "@/features/companies";
 
 import { HoursReportSection } from "./hours-report-section";
 import { InvoiceReportSection } from "./invoice-report-section";
@@ -17,7 +17,7 @@ import { SummaryReportSection } from "./summary-report-section";
 export interface AnalyticsReportsTabProps {
   filters: ReportFilters;
   reportType: ReportType;
-  clients: Client[] | undefined;
+  clients: Company[] | undefined;
   onFilterChange: (key: keyof ReportFilters, value: string) => void;
   onReportTypeChange: (value: ReportType) => void;
   onQuickDateRange: (range: "thisMonth" | "lastMonth" | "last3Months") => void;

@@ -13,13 +13,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Client } from "@/features/companies/types";
+import { Company } from "@/features/companies/types";
 
-interface ClientShareMenuProps {
-  client: Client;
+interface CompanyShareMenuProps {
+  company: Company;
 }
 
-export function ClientShareMenu({ client }: ClientShareMenuProps) {
+export function CompanyShareMenu({ company }: CompanyShareMenuProps) {
   const t = useTranslations("clients");
 
   const getClientDashboardUrl = () => {
@@ -28,7 +28,7 @@ export function ClientShareMenu({ client }: ClientShareMenuProps) {
         ? `${window.location.protocol}//${window.location.host}`
         : "";
 
-    return `${baseUrl}/client-dashboard/${client.id}`;
+    return `${baseUrl}/client-dashboard/${company.id}`;
   };
 
   const handleShareClick = (e: React.MouseEvent) => {
@@ -56,9 +56,9 @@ export function ClientShareMenu({ client }: ClientShareMenuProps) {
 
   const handleShareEmail = () => {
     const url = getClientDashboardUrl();
-    const subject = t("emailShareSubject", { company: client.company });
+    const subject = t("emailShareSubject", { company: company.company });
     const body = t("emailShareBody", { url });
-    const emailUrl = `mailto:${client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const emailUrl = `mailto:${company.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     window.open(emailUrl);
   };

@@ -6,7 +6,7 @@ export interface Invoice {
   id: string;
   number?: string;
   companyId: string;
-  client?: {
+  company?: {
     id: string;
     name: string;
     email: string;
@@ -19,7 +19,7 @@ export interface Invoice {
       date: string;
       description: string;
       hours: number;
-      client?: {
+      company?: {
         id: string;
         name: string;
         email: string;

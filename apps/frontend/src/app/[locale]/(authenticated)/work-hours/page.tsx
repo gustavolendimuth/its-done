@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useClients, Client } from "@/features/companies";
+import { useCompanies, Company } from "@/features/companies";
 import {
   WorkHourForm,
   WorkHoursBigStats,
@@ -81,7 +81,7 @@ export default function WorkHoursPage() {
     data: clients,
     isLoading: isLoadingClients,
     error: clientsError,
-  } = useClients();
+  } = useCompanies();
 
   // Delete mutation
   const deleteTimeEntry = useDeleteTimeEntry();
@@ -168,7 +168,7 @@ export default function WorkHoursPage() {
             />
           </div>
 
-          {/* Client Filter */}
+          {/* Company Filter */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-3">
               {tCommon("filterByClient")}
@@ -184,7 +184,7 @@ export default function WorkHoursPage() {
                 <SelectItem value="all">
                   {tCommon("all")} {t("clients")}
                 </SelectItem>
-                {clients?.map((client: Client) => (
+                {clients?.map((client: Company) => (
                   <SelectItem key={client.id} value={client.id}>
                     {client.name
                       ? `${client.company} (${client.name})`
@@ -225,7 +225,7 @@ export default function WorkHoursPage() {
         )}
 
         <WorkHoursTable
-          workHours={(workHours ?? []).filter((workHour) => workHour.client)}
+          workHours={(workHours ?? []).filter((workHour) => workHour.company)}
           onEdit={handleEdit}
           onDelete={handleDelete}
           deletingId={deletingId}

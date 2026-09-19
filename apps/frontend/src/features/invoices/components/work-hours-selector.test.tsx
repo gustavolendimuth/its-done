@@ -9,7 +9,7 @@ const makeEntry = (overrides: Partial<any> = {}) => ({
   hours: 1,
   companyId: "c1",
   projectId: "p1",
-  client: { id: "c1", name: "Client 1", company: "ACME", email: "c1@x.com" },
+  company: { id: "c1", name: "Client 1", company: "ACME", email: "c1@x.com" },
   project: { id: "p1", name: "Project 1", hourlyRate: 100 },
   invoiceWorkHours: [],
   createdAt: new Date().toISOString(),
@@ -66,7 +66,7 @@ describe("WorkHoursSelector", () => {
       hours: 2,
       projectId: undefined,
       project: undefined,
-      client: {
+      company: {
         id: "c1",
         name: "Client 1",
         company: "ACME",

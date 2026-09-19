@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
 import { SearchInput } from "@/components/ui/search-input";
-import { ClientsPageSkeleton , ClientCard, ClientForm, ClientsBigStats, useClients } from "@/features/companies";
+import { CompaniesPageSkeleton , CompanyCard, CompanyForm, CompaniesBigStats, useCompanies } from "@/features/companies";
 
 export default function ClientsPage() {
   const t = useTranslations("clients");
@@ -18,7 +18,7 @@ export default function ClientsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: clients, isLoading } = useClients();
+  const { data: clients, isLoading } = useCompanies();
   const filteredClients = useMemo(() => {
     if (!clients) return [];
     if (!searchTerm) return clients;
@@ -36,7 +36,7 @@ export default function ClientsPage() {
   };
 
   if (isLoading) {
-    return <ClientsPageSkeleton />;
+    return <CompaniesPageSkeleton />;
   }
 
   return (
@@ -63,7 +63,7 @@ export default function ClientsPage() {
       />
 
       {/* Big Stats Display */}
-      <ClientsBigStats className="mb-8" />
+      <CompaniesBigStats className="mb-8" />
 
       {/* Search Bar */}
       <SearchInput
@@ -73,7 +73,7 @@ export default function ClientsPage() {
         className="mb-6"
       />
 
-      {/* Client List */}
+      {/* Company List */}
       {filteredClients.length === 0 ? (
         searchTerm ? (
           <EmptyState
@@ -98,7 +98,7 @@ export default function ClientsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredClients.map((client) => (
-            <ClientCard key={client.id} client={client} />
+            <CompanyCard key={client.id} company={client} />
           ))}
         </div>
       )}
@@ -111,7 +111,7 @@ export default function ClientsPage() {
         icon={Users}
         className="sm:max-w-[600px]"
       >
-        <ClientForm onSuccess={handleClientAdded} />
+        <CompanyForm onSuccess={handleClientAdded} />
       </FormModal>
     </PageContainer>
   );

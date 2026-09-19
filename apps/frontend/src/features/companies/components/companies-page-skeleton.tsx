@@ -1,7 +1,7 @@
 import { BigStatsDisplaySkeleton, SkeletonBox } from "@/components/layout/loading-skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-export function ClientsPageSkeleton() {
+export function CompaniesPageSkeleton() {
   return (
     <div className="container mx-auto py-6 space-y-8">
       {/* Header */}

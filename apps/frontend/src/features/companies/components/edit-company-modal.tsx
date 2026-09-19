@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { ClientAddresses } from "./client-addresses";
+import { CompanyAddresses } from "./company-addresses";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,20 +21,20 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { useUpdateClient } from "@/features/companies/clients";
-import { Client, UpdateClientDto } from "@/features/companies/types";
+import { useUpdateCompany } from "@/features/companies/companies";
+import { Company, UpdateCompanyDto } from "@/features/companies/types";
 
-interface EditClientModalProps {
-  client: Client;
+interface EditCompanyModalProps {
+  company: Company;
   trigger?: React.ReactNode;
 }
 
-export function EditClientModal({ client, trigger }: EditClientModalProps) {
+export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
   const [open, setOpen] = useState(false);
-  const updateClient = useUpdateClient();
+  const updateCompany = useUpdateCompany();
   const t = useTranslations("clients");
 
-  const clientFormSchema = z.object({
+  const companyFormSchema = z.object({
     name: z.string().min(1, t("validationNameRequired")),
     email: z.string().email(t("validationInvalidEmail")),
     phone: z.string().min(1, t("validationPhoneRequired")),
@@ -46,44 +46,44 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
       .nullable(),
   });
 
-  type ClientFormData = z.infer<typeof clientFormSchema>;
+  type CompanyFormData = z.infer<typeof companyFormSchema>;
 
   console.log(
-    "EditClientModal rendered for client:",
-    client.company,
+    "EditCompanyModal rendered for company:",
+    company.company,
     "open:",
     open,
   );
 
-  const form = useForm<ClientFormData>({
-    resolver: zodResolver(clientFormSchema),
+  const form = useForm<CompanyFormData>({
+    resolver: zodResolver(companyFormSchema),
     defaultValues: {
-      name: client.name,
-      email: client.email,
-      phone: client.phone,
-      company: client.company,
-      hourlyRate: client.hourlyRate ?? null,
+      name: company.name,
+      email: company.email,
+      phone: company.phone,
+      company: company.company,
+      hourlyRate: company.hourlyRate ?? null,
     },
   });
 
-  const onSubmit = async (data: ClientFormData) => {
+  const onSubmit = async (data: CompanyFormData) => {
     try {
       const formattedData = {
         ...data,
         hourlyRate: data.hourlyRate === null ? undefined : data.hourlyRate,
       };
-      await updateClient.mutateAsync({
-        id: client.id,
-        data: formattedData as UpdateClientDto,
+      await updateCompany.mutateAsync({
+        id: company.id,
+        data: formattedData as UpdateCompanyDto,
       });
       setOpen(false);
     } catch (error) {
-      console.error("Failed to update client:", error);
+      console.error("Failed to update company:", error);
     }
   };
 
   const handleTriggerClick = () => {
-    console.log("Edit trigger clicked for client:", client.company);
+    console.log("Edit trigger clicked for company:", company.company);
     setOpen(true);
   };
 
@@ -192,7 +192,7 @@ export function EditClientModal({ client, trigger }: EditClientModalProps) {
                 </FormItem>
               )}
             />
-            <ClientAddresses companyId={client.id} />
+            <CompanyAddresses companyId={company.id} />
             <Button type="submit" className="w-full">
               {t("saveChanges")}
             </Button>

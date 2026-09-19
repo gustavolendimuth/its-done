@@ -8,7 +8,7 @@ import { useState, useMemo } from "react";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
-import { useClients } from "@/features/companies";
+import { useCompanies } from "@/features/companies";
 import { Overview, OverviewData } from "@/features/dashboard";
 import { useInvoices } from "@/features/invoices";
 import { useTimeEntries, useWorkHoursStats } from "@/features/time-tracking";
@@ -33,7 +33,7 @@ export default function DashboardPage() {
     to: period.to,
   });
 
-  const { data: clients = [], isLoading: clientsLoading } = useClients();
+  const { data: clients = [], isLoading: clientsLoading } = useCompanies();
 
   const { isLoading: statsLoading } = useWorkHoursStats({
     from: period.from,
@@ -106,7 +106,7 @@ export default function DashboardPage() {
 
           acc[companyId] = {
             id: companyId,
-            name: client?.name || "Unknown Client",
+            name: client?.name || "Unknown Company",
             company: client?.company || "",
             hours: 0,
             invoices: 0,

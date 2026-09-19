@@ -83,8 +83,8 @@ export default function ClientDashboardPage() {
           : 0
         : ((thisMonthAmount - previousMonthAmount) / previousMonthAmount) * 100;
 
-    const clientName = invoices[0]?.client?.name || "Empresa";
-    const clientEmail = invoices[0]?.client?.email || "";
+    const clientName = invoices[0]?.company?.name || "Empresa";
+    const clientEmail = invoices[0]?.company?.email || "";
 
     return {
       invoices,

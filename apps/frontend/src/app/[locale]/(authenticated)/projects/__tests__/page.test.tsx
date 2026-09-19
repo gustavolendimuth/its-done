@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ProjectsPage from "../page";
 
-import type { Client } from "@/features/companies";
+import type { Company } from "@/features/companies";
 import type { Project } from "@/features/projects";
 
 // Mock next-intl
@@ -32,7 +32,7 @@ jest.mock("@/features/projects", () => ({
     onSuccess: () => void;
   }) => (
     <div data-testid="project-create-dialog">
-      <p>Client ID: {companyId}</p>
+      <p>Company ID: {companyId}</p>
       <button onClick={() => onSuccess()}>Create</button>
       <button onClick={() => onOpenChange(false)}>Cancel</button>
     </div>
@@ -48,7 +48,7 @@ jest.mock("@/features/projects", () => ({
   }) => (
     <div data-testid="project-card">
       <p>Name: {project.name}</p>
-      <p>Client: {project.client.company}</p>
+      <p>Company: {project.company.company}</p>
       <p>Hours: {project._count.workHours}</p>
       <button
         onClick={() => onDelete(project.id)}
@@ -116,7 +116,7 @@ jest.mock("@/components/layout/empty-state", () => ({
 }));
 
 // Mock data
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "client1",
     name: "John Doe",
@@ -144,7 +144,7 @@ const mockProjects: Project[] = [
     userId: "user1",
     createdAt: "2024-03-01T00:00:00Z",
     updatedAt: "2024-03-01T00:00:00Z",
-    client: mockClients[0],
+    company: mockClients[0],
     _count: {
       workHours: 40,
     },
@@ -157,7 +157,7 @@ const mockProjects: Project[] = [
     userId: "user1",
     createdAt: "2024-03-02T00:00:00Z",
     updatedAt: "2024-03-02T00:00:00Z",
-    client: mockClients[1],
+    company: mockClients[1],
     _count: {
       workHours: 60,
     },
@@ -165,7 +165,7 @@ const mockProjects: Project[] = [
 ];
 
 jest.mock("@/features/companies", () => ({
-  useClients: jest.fn(() => ({
+  useCompanies: jest.fn(() => ({
     data: mockClients,
     isLoading: false,
   })),
@@ -212,10 +212,10 @@ describe("ProjectsPage", () => {
     const cards = screen.getAllByTestId("project-card");
     expect(cards).toHaveLength(2);
     expect(cards[0]).toHaveTextContent("Name: Web App");
-    expect(cards[0]).toHaveTextContent("Client: Company A");
+    expect(cards[0]).toHaveTextContent("Company: Company A");
     expect(cards[0]).toHaveTextContent("Hours: 40");
     expect(cards[1]).toHaveTextContent("Name: Mobile App");
-    expect(cards[1]).toHaveTextContent("Client: Company B");
+    expect(cards[1]).toHaveTextContent("Company: Company B");
     expect(cards[1]).toHaveTextContent("Hours: 60");
   });
 
@@ -234,7 +234,7 @@ describe("ProjectsPage", () => {
     const cards = screen.getAllByTestId("project-card");
     expect(cards).toHaveLength(1);
     expect(cards[0]).toHaveTextContent("Name: Web App");
-    expect(cards[0]).toHaveTextContent("Client: Company A");
+    expect(cards[0]).toHaveTextContent("Company: Company A");
     expect(cards[0]).toHaveTextContent("Hours: 40");
   });
 
@@ -281,7 +281,7 @@ describe("ProjectsPage", () => {
     // Check if dialog is open
     expect(screen.getByTestId("project-create-dialog")).toBeInTheDocument();
     expect(
-      screen.getByText(`Client ID: ${mockClients[0].id}`)
+      screen.getByText(`Company ID: ${mockClients[0].id}`)
     ).toBeInTheDocument();
   });
 

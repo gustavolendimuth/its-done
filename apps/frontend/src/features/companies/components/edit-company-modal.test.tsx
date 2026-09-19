@@ -2,29 +2,29 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 
-import { Client } from "@/features/companies/types";
+import { Company } from "@/features/companies/types";
 
-import { EditClientModal } from "./edit-client-modal";
+import { EditCompanyModal } from "./edit-company-modal";
 
 const mockUpdateMutateAsync = jest.fn();
 
-jest.mock("@/features/companies/clients", () => ({
-  useUpdateClient: () => ({
+jest.mock("@/features/companies/companies", () => ({
+  useUpdateCompany: () => ({
     mutateAsync: mockUpdateMutateAsync,
     isPending: false,
   }),
 }));
 
-// ClientAddresses fetches over the network on mount (useClientAddresses);
+// CompanyAddresses fetches over the network on mount (useCompanyAddresses);
 // stubbed out here since these tests only exercise the client fields.
-jest.mock("./client-addresses", () => ({
-  ClientAddresses: () => null,
+jest.mock("./company-addresses", () => ({
+  CompanyAddresses: () => null,
 }));
 
 // Mock translations
 const messages = {
   clients: {
-    editClient: "Edit Client",
+    editClient: "Edit Company",
     editClientFormSubtitle: "Modify client details and contact information",
     company: "Company",
     name: "Name",
@@ -39,7 +39,7 @@ const messages = {
   },
 };
 
-const mockClient: Client = {
+const mockCompany: Company = {
   id: "1",
   name: "John Doe",
   email: "john@example.com",
@@ -66,7 +66,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-describe("EditClientModal", () => {
+describe("EditCompanyModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -74,12 +74,12 @@ describe("EditClientModal", () => {
   it("should render edit client button", () => {
     render(
       <TestWrapper>
-        <EditClientModal client={mockClient} />
+        <EditCompanyModal company={mockCompany} />
       </TestWrapper>
     );
 
     // Check that the edit button is present
-    expect(screen.getByText("Edit Client")).toBeInTheDocument();
+    expect(screen.getByText("Edit Company")).toBeInTheDocument();
   });
 
   it("pre-fills the hourlyRate field from the client and submits a decimal value", async () => {
@@ -87,11 +87,11 @@ describe("EditClientModal", () => {
 
     render(
       <TestWrapper>
-        <EditClientModal client={{ ...mockClient, hourlyRate: 120.5 }} />
+        <EditCompanyModal company={{ ...mockCompany, hourlyRate: 120.5 }} />
       </TestWrapper>
     );
 
-    fireEvent.click(screen.getByText("Edit Client"));
+    fireEvent.click(screen.getByText("Edit Company"));
 
     const hourlyRateInput = screen.getByLabelText("Hourly Rate");
     expect(hourlyRateInput).toHaveValue(120.5);
@@ -107,11 +107,11 @@ describe("EditClientModal", () => {
   it("rejects a negative hourlyRate", async () => {
     render(
       <TestWrapper>
-        <EditClientModal client={mockClient} />
+        <EditCompanyModal company={mockCompany} />
       </TestWrapper>
     );
 
-    fireEvent.click(screen.getByText("Edit Client"));
+    fireEvent.click(screen.getByText("Edit Company"));
 
     fireEvent.change(screen.getByLabelText("Hourly Rate"), {
       target: { value: "-10" },
@@ -131,11 +131,11 @@ describe("EditClientModal", () => {
 
     render(
       <TestWrapper>
-        <EditClientModal client={mockClient} />
+        <EditCompanyModal company={mockCompany} />
       </TestWrapper>
     );
 
-    fireEvent.click(screen.getByText("Edit Client"));
+    fireEvent.click(screen.getByText("Edit Company"));
     fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
 
     await waitFor(() => expect(mockUpdateMutateAsync).toHaveBeenCalled());

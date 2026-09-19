@@ -11,7 +11,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
-import { useClients } from "@/features/companies";
+import { useCompanies } from "@/features/companies";
 import { InvoicesPageSkeleton ,
   CreateInvoiceForm,
   EditInvoiceForm,
@@ -36,7 +36,7 @@ export default function InvoicesPage() {
   const [uploadInvoice, setUploadInvoice] = useState<Invoice | null>(null);
 
   const { data: invoices = [], isLoading, error } = useInvoices();
-  const { data: clients = [], isLoading: clientsLoading } = useClients();
+  const { data: clients = [], isLoading: clientsLoading } = useCompanies();
 
   // Open invoice from URL parameter
   useEffect(() => {

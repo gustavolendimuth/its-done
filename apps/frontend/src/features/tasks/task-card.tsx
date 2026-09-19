@@ -97,7 +97,7 @@ export function TaskCard({
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Building2 className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">{task.client.company}</span>
+              <span className="truncate">{task.company.company}</span>
             </div>
           </div>
 

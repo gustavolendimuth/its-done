@@ -19,7 +19,7 @@ export interface User {
   };
 }
 
-export interface Client {
+export interface Company {
   id: string;
   name?: string;
   email: string;
@@ -52,7 +52,7 @@ export interface Project {
   userId: string;
   createdAt: DateField;
   updatedAt: DateField;
-  client?: Client;
+  company?: Company;
   user?: User;
   workHours?: WorkHour[];
   _count?: {
@@ -74,7 +74,7 @@ export interface WorkHour {
   createdAt: DateField;
   updatedAt: DateField;
   user?: User;
-  client?: Client;
+  company?: Company;
   project?: Project;
   task?: Task;
 }
@@ -88,7 +88,7 @@ export interface Task {
   link?: string;
   createdAt: DateField;
   updatedAt: DateField;
-  client?: Client;
+  company?: Company;
   project?: Project;
   /** Sum of actual hours worked across this task's entries. */
   totalHours?: number;
@@ -106,7 +106,7 @@ export interface Address {
   companyId: string;
   createdAt: DateField;
   updatedAt: DateField;
-  client?: Client;
+  company?: Company;
 }
 
 export interface Settings {
@@ -129,7 +129,7 @@ export interface Invoice {
   description?: string;
   createdAt: DateField;
   updatedAt: DateField;
-  client?: Client;
+  company?: Company;
   invoiceWorkHours?: InvoiceWorkHour[];
 }
 
@@ -160,7 +160,7 @@ export interface TimeEntry {
   companyId: string;
   projectId?: string;
   taskId?: string;
-  client?: {
+  company?: {
     id: string;
     name?: string;
     company: string;

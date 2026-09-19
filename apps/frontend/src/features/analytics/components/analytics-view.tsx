@@ -22,7 +22,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useClients } from "@/features/companies";
+import { useCompanies } from "@/features/companies";
 import { useDashboardStats } from "@/features/dashboard";
 import { useTimeEntries } from "@/features/time-tracking";
 
@@ -55,7 +55,7 @@ export function AnalyticsView() {
   const { data: dashboardStats, isLoading: statsLoading } =
     useDashboardStats(period);
   const { isLoading: entriesLoading } = useTimeEntries(period);
-  const { data: clients } = useClients();
+  const { data: clients } = useCompanies();
 
   // Fetch reports based on type and filters
   const {

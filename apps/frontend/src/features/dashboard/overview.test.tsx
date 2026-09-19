@@ -40,7 +40,7 @@ const mockWorkHours: WorkHour[] = [
     date: "2024-03-01",
     description: "Web development work",
     hours: 20,
-    client: {
+    company: {
       id: "client1",
       name: "Client 1",
       email: "client1@example.com",
@@ -55,7 +55,7 @@ const mockWorkHours: WorkHour[] = [
     date: "2024-03-02",
     description: "App design work",
     hours: 30,
-    client: {
+    company: {
       id: "client2",
       name: "Client 2",
       email: "client2@example.com",

@@ -3,7 +3,7 @@ export interface WorkHour {
   date: string;
   description: string;
   hours: number;
-  client?: {
+  company?: {
     id: string;
     name: string;
     email: string;

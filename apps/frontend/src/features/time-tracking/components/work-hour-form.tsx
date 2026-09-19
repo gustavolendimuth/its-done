@@ -13,14 +13,14 @@ import { useCreateTimeEntry, useUpdateTimeEntry } from "../time-entries";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { Client } from "@/features/companies";
+import { Company } from "@/features/companies";
 
 type EntryMode = "duration" | "interval";
 
@@ -83,7 +83,7 @@ function buildSchema(
     shape.companyId = z.string().min(1, "Empresa is required");
     // Story 8 (MW-5): Project is optional — dev work logged without one
     // must not be forced into inventing a fake Project just to satisfy the
-    // form. Client is still required (mirrors the backend, which always
+    // form. Company is still required (mirrors the backend, which always
     // needs a companyId).
     shape.projectId = z.string().optional();
     shape.taskId = z.string().optional();
@@ -156,7 +156,7 @@ interface EditableWorkHour {
 interface WorkHourFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
-  clients: Client[];
+  clients: Company[];
   defaultClientId?: string;
   hideClientSelection?: boolean;
   workHour?: EditableWorkHour | null;
@@ -389,7 +389,7 @@ export function WorkHourForm({
             name="companyId"
             control={control}
             render={({ field }) => (
-              <ClientCombobox
+              <CompanyCombobox
                 clients={clients}
                 value={field.value ?? ""}
                 onSelect={field.onChange}

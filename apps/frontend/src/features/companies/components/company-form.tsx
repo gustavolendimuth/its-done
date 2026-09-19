@@ -11,11 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { useClientAddresses } from "@/features/companies/addresses";
-import { useCreateClient } from "@/features/companies/clients";
-import { Client } from "@/features/companies/types";
+import { useCompanyAddresses } from "@/features/companies/addresses";
+import { useCreateCompany } from "@/features/companies/companies";
+import { Company } from "@/features/companies/types";
 
-interface ClientFormData {
+interface CompanyFormData {
   name?: string;
   email: string;
   phone?: string;
@@ -23,22 +23,22 @@ interface ClientFormData {
   hourlyRate?: string;
 }
 
-interface ClientFormProps {
+interface CompanyFormProps {
   onSuccess?: () => void;
 }
 
-export function ClientForm({ onSuccess }: ClientFormProps) {
+export function CompanyForm({ onSuccess }: CompanyFormProps) {
   const t = useTranslations("clients");
-  const [formData, setFormData] = useState<ClientFormData>({
+  const [formData, setFormData] = useState<CompanyFormData>({
     name: "",
     email: "",
     phone: "",
     company: "",
     hourlyRate: "",
   });
-  const [createdClient, setCreatedClient] = useState<Client | null>(null);
-  const { data: addresses } = useClientAddresses(createdClient?.id || "");
-  const createClientMutation = useCreateClient();
+  const [createdCompany, setCreatedCompany] = useState<Company | null>(null);
+  const { data: addresses } = useCompanyAddresses(createdCompany?.id || "");
+  const createCompanyMutation = useCreateCompany();
   const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,8 +58,8 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
       return;
     }
 
-    // Strip empty fields - client data only
-    const cleanClientData = {
+    // Strip empty fields - company data only
+    const cleanCompanyData = {
       company: formData.company.trim(),
       email: formData.email.trim(),
       ...(formData.name?.trim() && { name: formData.name.trim() }),
@@ -69,18 +69,18 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
       }),
     };
 
-    console.log("Clean client data to be sent:", cleanClientData);
+    console.log("Clean company data to be sent:", cleanCompanyData);
 
     try {
-      console.log("Submitting client:", cleanClientData);
-      const createdClient =
-        await createClientMutation.mutateAsync(cleanClientData);
+      console.log("Submitting company:", cleanCompanyData);
+      const createdCompany =
+        await createCompanyMutation.mutateAsync(cleanCompanyData);
 
-      console.log("Client created successfully:", createdClient);
+      console.log("Company created successfully:", createdCompany);
 
-      if (createdClient) {
-        console.log("Setting created client:", createdClient);
-        setCreatedClient(createdClient);
+      if (createdCompany) {
+        console.log("Setting created company:", createdCompany);
+        setCreatedCompany(createdCompany);
 
         // Clear form
         setFormData({
@@ -95,7 +95,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
         queryClient.invalidateQueries({ queryKey: ["clients"] });
       }
     } catch (error) {
-      console.error("Error creating client:", error);
+      console.error("Error creating company:", error);
     }
   };
 
@@ -108,23 +108,23 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
 
   const handleAddressAdded = () => {
     console.log(
-      "Address added successfully, invalidating queries for client:",
-      createdClient?.id
+      "Address added successfully, invalidating queries for company:",
+      createdCompany?.id
     );
     queryClient.invalidateQueries({
-      queryKey: ["clients", createdClient?.id, "addresses"],
+      queryKey: ["clients", createdCompany?.id, "addresses"],
     });
   };
 
   const handleFinish = () => {
     setFormData({ name: "", email: "", phone: "", company: "", hourlyRate: "" });
-    setCreatedClient(null);
+    setCreatedCompany(null);
     onSuccess?.();
   };
 
-  // If the client was created, show the addresses section
-  if (createdClient) {
-    console.log("Created client:", createdClient);
+  // If the company was created, show the addresses section
+  if (createdCompany) {
+    console.log("Created company:", createdCompany);
 
     return (
       <div className="space-y-6">
@@ -133,10 +133,10 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           <div className="ml-2">
             <p className="font-medium text-foreground">{t("saveSuccess")}</p>
             <p className="text-sm text-muted-foreground">
-              {t("nowYouCanAddAddresses", { company: createdClient.company })}
+              {t("nowYouCanAddAddresses", { company: createdCompany.company })}
             </p>
             <p className="text-xs text-muted-foreground">
-              {t("id")}: {createdClient.id}
+              {t("id")}: {createdCompany.id}
             </p>
           </div>
         </Alert>
@@ -145,10 +145,10 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           <Label className="text-sm font-medium text-foreground">
             {t("addressesOptional")}
           </Label>
-          {createdClient.id ? (
+          {createdCompany.id ? (
             <AddressCombobox
               addresses={addresses || []}
-              companyId={createdClient.id}
+              companyId={createdCompany.id}
               showAddButton={true}
               onAddressAdded={handleAddressAdded}
             />
@@ -163,7 +163,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
           <Button onClick={handleFinish} className="flex-1">
             {t("finish")}
           </Button>
-          <Button variant="outline" onClick={() => setCreatedClient(null)}>
+          <Button variant="outline" onClick={() => setCreatedCompany(null)}>
             {t("addAnotherClient")}
           </Button>
         </div>
@@ -255,7 +255,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
         </p>
       </div>
 
-      {createClientMutation.isError && (
+      {createCompanyMutation.isError && (
         <Alert variant="destructive">
           <AlertDescription>{t("errorCreatingClient")}</AlertDescription>
         </Alert>
@@ -264,10 +264,10 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
       <div className="space-y-4">
         <Button
           type="submit"
-          disabled={createClientMutation.isPending}
+          disabled={createCompanyMutation.isPending}
           className="w-full"
         >
-          {createClientMutation.isPending ? (
+          {createCompanyMutation.isPending ? (
             <>
               <svg
                 className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"

@@ -52,10 +52,10 @@ jest.mock("@/features/invoices", () => ({
 }));
 
 jest.mock("@/features/companies", () => ({
-  useClients: jest.fn(() => ({
+  useCompanies: jest.fn(() => ({
     data: [
-      { id: "client1", name: "Client 1", company: "Company 1" },
-      { id: "client2", name: "Client 2", company: "Company 2" },
+      { id: "client1", name: "Company 1", company: "Company 1" },
+      { id: "client2", name: "Company 2", company: "Company 2" },
     ],
     isLoading: false,
   })),

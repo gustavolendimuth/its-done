@@ -19,7 +19,7 @@ const mockProject = {
   name: "Test Project",
   description: "Test Description",
   companyId: "1",
-  client: {
+  company: {
     id: "1",
     name: "Test Client",
     company: "Test Company",

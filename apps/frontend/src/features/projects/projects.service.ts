@@ -11,7 +11,7 @@ export interface Project {
   userId: string;
   createdAt: string;
   updatedAt: string;
-  client: {
+  company: {
     id: string;
     name?: string;
     email: string;
