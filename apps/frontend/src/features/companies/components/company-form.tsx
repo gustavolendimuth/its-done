@@ -43,7 +43,7 @@ export function CompanyForm({ onSuccess }: CompanyFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting client form with data:", formData);
+    console.log("Submitting company form with data:", formData);
 
     // Basic validation
     if (!formData.company.trim()) {
@@ -109,7 +109,7 @@ export function CompanyForm({ onSuccess }: CompanyFormProps) {
   const handleAddressAdded = () => {
     console.log(
       "Address added successfully, invalidating queries for company:",
-      createdCompany?.id
+      createdCompany?.id,
     );
     queryClient.invalidateQueries({
       queryKey: ["clients", createdCompany?.id, "addresses"],
@@ -117,7 +117,13 @@ export function CompanyForm({ onSuccess }: CompanyFormProps) {
   };
 
   const handleFinish = () => {
-    setFormData({ name: "", email: "", phone: "", company: "", hourlyRate: "" });
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      company: "",
+      hourlyRate: "",
+    });
     setCreatedCompany(null);
     onSuccess?.();
   };

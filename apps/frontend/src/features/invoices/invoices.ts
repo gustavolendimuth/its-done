@@ -106,7 +106,7 @@ export const useCreateInvoice = () => {
     onSuccess: (invoice) => {
       // Invalidate all invoices queries
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      // Invalidate client invoices
+      // Invalidate company invoices
       queryClient.invalidateQueries({
         queryKey: ["clients", invoice.companyId, "invoices"],
       });
@@ -114,7 +114,7 @@ export const useCreateInvoice = () => {
       queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
       // Invalidate invoice stats
       queryClient.invalidateQueries({ queryKey: ["invoices", "stats"] });
-      // Invalidate client stats
+      // Invalidate company stats
       queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -141,13 +141,13 @@ export const useUpdateInvoice = () => {
       // Invalidate all invoices queries
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["invoices", id] });
-      // Invalidate client invoices
+      // Invalidate company invoices
       queryClient.invalidateQueries({
         queryKey: ["clients", invoice.companyId, "invoices"],
       });
       // Invalidate invoice stats
       queryClient.invalidateQueries({ queryKey: ["invoices", "stats"] });
-      // Invalidate client stats
+      // Invalidate company stats
       queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -168,7 +168,7 @@ export const useDeleteInvoice = () => {
       // Invalidate all invoices queries
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["invoices", id] });
-      // Invalidate client invoices
+      // Invalidate company invoices
       if (invoice?.companyId) {
         queryClient.invalidateQueries({
           queryKey: ["clients", invoice.companyId, "invoices"],
@@ -178,7 +178,7 @@ export const useDeleteInvoice = () => {
       queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
       // Invalidate invoice stats
       queryClient.invalidateQueries({ queryKey: ["invoices", "stats"] });
-      // Invalidate client stats
+      // Invalidate company stats
       queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -202,7 +202,7 @@ export const useUploadInvoiceFile = () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       return response.data;
@@ -211,7 +211,7 @@ export const useUploadInvoiceFile = () => {
       // Invalidate all invoices queries
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["invoices", id] });
-      // Invalidate client invoices
+      // Invalidate company invoices
       queryClient.invalidateQueries({
         queryKey: ["clients", invoice.companyId, "invoices"],
       });
@@ -226,7 +226,7 @@ export const useClientInvoices = (companyId: string) => {
     queryKey: ["clients", companyId, "invoices"],
     queryFn: async () => {
       const { data } = await api.get<Invoice[]>(
-        `/companies/${companyId}/invoices`
+        `/companies/${companyId}/invoices`,
       );
 
       return data;
@@ -272,7 +272,7 @@ export const useDownloadInvoice = () => {
 export const invoicesService = {
   async findByClient(companyId: string): Promise<Invoice[]> {
     const { data } = await api.get<Invoice[]>(
-      `/public/company/${companyId}/invoices`
+      `/public/company/${companyId}/invoices`,
     );
 
     return data;

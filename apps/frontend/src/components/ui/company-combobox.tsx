@@ -40,9 +40,9 @@ export function CompanyCombobox({
     onClientAdded?.();
   };
 
-  const getSearchString = (client: Company) => {
-    const searchParts = [client.company, client.name, client.email].filter(
-      Boolean
+  const getSearchString = (company: Company) => {
+    const searchParts = [company.company, company.name, company.email].filter(
+      Boolean,
     );
 
     return searchParts.join(" ");
@@ -63,21 +63,21 @@ export function CompanyCombobox({
         noItemsFoundMessage={t("noClientsFound")}
         searchPlaceholder={t("searchClients")}
         icon={Building2}
-        getDisplayValue={(client) => client.company}
-        getId={(client) => client.id}
+        getDisplayValue={(company) => company.company}
+        getId={(company) => company.id}
         getSearchValue={getSearchString}
-        renderItem={(client) => (
+        renderItem={(company) => (
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 shrink-0 opacity-50" />
             <div className="flex flex-col items-start">
-              <span className="font-medium">{client.company}</span>
-              {client.name && (
+              <span className="font-medium">{company.company}</span>
+              {company.name && (
                 <span className="text-sm text-muted-foreground">
-                  {client.name}
+                  {company.name}
                 </span>
               )}
               <span className="text-xs text-muted-foreground">
-                {client.email}
+                {company.email}
               </span>
             </div>
           </div>

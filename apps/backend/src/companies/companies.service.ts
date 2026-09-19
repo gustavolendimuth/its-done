@@ -57,7 +57,7 @@ export class CompaniesService {
     });
 
     if (!company) {
-      throw new NotFoundException('Client not found');
+      throw new NotFoundException('Company not found');
     }
 
     return this.mapWithHasActiveAdmin(company);
@@ -84,7 +84,7 @@ export class CompaniesService {
     });
 
     if (!company) {
-      throw new NotFoundException('Client not found');
+      throw new NotFoundException('Company not found');
     }
 
     return this.prisma.company.update({
@@ -102,14 +102,14 @@ export class CompaniesService {
     });
 
     if (!company) {
-      throw new NotFoundException('Client not found');
+      throw new NotFoundException('Company not found');
     }
 
     await this.prisma.company.delete({
       where: { id },
     });
 
-    return { message: 'Client deleted successfully' };
+    return { message: 'Company deleted successfully' };
   }
 
   /**
@@ -249,7 +249,7 @@ export class CompaniesService {
     });
 
     if (!company) {
-      throw new NotFoundException('Client not found');
+      throw new NotFoundException('Company not found');
     }
 
     const totalHours = company.workHours.reduce(

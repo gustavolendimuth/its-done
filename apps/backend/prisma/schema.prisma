@@ -218,7 +218,7 @@ model InvoiceWorkHour {
 model NotificationLog {
   id           String           @id @default(uuid())
   userId       String
-  clientId     String?
+  companyId    String?
   type         NotificationType
   threshold    Float
   totalHours   Float
@@ -226,7 +226,7 @@ model NotificationLog {
   user         User             @relation(fields: [userId], references: [id])
 
   @@index([userId, type, threshold])
-  @@index([userId, clientId, type, threshold])
+  @@index([userId, companyId, type, threshold])
 }
 
 model InAppNotification {
@@ -255,7 +255,7 @@ model WorkSession {
   lastPromptAt            DateTime?
   lastConfirmedAt         DateTime?
   promptNonce             String?
-  clientId                String?
+  companyId               String?
   projectId               String?
   taskId                  String?
   description             String?

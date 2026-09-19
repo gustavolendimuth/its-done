@@ -17,7 +17,7 @@ export class TasksService {
     });
 
     if (!company) {
-      throw new NotFoundException('Client not found or access denied');
+      throw new NotFoundException('Company not found or access denied');
     }
   }
 
@@ -134,9 +134,9 @@ export class TasksService {
       updateTaskDto.companyId !== task.companyId &&
       task.projectId
     ) {
-      // Client is changing but projectId wasn't given in this update — the
-      // Task's existing Project (tied to the old client) would otherwise be
-      // left dangling, violating "Project must belong to the same Client as
+      // Company is changing but projectId wasn't given in this update — the
+      // Task's existing Project (tied to the old company) would otherwise be
+      // left dangling, violating "Project must belong to the same Company as
       // the Task" (Story 28). Require the caller to also update/clear it.
       await this.assertProjectBelongsToClient(
         task.projectId,

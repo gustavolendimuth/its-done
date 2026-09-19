@@ -9,7 +9,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Invoice, useDownloadInvoice } from "@/features/invoices/invoices";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
 
-export interface ClientInvoiceCardProps {
+export interface CompanyInvoiceCardProps {
   invoice: Invoice;
   className?: string;
 }
@@ -34,10 +34,10 @@ const accentColorStyles = {
   yellow: "bg-yellow-500",
 };
 
-export function ClientInvoiceCard({
+export function CompanyInvoiceCard({
   invoice,
   className,
-}: ClientInvoiceCardProps) {
+}: CompanyInvoiceCardProps) {
   const downloadInvoiceMutation = useDownloadInvoice();
   const accentColor = getStatusColor(invoice.status);
   const invoiceNumber = invoice.number || `INV-${invoice.id.slice(-8)}`;
@@ -46,7 +46,7 @@ export function ClientInvoiceCard({
   const totalHours =
     invoice.invoiceWorkHours?.reduce(
       (sum, iwh) => sum + (iwh.workHour?.hours || 0),
-      0
+      0,
     ) || 0;
 
   // Get work period (first and last work dates)
@@ -91,7 +91,7 @@ export function ClientInvoiceCard({
     <Card
       className={cn(
         "overflow-hidden group relative transition-all duration-200 hover:shadow-lg hover:scale-[1.02]",
-        className
+        className,
       )}
     >
       {/* Accent bar */}
@@ -103,7 +103,7 @@ export function ClientInvoiceCard({
           <div
             className={cn(
               "h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold",
-              accentColorStyles[accentColor]
+              accentColorStyles[accentColor],
             )}
           >
             <FileText className="h-6 w-6" />

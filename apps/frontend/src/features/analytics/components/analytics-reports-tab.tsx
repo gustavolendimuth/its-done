@@ -17,12 +17,12 @@ import { SummaryReportSection } from "./summary-report-section";
 export interface AnalyticsReportsTabProps {
   filters: ReportFilters;
   reportType: ReportType;
-  clients: Company[] | undefined;
+  companies: Company[] | undefined;
   onFilterChange: (key: keyof ReportFilters, value: string) => void;
   onReportTypeChange: (value: ReportType) => void;
   onQuickDateRange: (range: "thisMonth" | "lastMonth" | "last3Months") => void;
   hoursReport: HoursReport | undefined;
-  clientHoursChartData: {
+  companyHoursChartData: {
     name: string;
     hours: number;
     percentage: number;
@@ -36,12 +36,12 @@ export interface AnalyticsReportsTabProps {
 export function AnalyticsReportsTab({
   filters,
   reportType,
-  clients,
+  companies,
   onFilterChange,
   onReportTypeChange,
   onQuickDateRange,
   hoursReport,
-  clientHoursChartData,
+  companyHoursChartData,
   weeklyChartData,
   invoiceReport,
   summaryReport,
@@ -51,7 +51,7 @@ export function AnalyticsReportsTab({
       <ReportFiltersCard
         filters={filters}
         reportType={reportType}
-        clients={clients}
+        companies={companies}
         onFilterChange={onFilterChange}
         onReportTypeChange={onReportTypeChange}
         onQuickDateRange={onQuickDateRange}
@@ -60,7 +60,7 @@ export function AnalyticsReportsTab({
       {reportType === "hours" && hoursReport && (
         <HoursReportSection
           hoursReport={hoursReport}
-          clientHoursChartData={clientHoursChartData}
+          companyHoursChartData={companyHoursChartData}
           weeklyChartData={weeklyChartData}
         />
       )}

@@ -68,7 +68,7 @@ function useOnlineStatus(): boolean {
 // Rendered inline by WorkTimerWidget when the user picks the "start with
 // details" option instead of the plain "Iniciar" button (spec.md P2
 // "Preencher detalhes antes de iniciar", WKT-10). Like the finish form, this
-// isn't local-first: loading client/project options needs a connection —
+// isn't local-first: loading company/project options needs a connection —
 // only the timer itself (start/count/stop) is local-first.
 export function WorkSessionStartForm({
   onCancel,
@@ -86,7 +86,12 @@ export function WorkSessionStartForm({
     formState: { errors, isSubmitting },
   } = useForm<StartFormData>({
     resolver: zodResolver(startFormSchema),
-    defaultValues: { companyId: "", projectId: "", taskId: "", description: "" },
+    defaultValues: {
+      companyId: "",
+      projectId: "",
+      taskId: "",
+      description: "",
+    },
   });
 
   const selectedClientId = watch("companyId");

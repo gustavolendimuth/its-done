@@ -28,7 +28,7 @@ import {
 export interface ReportFiltersCardProps {
   filters: ReportFilters;
   reportType: ReportType;
-  clients: Company[] | undefined;
+  companies: Company[] | undefined;
   onFilterChange: (key: keyof ReportFilters, value: string) => void;
   onReportTypeChange: (value: ReportType) => void;
   onQuickDateRange: (range: "thisMonth" | "lastMonth" | "last3Months") => void;
@@ -37,7 +37,7 @@ export interface ReportFiltersCardProps {
 export function ReportFiltersCard({
   filters,
   reportType,
-  clients,
+  companies,
   onFilterChange,
   onReportTypeChange,
   onQuickDateRange,
@@ -90,7 +90,7 @@ export function ReportFiltersCard({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="client">{t("client")}</Label>
+            <Label htmlFor="company">{t("client")}</Label>
             <Select
               value={filters.companyId || "all"}
               onValueChange={(value) => onFilterChange("companyId", value)}
@@ -100,9 +100,9 @@ export function ReportFiltersCard({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allClients")}</SelectItem>
-                {clients?.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
+                {companies?.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -87,7 +87,7 @@ function useOnlineStatus(): boolean {
 // Rendered inline by WorkTimerWidget once the session reaches STOPPING
 // (spec.md P1 "Encerrar sessão e preencher detalhes", WKT-06). Unlike the
 // rest of the timer, this form is NOT local-first: it needs a connection to
-// load client/project options, so it gates on connectivity (AC1) instead of
+// load company/project options, so it gates on connectivity (AC1) instead of
 // working offline.
 export function WorkSessionFinishForm({
   session,
@@ -108,7 +108,7 @@ export function WorkSessionFinishForm({
     formState: { errors },
   } = useForm<FinishFormData>({
     resolver: zodResolver(finishFormSchema),
-    // WKT-10: pre-fills client/project/description when the session was
+    // WKT-10: pre-fills company/project/description when the session was
     // started with upfront details — still editable here. WKT-11: the date
     // defaults to the day the session actually STARTED, not today, since
     // the person may only be filling this in days later.

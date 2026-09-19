@@ -7,12 +7,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { AppModule } from './../src/app.module';
 import { PrismaService } from './../src/prisma/prisma.service';
 
-describe('Desativação de Empresa (e2e) — MW-26', () => {
+describe('Desativação de Company (e2e) — MW-26', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let jwtService: JwtService;
 
-  const empresaIds: string[] = [];
+  const companyIds: string[] = [];
   const userIds: string[] = [];
 
   beforeAll(async () => {
@@ -38,31 +38,31 @@ describe('Desativação de Empresa (e2e) — MW-26', () => {
 
   afterAll(async () => {
     await prisma.workHour.deleteMany({
-      where: { clientId: { in: empresaIds } },
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.task.deleteMany({ where: { clientId: { in: empresaIds } } });
+    await prisma.task.deleteMany({ where: { companyId: { in: companyIds } } });
     await prisma.project.deleteMany({
-      where: { clientId: { in: empresaIds } },
+      where: { companyId: { in: companyIds } },
     });
     await prisma.invoice.deleteMany({
-      where: { clientId: { in: empresaIds } },
+      where: { companyId: { in: companyIds } },
     });
     await prisma.inAppNotification.deleteMany({
       where: { userId: { in: userIds } },
     });
-    await prisma.dominioAutorizado.deleteMany({
-      where: { empresaId: { in: empresaIds } },
+    await prisma.authorizedDomain.deleteMany({
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.convitePendente.deleteMany({
-      where: { empresaId: { in: empresaIds } },
+    await prisma.pendingInvite.deleteMany({
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.colaborador.deleteMany({
-      where: { empresaId: { in: empresaIds } },
+    await prisma.collaborator.deleteMany({
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.empresaAdmin.deleteMany({
-      where: { empresaId: { in: empresaIds } },
+    await prisma.companyAdmin.deleteMany({
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.empresa.deleteMany({ where: { id: { in: empresaIds } } });
+    await prisma.company.deleteMany({ where: { id: { in: companyIds } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
     await app.close();
   });
@@ -76,31 +76,31 @@ describe('Desativação de Empresa (e2e) — MW-26', () => {
     return user;
   }
 
-  async function registerEmpresaAdmin(company: string) {
+  async function registerCompanyAdmin(company: string) {
     const email = `mw26-admin-${uuidv4()}@test.local`;
     const password = 'super-secret-1';
     const res = await request(app.getHttpServer())
-      .post('/empresa-admin/auth/register')
+      .post('/company-admin/auth/register')
       .send({ company, email, password })
       .expect(201);
 
-    empresaIds.push(res.body.admin.empresaId);
+    companyIds.push(res.body.admin.companyId);
     return {
       token: res.body.access_token as string,
-      empresaId: res.body.admin.empresaId as string,
+      companyId: res.body.admin.companyId as string,
       id: res.body.admin.id as string,
       email,
     };
   }
 
-  // Mirrors empresa-admin-invite.e2e-spec.ts: creates a second EmpresaAdmin
-  // for an already-activated Empresa directly via Prisma, then signs a JWT
+  // Mirrors company-admin-invite.e2e-spec.ts: creates a second CompanyAdmin
+  // for an already-activated Company directly via Prisma, then signs a JWT
   // for it — equivalent to what the Convite de Administrador flow produces,
   // without going through email delivery.
-  async function createSecondAdmin(empresaId: string) {
-    const admin = await prisma.empresaAdmin.create({
+  async function createSecondAdmin(companyId: string) {
+    const admin = await prisma.companyAdmin.create({
       data: {
-        empresaId,
+        companyId,
         email: `mw26-second-admin-${uuidv4()}@test.local`,
         password: await bcrypt.hash('super-secret-1', 10),
       },
@@ -109,8 +109,8 @@ describe('Desativação de Empresa (e2e) — MW-26', () => {
     const token = jwtService.sign({
       email: admin.email,
       sub: admin.id,
-      actorType: 'EMPRESA_ADMIN',
-      empresaId,
+      actorType: 'COMPANY_ADMIN',
+      companyId,
     });
 
     return { admin, token };
@@ -118,135 +118,135 @@ describe('Desativação de Empresa (e2e) — MW-26', () => {
 
   it('rejeita desativação sem autenticação', async () => {
     await request(app.getHttpServer())
-      .post('/empresa-admin/auth/deactivate')
+      .post('/company-admin/auth/deactivate')
       .expect(401);
   });
 
-  it('desativação revoga todos os EmpresaAdmin, ConvitePendente PENDING e DominioAutorizado PENDING/CONFIRMED da Empresa', async () => {
-    const admin = await registerEmpresaAdmin('Acme Desativação');
+  it('desativação revoga todos os CompanyAdmin, PendingInvite PENDING e AuthorizedDomain PENDING/CONFIRMED da Company', async () => {
+    const admin = await registerCompanyAdmin('Acme Desativação');
 
     await request(app.getHttpServer())
-      .post('/empresa-admin/invites')
+      .post('/company-admin/invites')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ email: `mw26-invite-pending-${uuidv4()}@test.local` })
       .expect(201);
 
-    // A Convite Pendente that already turned into a Colaborador (LINKED)
+    // A Convite Pendente that already turned into a Collaborator (LINKED)
     // must stay untouched — deactivation only revokes still-PENDING ones.
     // Seeded directly via Prisma (not through the invite HTTP flow) so this
     // test only exercises MW-26's own logic, not MW-23's linking-on-invite
     // behaviour.
     const linkedInviteEmail = `mw26-linked-invite-${uuidv4()}@test.local`;
-    const linkedInvite = await prisma.convitePendente.create({
+    const linkedInvite = await prisma.pendingInvite.create({
       data: {
-        empresaId: admin.empresaId,
+        companyId: admin.companyId,
         email: linkedInviteEmail,
         status: 'LINKED',
         linkedAt: new Date(),
-        createdByEmpresaAdminId: admin.id,
+        createdByCompanyAdminId: admin.id,
       },
     });
 
     const domainRes = await request(app.getHttpServer())
-      .post('/empresa-admin/domains')
+      .post('/company-admin/domains')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ domain: `mw26-desativacao-${uuidv4().slice(0, 8)}.test` })
       .expect(201);
     const domainId = domainRes.body.id as string;
 
     await request(app.getHttpServer())
-      .post('/empresa-admin/auth/deactivate')
+      .post('/company-admin/auth/deactivate')
       .set('Authorization', `Bearer ${admin.token}`)
       .expect(201);
 
-    const remainingAdmins = await prisma.empresaAdmin.count({
-      where: { empresaId: admin.empresaId },
+    const remainingAdmins = await prisma.companyAdmin.count({
+      where: { companyId: admin.companyId },
     });
     expect(remainingAdmins).toBe(0);
 
-    const pendingInvite = await prisma.convitePendente.findFirst({
+    const pendingInvite = await prisma.pendingInvite.findFirst({
       where: {
-        empresaId: admin.empresaId,
+        companyId: admin.companyId,
         email: { not: linkedInviteEmail },
       },
     });
     expect(pendingInvite?.status).toBe('REVOKED');
 
-    const stillLinkedInvite = await prisma.convitePendente.findUnique({
+    const stillLinkedInvite = await prisma.pendingInvite.findUnique({
       where: { id: linkedInvite.id },
     });
     expect(stillLinkedInvite?.status).toBe('LINKED');
 
-    const domain = await prisma.dominioAutorizado.findUnique({
+    const domain = await prisma.authorizedDomain.findUnique({
       where: { id: domainId },
     });
     expect(domain?.status).toBe('REVOKED');
   });
 
   it('o token do Administrador que desativou deixa de autenticar em rotas protegidas', async () => {
-    const admin = await registerEmpresaAdmin('Acme Token Morto');
+    const admin = await registerCompanyAdmin('Acme Token Morto');
 
     await request(app.getHttpServer())
-      .post('/empresa-admin/auth/deactivate')
+      .post('/company-admin/auth/deactivate')
       .set('Authorization', `Bearer ${admin.token}`)
       .expect(201);
 
     await request(app.getHttpServer())
-      .get('/empresa-admin/auth/profile')
+      .get('/company-admin/auth/profile')
       .set('Authorization', `Bearer ${admin.token}`)
       .expect(401);
   });
 
-  it('vínculos Colaborador sobrevivem, WorkHour/Project/Task/Invoice permanecem intactos, e cada Colaborador vinculado é notificado (in-app)', async () => {
-    const admin = await registerEmpresaAdmin('Acme Sobrevivência');
-    const colaboradorUser = await createUser('mw26-colaborador');
+  it('vínculos Collaborator sobrevivem, WorkHour/Project/Task/Invoice permanecem intactos, e cada Collaborator vinculado é notificado (in-app)', async () => {
+    const admin = await registerCompanyAdmin('Acme Sobrevivência');
+    const collaboratorUser = await createUser('mw26-collaborator');
 
-    const colaborador = await prisma.colaborador.create({
-      data: { userId: colaboradorUser.id, empresaId: admin.empresaId },
+    const collaborator = await prisma.collaborator.create({
+      data: { userId: collaboratorUser.id, companyId: admin.companyId },
     });
 
     const project = await prisma.project.create({
       data: {
         name: 'Projeto MW-26',
-        clientId: admin.empresaId,
-        userId: colaboradorUser.id,
+        companyId: admin.companyId,
+        userId: collaboratorUser.id,
       },
     });
     const task = await prisma.task.create({
       data: {
         title: 'Tarefa MW-26',
-        clientId: admin.empresaId,
-        userId: colaboradorUser.id,
+        companyId: admin.companyId,
+        userId: collaboratorUser.id,
       },
     });
     const workHour = await prisma.workHour.create({
       data: {
         date: new Date(),
         hours: 3,
-        userId: colaboradorUser.id,
-        clientId: admin.empresaId,
+        userId: collaboratorUser.id,
+        companyId: admin.companyId,
         projectId: project.id,
         taskId: task.id,
       },
     });
     const invoice = await prisma.invoice.create({
-      data: { clientId: admin.empresaId, amount: 150 },
+      data: { companyId: admin.companyId, amount: 150 },
     });
 
     await request(app.getHttpServer())
-      .post('/empresa-admin/auth/deactivate')
+      .post('/company-admin/auth/deactivate')
       .set('Authorization', `Bearer ${admin.token}`)
       .expect(201);
 
-    const stillColaborador = await prisma.colaborador.findUnique({
-      where: { id: colaborador.id },
+    const stillCollaborator = await prisma.collaborator.findUnique({
+      where: { id: collaborator.id },
     });
-    expect(stillColaborador).not.toBeNull();
+    expect(stillCollaborator).not.toBeNull();
 
-    const empresa = await prisma.empresa.findUnique({
-      where: { id: admin.empresaId },
+    const company = await prisma.company.findUnique({
+      where: { id: admin.companyId },
     });
-    expect(empresa).not.toBeNull();
+    expect(company).not.toBeNull();
 
     const persistedProject = await prisma.project.findUnique({
       where: { id: project.id },
@@ -266,68 +266,68 @@ describe('Desativação de Empresa (e2e) — MW-26', () => {
     expect(persistedInvoice).not.toBeNull();
 
     const notification = await prisma.inAppNotification.findFirst({
-      where: { userId: colaboradorUser.id },
+      where: { userId: collaboratorUser.id },
       orderBy: { createdAt: 'desc' },
     });
     expect(notification).not.toBeNull();
     expect(notification?.title).toContain('Acme Sobrevivência');
-    expect((notification?.metadata as any)?.empresaName).toBe(
+    expect((notification?.metadata as any)?.companyName).toBe(
       'Acme Sobrevivência',
     );
   });
 
   it('reativação pelo fluxo normal de Ativação volta a funcionar depois da desativação', async () => {
-    const admin = await registerEmpresaAdmin('Acme Reativação');
+    const admin = await registerCompanyAdmin('Acme Reativação');
 
     await request(app.getHttpServer())
-      .post('/empresa-admin/auth/deactivate')
+      .post('/company-admin/auth/deactivate')
       .set('Authorization', `Bearer ${admin.token}`)
       .expect(201);
 
     await request(app.getHttpServer())
-      .post(`/empresa-admin/auth/activate/${admin.empresaId}/request`)
+      .post(`/company-admin/auth/activate/${admin.companyId}/request`)
       .send({ email: admin.email })
       .expect(201);
 
     const activationToken = jwtService.sign(
       {
-        empresaId: admin.empresaId,
+        companyId: admin.companyId,
         email: admin.email,
-        type: 'empresa-activation',
+        type: 'company-activation',
       },
       { expiresIn: '1h' },
     );
 
     const res = await request(app.getHttpServer())
-      .post('/empresa-admin/auth/activate/confirm')
+      .post('/company-admin/auth/activate/confirm')
       .send({ token: activationToken, password: 'super-secret-2' })
       .expect(201);
 
     expect(res.body.access_token).toBeDefined();
-    expect(res.body.admin.empresaId).toBe(admin.empresaId);
+    expect(res.body.admin.companyId).toBe(admin.companyId);
 
-    const admins = await prisma.empresaAdmin.findMany({
-      where: { empresaId: admin.empresaId },
+    const admins = await prisma.companyAdmin.findMany({
+      where: { companyId: admin.companyId },
     });
     expect(admins).toHaveLength(1);
   });
 
-  it('um segundo Administrador da mesma Empresa também consegue desativar sozinho, sem aprovação cruzada', async () => {
-    const admin = await registerEmpresaAdmin('Acme Dois Admins');
-    const { token: secondToken } = await createSecondAdmin(admin.empresaId);
+  it('um segundo Administrador da mesma Company também consegue desativar sozinho, sem aprovação cruzada', async () => {
+    const admin = await registerCompanyAdmin('Acme Dois Admins');
+    const { token: secondToken } = await createSecondAdmin(admin.companyId);
 
-    const adminsBefore = await prisma.empresaAdmin.count({
-      where: { empresaId: admin.empresaId },
+    const adminsBefore = await prisma.companyAdmin.count({
+      where: { companyId: admin.companyId },
     });
     expect(adminsBefore).toBe(2);
 
     await request(app.getHttpServer())
-      .post('/empresa-admin/auth/deactivate')
+      .post('/company-admin/auth/deactivate')
       .set('Authorization', `Bearer ${secondToken}`)
       .expect(201);
 
-    const adminsAfter = await prisma.empresaAdmin.count({
-      where: { empresaId: admin.empresaId },
+    const adminsAfter = await prisma.companyAdmin.count({
+      where: { companyId: admin.companyId },
     });
     expect(adminsAfter).toBe(0);
   });

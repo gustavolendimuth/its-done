@@ -41,7 +41,7 @@ export class HoursThresholdCheckerService {
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
       // Get all work hours grouped by company and project for this month
-      const workHoursByClientAndProject = await this.prisma.workHour.groupBy({
+      const workHoursByCompanyAndProject = await this.prisma.workHour.groupBy({
         by: ['companyId', 'projectId'],
         where: {
           userId,
@@ -55,10 +55,13 @@ export class HoursThresholdCheckerService {
         },
       });
 
-      console.log(`📊 Work hours by company and project:`, workHoursByClientAndProject);
+      console.log(
+        `📊 Work hours by company and project:`,
+        workHoursByCompanyAndProject,
+      );
 
       // Check each company/project combination
-      for (const data of workHoursByClientAndProject) {
+      for (const data of workHoursByCompanyAndProject) {
         const totalHours = data._sum.hours || 0;
         let threshold = defaultAlertHours;
 
@@ -69,19 +72,26 @@ export class HoursThresholdCheckerService {
             select: { alertHours: true },
           });
 
-          if (project?.alertHours !== null && project?.alertHours !== undefined) {
+          if (
+            project?.alertHours !== null &&
+            project?.alertHours !== undefined
+          ) {
             threshold = project.alertHours;
-            console.log(`📌 Using project-specific threshold: ${threshold}h for project ${data.projectId}`);
+            console.log(
+              `📌 Using project-specific threshold: ${threshold}h for project ${data.projectId}`,
+            );
           }
         }
 
         // Skip if no threshold is defined (neither default nor project-specific)
         if (!threshold) {
-          console.log(`⏭️  No threshold defined for company ${data.companyId}, project ${data.projectId}`);
+          console.log(
+            `⏭️  No threshold defined for company ${data.companyId}, project ${data.projectId}`,
+          );
           continue;
         }
 
-        await this.checkClientProjectThreshold(
+        await this.checkCompanyProjectThreshold(
           userId,
           data.companyId,
           data.projectId,
@@ -101,7 +111,7 @@ export class HoursThresholdCheckerService {
   /**
    * Check threshold for a specific company/project combination
    */
-  private async checkClientProjectThreshold(
+  private async checkCompanyProjectThreshold(
     userId: string,
     companyId: string,
     projectId: string | null,
@@ -112,11 +122,13 @@ export class HoursThresholdCheckerService {
     endOfMonth: Date,
   ): Promise<void> {
     const projectInfo = projectId ? `project ${projectId}` : 'no project';
-    console.log(`\n👤 Checking company ${companyId} (${projectInfo}): ${totalHours}h`);
+    console.log(
+      `\n👤 Checking company ${companyId} (${projectInfo}): ${totalHours}h`,
+    );
 
     if (totalHours < threshold) {
       console.log(
-        `⏭️  Client ${companyId} (${projectInfo}) has not reached threshold yet (${totalHours}h < ${threshold}h)`,
+        `⏭️  Company ${companyId} (${projectInfo}) has not reached threshold yet (${totalHours}h < ${threshold}h)`,
       );
       return;
     }
@@ -125,7 +137,7 @@ export class HoursThresholdCheckerService {
     const existingNotification = await this.prisma.notificationLog.findFirst({
       where: {
         userId,
-        clientId: companyId,
+        companyId,
         type: 'HOURS_THRESHOLD',
         threshold,
         sentAt: {
@@ -144,7 +156,7 @@ export class HoursThresholdCheckerService {
 
     // Threshold reached and notification not sent yet
     console.log(
-      `✉️  Client ${companyId} (${projectInfo}) reached threshold! Creating draft invoice and sending notification...`,
+      `✉️  Company ${companyId} (${projectInfo}) reached threshold! Creating draft invoice and sending notification...`,
     );
 
     // Get company info
@@ -153,7 +165,7 @@ export class HoursThresholdCheckerService {
     });
 
     if (!company) {
-      console.log(`❌ Client ${companyId} not found`);
+      console.log(`❌ Company ${companyId} not found`);
       return;
     }
 
@@ -167,7 +179,9 @@ export class HoursThresholdCheckerService {
     );
 
     if (availableHours.length === 0) {
-      console.log(`❌ No available hours found for company ${companyId} (${projectInfo})`);
+      console.log(
+        `❌ No available hours found for company ${companyId} (${projectInfo})`,
+      );
       return;
     }
 
@@ -189,12 +203,12 @@ export class HoursThresholdCheckerService {
     }
 
     // Create in-app notification with link to draft invoice
-    const clientName = company.name || company.company;
+    const companyName = company.name || company.company;
     await this.inAppNotificationsService.createHoursThresholdNotification(
       userId,
       totalHours,
       threshold,
-      clientName,
+      companyName,
       draftInvoice.id,
     );
 
@@ -202,14 +216,16 @@ export class HoursThresholdCheckerService {
     await this.prisma.notificationLog.create({
       data: {
         userId,
-        clientId: companyId,
+        companyId,
         type: 'HOURS_THRESHOLD',
         threshold,
         totalHours,
       },
     });
 
-    console.log(`✅ Notification sent for company ${clientName} (${projectInfo})!`);
+    console.log(
+      `✅ Notification sent for company ${companyName} (${projectInfo})!`,
+    );
   }
 
   /**

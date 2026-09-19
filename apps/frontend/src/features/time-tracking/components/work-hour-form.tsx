@@ -212,7 +212,7 @@ export function WorkHourForm({
   const isInvoiced = !!workHour?.isInvoiced;
   const fieldsDisabled = isEditMode && isInvoiced;
 
-  // Reset project/task when client changes
+  // Reset project/task when company changes
   useEffect(() => {
     setValue("projectId", "");
     setValue("taskId", "");

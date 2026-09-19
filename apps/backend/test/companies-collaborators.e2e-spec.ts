@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AppModule } from './../src/app.module';
 import { PrismaService } from './../src/prisma/prisma.service';
 
-describe('Clients (Empresa/Colaborador) (e2e)', () => {
+describe('Companies and Collaborators (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let jwtService: JwtService;
@@ -37,8 +37,8 @@ describe('Clients (Empresa/Colaborador) (e2e)', () => {
 
     const userA = await prisma.user.create({
       data: {
-        email: `clients-empresa-e2e-a-${uuidv4()}@test.local`,
-        name: 'Clients Empresa E2E A',
+        email: `clients-company-e2e-a-${uuidv4()}@test.local`,
+        name: 'Clients Company E2E A',
         password: 'not-used',
       },
     });
@@ -47,8 +47,8 @@ describe('Clients (Empresa/Colaborador) (e2e)', () => {
 
     const userB = await prisma.user.create({
       data: {
-        email: `clients-empresa-e2e-b-${uuidv4()}@test.local`,
-        name: 'Clients Empresa E2E B',
+        email: `clients-company-e2e-b-${uuidv4()}@test.local`,
+        name: 'Clients Company E2E B',
         password: 'not-used',
       },
     });
@@ -57,82 +57,80 @@ describe('Clients (Empresa/Colaborador) (e2e)', () => {
   });
 
   afterAll(async () => {
-    await prisma.colaborador.deleteMany({
+    await prisma.collaborator.deleteMany({
       where: { userId: { in: [userAId, userBId] } },
     });
-    await prisma.empresa.deleteMany({
+    await prisma.company.deleteMany({
       where: {
-        colaboradores: { some: { userId: { in: [userAId, userBId] } } },
+        collaborators: { some: { userId: { in: [userAId, userBId] } } },
       },
     });
     await prisma.user.deleteMany({ where: { id: { in: [userAId, userBId] } } });
     await app.close();
   });
 
-  it('creating a client links the creator as Colaborador and it shows up in their list', async () => {
+  it('creating a Company links the creator as Collaborator and it shows up in their list', async () => {
     const createRes = await request(app.getHttpServer())
-      .post('/clients')
+      .post('/companies')
       .set('Authorization', `Bearer ${tokenA}`)
       .send({ email: 'acme@test.local', company: 'Acme' })
       .expect(201);
 
-    const empresaId = createRes.body.id;
+    const companyId = createRes.body.id;
 
     const listRes = await request(app.getHttpServer())
-      .get('/clients')
+      .get('/companies')
       .set('Authorization', `Bearer ${tokenA}`)
       .expect(200);
 
-    expect(listRes.body.map((c: { id: string }) => c.id)).toContain(
-      empresaId,
-    );
+    expect(listRes.body.map((c: { id: string }) => c.id)).toContain(companyId);
 
-    const colaborador = await prisma.colaborador.findFirst({
-      where: { userId: userAId, empresaId },
+    const collaborator = await prisma.collaborator.findFirst({
+      where: { userId: userAId, companyId },
     });
-    expect(colaborador).not.toBeNull();
+    expect(collaborator).not.toBeNull();
   });
 
-  it('a client is invisible to a user with no Colaborador link to it', async () => {
+  it('a Company is invisible to a user with no Collaborator link to it', async () => {
     const createRes = await request(app.getHttpServer())
-      .post('/clients')
+      .post('/companies')
       .set('Authorization', `Bearer ${tokenA}`)
       .send({ email: 'private@test.local', company: 'Private Co' })
       .expect(201);
 
-    const empresaId = createRes.body.id;
+    const companyId = createRes.body.id;
 
     await request(app.getHttpServer())
-      .get(`/clients/${empresaId}`)
+      .get(`/companies/${companyId}`)
       .set('Authorization', `Bearer ${tokenB}`)
       .expect(404);
   });
 
-  it('a second Colaborador row on the same Empresa makes it visible to both users (N:N)', async () => {
+  it('a second Collaborator row on the same Company makes it visible to both users (N:N)', async () => {
     const createRes = await request(app.getHttpServer())
-      .post('/clients')
+      .post('/companies')
       .set('Authorization', `Bearer ${tokenA}`)
       .send({ email: 'shared@test.local', company: 'Shared Co' })
       .expect(201);
 
-    const empresaId = createRes.body.id;
+    const companyId = createRes.body.id;
 
-    await prisma.colaborador.create({
-      data: { userId: userBId, empresaId },
+    await prisma.collaborator.create({
+      data: { userId: userBId, companyId },
     });
 
     const [resA, resB] = await Promise.all([
       request(app.getHttpServer())
-        .get(`/clients/${empresaId}`)
+        .get(`/companies/${companyId}`)
         .set('Authorization', `Bearer ${tokenA}`)
         .expect(200),
       request(app.getHttpServer())
-        .get(`/clients/${empresaId}`)
+        .get(`/companies/${companyId}`)
         .set('Authorization', `Bearer ${tokenB}`)
         .expect(200),
     ]);
 
-    expect(resA.body.id).toBe(empresaId);
-    expect(resB.body.id).toBe(empresaId);
+    expect(resA.body.id).toBe(companyId);
+    expect(resB.body.id).toBe(companyId);
   });
 });

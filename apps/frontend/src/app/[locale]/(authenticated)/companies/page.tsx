@@ -10,7 +10,13 @@ import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
 import { SearchInput } from "@/components/ui/search-input";
-import { CompaniesPageSkeleton , CompanyCard, CompanyForm, CompaniesBigStats, useCompanies } from "@/features/companies";
+import {
+  CompaniesPageSkeleton,
+  CompanyCard,
+  CompanyForm,
+  CompaniesBigStats,
+  useCompanies,
+} from "@/features/companies";
 
 export default function ClientsPage() {
   const t = useTranslations("clients");
@@ -24,10 +30,10 @@ export default function ClientsPage() {
     if (!searchTerm) return clients;
 
     return clients.filter(
-      (client: { company: string; email: string; name?: string }) =>
-        client.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      (company: { company: string; email: string; name?: string }) =>
+        company.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        company.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        company.name?.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [clients, searchTerm]);
 
@@ -97,8 +103,8 @@ export default function ClientsPage() {
         )
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredClients.map((client) => (
-            <CompanyCard key={client.id} company={client} />
+          {filteredClients.map((company) => (
+            <CompanyCard key={company.id} company={company} />
           ))}
         </div>
       )}

@@ -131,7 +131,7 @@ export function ProjectEditDialog({
                 value={field.value}
                 onSelect={field.onChange}
                 placeholder={t("selectClient", {
-                  defaultMessage: "Select a client",
+                  defaultMessage: "Select a company",
                 })}
               />
             )}

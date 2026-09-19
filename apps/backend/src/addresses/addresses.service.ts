@@ -17,7 +17,7 @@ export class AddressesService {
     });
 
     if (!company) {
-      throw new NotFoundException('Client not found');
+      throw new NotFoundException('Company not found');
     }
 
     // If this is set as primary, unset other primary addresses for this company
@@ -66,7 +66,7 @@ export class AddressesService {
       });
 
       if (!company) {
-        throw new NotFoundException('Client not found');
+        throw new NotFoundException('Company not found');
       }
 
       where.companyId = companyId;
@@ -168,7 +168,7 @@ export class AddressesService {
     });
 
     if (!company) {
-      throw new NotFoundException('Client not found');
+      throw new NotFoundException('Company not found');
     }
 
     return this.prisma.address.findMany({

@@ -24,7 +24,7 @@ jest.mock("@/components/layout/loading-skeleton", () => ({
 
 jest.mock("@/features/invoices", () => ({
   ...jest.requireActual("@/features/invoices"),
-  ClientInvoiceCard: ({ invoice }: any) => (
+  CompanyInvoiceCard: ({ invoice }: any) => (
     <div data-testid="invoice-card">
       <p>Invoice {invoice.number}</p>
       <p>Amount: ${invoice.amount}</p>
@@ -131,7 +131,7 @@ describe("Overview", () => {
         data={mockData}
         isLoading={false}
         error={new Error("Test error")}
-      />
+      />,
     );
     expect(screen.getByText("Error loading dashboard")).toBeInTheDocument();
   });

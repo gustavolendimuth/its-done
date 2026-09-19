@@ -80,7 +80,7 @@ export const useCreateCompany = () => {
 
   return useMutation({
     mutationFn: async (data: CreateCompanyDto) => {
-      console.log("Making API request to create client with data:", data);
+      console.log("Making API request to create company with data:", data);
       try {
         const response = await api.post<Company>("/companies", data);
 
@@ -95,7 +95,7 @@ export const useCreateCompany = () => {
     onSuccess: () => {
       // Invalidate all clients queries
       queryClient.invalidateQueries({ queryKey: ["clients"] });
-      // Invalidate client stats
+      // Invalidate company stats
       queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -109,7 +109,13 @@ export const useUpdateCompany = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: UpdateCompanyDto }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateCompanyDto;
+    }) => {
       const response = await api.patch<Company>(`/companies/${id}`, data);
 
       return response.data;
@@ -118,7 +124,7 @@ export const useUpdateCompany = () => {
       // Invalidate all clients queries
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["clients", id] });
-      // Invalidate client stats
+      // Invalidate company stats
       queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -141,13 +147,13 @@ export const useDeleteCompany = () => {
       // Invalidate all clients queries
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["clients", id] });
-      // Invalidate client stats
+      // Invalidate company stats
       queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       // Invalidate work hours stats
       queryClient.invalidateQueries({ queryKey: ["workHours", "stats"] });
-      // Invalidate time entries (client may have been associated)
+      // Invalidate time entries (company may have been associated)
       queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
     },
   });

@@ -22,7 +22,8 @@ import {
   ProjectsBigStats,
   useProjects,
   useDeleteProject,
- ProjectsPageSkeleton } from "@/features/projects";
+  ProjectsPageSkeleton,
+} from "@/features/projects";
 
 export default function ProjectsPage() {
   const t = useTranslations("projects");
@@ -32,7 +33,7 @@ export default function ProjectsPage() {
 
   const { data: clients = [] } = useCompanies();
   const { data: projects = [], isLoading } = useProjects(
-    selectedClientId === "all" ? undefined : selectedClientId
+    selectedClientId === "all" ? undefined : selectedClientId,
   );
   const deleteProject = useDeleteProject();
 
@@ -86,9 +87,9 @@ export default function ProjectsPage() {
               <SelectItem value="all">
                 {tCommon("all")} {tCommon("clients")}
               </SelectItem>
-              {clients.map((client) => (
-                <SelectItem key={client.id} value={client.id}>
-                  {client.company}
+              {clients.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.company}
                 </SelectItem>
               ))}
             </SelectContent>

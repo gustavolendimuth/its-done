@@ -58,7 +58,7 @@ export class CompaniesController {
         companyId,
       );
       if (!company) {
-        throw new NotFoundException(`Client with id ${companyId} not found`);
+        throw new NotFoundException(`Company with id ${companyId} not found`);
       }
 
       // Return invoices for this company

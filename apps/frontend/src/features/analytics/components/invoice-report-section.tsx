@@ -75,14 +75,14 @@ export function InvoiceReportSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoiceReport.clientBreakdown?.map((client) => (
-                <TableRow key={client.companyId}>
+              {invoiceReport.companyBreakdown?.map((company) => (
+                <TableRow key={company.companyId}>
                   <TableCell className="font-medium">
-                    {client.clientName}
+                    {company.companyName}
                   </TableCell>
-                  <TableCell>{client.totalInvoices}</TableCell>
-                  <TableCell>{client.pendingInvoices}</TableCell>
-                  <TableCell>{client.paidInvoices}</TableCell>
+                  <TableCell>{company.totalInvoices}</TableCell>
+                  <TableCell>{company.pendingInvoices}</TableCell>
+                  <TableCell>{company.paidInvoices}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

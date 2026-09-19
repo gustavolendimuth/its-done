@@ -21,7 +21,7 @@ export class ProjectsService {
     });
 
     if (!company) {
-      throw new NotFoundException('Client not found or access denied');
+      throw new NotFoundException('Company not found or access denied');
     }
 
     return this.prisma.project.create({
@@ -131,7 +131,7 @@ export class ProjectsService {
       });
 
       if (!company) {
-        throw new NotFoundException('Client not found or access denied');
+        throw new NotFoundException('Company not found or access denied');
       }
     }
 

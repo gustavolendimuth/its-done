@@ -69,19 +69,19 @@ export const useCompanyAddresses = (companyId: string) => {
   return useQuery({
     queryKey: ["clients", companyId, "addresses"],
     queryFn: async () => {
-      console.log("Fetching addresses for client:", companyId);
+      console.log("Fetching addresses for company:", companyId);
       console.log("API base URL:", getApiUrl());
 
       try {
         const { data } = await api.get<Address[]>(
-          `/addresses/company/${companyId}`
+          `/addresses/company/${companyId}`,
         );
 
         console.log("Addresses fetched successfully:", data);
 
         return data;
       } catch (error: unknown) {
-        console.error("Error fetching client addresses:", error);
+        console.error("Error fetching company addresses:", error);
         throw error;
       }
     },
@@ -107,7 +107,7 @@ export const useCreateAddress = () => {
       queryClient.invalidateQueries({
         queryKey: ["clients", variables.companyId, "addresses"],
       });
-      // Invalidate client data
+      // Invalidate company data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({
         queryKey: ["clients", variables.companyId],
@@ -141,9 +141,11 @@ export const useUpdateAddress = () => {
         queryClient.invalidateQueries({
           queryKey: ["clients", data.companyId, "addresses"],
         });
-        queryClient.invalidateQueries({ queryKey: ["clients", data.companyId] });
+        queryClient.invalidateQueries({
+          queryKey: ["clients", data.companyId],
+        });
       }
-      // Invalidate client data
+      // Invalidate company data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -157,7 +159,7 @@ export const useDeleteAddress = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await api.delete<{ message: string }>(
-        `/addresses/${id}`
+        `/addresses/${id}`,
       );
 
       return response.data;
@@ -165,7 +167,7 @@ export const useDeleteAddress = () => {
     onSuccess: () => {
       // Invalidate all addresses queries
       queryClient.invalidateQueries({ queryKey: ["addresses"] });
-      // Invalidate client data
+      // Invalidate company data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -188,7 +190,7 @@ export const useSetPrimaryAddress = () => {
       queryClient.invalidateQueries({
         queryKey: ["clients", data.companyId, "addresses"],
       });
-      // Invalidate client data
+      // Invalidate company data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["clients", data.companyId] });
       // Invalidate dashboard data

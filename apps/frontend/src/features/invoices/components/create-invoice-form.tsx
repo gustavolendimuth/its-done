@@ -86,7 +86,7 @@ export function CreateInvoiceForm({
     } else if (formErrors.workHourIds) {
       toast.error("Select at least one work hour to invoice.");
     } else if (formErrors.companyId) {
-      toast.error("Select a client.");
+      toast.error("Select a company.");
     } else {
       toast.error("Please review the highlighted fields before submitting.");
     }
@@ -109,7 +109,7 @@ export function CreateInvoiceForm({
     selectedWorkHourIds.includes(entry.id),
   );
 
-  // Clear selected work hours whenever the client changes
+  // Clear selected work hours whenever the company changes
   useEffect(() => {
     // Reset local selection and calculated values
     setSelectedWorkHourIds([]);
@@ -210,7 +210,7 @@ export function CreateInvoiceForm({
               clients={clients || []}
               value={field.value}
               onSelect={field.onChange}
-              placeholder="Select a client"
+              placeholder="Select a company"
             />
           )}
         />
@@ -234,7 +234,7 @@ export function CreateInvoiceForm({
 
             {/* Work Hours Selector */}
             <WorkHoursSelector
-              key={watchedClientId || "no-client"}
+              key={watchedClientId || "no-company"}
               timeEntries={filteredTimeEntries}
               onSelectionChange={(workHourIds, totalAmount) =>
                 handleWorkHoursSelection(workHourIds, totalAmount)
@@ -252,7 +252,7 @@ export function CreateInvoiceForm({
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             <Clock className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p>Please select a client first to view available work hours</p>
+            <p>Please select a company first to view available work hours</p>
           </div>
         )}
         {errors.workHourIds && (

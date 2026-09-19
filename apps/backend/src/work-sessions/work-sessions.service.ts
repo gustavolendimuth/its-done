@@ -109,7 +109,7 @@ export class WorkSessionsService {
     switch (event.type) {
       case SyncEventType.START:
         return this.applyStart(userId, event.sessionId, clientTimestamp, {
-          clientId: event.clientId,
+          companyId: event.companyId,
           projectId: event.projectId,
           taskId: event.taskId,
           description: event.description,
@@ -132,7 +132,7 @@ export class WorkSessionsService {
     sessionId: string,
     clientTimestamp: Date,
     details?: {
-      clientId?: string;
+      companyId?: string;
       projectId?: string;
       taskId?: string;
       description?: string;
@@ -152,7 +152,7 @@ export class WorkSessionsService {
     // start event when the user chose to fill them upfront; left null
     // otherwise and filled later at finish(), exactly like before.
     const upfrontDetails = {
-      clientId: details?.clientId ?? null,
+      companyId: details?.companyId ?? null,
       projectId: details?.projectId ?? null,
       taskId: details?.taskId ?? null,
       description: details?.description ?? null,

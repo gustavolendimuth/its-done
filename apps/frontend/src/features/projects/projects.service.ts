@@ -82,7 +82,7 @@ export const useCreateProject = () => {
       // Invalidate all projects queries
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects", data.companyId] });
-      // Invalidate client data (project count may have changed)
+      // Invalidate company data (project count may have changed)
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["clients", data.companyId] });
       // Invalidate dashboard data
@@ -111,7 +111,7 @@ export const useUpdateProject = () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects", data.id] });
       queryClient.invalidateQueries({ queryKey: ["projects", data.companyId] });
-      // Invalidate client data
+      // Invalidate company data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["clients", data.companyId] });
       // Invalidate dashboard data
@@ -132,7 +132,7 @@ export const useDeleteProject = () => {
     onSuccess: () => {
       // Invalidate all projects queries
       queryClient.invalidateQueries({ queryKey: ["projects"] });
-      // Invalidate client data (project count may have changed)
+      // Invalidate company data (project count may have changed)
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });

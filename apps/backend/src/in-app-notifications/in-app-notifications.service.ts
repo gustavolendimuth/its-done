@@ -117,7 +117,7 @@ export class InAppNotificationsService {
       : 'Hours Threshold Reached';
 
     const message = clientName
-      ? `Client ${clientName} has logged ${totalHours} hours, reaching the threshold of ${threshold} hours. A draft invoice has been created automatically.`
+      ? `Company ${clientName} has logged ${totalHours} hours, reaching the threshold of ${threshold} hours. A draft invoice has been created automatically.`
       : `You have logged ${totalHours} hours, reaching your configured threshold of ${threshold} hours.`;
 
     return this.create(userId, {

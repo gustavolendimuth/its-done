@@ -41,8 +41,8 @@ export class InvoicesService {
     }
 
     // Verificar se todas as horas pertencem à mesma empresa
-    const clientIds = [...new Set(workHours.map((wh) => wh.companyId))];
-    if (clientIds.length > 1) {
+    const companyIds = [...new Set(workHours.map((wh) => wh.companyId))];
+    if (companyIds.length > 1) {
       throw new Error('All work hours must belong to the same company');
     }
 
@@ -114,7 +114,7 @@ export class InvoicesService {
     const invoice = await this.prisma.invoice.create({
       data: {
         companyId,
-        // If client sent amount explicitly, use it; otherwise use computed
+        // If the caller sent amount explicitly, use it; otherwise use computed
         amount:
           typeof createInvoiceDto.amount === 'number'
             ? createInvoiceDto.amount
@@ -302,8 +302,8 @@ export class InvoicesService {
       }
 
       // Verificar se todas as horas pertencem à mesma empresa
-      const clientIds = [...new Set(workHours.map((wh) => wh.companyId))];
-      if (clientIds.length > 1) {
+      const companyIds = [...new Set(workHours.map((wh) => wh.companyId))];
+      if (companyIds.length > 1) {
         throw new Error('All work hours must belong to the same company');
       }
 

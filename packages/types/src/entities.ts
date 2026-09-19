@@ -19,7 +19,7 @@ export interface User {
   };
 }
 
-export interface Client {
+export interface Company {
   id: string;
   name?: string;
   email: string;
@@ -44,11 +44,11 @@ export interface Project {
   id: string;
   name: string;
   description?: string;
-  clientId: string;
+  companyId: string;
   userId: string;
   createdAt: DateField;
   updatedAt: DateField;
-  client?: Client;
+  company?: Company;
   user?: User;
   workHours?: WorkHour[];
   _count?: {
@@ -62,12 +62,12 @@ export interface WorkHour {
   description?: string;
   hours: number;
   userId: string;
-  clientId: string;
+  companyId: string;
   projectId?: string;
   createdAt: DateField;
   updatedAt: DateField;
   user?: User;
-  client?: Client;
+  company?: Company;
   project?: Project;
 }
 
@@ -80,10 +80,10 @@ export interface Address {
   country: string;
   type: string;
   isPrimary: boolean;
-  clientId: string;
+  companyId: string;
   createdAt: DateField;
   updatedAt: DateField;
-  client?: Client;
+  company?: Company;
 }
 
 export interface Settings {
@@ -99,14 +99,14 @@ export interface Settings {
 export interface Invoice {
   id: string;
   number?: string;
-  clientId: string;
+  companyId: string;
   fileUrl?: string;
   amount: number;
   status: "PENDING" | "PAID" | "CANCELED";
   description?: string;
   createdAt: DateField;
   updatedAt: DateField;
-  client?: Client;
+  company?: Company;
   invoiceWorkHours?: InvoiceWorkHour[];
 }
 
@@ -134,9 +134,9 @@ export interface TimeEntry {
   date: string;
   description?: string;
   hours: number;
-  clientId: string;
+  companyId: string;
   projectId?: string;
-  client?: {
+  company?: {
     id: string;
     name?: string;
     company: string;
@@ -163,6 +163,6 @@ export interface CreateTimeEntryDto {
   date: string;
   description?: string;
   hours: number;
-  clientId: string;
+  companyId: string;
   projectId?: string;
 }

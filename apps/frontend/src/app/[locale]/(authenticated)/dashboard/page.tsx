@@ -68,7 +68,7 @@ export default function DashboardPage() {
     const totalInvoices = invoices.length;
     const totalAmount = invoices.reduce(
       (sum, invoice) => sum + invoice.amount,
-      0
+      0,
     );
     const paidAmount = invoices
       .filter((inv) => inv.status === "PAID")
@@ -79,10 +79,10 @@ export default function DashboardPage() {
 
     const paidInvoices = invoices.filter((inv) => inv.status === "PAID").length;
     const pendingInvoices = invoices.filter(
-      (inv) => inv.status === "PENDING"
+      (inv) => inv.status === "PENDING",
     ).length;
     const canceledInvoices = invoices.filter(
-      (inv) => inv.status === "CANCELED"
+      (inv) => inv.status === "CANCELED",
     ).length;
 
     const averageInvoiceValue =
@@ -92,7 +92,7 @@ export default function DashboardPage() {
     const recentInvoices = invoices
       .sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )
       .slice(0, 5);
 
@@ -102,12 +102,14 @@ export default function DashboardPage() {
         const companyId = entry.companyId;
 
         if (!acc[companyId]) {
-          const client = clients.find((c) => c.id === companyId);
+          const company = clients.find(
+            (candidate) => candidate.id === companyId,
+          );
 
           acc[companyId] = {
             id: companyId,
-            name: client?.name || "Unknown Company",
-            company: client?.company || "",
+            name: company?.name || "Unknown Company",
+            company: company?.company || "",
             hours: 0,
             invoices: 0,
           };
@@ -125,7 +127,7 @@ export default function DashboardPage() {
           hours: number;
           invoices: number;
         }
-      >
+      >,
     );
 
     // Add invoice counts to clients

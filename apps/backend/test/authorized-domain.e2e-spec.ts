@@ -5,14 +5,14 @@ import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
 import { AppModule } from './../src/app.module';
 import { PrismaService } from './../src/prisma/prisma.service';
-import { EMPRESA_ADMIN_ACTOR_TYPE } from '../src/empresa-admin/empresa-admin-auth.service';
+import { COMPANY_ADMIN_ACTOR_TYPE } from '../src/company-admin/company-admin-auth.service';
 
 describe('Domínio Autorizado (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let jwtService: JwtService;
 
-  const empresaIds: string[] = [];
+  const companyIds: string[] = [];
   const userIds: string[] = [];
 
   beforeAll(async () => {
@@ -37,42 +37,42 @@ describe('Domínio Autorizado (e2e)', () => {
   });
 
   afterAll(async () => {
-    await prisma.dominioAutorizado.deleteMany({
-      where: { empresaId: { in: empresaIds } },
+    await prisma.authorizedDomain.deleteMany({
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.colaborador.deleteMany({
-      where: { empresaId: { in: empresaIds } },
+    await prisma.collaborator.deleteMany({
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.empresaAdmin.deleteMany({
-      where: { empresaId: { in: empresaIds } },
+    await prisma.companyAdmin.deleteMany({
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.empresa.deleteMany({ where: { id: { in: empresaIds } } });
+    await prisma.company.deleteMany({ where: { id: { in: companyIds } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
     await app.close();
   });
 
-  async function registerEmpresaAdmin(company: string) {
+  async function registerCompanyAdmin(company: string) {
     const email = `dominio-admin-${uuidv4()}@test.local`;
     const password = 'super-secret-1';
     const res = await request(app.getHttpServer())
-      .post('/empresa-admin/auth/register')
+      .post('/company-admin/auth/register')
       .send({ company, email, password })
       .expect(201);
 
-    empresaIds.push(res.body.admin.empresaId);
+    companyIds.push(res.body.admin.companyId);
     return {
       token: res.body.access_token as string,
-      empresaId: res.body.admin.empresaId as string,
+      companyId: res.body.admin.companyId as string,
       adminEmail: email,
     };
   }
 
-  function signDomainConfirmationToken(domainId: string, empresaId: string) {
+  function signDomainConfirmationToken(domainId: string, companyId: string) {
     return jwtService.sign(
       {
         sub: domainId,
-        empresaId,
-        actorType: EMPRESA_ADMIN_ACTOR_TYPE,
+        companyId,
+        actorType: COMPANY_ADMIN_ACTOR_TYPE,
         type: 'domain-confirmation',
       },
       { expiresIn: '1h' },
@@ -80,10 +80,10 @@ describe('Domínio Autorizado (e2e)', () => {
   }
 
   it('registers a domain as PENDING', async () => {
-    const admin = await registerEmpresaAdmin('Acme Domain');
+    const admin = await registerCompanyAdmin('Acme Domain');
 
     const res = await request(app.getHttpServer())
-      .post('/empresa-admin/domains')
+      .post('/company-admin/domains')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ domain: `acme-${uuidv4()}.com` })
       .expect(201);
@@ -96,20 +96,20 @@ describe('Domínio Autorizado (e2e)', () => {
     ['GMAIL.COM', 'uppercase'],
     ['mail.gmail.com', 'subdomain'],
   ])('rejects a public provider domain (%s — %s)', async (domain) => {
-    const admin = await registerEmpresaAdmin('Acme Blocked');
+    const admin = await registerCompanyAdmin('Acme Blocked');
 
     await request(app.getHttpServer())
-      .post('/empresa-admin/domains')
+      .post('/company-admin/domains')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ domain })
       .expect(400);
   });
 
   it('does not reject a domain that merely looks like a public provider', async () => {
-    const admin = await registerEmpresaAdmin('Acme Notgmail');
+    const admin = await registerCompanyAdmin('Acme Notgmail');
 
     await request(app.getHttpServer())
-      .post('/empresa-admin/domains')
+      .post('/company-admin/domains')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ domain: `notgmail-${uuidv4()}.com` })
       .expect(201);
@@ -117,77 +117,77 @@ describe('Domínio Autorizado (e2e)', () => {
 
   it('rejects an unauthenticated request to create a domain', async () => {
     await request(app.getHttpServer())
-      .post('/empresa-admin/domains')
+      .post('/company-admin/domains')
       .send({ domain: 'acme.com' })
       .expect(401);
   });
 
   it('confirmation flow: request-confirmation keeps it PENDING, confirm with a valid token marks it CONFIRMED', async () => {
-    const admin = await registerEmpresaAdmin('Acme Confirm');
+    const admin = await registerCompanyAdmin('Acme Confirm');
     const createRes = await request(app.getHttpServer())
-      .post('/empresa-admin/domains')
+      .post('/company-admin/domains')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ domain: `confirm-${uuidv4()}.com` })
       .expect(201);
     const domainId = createRes.body.id;
 
     await request(app.getHttpServer())
-      .post(`/empresa-admin/domains/${domainId}/confirm`)
+      .post(`/company-admin/domains/${domainId}/confirm`)
       .set('Authorization', `Bearer ${admin.token}`)
       .expect(201);
 
-    const stillPending = await prisma.dominioAutorizado.findUnique({
+    const stillPending = await prisma.authorizedDomain.findUnique({
       where: { id: domainId },
     });
     expect(stillPending?.status).toBe('PENDING');
 
-    const token = signDomainConfirmationToken(domainId, admin.empresaId);
+    const token = signDomainConfirmationToken(domainId, admin.companyId);
     await request(app.getHttpServer())
-      .post('/empresa-admin/domains/confirm')
+      .post('/company-admin/domains/confirm')
       .send({ token })
       .expect(201);
 
-    const confirmed = await prisma.dominioAutorizado.findUnique({
+    const confirmed = await prisma.authorizedDomain.findUnique({
       where: { id: domainId },
     });
     expect(confirmed?.status).toBe('CONFIRMED');
     expect(confirmed?.confirmedAt).not.toBeNull();
   });
 
-  it('rejects confirming with a token for a different Empresa', async () => {
-    const admin = await registerEmpresaAdmin('Acme Confirm Owner');
-    const otherAdmin = await registerEmpresaAdmin('Acme Confirm Other');
+  it('rejects confirming with a token for a different Company', async () => {
+    const admin = await registerCompanyAdmin('Acme Confirm Owner');
+    const otherAdmin = await registerCompanyAdmin('Acme Confirm Other');
     const createRes = await request(app.getHttpServer())
-      .post('/empresa-admin/domains')
+      .post('/company-admin/domains')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ domain: `cross-confirm-${uuidv4()}.com` })
       .expect(201);
 
     const token = signDomainConfirmationToken(
       createRes.body.id,
-      otherAdmin.empresaId,
+      otherAdmin.companyId,
     );
     await request(app.getHttpServer())
-      .post('/empresa-admin/domains/confirm')
+      .post('/company-admin/domains/confirm')
       .send({ token })
       .expect(404);
   });
 
   it('links automatically on signup when the email domain is CONFIRMED', async () => {
-    const admin = await registerEmpresaAdmin('Acme Auto Link');
+    const admin = await registerCompanyAdmin('Acme Auto Link');
     const domain = `autolink-${uuidv4()}.com`;
     const createRes = await request(app.getHttpServer())
-      .post('/empresa-admin/domains')
+      .post('/company-admin/domains')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ domain })
       .expect(201);
 
     const token = signDomainConfirmationToken(
       createRes.body.id,
-      admin.empresaId,
+      admin.companyId,
     );
     await request(app.getHttpServer())
-      .post('/empresa-admin/domains/confirm')
+      .post('/company-admin/domains/confirm')
       .send({ token })
       .expect(201);
 
@@ -198,17 +198,17 @@ describe('Domínio Autorizado (e2e)', () => {
       .expect(201);
     userIds.push(registerRes.body.user.id);
 
-    const colaborador = await prisma.colaborador.findFirst({
-      where: { userId: registerRes.body.user.id, empresaId: admin.empresaId },
+    const collaborator = await prisma.collaborator.findFirst({
+      where: { userId: registerRes.body.user.id, companyId: admin.companyId },
     });
-    expect(colaborador).not.toBeNull();
+    expect(collaborator).not.toBeNull();
   });
 
   it('does not link when the domain is still PENDING (not yet confirmed)', async () => {
-    const admin = await registerEmpresaAdmin('Acme Still Pending');
+    const admin = await registerCompanyAdmin('Acme Still Pending');
     const domain = `stillpending-${uuidv4()}.com`;
     await request(app.getHttpServer())
-      .post('/empresa-admin/domains')
+      .post('/company-admin/domains')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ domain })
       .expect(201);
@@ -220,36 +220,36 @@ describe('Domínio Autorizado (e2e)', () => {
       .expect(201);
     userIds.push(registerRes.body.user.id);
 
-    const colaborador = await prisma.colaborador.findFirst({
-      where: { userId: registerRes.body.user.id, empresaId: admin.empresaId },
+    const collaborator = await prisma.collaborator.findFirst({
+      where: { userId: registerRes.body.user.id, companyId: admin.companyId },
     });
-    expect(colaborador).toBeNull();
+    expect(collaborator).toBeNull();
   });
 
   it('revokes a domain, and a revoked domain no longer auto-links', async () => {
-    const admin = await registerEmpresaAdmin('Acme Revoke Domain');
+    const admin = await registerCompanyAdmin('Acme Revoke Domain');
     const domain = `revoke-${uuidv4()}.com`;
     const createRes = await request(app.getHttpServer())
-      .post('/empresa-admin/domains')
+      .post('/company-admin/domains')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ domain })
       .expect(201);
 
     const token = signDomainConfirmationToken(
       createRes.body.id,
-      admin.empresaId,
+      admin.companyId,
     );
     await request(app.getHttpServer())
-      .post('/empresa-admin/domains/confirm')
+      .post('/company-admin/domains/confirm')
       .send({ token })
       .expect(201);
 
     await request(app.getHttpServer())
-      .delete(`/empresa-admin/domains/${createRes.body.id}`)
+      .delete(`/company-admin/domains/${createRes.body.id}`)
       .set('Authorization', `Bearer ${admin.token}`)
       .expect(200);
 
-    const revoked = await prisma.dominioAutorizado.findUnique({
+    const revoked = await prisma.authorizedDomain.findUnique({
       where: { id: createRes.body.id },
     });
     expect(revoked?.status).toBe('REVOKED');
@@ -261,23 +261,23 @@ describe('Domínio Autorizado (e2e)', () => {
       .expect(201);
     userIds.push(registerRes.body.user.id);
 
-    const colaborador = await prisma.colaborador.findFirst({
-      where: { userId: registerRes.body.user.id, empresaId: admin.empresaId },
+    const collaborator = await prisma.collaborator.findFirst({
+      where: { userId: registerRes.body.user.id, companyId: admin.companyId },
     });
-    expect(colaborador).toBeNull();
+    expect(collaborator).toBeNull();
   });
 
-  it('an Administrador cannot revoke another Empresa\'s domain', async () => {
-    const adminA = await registerEmpresaAdmin('Acme Domain Owner');
-    const adminB = await registerEmpresaAdmin('Acme Domain Intruder');
+  it("an Administrador cannot revoke another Company's domain", async () => {
+    const adminA = await registerCompanyAdmin('Acme Domain Owner');
+    const adminB = await registerCompanyAdmin('Acme Domain Intruder');
     const createRes = await request(app.getHttpServer())
-      .post('/empresa-admin/domains')
+      .post('/company-admin/domains')
       .set('Authorization', `Bearer ${adminA.token}`)
       .send({ domain: `cross-revoke-${uuidv4()}.com` })
       .expect(201);
 
     await request(app.getHttpServer())
-      .delete(`/empresa-admin/domains/${createRes.body.id}`)
+      .delete(`/company-admin/domains/${createRes.body.id}`)
       .set('Authorization', `Bearer ${adminB.token}`)
       .expect(404);
   });

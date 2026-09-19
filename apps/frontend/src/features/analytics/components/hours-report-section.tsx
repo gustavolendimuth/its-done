@@ -29,7 +29,7 @@ import { formatHoursToHHMM } from "@/lib/utils";
 
 export interface HoursReportSectionProps {
   hoursReport: HoursReport;
-  clientHoursChartData: {
+  companyHoursChartData: {
     name: string;
     hours: number;
     percentage: number;
@@ -40,7 +40,7 @@ export interface HoursReportSectionProps {
 
 export function HoursReportSection({
   hoursReport,
-  clientHoursChartData,
+  companyHoursChartData,
   weeklyChartData,
 }: HoursReportSectionProps) {
   const t = useTranslations("analytics");
@@ -58,7 +58,7 @@ export function HoursReportSection({
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={clientHoursChartData}
+                    data={companyHoursChartData}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -69,7 +69,7 @@ export function HoursReportSection({
                     fill="#8884d8"
                     dataKey="hours"
                   >
-                    {clientHoursChartData.map((entry, index) => (
+                    {companyHoursChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -116,13 +116,13 @@ export function HoursReportSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {hoursReport.clientBreakdown?.map((client) => (
-                <TableRow key={client.companyId}>
+              {hoursReport.companyBreakdown?.map((company) => (
+                <TableRow key={company.companyId}>
                   <TableCell className="font-medium">
-                    {client.clientName}
+                    {company.companyName}
                   </TableCell>
-                  <TableCell>{formatHoursToHHMM(client.totalHours)}</TableCell>
-                  <TableCell>{client.percentage.toFixed(1)}%</TableCell>
+                  <TableCell>{formatHoursToHHMM(company.totalHours)}</TableCell>
+                  <TableCell>{company.percentage.toFixed(1)}%</TableCell>
                   <TableCell>-</TableCell>
                 </TableRow>
               ))}

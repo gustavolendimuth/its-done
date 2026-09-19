@@ -184,11 +184,11 @@ export default function WorkHoursPage() {
                 <SelectItem value="all">
                   {tCommon("all")} {t("clients")}
                 </SelectItem>
-                {clients?.map((client: Company) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name
-                      ? `${client.company} (${client.name})`
-                      : client.company}
+                {clients?.map((company: Company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name
+                      ? `${company.company} (${company.name})`
+                      : company.company}
                   </SelectItem>
                 ))}
               </SelectContent>

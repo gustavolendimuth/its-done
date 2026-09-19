@@ -11,9 +11,9 @@ export interface HoursReport {
   totalHours: number;
   totalDays: number;
   averageHoursPerDay: number;
-  clientBreakdown: {
+  companyBreakdown: {
     companyId: string;
-    clientName: string;
+    companyName: string;
     totalHours: number;
     percentage: number;
   }[];
@@ -32,9 +32,9 @@ export interface InvoiceReport {
   pendingInvoices: number;
   paidInvoices: number;
   totalValue?: number;
-  clientBreakdown: {
+  companyBreakdown: {
     companyId: string;
-    clientName: string;
+    companyName: string;
     totalInvoices: number;
     pendingInvoices: number;
     paidInvoices: number;
@@ -80,21 +80,21 @@ export class ReportsService {
     const totalDays = uniqueDates.size;
     const averageHoursPerDay = totalDays > 0 ? totalHours / totalDays : 0;
 
-    // Client breakdown
-    const clientMap = new Map();
+    // Company breakdown
+    const companyMap = new Map();
     workHours.forEach((wh) => {
       const key = wh.companyId;
-      if (!clientMap.has(key)) {
-        clientMap.set(key, {
+      if (!companyMap.has(key)) {
+        companyMap.set(key, {
           companyId: wh.companyId,
-          clientName: wh.company.name,
+          companyName: wh.company.name,
           totalHours: 0,
         });
       }
-      clientMap.get(key).totalHours += wh.hours;
+      companyMap.get(key).totalHours += wh.hours;
     });
 
-    const clientBreakdown = Array.from(clientMap.values()).map((company) => ({
+    const companyBreakdown = Array.from(companyMap.values()).map((company) => ({
       ...company,
       percentage: totalHours > 0 ? (company.totalHours / totalHours) * 100 : 0,
     }));
@@ -141,7 +141,7 @@ export class ReportsService {
       totalHours: Math.round(totalHours * 100) / 100,
       totalDays,
       averageHoursPerDay: Math.round(averageHoursPerDay * 100) / 100,
-      clientBreakdown,
+      companyBreakdown,
       weeklyBreakdown,
       monthlyBreakdown,
     };
@@ -191,20 +191,20 @@ export class ReportsService {
       (inv) => inv.status === 'CANCELED',
     ).length;
 
-    // Client breakdown
-    const clientMap = new Map();
+    // Company breakdown
+    const companyMap = new Map();
     invoices.forEach((inv) => {
       const key = inv.companyId;
-      if (!clientMap.has(key)) {
-        clientMap.set(key, {
+      if (!companyMap.has(key)) {
+        companyMap.set(key, {
           companyId: inv.companyId,
-          clientName: inv.company.name,
+          companyName: inv.company.name,
           totalInvoices: 0,
           pendingInvoices: 0,
           paidInvoices: 0,
         });
       }
-      const company = clientMap.get(key);
+      const company = companyMap.get(key);
       company.totalInvoices++;
       if (inv.status === 'PENDING') company.pendingInvoices++;
       if (inv.status === 'PAID') company.paidInvoices++;
@@ -212,13 +212,13 @@ export class ReportsService {
         company.canceledInvoices = (company.canceledInvoices || 0) + 1;
     });
 
-    const clientBreakdown = Array.from(clientMap.values());
+    const companyBreakdown = Array.from(companyMap.values());
 
     return {
       totalInvoices,
       pendingInvoices,
       paidInvoices,
-      clientBreakdown,
+      companyBreakdown,
     };
   }
 

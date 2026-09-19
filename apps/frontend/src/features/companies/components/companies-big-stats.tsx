@@ -10,7 +10,6 @@ import {
 import { useCompanyStats } from "@/features/companies/company-stats";
 import { formatHoursToHHMM } from "@/lib/utils";
 
-
 interface CompaniesBigStatsProps {
   className?: string;
   isRefetching?: boolean;
@@ -34,7 +33,7 @@ export function CompaniesBigStats({
   const averageInvoicesPerClient =
     stats.totalClients > 0 ? stats.totalInvoices / stats.totalClients : 0;
 
-  // Determine client engagement level
+  // Determine company engagement level
   const getEngagementLevel = () => {
     if (averageHoursPerClient >= 100) return t("engagementHigh");
     if (averageHoursPerClient >= 40) return t("engagementMedium");
@@ -64,7 +63,7 @@ export function CompaniesBigStats({
     },
   ];
 
-  // Extra content with client insights
+  // Extra content with company insights
   const extraContent = (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="bg-blue-100/50 dark:bg-blue-800/20 rounded-lg p-3">

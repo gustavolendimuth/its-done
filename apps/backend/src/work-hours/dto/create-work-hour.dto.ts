@@ -38,7 +38,7 @@ export class CreateWorkHourDto {
   @Matches(HH_MM_REGEX, { message: `endTime ${HH_MM_MESSAGE}` })
   endTime?: string;
 
-  @IsUUID(4, { message: 'Client ID must be a valid UUID' })
+  @IsUUID(4, { message: 'Company ID must be a valid UUID' })
   companyId: string;
 
   @IsOptional()

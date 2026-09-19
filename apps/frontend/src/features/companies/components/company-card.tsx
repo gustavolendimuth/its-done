@@ -40,7 +40,10 @@ import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useCompanySpecificStats } from "@/features/companies/company-stats";
-import { useUpdateCompany, UpdateCompanyDto } from "@/features/companies/companies";
+import {
+  useUpdateCompany,
+  UpdateCompanyDto,
+} from "@/features/companies/companies";
 import { Company } from "@/features/companies/types";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
 
@@ -81,7 +84,7 @@ export function CompanyCard({ company }: CompanyCardProps) {
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log("Edit button clicked for client:", company.company);
+    console.log("Edit button clicked for company:", company.company);
     setIsEditModalOpen(true);
   };
 
@@ -94,7 +97,7 @@ export function CompanyCard({ company }: CompanyCardProps) {
       setIsEditModalOpen(false);
       toast.success(t("clientUpdatedSuccessfully"));
     } catch (_error) {
-      console.error("Failed to update client:", _error);
+      console.error("Failed to update company:", _error);
       toast.error(t("failedToUpdateClient"));
     }
   };

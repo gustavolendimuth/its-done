@@ -12,7 +12,7 @@ describe('Notificação de vínculo + desvinculação/remoção (e2e) — MW-23'
   let jwtService: JwtService;
 
   const userIds: string[] = [];
-  const empresaIds: string[] = [];
+  const companyIds: string[] = [];
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -37,28 +37,28 @@ describe('Notificação de vínculo + desvinculação/remoção (e2e) — MW-23'
 
   afterAll(async () => {
     await prisma.workHour.deleteMany({
-      where: { clientId: { in: empresaIds } },
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.task.deleteMany({ where: { clientId: { in: empresaIds } } });
+    await prisma.task.deleteMany({ where: { companyId: { in: companyIds } } });
     await prisma.project.deleteMany({
-      where: { clientId: { in: empresaIds } },
+      where: { companyId: { in: companyIds } },
     });
     await prisma.invoice.deleteMany({
-      where: { clientId: { in: empresaIds } },
+      where: { companyId: { in: companyIds } },
     });
     await prisma.inAppNotification.deleteMany({
       where: { userId: { in: userIds } },
     });
-    await prisma.convitePendente.deleteMany({
-      where: { empresaId: { in: empresaIds } },
+    await prisma.pendingInvite.deleteMany({
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.colaborador.deleteMany({
-      where: { empresaId: { in: empresaIds } },
+    await prisma.collaborator.deleteMany({
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.empresaAdmin.deleteMany({
-      where: { empresaId: { in: empresaIds } },
+    await prisma.companyAdmin.deleteMany({
+      where: { companyId: { in: companyIds } },
     });
-    await prisma.empresa.deleteMany({ where: { id: { in: empresaIds } } });
+    await prisma.company.deleteMany({ where: { id: { in: companyIds } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
     await app.close();
   });
@@ -73,27 +73,27 @@ describe('Notificação de vínculo + desvinculação/remoção (e2e) — MW-23'
     return { user, token };
   }
 
-  async function registerEmpresaAdmin(company: string) {
+  async function registerCompanyAdmin(company: string) {
     const email = `mw23-admin-${uuidv4()}@test.local`;
     const password = 'super-secret-1';
     const res = await request(app.getHttpServer())
-      .post('/empresa-admin/auth/register')
+      .post('/company-admin/auth/register')
       .send({ company, email, password })
       .expect(201);
 
-    empresaIds.push(res.body.admin.empresaId);
+    companyIds.push(res.body.admin.companyId);
     return {
       token: res.body.access_token as string,
-      empresaId: res.body.admin.empresaId as string,
+      companyId: res.body.admin.companyId as string,
     };
   }
 
-  it('vínculo automático (Convite Pendente honrado no signup) dispara email e InAppNotification pro Colaborador', async () => {
-    const admin = await registerEmpresaAdmin('Acme Notificação');
+  it('vínculo automático (Convite Pendente honrado no signup) dispara email e InAppNotification pro Collaborator', async () => {
+    const admin = await registerCompanyAdmin('Acme Notificação');
     const email = `mw23-signup-${uuidv4()}@test.local`;
 
     await request(app.getHttpServer())
-      .post('/empresa-admin/invites')
+      .post('/company-admin/invites')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ email })
       .expect(201);
@@ -105,10 +105,10 @@ describe('Notificação de vínculo + desvinculação/remoção (e2e) — MW-23'
     const userId = registerRes.body.user.id as string;
     userIds.push(userId);
 
-    const colaborador = await prisma.colaborador.findFirst({
-      where: { userId, empresaId: admin.empresaId },
+    const collaborator = await prisma.collaborator.findFirst({
+      where: { userId, companyId: admin.companyId },
     });
-    expect(colaborador).not.toBeNull();
+    expect(collaborator).not.toBeNull();
 
     const notification = await prisma.inAppNotification.findFirst({
       where: { userId, type: 'INFO' },
@@ -117,18 +117,18 @@ describe('Notificação de vínculo + desvinculação/remoção (e2e) — MW-23'
     expect(notification).not.toBeNull();
     expect(notification?.title).toContain('Acme Notificação');
     expect(notification?.message).toContain('Acme Notificação');
-    expect((notification?.metadata as any)?.empresaName).toBe(
+    expect((notification?.metadata as any)?.companyName).toBe(
       'Acme Notificação',
     );
   });
 
   it('vínculo idempotente (segundo login) não gera uma segunda notificação de vínculo', async () => {
-    const admin = await registerEmpresaAdmin('Acme Idempotente');
+    const admin = await registerCompanyAdmin('Acme Idempotente');
     const email = `mw23-idempotent-${uuidv4()}@test.local`;
     const password = 'super-secret-1';
 
     await request(app.getHttpServer())
-      .post('/empresa-admin/invites')
+      .post('/company-admin/invites')
       .set('Authorization', `Bearer ${admin.token}`)
       .send({ email })
       .expect(201);
@@ -156,57 +156,57 @@ describe('Notificação de vínculo + desvinculação/remoção (e2e) — MW-23'
     expect(countAfterLogin).toBe(countAfterSignup);
   });
 
-  it('Colaborador se desvincula: remove só o Colaborador, mantendo WorkHour/Project/Task/Invoice consultáveis, e notifica o próprio usuário', async () => {
+  it('Collaborator se desvincula: remove só o Collaborator, mantendo WorkHour/Project/Task/Invoice consultáveis, e notifica o próprio usuário', async () => {
     const { user, token } = await createUser('mw23-unlink');
 
     const createRes = await request(app.getHttpServer())
-      .post('/clients')
+      .post('/companies')
       .set('Authorization', `Bearer ${token}`)
-      .send({ email: 'empresa-unlink@test.local', company: 'Empresa Unlink' })
+      .send({ email: 'company-unlink@test.local', company: 'Company Unlink' })
       .expect(201);
-    const empresaId = createRes.body.id;
-    empresaIds.push(empresaId);
+    const companyId = createRes.body.id;
+    companyIds.push(companyId);
 
     const project = await prisma.project.create({
-      data: { name: 'Projeto MW-23', clientId: empresaId, userId: user.id },
+      data: { name: 'Projeto MW-23', companyId: companyId, userId: user.id },
     });
     const task = await prisma.task.create({
-      data: { title: 'Tarefa MW-23', clientId: empresaId, userId: user.id },
+      data: { title: 'Tarefa MW-23', companyId: companyId, userId: user.id },
     });
     const workHour = await prisma.workHour.create({
       data: {
         date: new Date(),
         hours: 2,
         userId: user.id,
-        clientId: empresaId,
+        companyId: companyId,
         projectId: project.id,
         taskId: task.id,
       },
     });
     const invoice = await prisma.invoice.create({
-      data: { clientId: empresaId, amount: 100 },
+      data: { companyId: companyId, amount: 100 },
     });
 
     await request(app.getHttpServer())
-      .delete(`/clients/${empresaId}/colaborador`)
+      .delete(`/companies/${companyId}/collaborator`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    const colaborador = await prisma.colaborador.findUnique({
-      where: { userId_empresaId: { userId: user.id, empresaId } },
+    const collaborator = await prisma.collaborator.findUnique({
+      where: { userId_companyId: { userId: user.id, companyId } },
     });
-    expect(colaborador).toBeNull();
+    expect(collaborator).toBeNull();
 
-    // The Empresa record itself is untouched.
-    const empresa = await prisma.empresa.findUnique({
-      where: { id: empresaId },
+    // The Company record itself is untouched.
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
     });
-    expect(empresa).not.toBeNull();
+    expect(company).not.toBeNull();
 
     // WorkHour/Project/Task/Invoice are untouched and still queryable.
     const workHoursRes = await request(app.getHttpServer())
       .get('/work-hours')
-      .query({ clientId: empresaId })
+      .query({ companyId: companyId })
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
     expect(workHoursRes.body.map((wh: { id: string }) => wh.id)).toContain(
@@ -226,52 +226,52 @@ describe('Notificação de vínculo + desvinculação/remoção (e2e) — MW-23'
     expect(persistedTask).not.toBeNull();
     expect(persistedInvoice).not.toBeNull();
 
-    // The Colaborador themself is notified of their own unlink.
+    // The Collaborator themself is notified of their own unlink.
     const unlinkNotification = await prisma.inAppNotification.findFirst({
       where: { userId: user.id },
       orderBy: { createdAt: 'desc' },
     });
     expect(unlinkNotification).not.toBeNull();
     expect((unlinkNotification?.metadata as any)?.unlinkedBy).toBe(
-      'colaborador',
+      'collaborator',
     );
 
     // Unlinking again (already gone) 404s.
     await request(app.getHttpServer())
-      .delete(`/clients/${empresaId}/colaborador`)
+      .delete(`/companies/${companyId}/collaborator`)
       .set('Authorization', `Bearer ${token}`)
       .expect(404);
   });
 
   it('rejeita desvinculação sem autenticação', async () => {
     await request(app.getHttpServer())
-      .delete(`/clients/${uuidv4()}/colaborador`)
+      .delete(`/companies/${uuidv4()}/collaborator`)
       .expect(401);
   });
 
-  it('Administrador lista Colaboradores da própria Empresa e remove um deles, notificando-o', async () => {
-    const admin = await registerEmpresaAdmin('Acme Admin Remove');
+  it('Administrador lista Collaborators da própria Company e remove um deles, notificando-o', async () => {
+    const admin = await registerCompanyAdmin('Acme Admin Remove');
     const { user } = await createUser('mw23-admin-remove');
 
-    const colaborador = await prisma.colaborador.create({
-      data: { userId: user.id, empresaId: admin.empresaId },
+    const collaborator = await prisma.collaborator.create({
+      data: { userId: user.id, companyId: admin.companyId },
     });
 
     const listRes = await request(app.getHttpServer())
-      .get('/empresa-admin/colaboradores')
+      .get('/company-admin/collaborators')
       .set('Authorization', `Bearer ${admin.token}`)
       .expect(200);
     expect(listRes.body.map((c: { id: string }) => c.id)).toContain(
-      colaborador.id,
+      collaborator.id,
     );
 
     await request(app.getHttpServer())
-      .delete(`/empresa-admin/colaboradores/${colaborador.id}`)
+      .delete(`/company-admin/collaborators/${collaborator.id}`)
       .set('Authorization', `Bearer ${admin.token}`)
       .expect(200);
 
-    const removed = await prisma.colaborador.findUnique({
-      where: { id: colaborador.id },
+    const removed = await prisma.collaborator.findUnique({
+      where: { id: collaborator.id },
     });
     expect(removed).toBeNull();
 
@@ -283,33 +283,33 @@ describe('Notificação de vínculo + desvinculação/remoção (e2e) — MW-23'
     expect((notification?.metadata as any)?.unlinkedBy).toBe('admin');
   });
 
-  it('Administrador não consegue remover Colaborador de outra Empresa (404)', async () => {
-    const adminA = await registerEmpresaAdmin('Acme Dono');
-    const adminB = await registerEmpresaAdmin('Acme Intrusa');
-    const { user } = await createUser('mw23-cross-empresa');
+  it('Administrador não consegue remover Collaborator de outra Company (404)', async () => {
+    const adminA = await registerCompanyAdmin('Acme Dono');
+    const adminB = await registerCompanyAdmin('Acme Intrusa');
+    const { user } = await createUser('mw23-cross-company');
 
-    const colaborador = await prisma.colaborador.create({
-      data: { userId: user.id, empresaId: adminA.empresaId },
+    const collaborator = await prisma.collaborator.create({
+      data: { userId: user.id, companyId: adminA.companyId },
     });
 
     await request(app.getHttpServer())
-      .delete(`/empresa-admin/colaboradores/${colaborador.id}`)
+      .delete(`/company-admin/collaborators/${collaborator.id}`)
       .set('Authorization', `Bearer ${adminB.token}`)
       .expect(404);
 
-    const stillThere = await prisma.colaborador.findUnique({
-      where: { id: colaborador.id },
+    const stillThere = await prisma.collaborator.findUnique({
+      where: { id: collaborator.id },
     });
     expect(stillThere).not.toBeNull();
   });
 
-  it('rejeita listagem/remoção de Colaboradores sem autenticação de Administrador', async () => {
+  it('rejeita listagem/remoção de Collaborators sem autenticação de Administrador', async () => {
     await request(app.getHttpServer())
-      .get('/empresa-admin/colaboradores')
+      .get('/company-admin/collaborators')
       .expect(401);
 
     await request(app.getHttpServer())
-      .delete(`/empresa-admin/colaboradores/${uuidv4()}`)
+      .delete(`/company-admin/collaborators/${uuidv4()}`)
       .expect(401);
   });
 });
