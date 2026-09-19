@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { InAppNotificationsService } from '../in-app-notifications/in-app-notifications.service';
 import { CompanyAdminsService } from './company-admins.service';
+import { UsersService } from '../users/users.service';
 import { isPublicProviderDomain } from './utils/domain-blocklist.util';
 import {
   RegisterCompanyAdminDto,
@@ -34,6 +35,7 @@ export class CompanyAdminAuthService {
     private jwtService: JwtService,
     private notificationsService: NotificationsService,
     private inAppNotificationsService: InAppNotificationsService,
+    private usersService: UsersService,
   ) {}
 
   async register(dto: RegisterCompanyAdminDto) {
@@ -42,6 +44,11 @@ export class CompanyAdminAuthService {
       throw new ConflictException(
         'An CompanyAdmin already exists with this email',
       );
+    }
+
+    const existingUser = await this.usersService.findByEmail(dto.email);
+    if (existingUser) {
+      throw new ConflictException('A User already exists with this email');
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -415,6 +422,11 @@ export class CompanyAdminAuthService {
       throw new ConflictException(
         'An CompanyAdmin already exists with this email',
       );
+    }
+
+    const existingUser = await this.usersService.findByEmail(email);
+    if (existingUser) {
+      throw new ConflictException('A User already exists with this email');
     }
   }
 

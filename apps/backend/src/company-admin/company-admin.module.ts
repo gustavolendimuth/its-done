@@ -17,9 +17,11 @@ import { CollaboratorsController } from './collaborators.controller';
 import { CollaboratorsService } from './collaborators.service';
 import { CompanyDashboardController } from './company-dashboard.controller';
 import { CompanyDashboardService } from './company-dashboard.service';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
+    UsersModule,
     NotificationsModule,
     InAppNotificationsModule,
     PassportModule,
