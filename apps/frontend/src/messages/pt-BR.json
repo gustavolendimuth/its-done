@@ -56,8 +56,7 @@
       "signInWithGoogle": "Continuar com Google",
       "forgotPassword": "Esqueceu a senha?",
       "noAccount": "Não tem uma conta?",
-      "signUp": "Cadastre-se",
-      "companyAdminLink": "É administrador de uma empresa? Entre aqui"
+      "signUp": "Cadastre-se"
     },
     "register": {
       "title": "Criar conta",

@@ -3,7 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { getSession, signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -25,6 +26,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const t = useTranslations("auth.login");
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -38,12 +40,23 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError(null);
-      await signIn("credentials", {
+      const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
-        redirect: true,
-        callbackUrl: "/work-hours",
+        redirect: false,
       });
+
+      if (!result?.ok) {
+        setError("Invalid email or password.");
+        return;
+      }
+
+      const session = await getSession();
+      const destination =
+        session?.user?.actorType === "COMPANY_ADMIN"
+          ? "/company-admin/dashboard"
+          : "/work-hours";
+      router.push(destination);
     } catch (error) {
       setError("Something went wrong. Please try again.");
     }
@@ -151,14 +164,6 @@ export function LoginForm() {
           {t("noAccount")}{" "}
           <a href="/register" className="text-primary hover:underline">
             {t("signUp")}
-          </a>
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <a
-            href="/company-admin/login"
-            className="text-primary hover:underline"
-          >
-            {t("companyAdminLink")}
           </a>
         </p>
       </div>
