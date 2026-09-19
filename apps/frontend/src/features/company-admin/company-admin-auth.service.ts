@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { companyAdminApi } from "@/lib/company-admin-axios";
+import { default as companyAdminApi } from "@/lib/axios";
 
 export interface ForgotPasswordCompanyAdminDto {
   email: string;
