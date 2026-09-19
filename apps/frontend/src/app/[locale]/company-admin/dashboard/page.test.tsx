@@ -7,7 +7,16 @@ import CompanyAdminDashboardPage from "./page";
 const mutateAsyncMock = jest.fn().mockResolvedValue(undefined);
 const mutateMock = jest.fn();
 const deactivateMutateAsyncMock = jest.fn().mockResolvedValue(undefined);
-const logoutMock = jest.fn();
+const signOutMock = jest.fn();
+const pushMock = jest.fn();
+
+jest.mock("next-auth/react", () => ({
+  signOut: (...args: unknown[]) => signOutMock(...args),
+}));
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock }),
+}));
 
 jest.mock("@/features/company-admin", () => ({
   useCompanyDashboardOverview: jest.fn(),
@@ -37,9 +46,6 @@ jest.mock("@/features/company-admin", () => ({
   useDeactivateCompany: jest.fn(() => ({
     mutateAsync: deactivateMutateAsyncMock,
     isPending: false,
-  })),
-  useCompanyAdminAuth: jest.fn(() => ({
-    logout: logoutMock,
   })),
   downloadCompanyDashboardExport: jest.fn(),
 }));
@@ -256,8 +262,11 @@ describe("CompanyAdminDashboardPage", () => {
     });
     fireEvent.click(confirmButton);
 
-    await waitFor(() => expect(logoutMock).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(signOutMock).toHaveBeenCalledWith({ redirect: false })
+    );
     expect(deactivateMutateAsyncMock).toHaveBeenCalled();
+    expect(pushMock).toHaveBeenCalledWith("/login?deactivated=1");
   });
 
   it("cancelar o diálogo de desativação não chama a mutação", async () => {

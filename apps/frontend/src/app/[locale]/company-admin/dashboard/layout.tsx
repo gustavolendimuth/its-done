@@ -1,16 +1,16 @@
 "use client";
 
 import { LogOut } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useCompanyAdminAuth } from "@/features/company-admin";
 
 /**
  * MW-24 — Minimal Company Dashboard layout: no Collaborator MainLayout/menu
  * (explicit ticket requirement), just a header with the admin session +
- * logout, and the guard that redirects to login when there is no valid
+ * logout, and the guard that redirects to /login when there is no
  * CompanyAdmin session.
  */
 export default function CompanyAdminDashboardLayout({
@@ -19,20 +19,21 @@ export default function CompanyAdminDashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { admin, isLoading, logout } = useCompanyAdminAuth();
+  const { data: session, status } = useSession();
+  const isCompanyAdmin = session?.user?.actorType === "COMPANY_ADMIN";
 
   useEffect(() => {
-    if (!isLoading && !admin) {
-      router.replace("/company-admin/login");
+    if (status !== "loading" && !isCompanyAdmin) {
+      router.replace("/login");
     }
-  }, [isLoading, admin, router]);
+  }, [status, isCompanyAdmin, router]);
 
   const handleLogout = async () => {
-    await logout();
-    router.push("/company-admin/login");
+    await signOut({ redirect: false });
+    router.push("/login");
   };
 
-  if (isLoading) {
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <p className="text-sm text-muted-foreground">Carregando…</p>
@@ -40,7 +41,7 @@ export default function CompanyAdminDashboardLayout({
     );
   }
 
-  if (!admin) {
+  if (!isCompanyAdmin) {
     return null;
   }
 
@@ -50,7 +51,9 @@ export default function CompanyAdminDashboardLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold">Dashboard da Empresa</p>
-            <p className="text-xs text-muted-foreground">{admin.email}</p>
+            <p className="text-xs text-muted-foreground">
+              {session?.user?.email}
+            </p>
           </div>
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             <LogOut className="w-4 h-4 mr-2" />

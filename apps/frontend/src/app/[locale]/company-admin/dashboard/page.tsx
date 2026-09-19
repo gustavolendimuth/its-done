@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { useMemo, useState } from "react";
 
 import {
@@ -54,7 +55,6 @@ import {
   useCreateCompanyDomain,
   useCreateCompanyInvite,
   useDeactivateCompany,
-  useCompanyAdminAuth,
   useCompanyDashboardCollaborators,
   useCompanyDashboardOverview,
   useCompanyDomains,
@@ -87,7 +87,6 @@ function originBadgeVariant(
 
 export default function CompanyAdminDashboardPage() {
   const router = useRouter();
-  const { logout } = useCompanyAdminAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -149,8 +148,8 @@ export default function CompanyAdminDashboardPage() {
   const handleDeactivate = async () => {
     await deactivateCompany.mutateAsync();
     setIsDeactivateOpen(false);
-    await logout();
-    router.push("/company-admin/login?deactivated=1");
+    await signOut({ redirect: false });
+    router.push("/login?deactivated=1");
   };
 
   return (
