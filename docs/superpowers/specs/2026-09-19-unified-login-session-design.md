@@ -97,7 +97,8 @@ dois em sequência, do lado do frontend.
 | `app/[locale]/company-admin/layout.tsx` | Deixa de prover um contexto próprio; vira um guard comum, checando `session.user.actorType === 'COMPANY_ADMIN'` e redirecionando para `/login` quando não bate. |
 | `features/auth/login-form.tsx` | `signIn("credentials", { redirect: false })`; no sucesso, lê `actorType` (via `getSession()`) e decide entre `/work-hours` e `/company-admin/dashboard`. Remove o link para `/company-admin/login`. |
 | `app/[locale]/company-admin/login/page.tsx` (+ teste) | Removido. |
-| `app/[locale]/company-admin/register/page.tsx`, `forgot-password/page.tsx`, `reset-password/page.tsx` | Só o link "voltar ao login" passa de `/company-admin/login` para `/login`. |
+| `app/[locale]/company-admin/register/page.tsx` | Deixa de usar `useCompanyAdminAuth`: chama `POST /api/backend/company-admin/auth/register` e autentica com `signIn("credentials", { redirect: false })`, indo direto pra `/company-admin/dashboard`. O link "Já tem conta?" passa de `/company-admin/login` para `/login`. |
+| `forgot-password/page.tsx`, `reset-password/page.tsx` (em `app/[locale]/company-admin/`) | Só o link "voltar ao login" passa de `/company-admin/login` para `/login`. |
 | `app/[locale]/(authenticated)/admin/page.tsx` e qualquer outro consumidor de `session.user.role` | Precisa tolerar `role` ausente (sessão de `COMPANY_ADMIN` não tem role de plataforma) — checagem já deveria ser `session.user.role === 'ADMIN'`, sem assumir que o campo sempre existe. |
 
 ## Fluxo de dados: login de CompanyAdmin
