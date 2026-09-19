@@ -244,7 +244,7 @@ describe("CompanyAdminDashboardPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("desativação exige confirmação: abrir o botão não desativa nada até confirmar no diálogo", async () => {
+  it("deactivates only after the confirmation dialog is accepted", async () => {
     render(<CompanyAdminDashboardPage />);
 
     await userEvent.click(
