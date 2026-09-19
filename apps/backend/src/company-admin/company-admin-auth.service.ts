@@ -9,55 +9,55 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { InAppNotificationsService } from '../in-app-notifications/in-app-notifications.service';
-import { EmpresaAdminsService } from './empresa-admins.service';
+import { CompanyAdminsService } from './company-admins.service';
 import { isPublicProviderDomain } from './utils/domain-blocklist.util';
 import {
-  RegisterEmpresaAdminDto,
-  ForgotPasswordEmpresaAdminDto,
-  ResetPasswordEmpresaAdminDto,
-  RequestEmpresaActivationDto,
-  ConfirmEmpresaActivationDto,
-  InviteEmpresaAdminDto,
-  ConfirmEmpresaAdminInviteDto,
-} from './dto/empresa-admin-auth.dto';
+  RegisterCompanyAdminDto,
+  ForgotPasswordCompanyAdminDto,
+  ResetPasswordCompanyAdminDto,
+  RequestCompanyActivationDto,
+  ConfirmCompanyActivationDto,
+  InviteCompanyAdminDto,
+  ConfirmCompanyAdminInviteDto,
+} from './dto/company-admin-auth.dto';
 
-export const EMPRESA_ADMIN_ACTOR_TYPE = 'EMPRESA_ADMIN';
+export const COMPANY_ADMIN_ACTOR_TYPE = 'COMPANY_ADMIN';
 
-const EMPRESA_ACTIVATION_TOKEN_TYPE = 'empresa-activation';
-const EMPRESA_ADMIN_INVITE_TOKEN_TYPE = 'empresa-admin-invite';
+const COMPANY_ACTIVATION_TOKEN_TYPE = 'company-activation';
+const COMPANY_ADMIN_INVITE_TOKEN_TYPE = 'company-admin-invite';
 
 @Injectable()
-export class EmpresaAdminAuthService {
+export class CompanyAdminAuthService {
   constructor(
     private prisma: PrismaService,
-    private empresaAdminsService: EmpresaAdminsService,
+    private companyAdminsService: CompanyAdminsService,
     private jwtService: JwtService,
     private notificationsService: NotificationsService,
     private inAppNotificationsService: InAppNotificationsService,
   ) {}
 
-  async register(dto: RegisterEmpresaAdminDto) {
-    const existing = await this.empresaAdminsService.findByEmail(dto.email);
+  async register(dto: RegisterCompanyAdminDto) {
+    const existing = await this.companyAdminsService.findByEmail(dto.email);
     if (existing) {
       throw new ConflictException(
-        'An EmpresaAdmin already exists with this email',
+        'An CompanyAdmin already exists with this email',
       );
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-    const empresa = await this.prisma.empresa.create({
+    const company = await this.prisma.company.create({
       data: {
         company: dto.company,
         email: dto.email,
-        empresaAdmins: {
+        companyAdmins: {
           create: { email: dto.email, password: hashedPassword },
         },
       },
-      include: { empresaAdmins: true },
+      include: { companyAdmins: true },
     });
 
-    const admin = empresa.empresaAdmins[0];
+    const admin = company.companyAdmins[0];
 
     await this.notificationsService.sendWelcomeEmail(
       admin.email,
@@ -67,8 +67,8 @@ export class EmpresaAdminAuthService {
     return this.buildAuthResponse(admin);
   }
 
-  async validateEmpresaAdmin(email: string, password: string) {
-    const admin = await this.empresaAdminsService.findByEmail(email);
+  async validateCompanyAdmin(email: string, password: string) {
+    const admin = await this.companyAdminsService.findByEmail(email);
     if (!admin) {
       return null;
     }
@@ -81,12 +81,12 @@ export class EmpresaAdminAuthService {
     return admin;
   }
 
-  async login(admin: { id: string; email: string; empresaId: string }) {
+  async login(admin: { id: string; email: string; companyId: string }) {
     return this.buildAuthResponse(admin);
   }
 
-  async forgotPassword(dto: ForgotPasswordEmpresaAdminDto) {
-    const admin = await this.empresaAdminsService.findByEmail(dto.email);
+  async forgotPassword(dto: ForgotPasswordCompanyAdminDto) {
+    const admin = await this.companyAdminsService.findByEmail(dto.email);
     if (!admin) {
       return { message: 'If the email exists, a reset link has been sent.' };
     }
@@ -95,13 +95,13 @@ export class EmpresaAdminAuthService {
       {
         email: admin.email,
         sub: admin.id,
-        actorType: EMPRESA_ADMIN_ACTOR_TYPE,
+        actorType: COMPANY_ADMIN_ACTOR_TYPE,
         type: 'password-reset',
       },
       { expiresIn: '1h' },
     );
 
-    await this.notificationsService.sendEmpresaAdminPasswordResetEmail(
+    await this.notificationsService.sendCompanyAdminPasswordResetEmail(
       admin.email,
       admin.email,
       resetToken,
@@ -110,7 +110,7 @@ export class EmpresaAdminAuthService {
     return { message: 'If the email exists, a reset link has been sent.' };
   }
 
-  async resetPassword(dto: ResetPasswordEmpresaAdminDto) {
+  async resetPassword(dto: ResetPasswordCompanyAdminDto) {
     const { token, newPassword } = dto;
 
     try {
@@ -118,20 +118,20 @@ export class EmpresaAdminAuthService {
 
       if (
         payload.type !== 'password-reset' ||
-        payload.actorType !== EMPRESA_ADMIN_ACTOR_TYPE
+        payload.actorType !== COMPANY_ADMIN_ACTOR_TYPE
       ) {
         throw new BadRequestException('Invalid reset token');
       }
 
-      const admin = await this.empresaAdminsService.findByEmail(
+      const admin = await this.companyAdminsService.findByEmail(
         payload.email,
       );
       if (!admin) {
-        throw new NotFoundException('EmpresaAdmin not found');
+        throw new NotFoundException('CompanyAdmin not found');
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await this.prisma.empresaAdmin.update({
+      await this.prisma.companyAdmin.update({
         where: { id: admin.id },
         data: { password: hashedPassword },
       });
@@ -148,19 +148,19 @@ export class EmpresaAdminAuthService {
     }
   }
 
-  // MW-19 — Ativação de uma Empresa existente
-  async requestEmpresaActivation(
-    empresaId: string,
-    dto: RequestEmpresaActivationDto,
+  // MW-19 — Ativação de uma Company existente
+  async requestCompanyActivation(
+    companyId: string,
+    dto: RequestCompanyActivationDto,
   ) {
-    const empresa = await this.prisma.empresa.findUnique({
-      where: { id: empresaId },
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
     });
-    if (!empresa) {
-      throw new NotFoundException('Empresa not found');
+    if (!company) {
+      throw new NotFoundException('Company not found');
     }
 
-    await this.assertEmpresaNotActivated(empresaId);
+    await this.assertCompanyNotActivated(companyId);
 
     const email = dto.email.trim().toLowerCase();
 
@@ -176,24 +176,24 @@ export class EmpresaAdminAuthService {
           'The email must belong to the declared domain',
         );
       }
-    } else if (email !== empresa.email.trim().toLowerCase()) {
+    } else if (email !== company.email.trim().toLowerCase()) {
       throw new BadRequestException(
-        "The email must match the Empresa's registered contact email, or a domain must be declared",
+        "The email must match the Company's registered contact email, or a domain must be declared",
       );
     }
 
     const activationToken = this.jwtService.sign(
       {
-        empresaId,
+        companyId,
         email,
-        type: EMPRESA_ACTIVATION_TOKEN_TYPE,
+        type: COMPANY_ACTIVATION_TOKEN_TYPE,
       },
       { expiresIn: '1h' },
     );
 
-    await this.notificationsService.sendEmpresaActivationEmail(
+    await this.notificationsService.sendCompanyActivationEmail(
       email,
-      empresa.company,
+      company.company,
       activationToken,
     );
 
@@ -202,24 +202,24 @@ export class EmpresaAdminAuthService {
     };
   }
 
-  async confirmEmpresaActivation(dto: ConfirmEmpresaActivationDto) {
-    const payload = this.verifyToken(dto.token, EMPRESA_ACTIVATION_TOKEN_TYPE);
-    const { empresaId, email } = payload;
+  async confirmCompanyActivation(dto: ConfirmCompanyActivationDto) {
+    const payload = this.verifyToken(dto.token, COMPANY_ACTIVATION_TOKEN_TYPE);
+    const { companyId, email } = payload;
 
-    const empresa = await this.prisma.empresa.findUnique({
-      where: { id: empresaId },
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
     });
-    if (!empresa) {
-      throw new NotFoundException('Empresa not found');
+    if (!company) {
+      throw new NotFoundException('Company not found');
     }
 
-    await this.assertEmpresaNotActivated(empresaId);
+    await this.assertCompanyNotActivated(companyId);
     await this.assertEmailNotTaken(email);
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const admin = await this.prisma.empresaAdmin.create({
+    const admin = await this.prisma.companyAdmin.create({
       data: {
-        empresaId,
+        companyId,
         email,
         password: hashedPassword,
         invitedById: null,
@@ -230,15 +230,15 @@ export class EmpresaAdminAuthService {
   }
 
   // MW-20 — Convite de Administrador
-  async inviteEmpresaAdmin(
-    admin: { id: string; empresaId: string },
-    dto: InviteEmpresaAdminDto,
+  async inviteCompanyAdmin(
+    admin: { id: string; companyId: string },
+    dto: InviteCompanyAdminDto,
   ) {
-    const empresa = await this.prisma.empresa.findUnique({
-      where: { id: admin.empresaId },
+    const company = await this.prisma.company.findUnique({
+      where: { id: admin.companyId },
     });
-    if (!empresa) {
-      throw new NotFoundException('Empresa not found');
+    if (!company) {
+      throw new NotFoundException('Company not found');
     }
 
     const email = dto.email.trim().toLowerCase();
@@ -246,17 +246,17 @@ export class EmpresaAdminAuthService {
 
     const inviteToken = this.jwtService.sign(
       {
-        empresaId: admin.empresaId,
+        companyId: admin.companyId,
         email,
         invitedById: admin.id,
-        type: EMPRESA_ADMIN_INVITE_TOKEN_TYPE,
+        type: COMPANY_ADMIN_INVITE_TOKEN_TYPE,
       },
       { expiresIn: '1h' },
     );
 
-    await this.notificationsService.sendEmpresaAdminInviteEmail(
+    await this.notificationsService.sendCompanyAdminInviteEmail(
       email,
-      empresa.company,
+      company.company,
       inviteToken,
     );
 
@@ -265,26 +265,26 @@ export class EmpresaAdminAuthService {
     };
   }
 
-  async confirmEmpresaAdminInvite(dto: ConfirmEmpresaAdminInviteDto) {
+  async confirmCompanyAdminInvite(dto: ConfirmCompanyAdminInviteDto) {
     const payload = this.verifyToken(
       dto.token,
-      EMPRESA_ADMIN_INVITE_TOKEN_TYPE,
+      COMPANY_ADMIN_INVITE_TOKEN_TYPE,
     );
-    const { empresaId, email, invitedById } = payload;
+    const { companyId, email, invitedById } = payload;
 
-    const empresa = await this.prisma.empresa.findUnique({
-      where: { id: empresaId },
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
     });
-    if (!empresa) {
-      throw new NotFoundException('Empresa not found');
+    if (!company) {
+      throw new NotFoundException('Company not found');
     }
 
     await this.assertEmailNotTaken(email);
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const admin = await this.prisma.empresaAdmin.create({
+    const admin = await this.prisma.companyAdmin.create({
       data: {
-        empresaId,
+        companyId,
         email,
         password: hashedPassword,
         invitedById: invitedById ?? null,
@@ -294,47 +294,47 @@ export class EmpresaAdminAuthService {
     return this.buildAuthResponse(admin);
   }
 
-  // MW-26 — Desativação de Empresa. Qualquer Administrador da Empresa
+  // MW-26 — Desativação de Company. Qualquer Administrador da Company
   // desativa sozinho, sem aprovação de outro admin. Hard-delete de todos os
-  // EmpresaAdmin: "Empresa ativada" já é `count(EmpresaAdmin) > 0`
-  // (`assertEmpresaNotActivated` acima), então isso faz o fluxo de
+  // CompanyAdmin: "Company ativada" já é `count(CompanyAdmin) > 0`
+  // (`assertCompanyNotActivated` acima), então isso faz o fluxo de
   // Ativação normal voltar a funcionar sozinho na reativação, sem nenhum
-  // tratamento especial. ConvitePendente/DominioAutorizado só são
-  // revogados (status = REVOKED), nunca apagados — `EmpresaLinkingService`
+  // tratamento especial. PendingInvite/AuthorizedDomain só são
+  // revogados (status = REVOKED), nunca apagados — `CompanyLinkingService`
   // já só honra PENDING/CONFIRMED, então isso sozinho impede novos
-  // vínculos automáticos sem precisar deletar linhas. Colaborador,
+  // vínculos automáticos sem precisar deletar linhas. Collaborator,
   // WorkHour, Project, Task, Invoice e Address não são tocados.
-  async deactivateEmpresa(admin: { empresaId: string }) {
-    const empresa = await this.prisma.empresa.findUnique({
-      where: { id: admin.empresaId },
+  async deactivateCompany(admin: { companyId: string }) {
+    const company = await this.prisma.company.findUnique({
+      where: { id: admin.companyId },
     });
-    if (!empresa) {
-      throw new NotFoundException('Empresa not found');
+    if (!company) {
+      throw new NotFoundException('Company not found');
     }
 
-    const colaboradores = await this.prisma.$transaction(async (tx) => {
+    const collaborators = await this.prisma.$transaction(async (tx) => {
       // Read inside the same transaction as the writes below, so the
-      // Colaborador snapshot we notify from matches exactly what existed at
+      // Collaborator snapshot we notify from matches exactly what existed at
       // the moment of deactivation.
-      const rows = await tx.colaborador.findMany({
-        where: { empresaId: admin.empresaId },
+      const rows = await tx.collaborator.findMany({
+        where: { companyId: admin.companyId },
         include: {
           user: { select: { id: true, name: true, email: true } },
         },
       });
 
-      await tx.empresaAdmin.deleteMany({
-        where: { empresaId: admin.empresaId },
+      await tx.companyAdmin.deleteMany({
+        where: { companyId: admin.companyId },
       });
 
-      await tx.convitePendente.updateMany({
-        where: { empresaId: admin.empresaId, status: 'PENDING' },
+      await tx.pendingInvite.updateMany({
+        where: { companyId: admin.companyId, status: 'PENDING' },
         data: { status: 'REVOKED' },
       });
 
-      await tx.dominioAutorizado.updateMany({
+      await tx.authorizedDomain.updateMany({
         where: {
-          empresaId: admin.empresaId,
+          companyId: admin.companyId,
           status: { in: ['PENDING', 'CONFIRMED'] },
         },
         data: { status: 'REVOKED' },
@@ -343,36 +343,36 @@ export class EmpresaAdminAuthService {
       return rows;
     });
 
-    await this.notifyColaboradoresOfDeactivation(colaboradores, empresa);
+    await this.notifyCollaboratorsOfDeactivation(collaborators, company);
 
-    return { message: 'Empresa deactivated successfully' };
+    return { message: 'Company deactivated successfully' };
   }
 
-  private async notifyColaboradoresOfDeactivation(
-    colaboradores: Array<{
+  private async notifyCollaboratorsOfDeactivation(
+    collaborators: Array<{
       user: { id: string; name: string; email: string };
     }>,
-    empresa: { name: string | null; company: string },
+    company: { name: string | null; company: string },
   ): Promise<void> {
-    const empresaName = empresa.name || empresa.company;
+    const companyName = company.name || company.company;
 
     await Promise.all(
-      colaboradores.map(async ({ user }) => {
+      collaborators.map(async ({ user }) => {
         try {
           await Promise.all([
-            this.notificationsService.sendEmpresaDeactivatedEmail(
+            this.notificationsService.sendCompanyDeactivatedEmail(
               user.email,
               user.name,
-              empresaName,
+              companyName,
             ),
-            this.inAppNotificationsService.createEmpresaDeactivatedNotification(
+            this.inAppNotificationsService.createCompanyDeactivatedNotification(
               user.id,
-              empresaName,
+              companyName,
             ),
           ]);
         } catch (error) {
           console.error(
-            'Failed to send Empresa deactivated notification:',
+            'Failed to send Company deactivated notification:',
             error,
           );
         }
@@ -398,22 +398,22 @@ export class EmpresaAdminAuthService {
     }
   }
 
-  private async assertEmpresaNotActivated(empresaId: string) {
-    const existingAdminCount = await this.prisma.empresaAdmin.count({
-      where: { empresaId },
+  private async assertCompanyNotActivated(companyId: string) {
+    const existingAdminCount = await this.prisma.companyAdmin.count({
+      where: { companyId },
     });
     if (existingAdminCount > 0) {
       throw new ConflictException(
-        'Empresa is already activated; use the Convite de Administrador flow instead',
+        'Company is already activated; use the Convite de Administrador flow instead',
       );
     }
   }
 
   private async assertEmailNotTaken(email: string) {
-    const existing = await this.empresaAdminsService.findByEmail(email);
+    const existing = await this.companyAdminsService.findByEmail(email);
     if (existing) {
       throw new ConflictException(
-        'An EmpresaAdmin already exists with this email',
+        'An CompanyAdmin already exists with this email',
       );
     }
   }
@@ -421,13 +421,13 @@ export class EmpresaAdminAuthService {
   private buildAuthResponse(admin: {
     id: string;
     email: string;
-    empresaId: string;
+    companyId: string;
   }) {
     const payload = {
       email: admin.email,
       sub: admin.id,
-      actorType: EMPRESA_ADMIN_ACTOR_TYPE,
-      empresaId: admin.empresaId,
+      actorType: COMPANY_ADMIN_ACTOR_TYPE,
+      companyId: admin.companyId,
     };
 
     return {
@@ -435,7 +435,7 @@ export class EmpresaAdminAuthService {
       admin: {
         id: admin.id,
         email: admin.email,
-        empresaId: admin.empresaId,
+        companyId: admin.companyId,
       },
     };
   }

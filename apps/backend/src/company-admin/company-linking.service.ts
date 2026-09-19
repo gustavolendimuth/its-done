@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ColaboradorOrigin } from '@prisma/client';
+import { CollaboradorOrigin } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { InAppNotificationsService } from '../in-app-notifications/in-app-notifications.service';
@@ -7,17 +7,17 @@ import { extractDomain } from './utils/domain-blocklist.util';
 
 /**
  * Shared logic to turn a Convite Pendente / Domínio Autorizado match into an
- * actual Colaborador link. Used both by the empresa-admin endpoints
+ * actual Collaborator link. Used both by the company-admin endpoints
  * (immediate link when a Convite Pendente is created for an existing User)
  * and by AuthService's signup/login hooks (MW-21/MW-22).
  *
- * Also owns the notification side of the Colaborador↔Empresa relationship
- * (MW-23): every path that creates or removes a Colaborador row funnels
- * through here, so the "Colaborador is told about it" guarantee only needs
+ * Also owns the notification side of the Collaborator↔Company relationship
+ * (MW-23): every path that creates or removes a Collaborator row funnels
+ * through here, so the "Collaborator is told about it" guarantee only needs
  * to be true in one place.
  */
 @Injectable()
-export class EmpresaLinkingService {
+export class CompanyLinkingService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
@@ -25,106 +25,106 @@ export class EmpresaLinkingService {
   ) {}
 
   /**
-   * Idempotent: never duplicates a Colaborador row for the same pair.
+   * Idempotent: never duplicates a Collaborator row for the same pair.
    * `origin` (MW-24 — Convite Pendente vs Domínio Autorizado) is recorded
    * only on first creation; an idempotent no-op call never overwrites it.
    */
-  async ensureColaborador(
+  async ensureCollaborator(
     userId: string,
-    empresaId: string,
-    origin?: ColaboradorOrigin,
+    companyId: string,
+    origin?: CollaboradorOrigin,
   ) {
-    const existing = await this.prisma.colaborador.findUnique({
-      where: { userId_empresaId: { userId, empresaId } },
+    const existing = await this.prisma.collaborator.findUnique({
+      where: { userId_companyId: { userId, companyId } },
     });
     if (existing) {
       return existing;
     }
 
-    const colaborador = await this.prisma.colaborador.create({
-      data: { userId, empresaId, origin },
+    const collaborator = await this.prisma.collaborator.create({
+      data: { userId, companyId, origin },
     });
 
     // Only notify when the link is actually new — never on the idempotent
     // no-op path (e.g. every subsequent login of an already-linked User).
-    await this.notifyColaboradorLinked(userId, empresaId);
+    await this.notifyCollaboratorLinked(userId, companyId);
 
-    return colaborador;
+    return collaborator;
   }
 
   /**
-   * MW-23: notifies the Colaborador that their link to an Empresa was
-   * removed — either by themselves (`ClientsService.removeColaborador`) or
-   * by an Administrador (`ColaboradoresService.remove`). Call this AFTER
-   * the Colaborador row has been deleted.
+   * MW-23: notifies the Collaborator that their link to an Company was
+   * removed — either by themselves (`ClientsService.removeCollaborator`) or
+   * by an Administrador (`CollaboratorsService.remove`). Call this AFTER
+   * the Collaborator row has been deleted.
    */
-  async notifyColaboradorUnlinked(
+  async notifyCollaboratorUnlinked(
     userId: string,
-    empresaId: string,
-    unlinkedBy: 'colaborador' | 'admin',
+    companyId: string,
+    unlinkedBy: 'collaborator' | 'admin',
   ): Promise<void> {
     try {
-      const [user, empresa] = await Promise.all([
+      const [user, company] = await Promise.all([
         this.prisma.user.findUnique({ where: { id: userId } }),
-        this.prisma.empresa.findUnique({ where: { id: empresaId } }),
+        this.prisma.company.findUnique({ where: { id: companyId } }),
       ]);
-      if (!user || !empresa) {
+      if (!user || !company) {
         return;
       }
 
-      const empresaName = empresa.name || empresa.company;
+      const companyName = company.name || company.company;
       await Promise.all([
-        this.notificationsService.sendColaboradorUnlinkedEmail(
+        this.notificationsService.sendCollaboratorUnlinkedEmail(
           user.email,
           user.name,
-          empresaName,
+          companyName,
           unlinkedBy,
         ),
-        this.inAppNotificationsService.createColaboradorUnlinkedNotification(
+        this.inAppNotificationsService.createCollaboratorUnlinkedNotification(
           user.id,
-          empresaName,
+          companyName,
           unlinkedBy,
         ),
       ]);
     } catch (error) {
-      console.error('Failed to send Colaborador unlinked notification:', error);
+      console.error('Failed to send Collaborator unlinked notification:', error);
     }
   }
 
-  private async notifyColaboradorLinked(
+  private async notifyCollaboratorLinked(
     userId: string,
-    empresaId: string,
+    companyId: string,
   ): Promise<void> {
     try {
-      const [user, empresa] = await Promise.all([
+      const [user, company] = await Promise.all([
         this.prisma.user.findUnique({ where: { id: userId } }),
-        this.prisma.empresa.findUnique({ where: { id: empresaId } }),
+        this.prisma.company.findUnique({ where: { id: companyId } }),
       ]);
-      if (!user || !empresa) {
+      if (!user || !company) {
         return;
       }
 
-      const empresaName = empresa.name || empresa.company;
+      const companyName = company.name || company.company;
       await Promise.all([
-        this.notificationsService.sendColaboradorLinkedEmail(
+        this.notificationsService.sendCollaboratorLinkedEmail(
           user.email,
           user.name,
-          empresaName,
+          companyName,
         ),
-        this.inAppNotificationsService.createColaboradorLinkedNotification(
+        this.inAppNotificationsService.createCollaboratorLinkedNotification(
           user.id,
-          empresaName,
+          companyName,
         ),
       ]);
     } catch (error) {
-      console.error('Failed to send Colaborador linked notification:', error);
+      console.error('Failed to send Collaborator linked notification:', error);
     }
   }
 
   /**
    * Call on every signup and every login (password or Google). Effectuates
    * any Convite Pendente and any confirmed Domínio Autorizado matching this
-   * email. Different Empresas match independently — all are honored.
+   * email. Different Companys match independently — all are honored.
    */
   async syncAutoLinks(userId: string, email: string): Promise<void> {
     await this.linkPendingInvites(userId, email);
@@ -133,13 +133,13 @@ export class EmpresaLinkingService {
 
   private async linkPendingInvites(userId: string, email: string) {
     const normalizedEmail = email.trim().toLowerCase();
-    const invites = await this.prisma.convitePendente.findMany({
+    const invites = await this.prisma.pendingInvite.findMany({
       where: { email: normalizedEmail, status: 'PENDING' },
     });
 
     for (const invite of invites) {
-      await this.ensureColaborador(userId, invite.empresaId, 'CONVITE');
-      await this.prisma.convitePendente.update({
+      await this.ensureCollaborator(userId, invite.companyId, 'INVITE');
+      await this.prisma.pendingInvite.update({
         where: { id: invite.id },
         data: { status: 'LINKED', linkedAt: new Date() },
       });
@@ -152,15 +152,15 @@ export class EmpresaLinkingService {
       return;
     }
 
-    const domains = await this.prisma.dominioAutorizado.findMany({
+    const domains = await this.prisma.authorizedDomain.findMany({
       where: { domain, status: 'CONFIRMED' },
     });
 
-    for (const dominioAutorizado of domains) {
-      await this.ensureColaborador(
+    for (const authorizedDomain of domains) {
+      await this.ensureCollaborator(
         userId,
-        dominioAutorizado.empresaId,
-        'DOMINIO',
+        authorizedDomain.companyId,
+        'DOMAIN',
       );
     }
   }

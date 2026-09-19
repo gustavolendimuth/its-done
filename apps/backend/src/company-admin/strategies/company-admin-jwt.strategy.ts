@@ -2,17 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { EmpresaAdminsService } from '../empresa-admins.service';
-import { EMPRESA_ADMIN_ACTOR_TYPE } from '../empresa-admin-auth.service';
+import { CompanyAdminsService } from '../company-admins.service';
+import { COMPANY_ADMIN_ACTOR_TYPE } from '../company-admin-auth.service';
 
 @Injectable()
-export class EmpresaAdminJwtStrategy extends PassportStrategy(
+export class CompanyAdminJwtStrategy extends PassportStrategy(
   Strategy,
-  'empresa-admin-jwt',
+  'company-admin-jwt',
 ) {
   constructor(
     private configService: ConfigService,
-    private empresaAdminsService: EmpresaAdminsService,
+    private companyAdminsService: CompanyAdminsService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -22,11 +22,11 @@ export class EmpresaAdminJwtStrategy extends PassportStrategy(
   }
 
   async validate(payload: any) {
-    if (payload.actorType !== EMPRESA_ADMIN_ACTOR_TYPE) {
+    if (payload.actorType !== COMPANY_ADMIN_ACTOR_TYPE) {
       return null;
     }
 
-    const admin = await this.empresaAdminsService.findById(payload.sub);
+    const admin = await this.companyAdminsService.findById(payload.sub);
     if (!admin) {
       return null;
     }
