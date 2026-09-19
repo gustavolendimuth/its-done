@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Client } from "@/features/clients/types";
+import { Client } from "@/features/companies/types";
 
 interface ClientShareMenuProps {
   client: Client;

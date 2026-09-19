@@ -39,9 +39,9 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { useClientSpecificStats } from "@/features/clients/client-stats";
-import { useUpdateClient, UpdateClientDto } from "@/features/clients/clients";
-import { Client } from "@/features/clients/types";
+import { useClientSpecificStats } from "@/features/companies/client-stats";
+import { useUpdateClient, UpdateClientDto } from "@/features/companies/clients";
+import { Client } from "@/features/companies/types";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
 
 interface ClientCardProps {

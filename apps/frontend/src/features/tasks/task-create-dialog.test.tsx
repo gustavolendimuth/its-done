@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import { TaskCreateDialog } from "./task-create-dialog";
 
-import type { Client } from "@/features/clients";
+import type { Client } from "@/features/companies";
 import type { Task, CreateTaskData } from "./tasks.service";
 
 jest.mock("next-intl", () => ({
@@ -49,7 +49,7 @@ const mockClients: Client[] = [
   },
 ];
 
-jest.mock("@/features/clients", () => ({
+jest.mock("@/features/companies", () => ({
   useClients: () => ({ data: mockClients, isLoading: false }),
 }));
 

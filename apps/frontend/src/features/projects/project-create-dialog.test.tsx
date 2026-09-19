@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import { ProjectCreateDialog } from "./project-create-dialog";
 
-import type { Client } from "@/features/clients";
+import type { Client } from "@/features/companies";
 import type { Project, CreateProjectData } from "./projects.service";
 
 // Mock next-intl
@@ -64,7 +64,7 @@ const mockClients: Client[] = [
   },
 ];
 
-jest.mock("@/features/clients", () => ({
+jest.mock("@/features/companies", () => ({
   useClients: () => ({
     data: mockClients,
     isLoading: false,

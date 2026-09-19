@@ -11,9 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { useClientAddresses } from "@/features/clients/addresses";
-import { useCreateClient } from "@/features/clients/clients";
-import { Client } from "@/features/clients/types";
+import { useClientAddresses } from "@/features/companies/addresses";
+import { useCreateClient } from "@/features/companies/clients";
+import { Client } from "@/features/companies/types";
 
 interface ClientFormData {
   name?: string;

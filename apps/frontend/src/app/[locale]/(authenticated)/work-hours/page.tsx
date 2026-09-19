@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useClients, Client } from "@/features/clients";
+import { useClients, Client } from "@/features/companies";
 import {
   WorkHourForm,
   WorkHoursBigStats,

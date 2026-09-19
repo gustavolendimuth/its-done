@@ -7,7 +7,7 @@ import type {
   ReportType,
   SummaryReport,
 } from "../types";
-import type { Client } from "@/features/clients";
+import type { Client } from "@/features/companies";
 
 import { HoursReportSection } from "./hours-report-section";
 import { InvoiceReportSection } from "./invoice-report-section";

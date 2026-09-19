@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReportFilters, ReportType } from "../types";
-import type { Client } from "@/features/clients";
+import type { Client } from "@/features/companies";
 
 import { format } from "date-fns";
 import { Filter } from "lucide-react";

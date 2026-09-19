@@ -69,7 +69,7 @@ const mockClients = [
   },
 ];
 
-jest.mock("@/features/clients", () => ({
+jest.mock("@/features/companies", () => ({
   useClients: () => ({ data: mockClients, isLoading: false, error: null }),
 }));
 

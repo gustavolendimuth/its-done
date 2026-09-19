@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useClients } from "@/features/clients";
+import { useClients } from "@/features/companies";
 import {
   TaskCard,
   TaskCreateDialog,

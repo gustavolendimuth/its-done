@@ -8,7 +8,7 @@ import { useState, useMemo } from "react";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
-import { useClients } from "@/features/clients";
+import { useClients } from "@/features/companies";
 import { Overview, OverviewData } from "@/features/dashboard";
 import { useInvoices } from "@/features/invoices";
 import { useTimeEntries, useWorkHoursStats } from "@/features/time-tracking";

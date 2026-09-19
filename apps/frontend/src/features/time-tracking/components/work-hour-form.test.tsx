@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { WorkHourForm } from "./work-hour-form";
 
-import type { Client } from "@/features/clients";
+import type { Client } from "@/features/companies";
 
 function renderWithQueryClient(ui: ReactNode) {
   const queryClient = new QueryClient({

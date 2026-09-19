@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUpdateAddress, Address } from "@/features/clients/addresses";
+import { useUpdateAddress, Address } from "@/features/companies/addresses";
 
 interface AddressFormData {
   street: string;

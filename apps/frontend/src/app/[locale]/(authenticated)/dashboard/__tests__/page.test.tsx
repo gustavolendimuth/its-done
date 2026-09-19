@@ -51,7 +51,7 @@ jest.mock("@/features/invoices", () => ({
   })),
 }));
 
-jest.mock("@/features/clients", () => ({
+jest.mock("@/features/companies", () => ({
   useClients: jest.fn(() => ({
     data: [
       { id: "client1", name: "Client 1", company: "Company 1" },

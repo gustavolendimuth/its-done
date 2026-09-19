@@ -15,7 +15,7 @@ import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useClients } from "@/features/clients";
+import { useClients } from "@/features/companies";
 
 const projectSchema = z.object({
   name: z.string().min(1, { message: "Project name is required" }),

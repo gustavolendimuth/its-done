@@ -38,7 +38,7 @@ jest.mock("../../../hooks/use-safe-hydration", () => ({
 }));
 
 // Mock clients service (Topbar fetches clients for the work hour form)
-jest.mock("@/features/clients", () => ({
+jest.mock("@/features/companies", () => ({
   useClients: () => ({ data: [] }),
 }));
 

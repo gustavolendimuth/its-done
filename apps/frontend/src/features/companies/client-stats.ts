@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { ClientSpecificStats } from "@/features/clients/types";
+import { ClientSpecificStats } from "@/features/companies/types";
 import api from "@/lib/axios";
 
 export interface ClientStats {

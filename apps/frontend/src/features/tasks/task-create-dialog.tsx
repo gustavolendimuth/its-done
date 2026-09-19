@@ -17,7 +17,7 @@ import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
-import { useClients } from "@/features/clients";
+import { useClients } from "@/features/companies";
 import { useProjects } from "@/features/projects";
 
 const taskSchema = z.object({

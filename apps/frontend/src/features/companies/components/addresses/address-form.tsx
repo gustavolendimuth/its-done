@@ -19,7 +19,7 @@ import {
 import {
   useCreateAddress,
   useClientAddresses,
-} from "@/features/clients/addresses";
+} from "@/features/companies/addresses";
 
 interface AddressFormData {
   street: string;

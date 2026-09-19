@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ClientsPage from "../page";
 
-import type { Client } from "@/features/clients";
+import type { Client } from "@/features/companies";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
@@ -69,8 +69,8 @@ const mockClients: Client[] = [
 ];
 
 // Mock the clients feature barrel (components + hooks), never an internal path
-jest.mock("@/features/clients", () => ({
-  ...jest.requireActual("@/features/clients"),
+jest.mock("@/features/companies", () => ({
+  ...jest.requireActual("@/features/companies"),
   useClients: jest.fn(() => ({
     data: mockClients,
     isLoading: false,
@@ -95,7 +95,7 @@ describe("ClientsPage", () => {
   beforeEach(() => {
     // Restore the default (some tests below override it via mockReturnValue,
     // which is not undone automatically between tests)
-    const { useClients } = require("@/features/clients");
+    const { useClients } = require("@/features/companies");
 
     useClients.mockReturnValue({
       data: mockClients,
@@ -104,7 +104,7 @@ describe("ClientsPage", () => {
   });
 
   it("should render loading skeleton when loading", () => {
-    const { useClients } = require("@/features/clients");
+    const { useClients } = require("@/features/companies");
     useClients.mockReturnValue({
       data: null,
       isLoading: true,
@@ -148,7 +148,7 @@ describe("ClientsPage", () => {
   });
 
   it("should show empty state when no clients", () => {
-    const { useClients } = require("@/features/clients");
+    const { useClients } = require("@/features/companies");
     useClients.mockReturnValue({
       data: [],
       isLoading: false,

@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { FormModal } from "@/components/ui/form-modal";
 import { InfoCard } from "@/components/ui/info-card";
 import { SearchInput } from "@/components/ui/search-input";
-import { ClientsPageSkeleton , ClientCard, ClientForm, ClientsBigStats, useClients } from "@/features/clients";
+import { ClientsPageSkeleton , ClientCard, ClientForm, ClientsBigStats, useClients } from "@/features/companies";
 
 export default function ClientsPage() {
   const t = useTranslations("clients");

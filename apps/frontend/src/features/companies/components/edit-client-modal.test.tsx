@@ -2,13 +2,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 
-import { Client } from "@/features/clients/types";
+import { Client } from "@/features/companies/types";
 
 import { EditClientModal } from "./edit-client-modal";
 
 const mockUpdateMutateAsync = jest.fn();
 
-jest.mock("@/features/clients/clients", () => ({
+jest.mock("@/features/companies/clients", () => ({
   useUpdateClient: () => ({
     mutateAsync: mockUpdateMutateAsync,
     isPending: false,

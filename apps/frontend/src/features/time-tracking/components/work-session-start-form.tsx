@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { useClients } from "@/features/clients";
+import { useClients } from "@/features/companies";
 
 export interface WorkSessionStartFormProps {
   onCancel: () => void;

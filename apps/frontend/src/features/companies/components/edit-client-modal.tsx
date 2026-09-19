@@ -21,8 +21,8 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { useUpdateClient } from "@/features/clients/clients";
-import { Client, UpdateClientDto } from "@/features/clients/types";
+import { useUpdateClient } from "@/features/companies/clients";
+import { Client, UpdateClientDto } from "@/features/companies/types";
 
 interface EditClientModalProps {
   client: Client;

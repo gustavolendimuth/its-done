@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Client } from "@/features/clients";
+import { Client } from "@/features/companies";
 import {
   useCreateInvoice,
   useUploadInvoiceFile,
