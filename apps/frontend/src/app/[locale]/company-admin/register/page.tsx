@@ -128,7 +128,7 @@ export default function CompanyAdminRegisterPage() {
             <p className="text-center text-sm text-muted-foreground">
               Já tem conta?{" "}
               <Link
-                href="/company-admin/login"
+                href="/login"
                 className="text-primary hover:underline"
               >
                 Entrar

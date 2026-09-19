@@ -54,7 +54,7 @@ describe("CompanyAdminResetPasswordPage", () => {
     ).toBeInTheDocument();
 
     jest.advanceTimersByTime(3000);
-    expect(pushMock).toHaveBeenCalledWith("/company-admin/login");
+    expect(pushMock).toHaveBeenCalledWith("/login");
 
     jest.useRealTimers();
   });

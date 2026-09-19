@@ -86,7 +86,7 @@ function CompanyAdminResetPasswordContent() {
         newPassword,
       });
       setSuccess(true);
-      setTimeout(() => router.push("/company-admin/login"), 3000);
+      setTimeout(() => router.push("/login"), 3000);
     } catch (err) {
       setTokenError(getErrorMessage(err));
     }
