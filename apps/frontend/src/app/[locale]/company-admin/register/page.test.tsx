@@ -5,15 +5,18 @@ import "@testing-library/jest-dom";
 import CompanyAdminRegisterPage from "./page";
 
 const pushMock = jest.fn();
-const registerMock = jest.fn();
+const signInMock = jest.fn();
+const fetchMock = jest.fn();
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock }),
 }));
 
-jest.mock("@/features/company-admin", () => ({
-  useCompanyAdminAuth: () => ({ register: registerMock }),
+jest.mock("next-auth/react", () => ({
+  signIn: (...args: unknown[]) => signInMock(...args),
 }));
+
+global.fetch = fetchMock as unknown as typeof fetch;
 
 describe("CompanyAdminRegisterPage", () => {
   beforeEach(() => {
@@ -21,7 +24,13 @@ describe("CompanyAdminRegisterPage", () => {
   });
 
   it("registers, authenticates through the same session mechanism as login, and redirects straight to the dashboard", async () => {
-    registerMock.mockResolvedValueOnce(undefined);
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        admin: { id: "a1", email: "admin@acme.com", companyId: "c1" },
+      }),
+    });
+    signInMock.mockResolvedValueOnce({ ok: true });
 
     render(<CompanyAdminRegisterPage />);
 
@@ -32,20 +41,20 @@ describe("CompanyAdminRegisterPage", () => {
       screen.getByRole("button", { name: "Criar conta" })
     );
 
-    expect(registerMock).toHaveBeenCalledWith(
-      "Acme Inc",
-      "admin@acme.com",
-      "supersecret"
-    );
+    expect(signInMock).toHaveBeenCalledWith("credentials", {
+      email: "admin@acme.com",
+      password: "supersecret",
+      redirect: false,
+    });
     expect(pushMock).toHaveBeenCalledWith("/company-admin/dashboard");
   });
 
   it("shows the backend's 409 error message and keeps the entered fields", async () => {
-    registerMock.mockRejectedValueOnce({
-      response: {
-        status: 409,
-        data: { message: "An CompanyAdmin already exists with this email" },
-      },
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({
+        message: "An CompanyAdmin already exists with this email",
+      }),
     });
 
     render(<CompanyAdminRegisterPage />);
@@ -63,6 +72,7 @@ describe("CompanyAdminRegisterPage", () => {
       )
     ).toBeInTheDocument();
     expect(pushMock).not.toHaveBeenCalled();
+    expect(signInMock).not.toHaveBeenCalled();
 
     expect(screen.getByLabelText("Empresa")).toHaveValue("Acme Inc");
     expect(screen.getByLabelText("Email")).toHaveValue("admin@acme.com");

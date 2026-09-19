@@ -3,6 +3,7 @@
 import { Building2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,22 +16,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCompanyAdminAuth } from "@/features/company-admin";
-
-function getErrorMessage(error: unknown): string {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { message?: string } } })
-      .response;
-    if (response?.data?.message) {
-      return response.data.message;
-    }
-  }
-  return "Não foi possível criar a conta. Tente novamente.";
-}
+import { getApiUrl } from "@/lib/utils";
 
 export default function CompanyAdminRegisterPage() {
   const router = useRouter();
-  const { register } = useCompanyAdminAuth();
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,10 +31,39 @@ export default function CompanyAdminRegisterPage() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await register(company, email, password);
+      const response = await fetch(
+        `${getApiUrl()}/company-admin/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ company, email, password }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "Não foi possível criar a conta. Tente novamente."
+        );
+      }
+
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (!result?.ok) {
+        throw new Error("Não foi possível entrar com a conta criada.");
+      }
+
       router.push("/company-admin/dashboard");
     } catch (err) {
-      setError(getErrorMessage(err));
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Não foi possível criar a conta. Tente novamente.";
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }
