@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CompanyLinkingService } from '../company-admin/company-linking.service';
+import { CompanyAdminsService } from '../company-admin/company-admins.service';
 import {
   RegisterDto,
   ForgotPasswordDto,
@@ -25,6 +26,7 @@ export class AuthService {
     private jwtService: JwtService,
     private notificationsService: NotificationsService,
     private companyLinkingService: CompanyLinkingService,
+    private companyAdminsService: CompanyAdminsService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -33,6 +35,15 @@ export class AuthService {
     if (existingUser) {
       console.log('User already exists:', { email: registerDto.email });
       throw new ConflictException('User already exists with this email');
+    }
+
+    const existingCompanyAdmin = await this.companyAdminsService.findByEmail(
+      registerDto.email,
+    );
+    if (existingCompanyAdmin) {
+      throw new ConflictException(
+        'A CompanyAdmin already exists with this email',
+      );
     }
 
     console.log('Hashing password for new user');
@@ -145,6 +156,15 @@ export class AuthService {
     console.log('Existing user found:', existingUser);
 
     if (!existingUser) {
+      const existingCompanyAdmin = await this.companyAdminsService.findByEmail(
+        googleAuthDto.email,
+      );
+      if (existingCompanyAdmin) {
+        throw new ConflictException(
+          'A CompanyAdmin already exists with this email',
+        );
+      }
+
       // Criar usuário se não existir
       console.log('Creating new user from Google auth');
       const randomPassword = Math.random().toString(36).slice(-8);
