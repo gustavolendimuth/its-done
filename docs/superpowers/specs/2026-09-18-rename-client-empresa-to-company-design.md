@@ -53,7 +53,7 @@ de estratégia de zero-downtime.
 | `ColaboradorOrigin` | enum | `CollaboratorOrigin` |
 | `ColaboradorOrigin.CONVITE` | enum value | `INVITE` |
 | `ColaboradorOrigin.DOMINIO` | enum value | `DOMAIN` |
-| `User.colaboradores` | field | `collaboratorMemberships` |
+| `User.colaboradores` | field | `collaborators` (mesmo nome do lado `Company`; um rename automatizado não distingue de qual model o token `colaboradores` veio, então um nome diferente por lado exigiria uma exceção manual espalhada por todo consumidor do campo — não vale o ganho de legibilidade) |
 | `Empresa.colaboradores` | field | `collaborators` |
 | `Empresa.empresaAdmins` | field | `companyAdmins` |
 | `Empresa.convitesPendentes` | field | `pendingInvites` |
