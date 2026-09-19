@@ -23,6 +23,7 @@ The backend reuses the two identity services to prevent new cross-table email co
 | One-way door | Literal shape | Alternative rejected |
 | --- | --- | --- |
 | All authenticated browser-to-backend traffic uses one same-origin proxy | `/api/backend/[...path]` reads `JWT.accessToken` with `getToken()` and injects `Authorization` server-side | browser-side `getSession()` and Bearer injection - exposes the backend JWT to XSS |
+| CompanyAdmin registration keeps backend JWTs out of browser responses | `/api/backend` recursively removes the exact `access_token` key from every JSON response before returning it to the browser; registration uses `/api/backend/company-admin/auth/register` | direct browser fetch to the backend - exposes the JWT in the Network panel |
 | Credentials fallback distinguishes a missing User from a bad User password | after `/auth/login` fails, server-side `authorize()` queries existing `GET /users/check?email=...`; it calls `/company-admin/auth/login` only when `exists` is false | unconditional fallback - consumes the CompanyAdmin 10/min/IP throttle for a User password mistake |
 | The browser-visible actor discriminator is explicit | `Session.user.actorType` is exactly `"USER" | "COMPANY_ADMIN"`; `accessToken` exists only on the internal NextAuth `JWT` | infer actor from `role` or route - CompanyAdmin has no platform role and inference is brittle |
 
@@ -140,7 +141,7 @@ Proof: `pnpm preview:start && source .preview-worktree.state && curl --fail --si
 
 S1-S5 share the auth/session interface and total roughly 25k tokens of source reading, below the default 150k budget; one implementation batch avoids cutting the login transport midway. The batch boundary is after S5, followed by an independent verifier over the feature base through `HEAD`.
 
-Boundary: C1-C28 span `3353c4c..00db8c0` plus this handoff update. Implementation commits are `463e744`, `9bcf4a9`, `f4fe062`, `6afcd77`, `adbd756`, `46c772f`, `f92362e`, `e8569de`, `513d70c`, `045e500`, and `00db8c0`; C1-C13 are recorded in the ledger and C14-C28 were rerun in the final gate.
+Boundary: C1-C28 span `3353c4c..4b4849e` plus this documentation correction. Implementation commits are `463e744`, `9bcf4a9`, `f4fe062`, `6afcd77`, `adbd756`, `46c772f`, `f92362e`, `e8569de`, `513d70c`, `045e500`, `00db8c0`, and `4b4849e`; C1-C13 are recorded in the ledger and C14-C28 were rerun in the final gate.
 
 User decisions during the build: none.
 
