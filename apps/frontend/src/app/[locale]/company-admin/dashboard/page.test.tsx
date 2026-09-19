@@ -230,11 +230,11 @@ describe("CompanyAdminDashboardPage", () => {
     expect(mutateAsyncMock).toHaveBeenCalledWith("novo@test.local");
   });
 
-  it("renders the Desativar Company button in the header, outside the tabs", () => {
+  it("renders the Desativar Empresa button in the header, outside the tabs", () => {
     render(<CompanyAdminDashboardPage />);
 
     expect(
-      screen.getByRole("button", { name: /Desativar Company/ })
+      screen.getByRole("button", { name: /Desativar Empresa/ })
     ).toBeInTheDocument();
   });
 
@@ -242,7 +242,7 @@ describe("CompanyAdminDashboardPage", () => {
     render(<CompanyAdminDashboardPage />);
 
     await userEvent.click(
-      screen.getByRole("button", { name: /Desativar Company/ })
+      screen.getByRole("button", { name: /Desativar Empresa/ })
     );
     expect(deactivateMutateAsyncMock).not.toHaveBeenCalled();
 
@@ -252,7 +252,7 @@ describe("CompanyAdminDashboardPage", () => {
     // fireEvent (a raw DOM event) instead of userEvent's pointer-events-
     // aware simulation, since Radix also marks the background inert.
     const confirmButton = screen.getByRole("button", {
-      name: /Desativar Company/,
+      name: /Desativar Empresa/,
     });
     fireEvent.click(confirmButton);
 
@@ -264,7 +264,7 @@ describe("CompanyAdminDashboardPage", () => {
     render(<CompanyAdminDashboardPage />);
 
     await userEvent.click(
-      screen.getByRole("button", { name: /Desativar Company/ })
+      screen.getByRole("button", { name: /Desativar Empresa/ })
     );
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
 

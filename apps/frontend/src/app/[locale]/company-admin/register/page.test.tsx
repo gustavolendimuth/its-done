@@ -25,7 +25,7 @@ describe("CompanyAdminRegisterPage", () => {
 
     render(<CompanyAdminRegisterPage />);
 
-    await userEvent.type(screen.getByLabelText("Company"), "Acme Inc");
+    await userEvent.type(screen.getByLabelText("Empresa"), "Acme Inc");
     await userEvent.type(screen.getByLabelText("Email"), "admin@acme.com");
     await userEvent.type(screen.getByLabelText("Senha"), "supersecret");
     await userEvent.click(
@@ -50,7 +50,7 @@ describe("CompanyAdminRegisterPage", () => {
 
     render(<CompanyAdminRegisterPage />);
 
-    await userEvent.type(screen.getByLabelText("Company"), "Acme Inc");
+    await userEvent.type(screen.getByLabelText("Empresa"), "Acme Inc");
     await userEvent.type(screen.getByLabelText("Email"), "admin@acme.com");
     await userEvent.type(screen.getByLabelText("Senha"), "supersecret");
     await userEvent.click(
@@ -64,7 +64,7 @@ describe("CompanyAdminRegisterPage", () => {
     ).toBeInTheDocument();
     expect(pushMock).not.toHaveBeenCalled();
 
-    expect(screen.getByLabelText("Company")).toHaveValue("Acme Inc");
+    expect(screen.getByLabelText("Empresa")).toHaveValue("Acme Inc");
     expect(screen.getByLabelText("Email")).toHaveValue("admin@acme.com");
     expect(screen.getByLabelText("Senha")).toHaveValue("supersecret");
   });

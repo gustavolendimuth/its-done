@@ -11,14 +11,14 @@ export interface CompanyDashboardOverview {
   to: string;
 }
 
-export type CollaboradorOrigin = "INVITE" | "DOMAIN" | null;
+export type CollaboratorOrigin = "INVITE" | "DOMAIN" | null;
 
 export interface CollaboratorDashboardRow {
   id: string;
   userId: string;
   name: string;
   email: string;
-  origin: CollaboradorOrigin;
+  origin: CollaboratorOrigin;
   horas: number;
   projetos: number;
   faturado: number;

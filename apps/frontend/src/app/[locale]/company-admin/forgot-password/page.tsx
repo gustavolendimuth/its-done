@@ -40,7 +40,7 @@ export default function CompanyAdminForgotPasswordPage() {
           <Building2 className="mx-auto h-8 w-8 text-primary" />
           <CardTitle>Esqueci minha senha</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Administrador da Company
+            Administrador da Empresa
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

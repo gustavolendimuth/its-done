@@ -98,7 +98,7 @@ function CompanyAdminResetPasswordContent() {
         <Building2 className="mx-auto h-8 w-8 text-primary" />
         <CardTitle>Redefinir senha</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Administrador da Company
+          Administrador da Empresa
         </p>
       </CardHeader>
       <CardContent>

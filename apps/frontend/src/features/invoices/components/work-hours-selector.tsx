@@ -155,7 +155,7 @@ export function WorkHoursSelector({
             <SelectValue placeholder="Select grouping" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="client">Empresa</SelectItem>
+            <SelectItem value="client">Company</SelectItem>
             <SelectItem value="project">Project</SelectItem>
             <SelectItem value="none">None</SelectItem>
           </SelectContent>

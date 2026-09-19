@@ -56,15 +56,15 @@ export default function CompanyAdminRegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <Building2 className="mx-auto h-8 w-8 text-primary" />
-          <CardTitle>Criar conta da Company</CardTitle>
+          <CardTitle>Criar conta da Empresa</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Cadastro do Administrador da Company
+            Cadastro do Administrador da Empresa
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="company">Company</Label>
+              <Label htmlFor="company">Empresa</Label>
               <Input
                 id="company"
                 type="text"

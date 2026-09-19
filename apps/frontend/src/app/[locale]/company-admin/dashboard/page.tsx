@@ -49,7 +49,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  CollaboradorOrigin,
+  CollaboratorOrigin,
   downloadCompanyDashboardExport,
   useCreateCompanyDomain,
   useCreateCompanyInvite,
@@ -71,14 +71,14 @@ function formatCurrency(value: number): string {
   })}`;
 }
 
-function originLabel(origin: CollaboradorOrigin): string {
+function originLabel(origin: CollaboratorOrigin): string {
   if (origin === "INVITE") return "Convite";
   if (origin === "DOMAIN") return "Domínio";
   return "—";
 }
 
 function originBadgeVariant(
-  origin: CollaboradorOrigin
+  origin: CollaboratorOrigin
 ): "info" | "secondary" | "neutral" {
   if (origin === "DOMAIN") return "info";
   if (origin === "INVITE") return "secondary";
@@ -156,7 +156,7 @@ export default function CompanyAdminDashboardPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Dashboard da Company"
+        title="Dashboard da Empresa"
         subtitle="Visão agregada dos Collaborators vinculados"
         icon={Building2}
       >
@@ -171,19 +171,19 @@ export default function CompanyAdminDashboardPage() {
               className="text-destructive hover:text-destructive"
             >
               <PowerOff className="w-4 h-4 mr-2" />
-              Desativar Company
+              Desativar Empresa
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Desativar Company</AlertDialogTitle>
+              <AlertDialogTitle>Desativar Empresa</AlertDialogTitle>
               <AlertDialogDescription>
                 Isso remove todos os Administradores e revoga os convites e
-                domínios pendentes desta Company. Os Collaborators continuam
+                domínios pendentes desta Empresa. Os Collaborators continuam
                 vinculados e seguem registrando e faturando horas
-                normalmente — eles só serão avisados de que a Company não
+                normalmente — eles só serão avisados de que a Empresa não
                 tem mais um Administrador ativo. Você pode reativar a
-                Company depois pelo mesmo fluxo de Ativação.
+                Empresa depois pelo mesmo fluxo de Ativação.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -193,7 +193,7 @@ export default function CompanyAdminDashboardPage() {
                 disabled={deactivateCompany.isPending}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                Desativar Company
+                Desativar Empresa
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -272,7 +272,7 @@ export default function CompanyAdminDashboardPage() {
                     {overview?.collaboratorsAtivos ?? 0}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    vinculados à Company
+                    vinculados à Empresa
                   </p>
                 </CardContent>
               </Card>

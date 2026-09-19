@@ -22,7 +22,7 @@ import { useProjects } from "@/features/projects";
 
 const taskSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
-  companyId: z.string().min(1, { message: "Empresa is required" }),
+  companyId: z.string().min(1, { message: "Company is required" }),
   projectId: z.string().optional(),
   link: z.string().optional(),
 });

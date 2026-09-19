@@ -30,7 +30,7 @@ import { useAvailableTimeEntries } from "@/features/time-tracking";
 import { TimeEntry } from "@/types";
 
 const invoiceSchema = z.object({
-  companyId: z.string().min(1, "Empresa is required"),
+  companyId: z.string().min(1, "Company is required"),
   workHourIds: z
     .array(z.string())
     .min(1, "At least one work hour must be selected"),
@@ -201,7 +201,7 @@ export function CreateInvoiceForm({
     >
       {/* Company Selection */}
       <div className="space-y-2">
-        <Label htmlFor="companyId">Empresa</Label>
+        <Label htmlFor="companyId">Company</Label>
         <Controller
           name="companyId"
           control={control}

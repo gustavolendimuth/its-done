@@ -49,7 +49,7 @@ export default function CompanyAdminDashboardLayout({
       <header className="border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold">Dashboard da Company</p>
+            <p className="text-sm font-semibold">Dashboard da Empresa</p>
             <p className="text-xs text-muted-foreground">{admin.email}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={handleLogout}>

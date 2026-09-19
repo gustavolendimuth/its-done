@@ -44,9 +44,9 @@ export default function CompanyAdminLoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <Building2 className="mx-auto h-8 w-8 text-primary" />
-          <CardTitle>Login da Company</CardTitle>
+          <CardTitle>Login da Empresa</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Acesso do Administrador da Company
+            Acesso do Administrador da Empresa
           </p>
         </CardHeader>
         <CardContent>
