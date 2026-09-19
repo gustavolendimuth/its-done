@@ -143,6 +143,8 @@ S1-S5 share the auth/session interface and total roughly 25k tokens of source re
 
 Boundary: C1-C28 span `3353c4c..4b4849e` plus this documentation correction. Implementation commits are `463e744`, `9bcf4a9`, `f4fe062`, `6afcd77`, `adbd756`, `46c772f`, `f92362e`, `e8569de`, `513d70c`, `045e500`, `00db8c0`, and `4b4849e`; C1-C13 are recorded in the ledger and C14-C28 were rerun in the final gate.
 
+Round 3 finding G5 (spec `:93` said the proxy does not intercept `access_token`, Landing said it removes it): spec `:93` rewritten to match the Landing and the code; no check, Landing row or application file changed. Needs a fresh Verifier to confirm.
+
 User decisions during the build: none.
 
 Abandoned attempts: the first implementer was interrupted by a usage limit; no commits were lost. This continuation resumed from Tasks 1-5 in the ledger rather than repeating them.
