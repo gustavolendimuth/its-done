@@ -10,17 +10,17 @@ import {
   Request,
   NotFoundException,
 } from '@nestjs/common';
-import { ClientsService } from './clients.service';
+import { CompaniesService } from './companies.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { InvoicesService } from '../invoices/invoices.service';
 
-@Controller('clients')
+@Controller('companies')
 @UseGuards(JwtAuthGuard)
-export class ClientsController {
+export class CompaniesController {
   constructor(
-    private readonly clientsService: ClientsService,
+    private readonly clientsService: CompaniesService,
     private readonly invoicesService: InvoicesService,
   ) {}
 
@@ -85,13 +85,13 @@ export class ClientsController {
     return this.clientsService.remove(req.user.id, id);
   }
 
-  @Delete(':id/colaborador')
-  removeColaborador(@Request() req, @Param('id') id: string) {
-    return this.clientsService.removeColaborador(req.user.id, id);
+  @Delete(':id/collaborator')
+  removeCollaborator(@Request() req, @Param('id') id: string) {
+    return this.clientsService.removeCollaborator(req.user.id, id);
   }
 
   @Get('debug/all')
-  async debugGetAllClients(@Request() req) {
+  async debugGetAllCompanies(@Request() req) {
     try {
       const clients = await this.clientsService.findAll(req.user.id);
       return {
