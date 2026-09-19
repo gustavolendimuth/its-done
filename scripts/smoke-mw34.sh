@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-STATE_FILE="$ROOT_DIR/.preview-worktree.state"
+STATE_FILE="${MW34_STATE_FILE:-$ROOT_DIR/.preview-worktree.state}"
 
 for command in curl jq; do
   if ! command -v "$command" >/dev/null 2>&1; then

@@ -78,13 +78,13 @@ Proof: `bash -c '! rg -n "ClientReportFilters|\\bclientIds\\b|type: \\"client\\"
 **C13** - Toda ocorrência exata restante de `Client`, `clientId`, `clientIds` ou `client` em código ativo está em uma categoria deliberada: compatibilidade da rota pública, OAuth, biblioteca/cliente técnico, diretiva React, identificador de fixture ou texto traduzido.
 Proof: `scripts/check-company-rename.sh`
 
-**C14** - Todos os workspaces compilam sem cache e as suítes unitárias do backend e frontend passam.
+**C14** - Todos os workspaces compilam sem cache e as suítes unitárias do backend e frontend passam; a expectativa obsoleta do atalho do Topbar acompanha o comportamento existente de abrir o modal, sem alteração funcional.
 Proof: `pnpm turbo run build --force`
 Proof: `pnpm --filter @its-done/backend test -- --runInBand`
 Proof: `pnpm --filter frontend test:ci`
 
 **C15** - O smoke local confirma login comum, listagem e detalhe de Company, cadastro de CompanyAdmin e acesso a colaboradores e convites sem resposta 404 ou 500; o preview é encerrado no fim.
-Proof: `pnpm preview:start && scripts/smoke-mw34.sh; task_status=$?; pnpm preview:stop; exit $task_status`
+Proof: `scripts/run-mw34-smoke.sh`
 
 ## Swept
 
