@@ -9,10 +9,10 @@ export class AddressesService {
 
   async create(userId: string, createAddressDto: CreateAddressDto) {
     // Verify that the client belongs to the user
-    const client = await this.prisma.empresa.findFirst({
+    const client = await this.prisma.company.findFirst({
       where: {
         id: createAddressDto.clientId,
-        colaboradores: { some: { userId } },
+        collaborators: { some: { userId } },
       },
     });
 
@@ -58,10 +58,10 @@ export class AddressesService {
 
     if (clientId) {
       // Verify that the client belongs to the user
-      const client = await this.prisma.empresa.findFirst({
+      const client = await this.prisma.company.findFirst({
         where: {
           id: clientId,
-          colaboradores: { some: { userId } },
+          collaborators: { some: { userId } },
         },
       });
 
@@ -73,7 +73,7 @@ export class AddressesService {
     } else {
       // If no clientId specified, get addresses for all user's clients
       where.client = {
-        colaboradores: { some: { userId } },
+        collaborators: { some: { userId } },
       };
     }
 
@@ -97,7 +97,7 @@ export class AddressesService {
       where: {
         id,
         client: {
-          colaboradores: { some: { userId } },
+          collaborators: { some: { userId } },
         },
       },
       include: {
@@ -160,10 +160,10 @@ export class AddressesService {
 
   async findByClient(userId: string, clientId: string) {
     // Verify that the client belongs to the user
-    const client = await this.prisma.empresa.findFirst({
+    const client = await this.prisma.company.findFirst({
       where: {
         id: clientId,
-        colaboradores: { some: { userId } },
+        collaborators: { some: { userId } },
       },
     });
 

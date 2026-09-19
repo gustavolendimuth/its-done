@@ -8,7 +8,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { EmpresaLinkingService } from '../empresa-admin/empresa-linking.service';
+import { CompanyLinkingService } from '../company-admin/company-linking.service';
 import {
   RegisterDto,
   ForgotPasswordDto,
@@ -24,7 +24,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private notificationsService: NotificationsService,
-    private empresaLinkingService: EmpresaLinkingService,
+    private companyLinkingService: CompanyLinkingService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -51,9 +51,9 @@ export class AuthService {
     // Send welcome email
     await this.notificationsService.sendWelcomeEmail(user.email, user.name);
 
-    // MW-21/MW-22: effectuate any Convite Pendente / Domínio Autorizado
-    // Colaborador link matching this email now that the User exists.
-    await this.empresaLinkingService.syncAutoLinks(user.id, user.email);
+    // MW-21/MW-22: effectuate any PendingInvite / AuthorizedDomain
+    // Collaborator link matching this email now that the User exists.
+    await this.companyLinkingService.syncAutoLinks(user.id, user.email);
 
     const payload = { email: user.email, sub: user.id };
     return {
@@ -100,9 +100,9 @@ export class AuthService {
   }
 
   async login(user: UserResponse) {
-    // MW-21/MW-22: effectuate any Convite Pendente / Domínio Autorizado
-    // Colaborador link matching this email on every password login.
-    await this.empresaLinkingService.syncAutoLinks(user.id, user.email);
+    // MW-21/MW-22: effectuate any PendingInvite / AuthorizedDomain
+    // Collaborator link matching this email on every password login.
+    await this.companyLinkingService.syncAutoLinks(user.id, user.email);
 
     const payload = { email: user.email, sub: user.id };
     return {
@@ -158,9 +158,9 @@ export class AuthService {
 
       console.log('New user created:', user);
 
-      // MW-21/MW-22: effectuate any Convite Pendente / Domínio Autorizado
-      // Colaborador link matching this email (Google signup).
-      await this.empresaLinkingService.syncAutoLinks(user.id, user.email);
+      // MW-21/MW-22: effectuate any PendingInvite / AuthorizedDomain
+      // Collaborator link matching this email (Google signup).
+      await this.companyLinkingService.syncAutoLinks(user.id, user.email);
 
       const payload = { email: user.email, sub: user.id };
       return {
@@ -184,9 +184,9 @@ export class AuthService {
 
     console.log('Updated user:', user);
 
-    // MW-21/MW-22: effectuate any Convite Pendente / Domínio Autorizado
-    // Colaborador link matching this email (Google login).
-    await this.empresaLinkingService.syncAutoLinks(user.id, user.email);
+    // MW-21/MW-22: effectuate any PendingInvite / AuthorizedDomain
+    // Collaborator link matching this email (Google login).
+    await this.companyLinkingService.syncAutoLinks(user.id, user.email);
 
     const payload = { email: user.email, sub: user.id };
     return {

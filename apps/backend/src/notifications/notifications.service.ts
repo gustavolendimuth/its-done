@@ -171,7 +171,7 @@ export class NotificationsService {
   // de `User` (assinatura idêntica, URL diferente): mudar a assinatura do
   // método genérico pra aceitar um tipo de URL seria breaking change pro
   // `auth/` de `User`, que já o consome sem esse parâmetro.
-  async sendEmpresaAdminPasswordResetEmail(
+  async sendCompanyAdminPasswordResetEmail(
     toEmail: string,
     adminEmail: string,
     resetToken: string,
@@ -180,154 +180,154 @@ export class NotificationsService {
       const frontendUrl = normalizeUrl(
         this.configService.get('FRONTEND_URL') || 'localhost:3000',
       );
-      const resetUrl = `${frontendUrl}/empresa-admin/reset-password?token=${resetToken}`;
+      const resetUrl = `${frontendUrl}/company-admin/reset-password?token=${resetToken}`;
 
       await this.sendEmail({
         to: toEmail,
         subject: 'Reset Your Password - Its Done',
-        html: this.generateEmpresaAdminPasswordResetEmailTemplate(
+        html: this.generateCompanyAdminPasswordResetEmailTemplate(
           adminEmail,
           resetUrl,
         ),
       });
 
-      console.log(`Empresa admin password reset email sent to ${toEmail}`);
+      console.log(`Company admin password reset email sent to ${toEmail}`);
       return true;
     } catch (error) {
       console.error(
-        'Failed to send Empresa admin password reset email:',
+        'Failed to send Company admin password reset email:',
         error,
       );
       return false;
     }
   }
 
-  async sendEmpresaActivationEmail(
+  async sendCompanyActivationEmail(
     toEmail: string,
-    empresaName: string,
+    companyName: string,
     activationToken: string,
   ) {
     try {
       const frontendUrl = normalizeUrl(
         this.configService.get('FRONTEND_URL') || 'localhost:3000',
       );
-      const activationUrl = `${frontendUrl}/empresa-admin/activate?token=${activationToken}`;
+      const activationUrl = `${frontendUrl}/company-admin/activate?token=${activationToken}`;
 
       await this.sendEmail({
         to: toEmail,
-        subject: 'Confirm Empresa Activation - Its Done',
-        html: this.generateEmpresaActivationEmailTemplate(
-          empresaName,
+        subject: 'Confirm Company Activation - Its Done',
+        html: this.generateCompanyActivationEmailTemplate(
+          companyName,
           activationUrl,
         ),
       });
 
-      console.log(`Empresa activation email sent to ${toEmail}`);
+      console.log(`Company activation email sent to ${toEmail}`);
       return true;
     } catch (error) {
-      console.error('Failed to send Empresa activation email:', error);
+      console.error('Failed to send Company activation email:', error);
       return false;
     }
   }
 
-  async sendEmpresaAdminInviteEmail(
+  async sendCompanyAdminInviteEmail(
     toEmail: string,
-    empresaName: string,
+    companyName: string,
     inviteToken: string,
   ) {
     try {
       const frontendUrl = normalizeUrl(
         this.configService.get('FRONTEND_URL') || 'localhost:3000',
       );
-      const inviteUrl = `${frontendUrl}/empresa-admin/invite?token=${inviteToken}`;
+      const inviteUrl = `${frontendUrl}/company-admin/invite?token=${inviteToken}`;
 
       await this.sendEmail({
         to: toEmail,
-        subject: 'You were invited as Empresa Administrator - Its Done',
-        html: this.generateEmpresaAdminInviteEmailTemplate(
-          empresaName,
+        subject: 'You were invited as Company Administrator - Its Done',
+        html: this.generateCompanyAdminInviteEmailTemplate(
+          companyName,
           inviteUrl,
         ),
       });
 
-      console.log(`Empresa admin invite email sent to ${toEmail}`);
+      console.log(`Company admin invite email sent to ${toEmail}`);
       return true;
     } catch (error) {
-      console.error('Failed to send Empresa admin invite email:', error);
+      console.error('Failed to send Company admin invite email:', error);
       return false;
     }
   }
 
-  async sendColaboradorLinkedEmail(
+  async sendCollaboratorLinkedEmail(
     toEmail: string,
     userName: string,
-    empresaName: string,
+    companyName: string,
   ) {
     try {
       await this.sendEmail({
         to: toEmail,
-        subject: `You were linked to ${empresaName} - Its Done`,
-        html: this.generateColaboradorLinkedEmailTemplate(
+        subject: `You were linked to ${companyName} - Its Done`,
+        html: this.generateCollaboratorLinkedEmailTemplate(
           userName,
-          empresaName,
+          companyName,
         ),
       });
 
-      console.log(`Colaborador linked email sent to ${toEmail}`);
+      console.log(`Collaborator linked email sent to ${toEmail}`);
       return true;
     } catch (error) {
-      console.error('Failed to send Colaborador linked email:', error);
+      console.error('Failed to send Collaborator linked email:', error);
       return false;
     }
   }
 
-  async sendColaboradorUnlinkedEmail(
+  async sendCollaboratorUnlinkedEmail(
     toEmail: string,
     userName: string,
-    empresaName: string,
-    unlinkedBy: 'colaborador' | 'admin',
+    companyName: string,
+    unlinkedBy: 'collaborator' | 'admin',
   ) {
     try {
       await this.sendEmail({
         to: toEmail,
-        subject: `You were unlinked from ${empresaName} - Its Done`,
-        html: this.generateColaboradorUnlinkedEmailTemplate(
+        subject: `You were unlinked from ${companyName} - Its Done`,
+        html: this.generateCollaboratorUnlinkedEmailTemplate(
           userName,
-          empresaName,
+          companyName,
           unlinkedBy,
         ),
       });
 
-      console.log(`Colaborador unlinked email sent to ${toEmail}`);
+      console.log(`Collaborator unlinked email sent to ${toEmail}`);
       return true;
     } catch (error) {
-      console.error('Failed to send Colaborador unlinked email:', error);
+      console.error('Failed to send Collaborator unlinked email:', error);
       return false;
     }
   }
 
-  // MW-26 — notifica um Colaborador de que a Empresa foi desativada (todos
-  // os EmpresaAdmin dela removidos). O vínculo Colaborador em si permanece
-  // intacto; isso só avisa que a Empresa não tem mais Administrador ativo.
-  async sendEmpresaDeactivatedEmail(
+  // MW-26 — notifica um Collaborator de que a Company foi desativada (todos
+  // os CompanyAdmin dela removidos). O vínculo Collaborator em si permanece
+  // intacto; isso só avisa que a Company não tem mais Administrador ativo.
+  async sendCompanyDeactivatedEmail(
     toEmail: string,
     userName: string,
-    empresaName: string,
+    companyName: string,
   ) {
     try {
       await this.sendEmail({
         to: toEmail,
-        subject: `${empresaName} was deactivated - Its Done`,
-        html: this.generateEmpresaDeactivatedEmailTemplate(
+        subject: `${companyName} was deactivated - Its Done`,
+        html: this.generateCompanyDeactivatedEmailTemplate(
           userName,
-          empresaName,
+          companyName,
         ),
       });
 
-      console.log(`Empresa deactivated email sent to ${toEmail}`);
+      console.log(`Company deactivated email sent to ${toEmail}`);
       return true;
     } catch (error) {
-      console.error('Failed to send Empresa deactivated email:', error);
+      console.error('Failed to send Company deactivated email:', error);
       return false;
     }
   }
@@ -435,7 +435,7 @@ export class NotificationsService {
             Invoice ID: <strong>${invoiceId}</strong>
           </div>
           <p>A new invoice has been uploaded and is now available for your review.</p>
-          <p>Please log in to your empresa dashboard to view and download the invoice.</p>
+          <p>Please log in to your company dashboard to view and download the invoice.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>
@@ -474,7 +474,7 @@ export class NotificationsService {
           <p>You can now:</p>
           <ul>
             <li>Track your work hours</li>
-            <li>Manage empresas and projects</li>
+            <li>Manage companies and projects</li>
             <li>Generate reports and analytics</li>
             <li>Configure notification settings</li>
           </ul>
@@ -488,8 +488,8 @@ export class NotificationsService {
     `;
   }
 
-  private generateEmpresaActivationEmailTemplate(
-    empresaName: string,
+  private generateCompanyActivationEmailTemplate(
+    companyName: string,
     activationUrl: string,
   ): string {
     return `
@@ -498,7 +498,7 @@ export class NotificationsService {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Confirm Empresa Activation</title>
+        <title>Confirm Company Activation</title>
         <style>
           body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
@@ -509,10 +509,10 @@ export class NotificationsService {
       </head>
       <body>
         <div class="header">
-          <h1>Its Done - Empresa Activation</h1>
+          <h1>Its Done - Company Activation</h1>
         </div>
         <div class="content">
-          <p>You're activating <strong>${empresaName}</strong> as an Empresa account on Its Done.</p>
+          <p>You're activating <strong>${companyName}</strong> as an Company account on Its Done.</p>
           <p>Click the button below to confirm and set up the first Administrator password:</p>
           <div style="text-align: center;">
             <a href="${activationUrl}" class="button">Confirm Activation</a>
@@ -529,7 +529,7 @@ export class NotificationsService {
     `;
   }
 
-  private generateEmpresaAdminPasswordResetEmailTemplate(
+  private generateCompanyAdminPasswordResetEmailTemplate(
     adminEmail: string,
     resetUrl: string,
   ): string {
@@ -570,8 +570,8 @@ export class NotificationsService {
     `;
   }
 
-  private generateEmpresaAdminInviteEmailTemplate(
-    empresaName: string,
+  private generateCompanyAdminInviteEmailTemplate(
+    companyName: string,
     inviteUrl: string,
   ): string {
     return `
@@ -580,7 +580,7 @@ export class NotificationsService {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Empresa Administrator Invite</title>
+        <title>Company Administrator Invite</title>
         <style>
           body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
@@ -594,7 +594,7 @@ export class NotificationsService {
           <h1>Its Done - Administrator Invite</h1>
         </div>
         <div class="content">
-          <p>You were invited to become an Administrator of <strong>${empresaName}</strong> on Its Done.</p>
+          <p>You were invited to become an Administrator of <strong>${companyName}</strong> on Its Done.</p>
           <p>Click the button below to confirm and set your password:</p>
           <div style="text-align: center;">
             <a href="${inviteUrl}" class="button">Accept Invite</a>
@@ -611,9 +611,9 @@ export class NotificationsService {
     `;
   }
 
-  private generateColaboradorLinkedEmailTemplate(
+  private generateCollaboratorLinkedEmailTemplate(
     userName: string,
-    empresaName: string,
+    companyName: string,
   ): string {
     return `
       <!DOCTYPE html>
@@ -621,7 +621,7 @@ export class NotificationsService {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Linked to a new Empresa</title>
+        <title>Linked to a new Company</title>
         <style>
           body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
@@ -632,16 +632,16 @@ export class NotificationsService {
       </head>
       <body>
         <div class="header">
-          <h1>Its Done - Empresa Link</h1>
+          <h1>Its Done - Company Link</h1>
         </div>
         <div class="content">
           <h2>Hello ${userName},</h2>
           <div class="info">
-            <strong>You were linked to ${empresaName}!</strong><br>
-            You are now a Colaborador of this Empresa.
+            <strong>You were linked to ${companyName}!</strong><br>
+            You are now a Collaborator of this Company.
           </div>
-          <p>${empresaName} can now see your aggregated hours, projects and invoices — your individual entries stay private, only the totals are shared.</p>
-          <p>You can unlink yourself from this Empresa at any time from your Empresas page.</p>
+          <p>${companyName} can now see your aggregated hours, projects and invoices — your individual entries stay private, only the totals are shared.</p>
+          <p>You can unlink yourself from this Company at any time from your Companys page.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>
@@ -651,15 +651,15 @@ export class NotificationsService {
     `;
   }
 
-  private generateColaboradorUnlinkedEmailTemplate(
+  private generateCollaboratorUnlinkedEmailTemplate(
     userName: string,
-    empresaName: string,
-    unlinkedBy: 'colaborador' | 'admin',
+    companyName: string,
+    unlinkedBy: 'collaborator' | 'admin',
   ): string {
     const explanation =
       unlinkedBy === 'admin'
-        ? `The Administrator of ${empresaName} removed you as a Colaborador.`
-        : `You unlinked yourself from ${empresaName}.`;
+        ? `The Administrator of ${companyName} removed you as a Collaborator.`
+        : `You unlinked yourself from ${companyName}.`;
 
     return `
       <!DOCTYPE html>
@@ -667,7 +667,7 @@ export class NotificationsService {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Unlinked from an Empresa</title>
+        <title>Unlinked from an Company</title>
         <style>
           body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
@@ -678,15 +678,15 @@ export class NotificationsService {
       </head>
       <body>
         <div class="header">
-          <h1>Its Done - Empresa Unlink</h1>
+          <h1>Its Done - Company Unlink</h1>
         </div>
         <div class="content">
           <h2>Hello ${userName},</h2>
           <div class="info">
-            <strong>You were unlinked from ${empresaName}.</strong><br>
+            <strong>You were unlinked from ${companyName}.</strong><br>
             ${explanation}
           </div>
-          <p>This Empresa no longer sees your aggregated hours. Your existing hours, projects, tasks and invoices are untouched and remain available to you.</p>
+          <p>This Company no longer sees your aggregated hours. Your existing hours, projects, tasks and invoices are untouched and remain available to you.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>
@@ -696,9 +696,9 @@ export class NotificationsService {
     `;
   }
 
-  private generateEmpresaDeactivatedEmailTemplate(
+  private generateCompanyDeactivatedEmailTemplate(
     userName: string,
-    empresaName: string,
+    companyName: string,
   ): string {
     return `
       <!DOCTYPE html>
@@ -706,7 +706,7 @@ export class NotificationsService {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Empresa deactivated</title>
+        <title>Company deactivated</title>
         <style>
           body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
@@ -717,16 +717,16 @@ export class NotificationsService {
       </head>
       <body>
         <div class="header">
-          <h1>Its Done - Empresa Deactivated</h1>
+          <h1>Its Done - Company Deactivated</h1>
         </div>
         <div class="content">
           <h2>Hello ${userName},</h2>
           <div class="info">
-            <strong>${empresaName} deactivated its account.</strong><br>
+            <strong>${companyName} deactivated its account.</strong><br>
             It no longer manages this account.
           </div>
-          <p>You are still linked to ${empresaName} and can keep logging and invoicing hours against it normally. Your existing hours, projects, tasks and invoices are untouched.</p>
-          <p>If ${empresaName} activates an Administrator again in the future, it will resume seeing your aggregated hours.</p>
+          <p>You are still linked to ${companyName} and can keep logging and invoicing hours against it normally. Your existing hours, projects, tasks and invoices are untouched.</p>
+          <p>If ${companyName} activates an Administrator again in the future, it will resume seeing your aggregated hours.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>

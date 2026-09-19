@@ -26,9 +26,9 @@ describe('NotificationsService', () => {
       .mockResolvedValue({ id: 'email-1' });
   });
 
-  describe('sendEmpresaAdminPasswordResetEmail()', () => {
-    it('points to /empresa-admin/reset-password, never /reset-password', async () => {
-      await service.sendEmpresaAdminPasswordResetEmail(
+  describe('sendCompanyAdminPasswordResetEmail()', () => {
+    it('points to /company-admin/reset-password, never /reset-password', async () => {
+      await service.sendCompanyAdminPasswordResetEmail(
         'admin@test.local',
         'admin@test.local',
         'tok123',
@@ -38,7 +38,7 @@ describe('NotificationsService', () => {
       const { html } = sendEmailMock.mock.calls[0][0];
 
       expect(html).toContain(
-        'https://app.test/empresa-admin/reset-password?token=tok123',
+        'https://app.test/company-admin/reset-password?token=tok123',
       );
       expect(html).not.toMatch(/href="https:\/\/app\.test\/reset-password\?/);
     });

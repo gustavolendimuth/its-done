@@ -19,7 +19,7 @@ export class AdminService {
       regularUsers,
     ] = await Promise.all([
       this.prisma.user.count(),
-      this.prisma.empresa.count(),
+      this.prisma.company.count(),
       this.prisma.project.count(),
       this.prisma.workHour.count(),
       this.prisma.invoice.count(),
@@ -69,7 +69,7 @@ export class AdminService {
         updatedAt: true,
         _count: {
           select: {
-            colaboradores: true,
+            collaborators: true,
             projects: true,
             workHours: true,
           },
@@ -81,7 +81,7 @@ export class AdminService {
     return users.map(({ _count, ...user }) => ({
       ...user,
       _count: {
-        clients: _count.colaboradores,
+        clients: _count.collaborators,
         projects: _count.projects,
         workHours: _count.workHours,
       },

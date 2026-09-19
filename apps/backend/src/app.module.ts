@@ -21,7 +21,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { InAppNotificationsModule } from './in-app-notifications/in-app-notifications.module';
 import { AdminModule } from './admin/admin.module';
-import { EmpresaAdminModule } from './empresa-admin/empresa-admin.module';
+import { CompanyAdminModule } from './company-admin/company-admin.module';
 import { WorkSessionsModule } from './work-sessions/work-sessions.module';
 import { PushModule } from './push/push.module';
 import { WorkSessionSchedulerService } from './work-sessions/services/work-session-scheduler.service';
@@ -36,10 +36,10 @@ import { WorkSessionSchedulerService } from './work-sessions/services/work-sessi
     // MW-27 — Rate limiting básico, aplicado a toda a aplicação.
     // Camada 'default': 60 req/min por IP, teto geral pra tráfego autenticado
     // normal (não incomoda uso legítimo, mas barra abuso grosseiro).
-    // Rotas sensíveis (login, forgot/reset-password, criar Convite Pendente,
-    // criar/confirmar Domínio Autorizado) sobrescrevem esse teto com
+    // Rotas sensíveis (login, forgot/reset-password, criar PendingInvite,
+    // criar/confirmar AuthorizedDomain) sobrescrevem esse teto com
     // @Throttle({ default: { limit, ttl } }) direto no controller/handler —
-    // ver auth.controller.ts e empresa-admin/*.controller.ts.
+    // ver auth.controller.ts e company-admin/*.controller.ts.
     ThrottlerModule.forRoot([
       {
         name: 'default',
@@ -62,7 +62,7 @@ import { WorkSessionSchedulerService } from './work-sessions/services/work-sessi
     NotificationsModule,
     InAppNotificationsModule,
     AdminModule,
-    EmpresaAdminModule,
+    CompanyAdminModule,
     WorkSessionsModule,
     PushModule,
   ],

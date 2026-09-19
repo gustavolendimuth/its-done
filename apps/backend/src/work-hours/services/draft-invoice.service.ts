@@ -64,7 +64,7 @@ export class DraftInvoiceService {
       where: {
         id: invoiceId,
         client: {
-          colaboradores: { some: { userId } },
+          collaborators: { some: { userId } },
         },
         status: 'DRAFT',
       },
@@ -99,7 +99,7 @@ export class DraftInvoiceService {
       where: {
         id: invoiceId,
         client: {
-          colaboradores: { some: { userId } },
+          collaborators: { some: { userId } },
         },
         status: 'DRAFT',
       },
