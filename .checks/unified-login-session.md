@@ -139,3 +139,9 @@ Proof: `pnpm preview:start && source .preview-worktree.state && curl --fail --si
 ## Handoff
 
 S1-S5 share the auth/session interface and total roughly 25k tokens of source reading, below the default 150k budget; one implementation batch avoids cutting the login transport midway. The batch boundary is after S5, followed by an independent verifier over the feature base through `HEAD`.
+
+Boundary: C1-C28 span `3353c4c..00db8c0` plus this handoff update. Implementation commits are `463e744`, `9bcf4a9`, `f4fe062`, `6afcd77`, `adbd756`, `46c772f`, `f92362e`, `e8569de`, `513d70c`, `045e500`, and `00db8c0`; C1-C13 are recorded in the ledger and C14-C28 were rerun in the final gate.
+
+User decisions during the build: none.
+
+Abandoned attempts: the first implementer was interrupted by a usage limit; no commits were lost. This continuation resumed from Tasks 1-5 in the ledger rather than repeating them.
