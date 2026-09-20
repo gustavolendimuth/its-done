@@ -21,7 +21,6 @@ export type FrontendRouteName = keyof typeof FRONTEND_ROUTES;
  * entry becomes resolvable, so this list only ever shrinks.
  */
 export const KNOWN_MISSING_PAGES: Record<string, string> = {
-  '/company-admin/activate': 'MW-28',
   '/company-admin/invite': 'MW-29',
 };
 
