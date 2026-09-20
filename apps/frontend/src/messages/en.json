@@ -316,7 +316,19 @@
     "createClient": "Create Client",
     "selectClient": "Select client",
     "linkedBadge": "Linked company",
-    "linkedBadgeNote": "This company has an active account and sees your aggregated hours."
+    "linkedBadgeNote": "This company has an active account and sees your aggregated hours.",
+    "shareActivationLink": "Invite company to activate its account",
+    "copyActivationLink": "Copy activation link",
+    "shareActivationViaWhatsApp": "Activation link via WhatsApp",
+    "sendActivationViaEmail": "Activation link via email",
+    "activationWhatsappMessage": "Hi! Activate your company's account on Its Done to see the aggregated hours of everyone who works with you: {url}",
+    "activationEmailSubject": "Activate your company's account - {company}",
+    "activationEmailBody": "Hi,\n\nYou can activate your company's account at the following link:\n\n{url}\n\nBest regards"
+  },
+  "companyActivation": {
+    "bannerTitle": "Do you represent this company?",
+    "bannerDescription": "Activate the company account to see the aggregated hours of everyone who works with you.",
+    "bannerCta": "Activate my company"
   },
   "projects": {
     "title": "Projects",

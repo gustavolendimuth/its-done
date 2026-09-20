@@ -316,7 +316,19 @@
     "createClient": "Criar Empresa",
     "selectClient": "Selecione a empresa",
     "linkedBadge": "Empresa vinculada",
-    "linkedBadgeNote": "Essa empresa tem conta ativa e vê o agregado das suas horas."
+    "linkedBadgeNote": "Essa empresa tem conta ativa e vê o agregado das suas horas.",
+    "shareActivationLink": "Convidar a empresa a ativar a conta",
+    "copyActivationLink": "Copiar link de ativação",
+    "shareActivationViaWhatsApp": "Link de ativação por WhatsApp",
+    "sendActivationViaEmail": "Link de ativação por Email",
+    "activationWhatsappMessage": "Olá! Ative a conta da sua empresa no Its Done pra ver o agregado das horas de todos que trabalham com você: {url}",
+    "activationEmailSubject": "Ative a conta da sua empresa - {company}",
+    "activationEmailBody": "Olá,\n\nVocê pode ativar a conta da sua empresa no seguinte link:\n\n{url}\n\nAtenciosamente"
+  },
+  "companyActivation": {
+    "bannerTitle": "Você representa esta Empresa?",
+    "bannerDescription": "Ative a conta da Empresa pra ver o agregado das horas de todos que trabalham com você.",
+    "bannerCta": "Ativar minha Empresa"
   },
   "projects": {
     "title": "Projetos",

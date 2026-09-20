@@ -22,23 +22,31 @@ interface CompanyShareMenuProps {
 export function CompanyShareMenu({ company }: CompanyShareMenuProps) {
   const t = useTranslations("clients");
 
-  const getClientDashboardUrl = () => {
+  const buildUrl = (path: string) => {
     const baseUrl =
       typeof window !== "undefined"
         ? `${window.location.protocol}//${window.location.host}`
         : "";
 
-    return `${baseUrl}/client-dashboard/${company.id}`;
+    return `${baseUrl}${path}`;
   };
+
+  const dashboardUrl = () => buildUrl(`/client-dashboard/${company.id}`);
+  const activationUrl = () =>
+    buildUrl(
+      `/company-admin/activate/request?companyId=${encodeURIComponent(company.id)}`
+    );
+
+  // Only offered when the API says the company has no admin. `undefined`
+  // (older payloads) hides it rather than showing it to already-active companies.
+  const canInviteToActivate = company.hasActiveAdmin === false;
 
   const handleShareClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
 
-  const handleCopyLink = async () => {
+  const copy = async (url: string) => {
     try {
-      const url = getClientDashboardUrl();
-
       await navigator.clipboard.writeText(url);
       toast.success(t("linkCopiedToClipboard"));
     } catch (_error) {
@@ -46,21 +54,14 @@ export function CompanyShareMenu({ company }: CompanyShareMenuProps) {
     }
   };
 
-  const handleShareWhatsApp = () => {
-    const url = getClientDashboardUrl();
-    const message = t("whatsappShareMessage", { url });
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-
-    window.open(whatsappUrl, "_blank");
+  const openWhatsApp = (message: string) => {
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 
-  const handleShareEmail = () => {
-    const url = getClientDashboardUrl();
-    const subject = t("emailShareSubject", { company: company.company });
-    const body = t("emailShareBody", { url });
-    const emailUrl = `mailto:${company.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-    window.open(emailUrl);
+  const openMailClient = (subject: string, body: string) => {
+    window.open(
+      `mailto:${company.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    );
   };
 
   return (
@@ -76,21 +77,64 @@ export function CompanyShareMenu({ company }: CompanyShareMenuProps) {
           {t("share")}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel>{t("shareClientDashboard")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleCopyLink}>
+        <DropdownMenuItem onClick={() => copy(dashboardUrl())}>
           <Copy className="mr-2 h-4 w-4" />
           <span>{t("copyLink")}</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleShareWhatsApp}>
+        <DropdownMenuItem
+          onClick={() =>
+            openWhatsApp(t("whatsappShareMessage", { url: dashboardUrl() }))
+          }
+        >
           <MessageCircle className="mr-2 h-4 w-4" />
           <span>{t("shareViaWhatsApp")}</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleShareEmail}>
+        <DropdownMenuItem
+          onClick={() =>
+            openMailClient(
+              t("emailShareSubject", { company: company.company }),
+              t("emailShareBody", { url: dashboardUrl() })
+            )
+          }
+        >
           <Mail className="mr-2 h-4 w-4" />
           <span>{t("sendViaEmail")}</span>
         </DropdownMenuItem>
+
+        {canInviteToActivate && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>{t("shareActivationLink")}</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => copy(activationUrl())}>
+              <Copy className="mr-2 h-4 w-4" />
+              <span>{t("copyActivationLink")}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                openWhatsApp(
+                  t("activationWhatsappMessage", { url: activationUrl() })
+                )
+              }
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              <span>{t("shareActivationViaWhatsApp")}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                openMailClient(
+                  t("activationEmailSubject", { company: company.company }),
+                  t("activationEmailBody", { url: activationUrl() })
+                )
+              }
+            >
+              <Mail className="mr-2 h-4 w-4" />
+              <span>{t("sendActivationViaEmail")}</span>
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
