@@ -133,7 +133,7 @@ Proof: same file, `-t "renders nothing when the company already has an admin"`
 Proof: same file, `-t "renders nothing while loading or when the status request fails"`
 
 **C25** - `/client-dashboard/<companyId>` renders the banner with that id, above the overview
-Proof: C27 (portal step): the flow test asserts the banner link is visible with `companyId` in its `href` and sits above the overview heading; no unit test on this page
+Proof: C27 (portal step): the flow test asserts the banner link is visible, sits above the overview heading (`Company Dashboard`; the name falls back to "Company" for a company with no invoices), and that the click lands on the request URL with `companyId`; no unit test on this page
 
 ### S6 - Whole flow in a browser · 2 files · ~1k
 
@@ -168,7 +168,7 @@ Proof: `grep -qE "^7\. " .tasks/empresa-admin-ativacao-frontend.md && grep -qE "
 - Claims naming a status code, route or response shape: C4 (409), C10 (400), C20 and C21 (404/200). C4 and C10 assert what the page does with a mocked error (component level; the backend returns those codes today, proven by `company-activation.e2e-spec.ts`). C21 crosses the HTTP boundary for the new endpoint.
 - Frontend `hasActiveAdmin` set: true C12, false C13-C15, undefined C16 (3 members, 3 proofs).
 - The share menu shows activation items only when the list payload carries `hasActiveAdmin: false` (`companies.service.ts` `findAll`, existing, proven by `companies.service.spec.ts`); C12/C13/C16 assert the menu side only.
-- C4/C10/C30 assert the page with a mocked axios error. The exact messages they mock are pinned against the real backend in `company-activation.e2e-spec.ts` (409 already activated, 400 request that does not prove ownership; 400 wrong token type asserts a non-empty message).
+- C4/C10/C30 assert the page with a mocked axios error. The exact messages they mock are pinned against the real backend in `company-activation.e2e-spec.ts` (409 already activated, 400 request that does not prove ownership; 400 wrong token type asserts a non-empty message). C30 mocks `Token has expired`, the backend's own string (`company-admin-auth.service.ts:399`), which no e2e case triggers.
 - No other check claims more than the single case its proof exercises.
 
 ## Deviations from the plan (decided while writing this checklist)
@@ -176,7 +176,7 @@ Proof: `grep -qE "^7\. " .tasks/empresa-admin-ativacao-frontend.md && grep -qE "
 - Plan Task 1 step 7 (`pnpm e2e:email-links` after removing the allowlist entry) runs once in S6, where it covers a superset (6 tests). The unit contract test (C6) settles the allowlist claim at commit time. Reason: one preview stack at a time, and builders run in parallel.
 - Plan tests for S3 WhatsApp/email split into two tests (C14, C15) so each check has one proof; C16, C17 and C21 are additions the plan lacked (unknown-`hasActiveAdmin` claim in its own comment, message parity, boundary proof for the new route).
 - Builders never commit; the orchestrator commits per task with the plan's commit messages.
-- The two `{ timeout: NEXT_DEV_COMPILE_MS }` (30s) on post-navigation `expect`s in the flow test are wiring: `next dev` compiles each page on first visit, longer than the 5s default. No assertion changed.
+- The `{ timeout: NEXT_DEV_COMPILE_MS }` (30s) on post-navigation `expect`s in the flow test are wiring: `next dev` compiles each page on first visit, longer than the 5s default. No assertion changed.
 
 ## Amendments after verification round 1
 

@@ -125,7 +125,7 @@ describe("CompanyAdminActivatePage", () => {
     mutateAsyncMock.mockRejectedValueOnce({
       response: {
         status: 400,
-        data: { message: "Invalid or expired activation token" },
+        data: { message: "Token has expired" },
       },
     });
 
@@ -133,7 +133,7 @@ describe("CompanyAdminActivatePage", () => {
     await fillAndSubmit("supersecret");
 
     expect(
-      await screen.findByText("Invalid or expired activation token")
+      await screen.findByText("Token has expired")
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Ir para o login" })

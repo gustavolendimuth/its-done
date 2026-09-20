@@ -1,105 +1,127 @@
 # MW-28 company activation frontend Verification
 
-**Verdict**: PASS with findings (29/29 checks proven; no failing proof; 0 blocking gaps; 1 unresolved flake report, 7 non-blocking findings below)
-**Profile**: light (default; declared nowhere)
-**Diff range**: 72d4644..HEAD (HEAD = 6858086)
-**Round**: 1 - full
-**Verifier**: independent sub-agent (author != verifier), read-only; only this file written. `git status --porcelain` empty before and after.
+**Verdict**: PASS with findings (33/33 checks proven at HEAD; 8/8 round 1 findings fixed; 0 blocking gaps; 5 low, non-blocking residual gaps below)
+**Profile**: light (default; declared nowhere): no step 1, no fault injection, no Coverage join, no Test-policy verdicts
+**Diff range**: 72d4644..HEAD (HEAD = b50ff9a). Round 1 verified at 6858086; fix diff = `3caf921..HEAD` (4 commits, 9 files: 3 test files, 2 pages, 1 e2e spec, 1 Playwright spec, 1 spec doc, 1 checklist)
+**Round**: 2 - scoped
+**Verifier**: independent sub-agent (author != verifier), read-only; only this file written. `git status --porcelain` empty before and after (incl. after the preview run).
 
-Steps skipped by profile: step 1 (no source marked binding - checklist says "Nothing is marked binding"), fault injection (step 4), Coverage-join recompute, Test-policy verdicts (no `Test policy` section). Steps 2, 3 and this report ran.
+Scoping: proofs C1-C33 all re-run in full at b50ff9a. Evidence for untouched code is marked `carried from 6858086`; files the fix diff touched are re-cited and marked `verified at b50ff9a`.
 
 ## Binding sources
 
-None marked binding. Step 1 skipped.
+None marked binding (checklist: "Nothing is marked binding"). Step 1 skipped. `carried from 6858086`.
 
-## Proof runs (all at HEAD 6858086)
+## Proof runs (all at HEAD b50ff9a)
 
 | Target | Command | Result |
 |---|---|---|
-| frontend jest (5 files) | `pnpm --filter frontend exec jest "src/app/\[locale\]/company-admin/activate" src/features/companies/components/company-share-menu.test.tsx src/features/company-admin/components src/messages --ci --verbose` | 5 suites, 38 tests passed; each named test listed individually as run |
-| backend unit jest (2 files) | `pnpm --filter backend exec jest src/notifications/frontend-links.contract.spec.ts src/companies/companies.service.spec.ts --verbose` | 2 suites, 13 passed |
-| backend e2e filtered (C21) | `pnpm --filter backend run test:e2e company-activation.e2e-spec.ts -t "activation-status"` | 3 passed, 8 skipped |
-| backend e2e full file x3 (flake probe) | `pnpm --filter backend run test:e2e company-activation.e2e-spec.ts` | run 1, 2, 3: exit 0, 11/11 passed each |
-| Playwright smoke (C26, C27) | `pnpm e2e:email-links` | exit 0, 6 passed; test 4 `companyAdminInvite` shows the expected-failure mark; preview torn down by the script, ports 3100/3102 free afterwards, `pnpm preview:stop` not needed |
-| C28 grep | `! grep -nE "empresaId\|/empresa-admin/" .tasks/empresa-admin-ativacao-frontend.md` | exit 0 |
-| C29 grep | the four-part `grep -qE ... && ! grep -qE "^\| 1 \| blocks"` chain | exit 0 (row 1 existed at 72d4644 line 119, gone at HEAD) |
+| frontend jest, full | `pnpm --filter frontend exec jest --ci --verbose` | 66 suites, 559 tests passed, 0 failed; every named C1-C17/C22-C24/C30-C33 test listed individually as run and passed |
+| backend unit jest (C6, C18-C20) | `pnpm --filter backend exec jest src/notifications/frontend-links.contract.spec.ts src/companies/companies.service.spec.ts --ci --verbose` | 2 suites, 13 passed; each named test listed |
+| backend jest, full (gate) | `pnpm --filter backend exec jest --ci --silent` | 27 suites, 170 tests passed |
+| C21 | `pnpm --filter backend run test:e2e company-activation.e2e-spec.ts -t "activation-status"` | 3 passed, 8 skipped (the 3 activation-status tests each shown) |
+| backend e2e full file x3 | `pnpm --filter backend run test:e2e company-activation.e2e-spec.ts` | run 1, 2, 3: exit 0, 11/11 passed each. Log lines matching `Resend\|Email enviado\|activation email sent`: 0, 0, 0 (round 1: 9 real sends per 3 runs). Email-path tests now 214-265 ms |
+| C26, C27 | `pnpm e2e:email-links` | exit 0, `6 passed`; test 4 `companyAdminInvite` shows the inverted expected-failure mark; 3, 5 and 6 pass. Script tore the preview down; ports 3100/3102 free afterwards (`lsof` empty), `pnpm preview:stop` not needed |
+| C28 | `! grep -nE "empresaId\|/empresa-admin/" .tasks/empresa-admin-ativacao-frontend.md` | exit 0 |
+| C29 | the four-part `grep` chain | exit 0 |
 
 ## Checks
 
-| Check | Claim | Proof run | Evidence | Result |
-|---|---|---|---|---|
-| C1 | confirm posts `{token,password}`, signs in with returned email, goes to dashboard | frontend jest, test ran and passed | `activate/page.test.tsx:51` `expect(mutateAsyncMock).toHaveBeenCalledWith({token:"activation-token",password:"supersecret"})`; `:55` `expect(signInMock).toHaveBeenCalledWith("credentials",{email:"admin@acme.com",password:"supersecret",redirect:false})`; `:60` `expect(pushMock).toHaveBeenCalledWith("/company-admin/dashboard")` | PASS |
-| C2 | missing token: error text, no password field, no mutation | same | `page.test.tsx:68-72` `getByText("Link de ativação inválido ou incompleto.")`, `queryByLabelText("Senha")).not.toBeInTheDocument()`, `mutateAsyncMock).not.toHaveBeenCalled()` | PASS |
-| C3 | mismatched passwords: message, no mutation | same | `page.test.tsx:79-80` `getByText("As senhas não coincidem.")`, `mutateAsyncMock).not.toHaveBeenCalled()` | PASS |
-| C4 | 409: backend message + "Ir para o login" href=/login, no signIn | same | `page.test.tsx:96-104` `findByText("Company is already activated; use the Admin invite flow instead")`, `getByRole("link",{name:"Ir para o login"})).toHaveAttribute("href","/login")`, `signInMock).not.toHaveBeenCalled()`. Message equals backend source `company-admin-auth.service.ts:414` | PASS (component level, see F3/F4) |
-| C5 | confirm ok, signIn `ok:false`: message, no navigation | same | `page.test.tsx:116-121` `findByText("Conta ativada, mas não foi possível entrar automaticamente. Entre pelo login.")`, `pushMock).not.toHaveBeenCalled()` | PASS |
-| C6 | `/company-admin/activate` out of `KNOWN_MISSING_PAGES`, contract finds a page | backend jest: `companyAdminActivate (/company-admin/activate) has a frontend page` and `keeps KNOWN_MISSING_PAGES honest` both ran, passed | `frontend-routes.ts:23-24` map holds only `'/company-admin/invite': 'MW-29'` (activate removed in diff); `frontend-links.contract.spec.ts:60-65` `if (!resolves(path)) throw new Error(...)` (activate not in map, so this branch guards it); `:69-77` `expect({path,inFrontendRoutes:declared.includes(path)}).toEqual({path,inFrontendRoutes:true})` | PASS |
-| C7 | request with companyId+email, blank domain undefined, form hidden, confirmation text | frontend jest | `request/page.test.tsx:40-44` `toHaveBeenCalledWith({companyId:"company-1",email:"contato@acme.com",domain:undefined})`; `:45-48` `findByText(/enviamos um link de confirmação/)`, `queryByLabelText("Email")).not.toBeInTheDocument()` | PASS |
-| C8 | filled domain sent as `"acme.com"` | same | `request/page.test.tsx:62-66` `toHaveBeenCalledWith({companyId:"company-1",email:"ana@acme.com",domain:"acme.com"})` | PASS |
-| C9 | missing companyId: error, no email field, no mutation | same | `request/page.test.tsx:74-78` `getByText("Link inválido: a Empresa não foi identificada.")`, `queryByLabelText("Email")).not...`, `mutateAsyncMock).not.toHaveBeenCalled()` | PASS |
-| C10 | 400 keeps form (email preserved) + backend message | same | `request/page.test.tsx:96-99` `findByText(/must match the Company's registered contact email/)`, `getByLabelText("Email")).toHaveValue("outro@acme.com")` | PASS (component level, see F3/F4) |
-| C11 | dashboard "Copy link" still copies `<origin>/client-dashboard/c1` | frontend jest | `company-share-menu.test.tsx:76-78` `expect(writeText).toHaveBeenCalledWith(\`${window.location.origin}/client-dashboard/c1\`)` | PASS |
-| C12 | `hasActiveAdmin:true`: no activation items | same | `company-share-menu.test.tsx:86-91` `queryByText("Invite company to activate")).not...`, `queryByRole("menuitem",{name:"Copy activation link"})).not...` | PASS |
-| C13 | `false`: copies `<origin>/company-admin/activate/request?companyId=c1`, toast "Link copied" | same | `company-share-menu.test.tsx:116-119` `writeText).toHaveBeenCalledWith(\`${window.location.origin}/company-admin/activate/request?companyId=c1\`)`, `toastSuccess).toHaveBeenCalledWith("Link copied")` | PASS |
-| C14 | WhatsApp item opens `https://wa.me/?text=...` in `_blank` | same | `company-share-menu.test.tsx:130-133` `openSpy).toHaveBeenLastCalledWith(expect.stringMatching(/^https:\/\/wa\.me\/\?text=/),"_blank")` | PASS |
-| C15 | email item opens `mailto:contact@acme.test?subject=` | same | `company-share-menu.test.tsx:144-146` `openSpy).toHaveBeenLastCalledWith(expect.stringMatching(/^mailto:contact@acme\.test\?subject=/))` | PASS |
-| C16 | `hasActiveAdmin` undefined: no activation items | same | `company-share-menu.test.tsx:99-104` same two `.not.toBeInTheDocument()` with `setup({...baseCompany})`; code `company-share-menu.tsx:42` `company.hasActiveAdmin === false` | PASS |
-| C17 | en + pt-BR carry the 10 new keys (7 `clients`, 3 `companyActivation`) | frontend jest, 20 `activation message keys` cases ran (10 per locale) | `activation-keys.test.ts:30-31` `expect(typeof value).toBe("string")`, `expect(value.length).toBeGreaterThan(0)`; `:37-38` same for `companyActivation`; key lists `:4-18`; json diff shows all 10 in both files | PASS (see F5) |
-| C18 | `getActivationStatus` true when count 1, `findUnique` with `select:{_count:{select:{companyAdmins:true}}}` | backend jest | `companies.service.spec.ts:94-96` `resolves.toEqual({hasActiveAdmin:true})`; `:97-100` `findUnique).toHaveBeenCalledWith({where:{id:'company-1'},select:{_count:{select:{companyAdmins:true}}}})` | PASS |
-| C19 | false when count 0 | same | `companies.service.spec.ts:108-110` `resolves.toEqual({hasActiveAdmin:false})` | PASS |
-| C20 | `NotFoundException` for unknown company | same | `companies.service.spec.ts:116-118` `rejects.toThrow(NotFoundException)`; source `companies.service.ts:75-77`; HTTP 404 proven at C21 | PASS |
-| C21 | public GET: 200 false, 200 true after admin, 404 unknown, no Authorization header | e2e filtered run, 3 tests ran, passed | `company-activation.e2e-spec.ts:213-216` `.get(\`/public/company/${company.id}/activation-status\`).expect(200)` + `expect(res.body).toEqual({hasActiveAdmin:false})`; `:236-239` `.expect(200)` + `toEqual({hasActiveAdmin:true})` (admin made via `/activate/confirm` `:231-233`); `:244-248` `.expect(404)` + `expect(res.body.message).toBe('Company not found')`. No `.set('Authorization',...)` anywhere in the three | PASS |
-| C22 | banner text + link href + hook called with "c1" | frontend jest | `activate-company-banner.test.tsx:40` `expect(useStatusMock).toHaveBeenCalledWith("c1")`; `:41` `getByText("Do you represent this company?")`; `:42-44` `getByRole("link",{name:"Activate my company"})).toHaveAttribute("href","/company-admin/activate/request?companyId=c1")` | PASS |
-| C23 | `true`: renders nothing | same | `activate-company-banner.test.tsx:52` `expect(container).toBeEmptyDOMElement()` | PASS |
-| C24 | loading/error (`data` undefined): renders nothing | same | `activate-company-banner.test.tsx:56,60` `useStatusMock.mockReturnValue({data:undefined})`, `expect(container).toBeEmptyDOMElement()`; code `activate-company-banner.tsx:22` `data?.hasActiveAdmin !== false` | PASS (see F6) |
-| C25 | portal renders banner with route clientId above overview | settled by C27 + reading | `client-dashboard/[clientId]/page.tsx:112-116` `<ActivateCompanyBanner companyId={clientId as string} />` then `<Overview .../>`, no early return in the component (`return` only at :90 inside memo and :112); `clientId` from `useParams()` `:13`. C27 run reaches the banner at `/client-dashboard/${company.id}` `email-links.spec.ts:166-167` | PASS (order proven by reading only, see F6) |
-| C26 | emailed activation link opens a real page; only `companyAdminInvite` remains expected failure | `pnpm e2e:email-links`: test 3 passed, test 4 expected-fail mark, 6 passed | `email-links.spec.ts:146-150` `expect(response?.status()).toBeLessThan(400)`, `expect(new URL(page.url()).pathname).toBe(path)`, `expect(pageErrors).toEqual([])`; `:130` `test.fail(!!knownMissing && !process.env.E2E_STRICT, ...)`; `frontend-routes.ts:23-24` map has exactly one entry (invite) | PASS |
-| C27 | portal banner -> request -> emailed link -> confirm -> `/company-admin/dashboard` | `pnpm e2e:email-links`: test 5 (17.1s) passed | `email-links.spec.ts:167` click "Ativar minha Empresa"; `:168-171` `toHaveURL(...activate/request?companyId=${company.id})`; `:176` `getByText(/enviamos um link de confirmação/)).toBeVisible`; `:187` `expect(page).toHaveURL(\`${FRONTEND_URL}/company-admin/dashboard\`, ...)` | PASS (see F7) |
-| C28 | spec has no `empresaId` / `/empresa-admin/` | grep negation exit 0 | `.tasks/empresa-admin-ativacao-frontend.md`: grep for the pattern returns no lines (base had hits at :93) | PASS |
-| C29 | spec has criteria 7, 8, `activation-status` row, Unresolved row 1 gone | grep chain exit 0 | `.tasks/empresa-admin-ativacao-frontend.md:57` `7. When a Empresa não tem Administrador`; `:61` `8. When alguém abre`; `:89,:117,:125` `activation-status`; Unresolved table `:142-146` holds only row 2 (row `1 | blocks` was base :119) | PASS |
+| Check | Claim | Proof run | Evidence | Result | Status |
+|---|---|---|---|---|---|
+| C1 | confirm posts `{token,password}`, signs in with returned email, goes to dashboard | frontend jest, ran+passed | `activate/page.test.tsx:51` `toHaveBeenCalledWith({token:"activation-token",password:"supersecret"})`; `:55` `signInMock ... ("credentials",{email:"admin@acme.com",password:"supersecret",redirect:false})`; `:60` `pushMock ... ("/company-admin/dashboard")` | PASS | assertions carried from 6858086 (file touched by fix: lines shifted only above `:120`, test bodies unchanged); run at b50ff9a |
+| C2 | missing token: error, no password field, no mutation | same | `page.test.tsx:68-72` `getByText("Link de ativação inválido ou incompleto.")`, `queryByLabelText("Senha")).not...`, `mutateAsyncMock).not.toHaveBeenCalled()` | PASS | carried; run at b50ff9a |
+| C3 | mismatched passwords | same | `page.test.tsx:79-80` `getByText("As senhas não coincidem.")`, `mutateAsyncMock).not.toHaveBeenCalled()` | PASS | carried; run at b50ff9a |
+| C4 | 409: backend message + login link, no signIn | same | `page.test.tsx:96-104` `findByText("Company is already activated; use the Admin invite flow instead")`, link `href="/login"`, `signInMock).not.toHaveBeenCalled()`. String equals backend `company-admin-auth.service.ts:414` and is now asserted against the real HTTP body at `company-activation.e2e-spec.ts:220-222` `expect(res.body.message).toBe('Company is already activated; use the Admin invite flow instead')` | PASS | verified at b50ff9a |
+| C5 | signIn `ok:false`: message, no navigation | same | `page.test.tsx:116-121` `findByText("Conta ativada, mas não foi possível entrar automaticamente. Entre pelo login.")`, `pushMock).not.toHaveBeenCalled()` | PASS | carried; run at b50ff9a |
+| C6 | activate out of `KNOWN_MISSING_PAGES`, contract finds a page | backend jest: `companyAdminActivate (/company-admin/activate) has a frontend page`, `keeps KNOWN_MISSING_PAGES honest` ran+passed | `frontend-routes.ts:23-24` map has only `'/company-admin/invite': 'MW-29'`; `frontend-links.contract.spec.ts:60-65`, `:69-77` | PASS | carried; run at b50ff9a |
+| C7 | request with companyId+email, blank domain undefined, form hidden | frontend jest | `request/page.test.tsx:40-44` `toHaveBeenCalledWith({companyId:"company-1",email:"contato@acme.com",domain:undefined})`; `:46` `findByText(/enviamos um link de confirmação/)` | PASS | carried; run at b50ff9a |
+| C8 | filled domain sent | same | `request/page.test.tsx:62-66` `... domain:"acme.com"` | PASS | carried; run at b50ff9a |
+| C9 | missing companyId | same | `request/page.test.tsx:74-78` `getByText("Link inválido: a Empresa não foi identificada.")`, no Email field, mutation not called | PASS | carried; run at b50ff9a |
+| C10 | 400 keeps form + backend message | same | `request/page.test.tsx:97-99` `findByText(/must match the Company's registered contact email/)`, `:100` `getByLabelText("Email")).toHaveValue("outro@acme.com")`. Mock string (`:87`) is byte-equal to backend `service.ts:187-188` and pinned at `company-activation.e2e-spec.ts:76-78` `expect(res.body.message).toBe("The email must match the Company's registered contact email, or a domain must be declared")` | PASS | verified at b50ff9a |
+| C11 | dashboard copy link unchanged | same | `company-share-menu.test.tsx:76-78` `writeText).toHaveBeenCalledWith(\`${window.location.origin}/client-dashboard/c1\`)` | PASS | carried; run at b50ff9a |
+| C12 | `hasActiveAdmin:true`: no items | same | `company-share-menu.test.tsx:86-91` `.not.toBeInTheDocument()` x2 | PASS | carried; run at b50ff9a |
+| C13 | `false`: copies activation URL, toast | same | `:116-119` `writeText ... /company-admin/activate/request?companyId=c1`, `toastSuccess ... ("Link copied")` | PASS | carried; run at b50ff9a |
+| C14 | WhatsApp URL | same | `:130-133` `stringMatching(/^https:\/\/wa\.me\/\?text=/),"_blank"` | PASS | carried; run at b50ff9a |
+| C15 | mailto URL | same | `:144-146` `stringMatching(/^mailto:contact@acme\.test\?subject=/)` | PASS | carried; run at b50ff9a |
+| C16 | undefined: no items | same | `:99-104`; code `company-share-menu.tsx:42` `company.hasActiveAdmin === false` | PASS | carried; run at b50ff9a |
+| C17 | en + pt-BR carry the 10 keys; same `companyActivation` key set | frontend jest: `has the same companyActivation keys in every locale` + 20 `has clients.*/companyActivation.*` cases ran+passed | `activation-keys.test.ts:38-46` `expect(Object.keys(ptBR.companyActivation).sort()).toEqual(Object.keys(en.companyActivation).sort())` and `expect(Object.keys(en.companyActivation).sort()).toEqual([...COMPANY_ACTIVATION_KEYS].sort())`; `:70-71,:77-78` per-key `typeof value === "string"`, `length > 0` | PASS | verified at b50ff9a |
+| C18 | `getActivationStatus` true, `findUnique` select shape | backend jest | `companies.service.spec.ts:94-100` `resolves.toEqual({hasActiveAdmin:true})`, `findUnique).toHaveBeenCalledWith({where:{id:'company-1'},select:{_count:{select:{companyAdmins:true}}}})` | PASS | carried; run at b50ff9a |
+| C19 | false when 0 | same | `:108-110` `resolves.toEqual({hasActiveAdmin:false})` | PASS | carried; run at b50ff9a |
+| C20 | NotFoundException | same | `:116-118` `rejects.toThrow(NotFoundException)` | PASS | carried; run at b50ff9a |
+| C21 | public GET 200 false / 200 true / 404, no auth | e2e filtered, 3 ran+passed | `company-activation.e2e-spec.ts` activation-status tests: `expect(res.body).toEqual({hasActiveAdmin:false})`, `...true`, `.expect(404)` + `:271` `expect(res.body.message).toBe('Company not found')`; no `.set('Authorization',...)` | PASS | carried evidence; file touched by fix (line shifts +~12 after `:63`); run at b50ff9a |
+| C22 | banner text, href, hook called with "c1" | frontend jest | `activate-company-banner.test.tsx:40-44` | PASS | carried; run at b50ff9a |
+| C23 | `true`: renders nothing | same | `:52` `expect(container).toBeEmptyDOMElement()` | PASS | carried; run at b50ff9a |
+| C24 | loading/error: renders nothing | same | `:56,60`; code `activate-company-banner.tsx:22` `data?.hasActiveAdmin !== false` | PASS | carried; run at b50ff9a |
+| C25 | portal renders banner with route id above the overview | `pnpm e2e:email-links` test 5 passed | `email-links.spec.ts:167-168` `getByRole("link",{name:"Ativar minha Empresa"})` `toBeVisible`; `:171-176` overview `getByRole("heading",{level:1,name:"Company Dashboard"})` `toBeVisible`; `:180` `expect(bannerBox!.y).toBeLessThan(overviewBox!.y)`; `:182-186` after click `toHaveURL(...activate/request?companyId=${company.id})`. Code: `client-dashboard/[clientId]/page.tsx:112-115` banner then `<Overview>`; h1 text is `overview-header.tsx:25-26` `{clientInfo.name} Dashboard` with the `|| "Company"` fallback at `page.tsx:87` | PASS (see R2, R5) | verified at b50ff9a |
+| C26 | emailed activation link opens real page; only invite is expected failure | `pnpm e2e:email-links` test 3 ✓, test 4 ✘ (expected-fail mark), 6 passed | `email-links.spec.ts:146-150`; `:130` `test.fail(!!knownMissing && !process.env.E2E_STRICT, ...)`; `frontend-routes.ts:23-24` one entry | PASS | carried evidence; file touched; run at b50ff9a |
+| C27 | portal -> request -> emailed link -> confirm -> dashboard; admin content; session cookie | `pnpm e2e:email-links` test 5 (16.8s) passed | `email-links.spec.ts:201-203` `toHaveURL(\`${FRONTEND_URL}/company-admin/dashboard\`)`; `:205-207` `getByRole("heading",{level:1,name:"Dashboard da Empresa"})` `toBeVisible` (source `company-admin/dashboard/page.tsx:158` `PageHeader title="Dashboard da Empresa"` -> `page-header.tsx:46` `<h1>`; layout's same text is a `<p>`, `layout.tsx:53`, so the heading query is discriminating); `:209-213` `cookies.some(c => /session-token/.test(c.name))).toBe(true)` (NextAuth cookie `next-auth.session-token`, `__Secure-` prefixed in prod: `next-auth/core/lib/cookie.js:21`) | PASS | verified at b50ff9a |
+| C28 | spec has no old names | grep negation exit 0 | `.tasks/empresa-admin-ativacao-frontend.md` no match | PASS | verified at b50ff9a (file touched by fix) |
+| C29 | spec criteria 7, 8, `activation-status`, Unresolved row 1 gone | grep chain exit 0 | same file | PASS | verified at b50ff9a |
+| C30 | 400 on confirm: backend message + login link, no signIn | frontend jest: `shows the backend message and a login link when the token is invalid or expired` ran+passed | `activate/page.test.tsx:124-141`: mock `status:400`; `:136` `findByText("Invalid or expired activation token")`; `:139-140` `getByRole("link",{name:"Ir para o login"})).toHaveAttribute("href","/login")`; `:141` `expect(signInMock).not.toHaveBeenCalled()`. Component path `page.tsx:97` `setBlockingError(getErrorMessage(err))` (same as 409) | PASS (see R1) | verified at b50ff9a |
+| C31 | list `message` joined by `"; "` on confirm page | frontend jest: `joins a list of validation messages into one readable line` (confirm file) ran+passed | `page.test.tsx:144-166`: mock `message:["password must be longer than or equal to 6 characters","token must be a string"]`; `:161-163` `findByText("password must be longer than or equal to 6 characters; token must be a string")`. Code `page.tsx:28-29` `Array.isArray(message) && message.length > 0 -> message.join("; ")` | PASS | verified at b50ff9a |
+| C32 | same on request page | frontend jest (request file) | `request/page.test.tsx:102-118`: mock `["email must be an email","domain must be a string"]`; `:115-117` `findByText("email must be an email; domain must be a string")`. Code `request/page.tsx:26-27` | PASS | verified at b50ff9a |
+| C33 | both locales use exactly the placeholders the share menu passes | frontend jest: `en placeholders` / `pt-BR placeholders` blocks, 14 cases ran+passed | `activation-keys.test.ts:25-29` `EXPECTED_PLACEHOLDERS = {activationWhatsappMessage:["url"],activationEmailSubject:["company"],activationEmailBody:["url"]}` (values readable at the assertion); `:47-55` `expect(placeholdersOf(value)).toEqual(expected)` per locale; `:57-63` the 4 other new `clients` keys `expect(placeholdersOf(value)).toEqual([])`. Matches share menu call args `company-share-menu.tsx:118` `{url}`, `:128` `{company}`, `:129` `{url}`; templates `en.json:324-326`, `pt-BR.json:324-326` | PASS (see R3) | verified at b50ff9a |
 
-Named-test existence: every `-t` name in the checklist appears verbatim in the verbose output above and at the cited `it(` lines (page.test.tsx:42,63,75,83,107; request/page.test.tsx:31,51,69,81; company-share-menu.test.tsx:70,81,94,107,122,136; activate-company-banner.test.tsx:35,47,55; companies.service.spec.ts:89,103,113; company-activation.e2e-spec.ts:209,219,242). No filter matched nothing.
+Named-test existence: every `-t` name for C1-C33 appears verbatim in the `--verbose` output above (frontend run: `page.test.tsx` 7 tests, `request/page.test.tsx` 5, `company-share-menu.test.tsx` 6, `activate-company-banner.test.tsx` 3, `activation-keys.test.ts` all; backend: 7 + 6 tests; e2e 3/3 + 11/11). No filter matched nothing.
 
-## Judgements requested
+## Round 1 findings
 
-**(a) `Swept` rows resolving to "existing"**
-- validation: holds. DTOs untouched (no dto file in the diff); `ConfirmCompanyActivationDto.password` is `@MinLength(6)` (`dto/company-admin-auth.dto.ts:70-72`), matching `minLength={6}` in the page (`activate/page.tsx:127,139`).
-- authorization: holds. `public-companies.controller.ts:5` `@Controller('public/company/:companyId')`, no `@UseGuards` in the file (`rg UseGuards` on it: none); sibling `public-invoices.controller.ts:4` is also unguarded; C21 calls with no header. Omission: the global `APP_GUARD ThrottlerGuard` (`app.module.ts:73`, default 60/min/IP, `:43-49`) applies to the new route and the row does not mention it. Not a defect, a precision gap (F8).
-- data lifecycle: holds. `company-admin-auth.service.ts:198` `{ expiresIn: '1h' }`, unchanged.
-- concurrency: does NOT hold as written. See F2.
+| # | Round 1 finding | Verdict | Evidence (fix diff, b50ff9a) |
+|---|---|---|---|
+| F1 | e2e file sends real Resend emails (flake lead) | FIXED (mitigation; original flake cause was never proven) | `company-activation.e2e-spec.ts:8` imports `NotificationsService`; `:15` `const sendCompanyActivationEmail = jest.fn().mockResolvedValue(true)`; `:26-27` `.overrideProvider(NotificationsService).useValue({ sendCompanyActivationEmail })`. Full-file runs x3: 11/11 each, exit 0, 0 lines matching Resend/email-sent (round 1: 9 sends). Email-path tests 214-265 ms |
+| F2 | Swept "concurrency: serialises" overstated | FIXED | Checklist Swept: "concurrency: existing, with a gap - `assertCompanyNotActivated` is a `count` then `create` with no transaction and no unique on `CompanyAdmin.companyId` ... two simultaneous confirms with different emails can both pass"; spec `.tasks/empresa-admin-ativacao-frontend.md:96-97` same content in Portuguese. Matches code: `company-admin-auth.service.ts:408-417` count-then-throw, `schema.prisma:92` email-only unique (unchanged by the diff, verified in round 1) |
+| F3 | 400 branch and list messages untested | FIXED | C30 `page.test.tsx:124-141` (400 + link + no signIn); C31 `:144-166`; C32 `request/page.test.tsx:102-118`; `getErrorMessage` handles `string \| string[]` in both pages: `activate/page.tsx:21-35`, `request/page.tsx:19-33`. Judgement below |
+| F4 | C4/C10 messages never tied to the backend text | FIXED for C4/C10; C30 partial (see R1) | Backend pins: `company-activation.e2e-spec.ts:76-78` (400 ownership message) and `:220-222` (409 message). Page-test mocks compared: `request/page.test.tsx:87` == `e2e-spec.ts:77` == `service.ts:188` (byte-equal); `activate/page.test.tsx:88` == `e2e-spec.ts:221` == `service.ts:414` (byte-equal). Wrong-type 400: `e2e-spec.ts:173-174` `typeof res.body.message === 'string'`, `length > 0` only |
+| F5 | C17 asserted only non-empty keys; placeholders untested | FIXED | `activation-keys.test.ts:38-46` (key-set equality across locales, and equal to the 3 expected), `:47-63` (placeholders per locale, C33). See R3 for the residual coupling |
+| F6 | C25 "above the overview" proven by reading only | FIXED | `email-links.spec.ts:180` `expect(bannerBox!.y).toBeLessThan(overviewBox!.y)`, preceded by `toBeVisible` on both (`:168`, `:175`) and null checks (`:178-179`); test ran and passed. Checklist C25 reworded (see R5) |
+| F7 | C27 stopped at the URL | FIXED | `email-links.spec.ts:205-207` heading `Dashboard da Empresa` visible; `:209-213` session-token cookie present. Test passed at b50ff9a |
+| F8 | Swept authorization omitted throttle; Coverage omitted `hasActiveAdmin`-from-list dependency | FIXED | Checklist Swept authorization: "Only the global 60/min/IP `ThrottlerGuard` limits the endpoint"; Coverage adds "The share menu shows activation items only when the list payload carries `hasActiveAdmin: false` (`companies.service.ts` `findAll` ...)"; `.tasks/...:96` same throttle sentence. Throttle fact verified in round 1 (`app.module.ts:43-49,73`) |
 
-**(b) Level gaps** (checks naming status code, route or response shape)
-- C21: proof at HTTP level over the real app (`supertest`, `AppModule`). Reaches the claim. No gap.
-- C20: unit proof throws the exception; the 404 status is reached by C21 at HTTP. No gap.
-- C4 (409) and C10 (400): proofs assert page behaviour on a hand-built axios error object (`{response:{status:409,data:{message}}}`). The checklist's Coverage section declares this and points to `company-activation.e2e-spec.ts` for the backend codes. That file does assert the statuses (400 at `:63,72,84,156`; 409 at `:185,199`) but never the body `message` the pages render, and no test connects the two ends. Message text is proven only by literal equality between test fixture and backend source (409: `service.ts:414`). Within the checklist's stated bar, but it is the one place a status/shape claim rests on a mock. See F4.
+8/8 fixed.
 
-**(c) Precision gaps in the checklist**: F3, F5, F6, F7, F8 below.
+## Regression review (fix diff `3caf921..HEAD`)
 
-## Findings (ranked, none flips a check)
+Every hunk maps to a finding: e2e spec (F1, F4), both pages (F3), page tests (F3), activation-keys test (F5), Playwright spec (F6, F7), `.tasks` and checklist (F2, F8, F3-F7 wording). Nothing unexplained. No backend `src` change, no frontend non-test change beyond the two `getErrorMessage` helpers.
 
-1. **F1 - Unresolved flake report (orchestrator-recorded, 1 of 11 once).** Not reproduced: filtered run passed, full file 3 of 3 passed (11/11 each, exit 0), plus the smoke. Cause not captured, so it stays open. Concrete lead found while reading, not proven as the cause: the e2e file boots the full `AppModule` with the `.env` Resend key and sends real emails (`notifications.service.ts:339-361`, `:219`); the 3 full runs logged 9 `Email enviado via Resend` lines and `Company activation email sent to ...@company-e2e.test`. `test/jest-e2e.json` sets no `testTimeout` (Jest default 5s). A slow or failed Resend round trip could trip a request-phase test; `sendCompanyActivationEmail` swallows send errors (`:230-232`) so only latency would fail a test. The new MW-28 cases send no email. Throttle ruled out as cause: `activate/:id/request` limit 20/min is hit 8 times, `activate/confirm` limit 10/min is hit 6 times per file, and the in-memory store resets per app boot. Recommendation for the orchestrator: mock `NotificationsService` (or Resend) in this e2e, or accept the residual risk knowingly.
-2. **F2 - Swept "concurrency: assertCompanyNotActivated serialises activation" is overstated.** `assertCompanyNotActivated` is `companyAdmin.count({where:{companyId}})` then throw if >0 (`company-admin-auth.service.ts:408-417`), called before `companyAdmin.create` (`:223-234`) with no transaction or lock; `CompanyAdmin` has only `email @unique` (`schema.prisma:92`), not `companyId`. Two concurrent confirms with different emails can both pass. C4 only proves the sequential 409 (`e2e-spec.ts:185-199`). Existing backend behaviour, not introduced by MW-28; the row's wording should say "rejects sequentially".
-3. **F3 - C4 omits the 400 branch the spec promises.** Spec criterion 6 (`.tasks/...:50-53`) says 400 (invalid/expired token) or 409 (already activated, or email in use) shows the message and a login link. C4 and its test cover 409 only. Same code path (`setBlockingError(getErrorMessage(err))`), but no 400 assertion exists. Also `getErrorMessage` types `message` as `string`; Nest `ValidationPipe` 400s return `message` as an array, which no test exercises.
-4. **F4 - C4/C10 message text not proven across the boundary** (see (b)). Low risk: the axios shape is standard and `lib/axios.ts:10-14` does not redirect on `/auth/` URLs.
-5. **F5 - C17 says "same keys" but asserts only that 10 named keys are non-empty strings in each file**; it does not compare key sets or the `{url}`/`{company}` placeholders across locales. Separately, `company-share-menu.test.tsx:17-37` uses hand-written messages with no placeholders, so the real templates with `{url}`/`{company}` are never rendered in any test. Code passes `url` and `company` (`company-share-menu.tsx` diff), so nothing is wrong today.
-6. **F6 - C24 and C25.** C24 collapses "loading" and "error" into one mock (`data:undefined`), which is what the code does (`banner.tsx:22`), fine. C25's "above the overview" is settled by reading `page.tsx:112-116` only; no test asserts order (the smoke just clicks the banner link).
-7. **F7 - C27 stops at the URL.** `email-links.spec.ts:187` asserts the URL `/company-admin/dashboard`, not dashboard content or a session cookie. Acceptable given `router.push` only runs after `signIn` ok (`activate/page.tsx:100-107`); noted so a redirect-only regression is understood to be caught only by URL.
-8. **F8 - Checklist precision:** Swept `authorization` omits the global 60/min/IP throttle on the new unauthenticated boolean endpoint; Coverage does not list the `hasActiveAdmin`-from-list-payload dependency of the menu (`companies.service.ts` `findAll`, existing, proven by `companies.service.spec.ts` earlier tests).
+`getErrorMessage` (both pages, identical logic; `activate/page.tsx:21-35`, `request/page.tsx:19-33`):
 
-Plan conformance: I extracted every non-trivial line of every code block in `docs/superpowers/plans/2026-09-19-mw-28-company-activation-frontend.md` and searched it in the changed files. All matched except four lines: the WhatsApp/email test split (declared, C14/C15), the client-dashboard return (plan expresses it as the fragment now in the code), and two Playwright `expect` calls that now carry `{ timeout: NEXT_DEV_COMPILE_MS }`. The timeouts are not listed under "Deviations"; they change no behaviour, only wait time. `playwright.config.ts` `locale: "pt-BR"` is in the plan (`:44`).
+| Input `response.data.message` | Before | After |
+|---|---|---|
+| non-empty string | the string | the string (unchanged) |
+| non-empty array | raw array returned as `string` (type lie; React would concatenate items with no separator) | `join("; ")` (C31/C32 prove it) |
+| empty array | truthy `[]` returned, blank message | falls through to the default text (correct; not tested) |
+| empty string or missing | default text | default text (unchanged; not tested) |
+| non-string, non-array (object) | object returned, React render error | default text (improvement; not tested) |
 
-Entry-point reachability: menu is rendered by `company-card.tsx:228`; banner by the public portal; emailed link by C26/C27. No page missing. Still out of scope and named: `/company-admin/invite` (MW-29).
+Verdict: correct and strictly safer; string path behaviour unchanged. Residual: array elements are not stringified (`[{...}]` would render `[object Object]`), which Nest's `ValidationPipe` never produces (strings only). The fallback branches have no test in either page (`rg "Não foi possível (ativar a conta|pedir a ativação)"` over `*.test.*`: no hits) and the helper is duplicated in two files (R2).
+
+E2E override: `useValue({ sendCompanyActivationEmail })` provides one method. It boots and 11/11 pass, so no route under test, and no other `AppModule` provider at boot, calls another `NotificationsService` method. A future route that does would throw `is not a function` (loud, not silent). The mock is never asserted, see R4.
+
+Playwright additions: the added `{ timeout: NEXT_DEV_COMPILE_MS }` are wiring, no assertion weakened. `NEXT_DEV_COMPILE_MS` (30 s) is used at `email-links.spec.ts:168,175,184,191,202,207`.
+
+## Residual gaps (ranked, low, none flips a check)
+
+1. **R1 - C30 mock text is invented, not pinned.** `page.test.tsx:128` mocks `"Invalid or expired activation token"`. Backend `verifyToken` throws `'Invalid token'` / `'Token has expired'` (`company-admin-auth.service.ts:394,399,402`); the e2e wrong-type test asserts only a non-empty string (`e2e-spec.ts:173-174`). The Coverage line "The exact messages they mock are pinned against the real backend" is true for C4/C10 and false for C30, though its parenthetical discloses the non-empty-only case. The check's claim (page shows whatever the backend sends) holds; the pin claim is overstated.
+2. **R2 - `getErrorMessage` fallback branches untested and duplicated.** Empty array, missing/empty message, and non-string message reach the default text with no test in either page. The helper exists twice with identical logic.
+3. **R3 - C33 compares templates to a test-local constant, not to the share menu's call.** `EXPECTED_PLACEHOLDERS` (`activation-keys.test.ts:25-29`) mirrors `company-share-menu.tsx:118,128,129`, but renaming an argument in the component (e.g. `{ link: ... }`) fails no test, since `company-share-menu.test.tsx` uses hand-written messages with no placeholders.
+4. **R4 - e2e email mock never asserted; F1 root cause unproven.** `sendCompanyActivationEmail` (`e2e-spec.ts:15`) is not asserted, so no e2e proves an accepted request triggers the send (also not proven before the fix). The original 1-in-11 flake was never reproduced or captured, so F1 is a plausible mitigation, backed by 3 clean full runs plus 1 filtered run.
+5. **R5 - checklist wording drift.** C25 says "banner link visible with `companyId` in its `href`"; the test asserts the URL after click (`email-links.spec.ts:182-186`), equivalent in effect but not the `href` attribute. The overview heading `"Company Dashboard"` depends on the no-invoice fallback name `|| "Company"`. The Deviations line "The two `{ timeout: ... }`" now understates the count (6 uses, `:168,175,184,191,202,207`; 3 uses at 3caf921).
 
 ## Test policy rows
 
-No `Test policy` section in the checklist and profile is `light`. Not run.
+No `Test policy` section; profile `light`. Not run.
 
 ## Faults injected
 
-Skipped (`light`).
+Skipped (`light`). Note: the fix added assertion surfaces (C30-C33, C25 order, C27 content and cookie) that were never made to fail once.
 
 ## Gate
 
-- `pnpm --filter backend exec tsc --noEmit -p tsconfig.json` - exit 0
-- `pnpm --filter frontend exec tsc --noEmit` - exit 0
-- Proofs: frontend 38 passed, backend unit 13 passed, backend e2e 11/11 x3 (+3/3 filtered), Playwright 6 passed; 0 failed.
+- `pnpm --filter backend exec tsc --noEmit -p tsconfig.json` - exit 0 (verified at b50ff9a)
+- `pnpm --filter frontend exec tsc --noEmit` - exit 0 (verified at b50ff9a)
+- `pnpm --filter frontend exec jest --ci` - 66 suites, 559 passed, 0 failed
+- `pnpm --filter backend exec jest --ci --silent` - 27 suites, 170 passed, 0 failed
+- Backend e2e `company-activation.e2e-spec.ts` full x3 - 11/11 each; filtered `activation-status` 3/3
+- `pnpm e2e:email-links` - 6 passed (invite = expected failure)
+- C28, C29 greps - exit 0
