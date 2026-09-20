@@ -37,6 +37,7 @@ export function CompanyForm({ onSuccess }: CompanyFormProps) {
     hourlyRate: "",
   });
   const [createdCompany, setCreatedCompany] = useState<Company | null>(null);
+  const [companyError, setCompanyError] = useState<string | null>(null);
   const { data: addresses } = useCompanyAddresses(createdCompany?.id || "");
   const createCompanyMutation = useCreateCompany();
   const queryClient = useQueryClient();
@@ -47,7 +48,7 @@ export function CompanyForm({ onSuccess }: CompanyFormProps) {
 
     // Basic validation
     if (!formData.company.trim()) {
-      console.error("Company is required");
+      setCompanyError(t("validationCompanyRequired"));
 
       return;
     }
@@ -100,6 +101,9 @@ export function CompanyForm({ onSuccess }: CompanyFormProps) {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.name === "company") {
+      setCompanyError(null);
+    }
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -193,8 +197,15 @@ export function CompanyForm({ onSuccess }: CompanyFormProps) {
           value={formData.company}
           onChange={handleChange}
           required
+          aria-invalid={companyError ? true : undefined}
+          aria-describedby={companyError ? "company-error" : undefined}
           placeholder={t("enterCompany")}
         />
+        {companyError && (
+          <p id="company-error" role="alert" className="text-sm text-destructive">
+            {companyError}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
