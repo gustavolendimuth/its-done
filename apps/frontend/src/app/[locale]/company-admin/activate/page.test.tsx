@@ -120,4 +120,47 @@ describe("CompanyAdminActivatePage", () => {
     ).toBeInTheDocument();
     expect(pushMock).not.toHaveBeenCalled();
   });
+
+  it("shows the backend message and a login link when the token is invalid or expired", async () => {
+    mutateAsyncMock.mockRejectedValueOnce({
+      response: {
+        status: 400,
+        data: { message: "Invalid or expired activation token" },
+      },
+    });
+
+    render(<CompanyAdminActivatePage />);
+    await fillAndSubmit("supersecret");
+
+    expect(
+      await screen.findByText("Invalid or expired activation token")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Ir para o login" })
+    ).toHaveAttribute("href", "/login");
+    expect(signInMock).not.toHaveBeenCalled();
+  });
+
+  it("joins a list of validation messages into one readable line", async () => {
+    mutateAsyncMock.mockRejectedValueOnce({
+      response: {
+        status: 400,
+        data: {
+          message: [
+            "password must be longer than or equal to 6 characters",
+            "token must be a string",
+          ],
+        },
+      },
+    });
+
+    render(<CompanyAdminActivatePage />);
+    await fillAndSubmit("supersecret");
+
+    expect(
+      await screen.findByText(
+        "password must be longer than or equal to 6 characters; token must be a string"
+      )
+    ).toBeInTheDocument();
+  });
 });

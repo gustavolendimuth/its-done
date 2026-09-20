@@ -20,10 +20,16 @@ import { useConfirmCompanyActivation } from "@/features/company-admin";
 
 function getErrorMessage(error: unknown): string {
   if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { message?: string } } })
-      .response;
-    if (response?.data?.message) {
-      return response.data.message;
+    const response = (
+      error as { response?: { data?: { message?: string | string[] } } }
+    ).response;
+    // Nest's ValidationPipe answers 400 with a list of messages.
+    const message = response?.data?.message;
+    if (Array.isArray(message) && message.length > 0) {
+      return message.join("; ");
+    }
+    if (typeof message === "string" && message) {
+      return message;
     }
   }
   return "Não foi possível ativar a conta. Tente novamente.";

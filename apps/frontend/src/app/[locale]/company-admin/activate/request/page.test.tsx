@@ -98,4 +98,23 @@ describe("CompanyAdminActivationRequestPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toHaveValue("outro@acme.com");
   });
+
+  it("joins a list of validation messages into one readable line", async () => {
+    mutateAsyncMock.mockRejectedValueOnce({
+      response: {
+        status: 400,
+        data: { message: ["email must be an email", "domain must be a string"] },
+      },
+    });
+
+    render(<CompanyAdminActivationRequestPage />);
+    await userEvent.type(screen.getByLabelText("Email"), "ana@acme.com");
+    await userEvent.click(screen.getByRole("button", { name: SUBMIT }));
+
+    expect(
+      await screen.findByText(
+        "email must be an email; domain must be a string"
+      )
+    ).toBeInTheDocument();
+  });
 });
