@@ -1,8 +1,10 @@
 export interface Company {
   id: string;
-  name?: string;
+  /** Nullable column: the API sends `null`, not an omitted key, when unset. */
+  name?: string | null;
   email: string;
-  phone?: string;
+  /** Nullable column: the API sends `null`, not an omitted key, when unset. */
+  phone?: string | null;
   company: string;
   /** Fallback hourly rate used to bill WorkHours that have no Project. */
   hourlyRate?: number | null;

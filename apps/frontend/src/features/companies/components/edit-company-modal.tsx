@@ -22,6 +22,10 @@ import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useUpdateCompany } from "@/features/companies/companies";
+import {
+  createCompanyEditSchema,
+  toCompanyEditFormValues,
+} from "@/features/companies/company-edit-form";
 import { Company, UpdateCompanyDto } from "@/features/companies/types";
 
 interface EditCompanyModalProps {
@@ -34,11 +38,7 @@ export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
   const updateCompany = useUpdateCompany();
   const t = useTranslations("clients");
 
-  const companyFormSchema = z.object({
-    name: z.string().min(1, t("validationNameRequired")),
-    email: z.string().email(t("validationInvalidEmail")),
-    phone: z.string().min(1, t("validationPhoneRequired")),
-    company: z.string().min(1, t("validationCompanyRequired")),
+  const companyFormSchema = createCompanyEditSchema(t).extend({
     hourlyRate: z
       .number()
       .min(0, { message: "Hourly rate must be 0 or greater" })
@@ -58,10 +58,7 @@ export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
   const form = useForm<CompanyFormData>({
     resolver: zodResolver(companyFormSchema),
     defaultValues: {
-      name: company.name,
-      email: company.email,
-      phone: company.phone,
-      company: company.company,
+      ...toCompanyEditFormValues(company),
       hourlyRate: company.hourlyRate ?? null,
     },
   });

@@ -82,6 +82,31 @@ describe("EditCompanyModal", () => {
     expect(screen.getByText("Edit Company")).toBeInTheDocument();
   });
 
+  it("opens with empty fields and no React warning when name and phone are null", () => {
+    // Company.name and Company.phone are nullable columns: the API sends null.
+    const apiCompany = {
+      ...mockCompany,
+      name: null,
+      phone: null,
+    } as unknown as Company;
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    render(
+      <TestWrapper>
+        <EditCompanyModal company={apiCompany} />
+      </TestWrapper>
+    );
+    fireEvent.click(screen.getByText("Edit Company"));
+
+    expect(screen.getByLabelText("Name")).toHaveValue("");
+    expect(screen.getByLabelText("Phone")).toHaveValue("");
+    expect(consoleError).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
+  });
+
   it("pre-fills the hourlyRate field from the client and submits a decimal value", async () => {
     mockUpdateMutateAsync.mockResolvedValueOnce({});
 

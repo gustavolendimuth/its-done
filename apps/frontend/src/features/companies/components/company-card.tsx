@@ -19,7 +19,6 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import { CompanyAddresses } from "./company-addresses";
 import { CompanyShareMenu } from "./company-share-menu";
@@ -43,6 +42,11 @@ import {
   useUpdateCompany,
   UpdateCompanyDto,
 } from "@/features/companies/companies";
+import {
+  CompanyEditFormValues,
+  createCompanyEditSchema,
+  toCompanyEditFormValues,
+} from "@/features/companies/company-edit-form";
 import { useCompanySpecificStats } from "@/features/companies/company-stats";
 import { Company } from "@/features/companies/types";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
@@ -58,24 +62,9 @@ export function CompanyCard({ company }: CompanyCardProps) {
   const router = useRouter();
   const updateCompany = useUpdateCompany();
 
-  const companyFormSchema = z.object({
-    name: z.string().min(1, t("validationNameRequired")),
-    email: z.string().email(t("validationInvalidEmail")),
-    phone: z.string().min(1, t("validationPhoneRequired")),
-    company: z.string().min(1, t("validationCompanyRequired")),
-  });
-
-  type CompanyFormData = z.infer<typeof companyFormSchema>;
-
-  const form = useForm<CompanyFormData>({
-    resolver: zodResolver(companyFormSchema),
-    defaultValues: {
-      // Nullable columns: the API sends null, which a controlled <Input> rejects.
-      name: company.name ?? "",
-      email: company.email,
-      phone: company.phone ?? "",
-      company: company.company,
-    },
+  const form = useForm<CompanyEditFormValues>({
+    resolver: zodResolver(createCompanyEditSchema(t)),
+    defaultValues: toCompanyEditFormValues(company),
   });
 
   const handleViewClick = (e: React.MouseEvent) => {
@@ -89,7 +78,7 @@ export function CompanyCard({ company }: CompanyCardProps) {
     setIsEditModalOpen(true);
   };
 
-  const onSubmit = async (data: CompanyFormData) => {
+  const onSubmit = async (data: CompanyEditFormValues) => {
     try {
       await updateCompany.mutateAsync({
         id: company.id,
