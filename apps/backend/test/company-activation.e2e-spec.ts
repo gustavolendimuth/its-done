@@ -5,17 +5,27 @@ import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
 import { AppModule } from './../src/app.module';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { NotificationsService } from './../src/notifications/notifications.service';
 
 describe('Company activation (e2e) — MW-19', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let jwtService: JwtService;
   const companyIdsToCleanup: string[] = [];
+  const sendCompanyActivationEmail = jest.fn().mockResolvedValue(true);
 
   beforeAll(async () => {
+    // NotificationsService is overridden so this spec never calls Resend. With
+    // the real provider and the RESEND_API_KEY from .env, every accepted
+    // activation request sent a real email over the network, which made the
+    // file network-dependent and time-sensitive (Jest's default 5s timeout).
+    // Only sendCompanyActivationEmail is reachable from the routes under test.
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(NotificationsService)
+      .useValue({ sendCompanyActivationEmail })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(
@@ -57,10 +67,15 @@ describe('Company activation (e2e) — MW-19', () => {
   it('rejects a request whose email does not match the contact email and has no domain', async () => {
     const company = await createCompany();
 
-    await request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .post(`/company-admin/auth/activate/${company.id}/request`)
       .send({ email: `random-${uuidv4()}@nowhere.test` })
       .expect(400);
+
+    // The frontend request page test mocks this exact backend message.
+    expect(res.body.message).toBe(
+      "The email must match the Company's registered contact email, or a domain must be declared",
+    );
   });
 
   it('rejects activating with a public email provider domain', async () => {
@@ -150,10 +165,13 @@ describe('Company activation (e2e) — MW-19', () => {
       { expiresIn: '1h' },
     );
 
-    await request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .post('/company-admin/auth/activate/confirm')
       .send({ token: wrongTypeToken, password: 'super-secret-1' })
       .expect(400);
+
+    expect(typeof res.body.message).toBe('string');
+    expect(res.body.message.length).toBeGreaterThan(0);
   });
 
   it('rejects activating an Company that already has a non-revoked CompanyAdmin', async () => {
@@ -193,10 +211,15 @@ describe('Company activation (e2e) — MW-19', () => {
       },
       { expiresIn: '1h' },
     );
-    await request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .post('/company-admin/auth/activate/confirm')
       .send({ token: secondToken, password: 'super-secret-1' })
       .expect(409);
+
+    // The frontend activation page test mocks this exact backend message.
+    expect(res.body.message).toBe(
+      'Company is already activated; use the Admin invite flow instead',
+    );
   });
 
   it('returns 404 for a non-existent Company', async () => {
