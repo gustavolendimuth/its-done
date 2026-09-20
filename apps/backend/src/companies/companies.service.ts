@@ -63,6 +63,21 @@ export class CompaniesService {
     return this.mapWithHasActiveAdmin(company);
   }
 
+  // Public (no user scope): the portal uses it to decide whether to offer
+  // "activate this company". Exposes only a boolean.
+  async getActivationStatus(companyId: string) {
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      select: { _count: { select: { companyAdmins: true } } },
+    });
+
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
+
+    return { hasActiveAdmin: company._count.companyAdmins > 0 };
+  }
+
   private mapWithHasActiveAdmin<
     T extends { _count: { companyAdmins: number } },
   >(company: T) {

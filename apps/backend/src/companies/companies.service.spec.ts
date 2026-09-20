@@ -1,9 +1,11 @@
+import { NotFoundException } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 
 const prismaMock = {
   company: {
     findMany: jest.fn(),
     findFirst: jest.fn(),
+    findUnique: jest.fn(),
   },
   collaborator: {
     findUnique: jest.fn(),
@@ -80,6 +82,40 @@ describe('CompaniesService', () => {
 
       expect(result.hasActiveAdmin).toBe(true);
       expect(result._count).toEqual({ workHours: 3, invoices: 1 });
+    });
+  });
+
+  describe('getActivationStatus()', () => {
+    it('returns hasActiveAdmin: true when the company has an admin', async () => {
+      prismaMock.company.findUnique.mockResolvedValueOnce({
+        _count: { companyAdmins: 1 },
+      });
+
+      await expect(service.getActivationStatus('company-1')).resolves.toEqual({
+        hasActiveAdmin: true,
+      });
+      expect(prismaMock.company.findUnique).toHaveBeenCalledWith({
+        where: { id: 'company-1' },
+        select: { _count: { select: { companyAdmins: true } } },
+      });
+    });
+
+    it('returns hasActiveAdmin: false when the company has no admin', async () => {
+      prismaMock.company.findUnique.mockResolvedValueOnce({
+        _count: { companyAdmins: 0 },
+      });
+
+      await expect(service.getActivationStatus('company-2')).resolves.toEqual({
+        hasActiveAdmin: false,
+      });
+    });
+
+    it('throws NotFoundException for an unknown company', async () => {
+      prismaMock.company.findUnique.mockResolvedValueOnce(null);
+
+      await expect(service.getActivationStatus('missing')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

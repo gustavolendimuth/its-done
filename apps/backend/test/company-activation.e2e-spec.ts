@@ -205,4 +205,46 @@ describe('Company activation (e2e) — MW-19', () => {
       .send({ email: `x-${uuidv4()}@nowhere.test` })
       .expect(404);
   });
+
+  it('activation-status is public and reports hasActiveAdmin: false for a company with no admin', async () => {
+    const company = await createCompany();
+
+    const res = await request(app.getHttpServer())
+      .get(`/public/company/${company.id}/activation-status`)
+      .expect(200);
+
+    expect(res.body).toEqual({ hasActiveAdmin: false });
+  });
+
+  it('activation-status reports hasActiveAdmin: true once the company has an admin', async () => {
+    const company = await createCompany();
+
+    const activationToken = jwtService.sign(
+      {
+        companyId: company.id,
+        email: company.email,
+        type: 'company-activation',
+      },
+      { expiresIn: '1h' },
+    );
+    await request(app.getHttpServer())
+      .post('/company-admin/auth/activate/confirm')
+      .send({ token: activationToken, password: 'super-secret-1' })
+      .expect(201);
+
+    const res = await request(app.getHttpServer())
+      .get(`/public/company/${company.id}/activation-status`)
+      .expect(200);
+
+    expect(res.body).toEqual({ hasActiveAdmin: true });
+  });
+
+  it('activation-status returns 404 for an unknown company', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/public/company/${uuidv4()}/activation-status`)
+      .expect(404);
+
+    // Distinguishes an unknown company from a route that does not exist.
+    expect(res.body.message).toBe('Company not found');
+  });
 });
