@@ -107,7 +107,7 @@ Proof: same file, `-t "returns hasActiveAdmin: false when the company has no adm
 Proof: same file, `-t "throws NotFoundException for an unknown company"`
 
 **C21** - `GET /public/company/:companyId/activation-status` with no `Authorization` header answers `200 { hasActiveAdmin: false }` for a company with no admin, `200 { hasActiveAdmin: true }` once it has one, and `404` for an unknown id
-Proof: `pnpm --filter backend run test:e2e -- company-activation.e2e-spec.ts -t "activation-status"` (new cases in `apps/backend/test/company-activation.e2e-spec.ts`, real app over HTTP, needs postgres)
+Proof: `pnpm --filter backend run test:e2e company-activation.e2e-spec.ts -t "activation-status"` (new cases in `apps/backend/test/company-activation.e2e-spec.ts`, real app over HTTP, needs postgres)
 
 ### S5 - Portal banner entry point · 5 files · ~1k
 
