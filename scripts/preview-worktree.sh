@@ -12,6 +12,23 @@ NC='\033[0m'
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# .env é gitignorado, então worktrees novas não o herdam do checkout principal.
+# Se não tiver um aqui, busca no worktree original do projeto (o primeiro da lista).
+if [ ! -f "$ROOT_DIR/.env" ]; then
+    MAIN_WORKTREE=$(git worktree list --porcelain | awk '/^worktree /{print $2; exit}')
+    if [ -n "$MAIN_WORKTREE" ] && [ "$MAIN_WORKTREE" != "$ROOT_DIR" ] && [ -f "$MAIN_WORKTREE/.env" ]; then
+        echo -e "${YELLOW}.env não existe nesta worktree, copiando de $MAIN_WORKTREE${NC}"
+        cp "$MAIN_WORKTREE/.env" "$ROOT_DIR/.env"
+    fi
+fi
+
+if [ -f "$ROOT_DIR/.env" ]; then
+    set -a
+    # shellcheck disable=SC1091
+    source "$ROOT_DIR/.env"
+    set +a
+fi
+
 STATE_FILE="$ROOT_DIR/.preview-worktree.state"
 LOG_DIR="$ROOT_DIR/logs"
 BACKEND_LOG="$LOG_DIR/preview-backend.log"
@@ -22,8 +39,26 @@ BACKEND_BASE_PORT=3102
 DB_PORT=5432
 REDIS_PORT=6379
 
+# Banco isolado por worktree: essa branch pode ter migrations incompatíveis
+# com o schema que o docker principal usa (ex: rename de tabela), então o
+# preview nunca roda migration contra o banco "its_done" compartilhado.
+PREVIEW_DB_NAME="its_done_$(echo -n "$(basename "$ROOT_DIR")" | tr 'A-Z' 'a-z' | tr -c 'a-z0-9' '_')"
+
 port_in_use() {
     ss -Htn state listening "( sport = :$1 )" 2>/dev/null | grep -q .
+}
+
+ensure_preview_db() {
+    local exists
+    exists=$(PGPASSWORD=postgres psql -h localhost -p "$DB_PORT" -U postgres -tAc \
+        "SELECT 1 FROM pg_database WHERE datname='$PREVIEW_DB_NAME'" 2>/dev/null)
+    if [ "$exists" != "1" ]; then
+        echo -e "${YELLOW}Criando banco de preview $PREVIEW_DB_NAME...${NC}"
+        PGPASSWORD=postgres createdb -h localhost -p "$DB_PORT" -U postgres "$PREVIEW_DB_NAME"
+    fi
+    echo -e "${BLUE}Aplicando migrations no banco de preview...${NC}"
+    DATABASE_URL="postgresql://postgres:postgres@localhost:${DB_PORT}/${PREVIEW_DB_NAME}" \
+        pnpm --filter backend exec prisma migrate deploy
 }
 
 find_free_port() {
@@ -48,6 +83,12 @@ cmd_start() {
         rm -f "$STATE_FILE"
     fi
 
+    if ! command -v psql >/dev/null || ! command -v createdb >/dev/null; then
+        echo -e "${RED}psql/createdb não encontrados no PATH.${NC}"
+        echo "Instale o cliente do postgres (ex: pacote postgresql-client) e tente de novo."
+        exit 1
+    fi
+
     if ! port_in_use "$DB_PORT"; then
         echo -e "${RED}Postgres não está respondendo na porta $DB_PORT.${NC}"
         echo "Suba o docker principal antes: docker compose -f docker-compose.dev.yml up -d postgres redis"
@@ -65,6 +106,8 @@ cmd_start() {
         pnpm install
     fi
 
+    ensure_preview_db
+
     mkdir -p "$LOG_DIR"
     : > "$BACKEND_LOG"
     : > "$FRONTEND_LOG"
@@ -77,7 +120,7 @@ cmd_start() {
     setsid env \
         PORT="$BACKEND_PORT" \
         NODE_ENV=development \
-        DATABASE_URL="postgresql://postgres:postgres@localhost:${DB_PORT}/its_done" \
+        DATABASE_URL="postgresql://postgres:postgres@localhost:${DB_PORT}/${PREVIEW_DB_NAME}" \
         JWT_SECRET="preview-jwt-secret" \
         FRONTEND_URL="http://localhost:${FRONTEND_PORT}" \
         pnpm --filter backend start:dev > "$BACKEND_LOG" 2>&1 < /dev/null &
@@ -101,6 +144,7 @@ EOF
     echo -e "${GREEN}Preview no ar.${NC}"
     echo -e "  Frontend: ${BLUE}http://localhost:${FRONTEND_PORT}${NC} (log: $FRONTEND_LOG)"
     echo -e "  Backend:  ${BLUE}http://localhost:${BACKEND_PORT}${NC} (log: $BACKEND_LOG)"
+    echo -e "  Banco:    ${BLUE}${PREVIEW_DB_NAME}${NC} (isolado do docker principal)"
     echo "Rode 'pnpm preview:stop' quando terminar de validar."
 }
 

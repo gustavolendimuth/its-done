@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
-import { normalizeUrl } from '../utils/url';
+import { buildFrontendUrl } from './frontend-routes';
 
 @Injectable()
 export class NotificationsService {
@@ -104,10 +104,11 @@ export class NotificationsService {
         `📧 Iniciando envio de email de reset de senha para: ${userEmail}`,
       );
 
-      const frontendUrl = normalizeUrl(
-        this.configService.get('FRONTEND_URL') || 'localhost:3000',
+      const resetUrl = buildFrontendUrl(
+        this.configService.get('FRONTEND_URL'),
+        'resetPassword',
+        { token: resetToken },
       );
-      const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
       const isDevelopment =
         this.configService.get('NODE_ENV') === 'development';
 
@@ -177,10 +178,11 @@ export class NotificationsService {
     resetToken: string,
   ) {
     try {
-      const frontendUrl = normalizeUrl(
-        this.configService.get('FRONTEND_URL') || 'localhost:3000',
+      const resetUrl = buildFrontendUrl(
+        this.configService.get('FRONTEND_URL'),
+        'companyAdminResetPassword',
+        { token: resetToken },
       );
-      const resetUrl = `${frontendUrl}/company-admin/reset-password?token=${resetToken}`;
 
       await this.sendEmail({
         to: toEmail,
@@ -208,10 +210,11 @@ export class NotificationsService {
     activationToken: string,
   ) {
     try {
-      const frontendUrl = normalizeUrl(
-        this.configService.get('FRONTEND_URL') || 'localhost:3000',
+      const activationUrl = buildFrontendUrl(
+        this.configService.get('FRONTEND_URL'),
+        'companyAdminActivate',
+        { token: activationToken },
       );
-      const activationUrl = `${frontendUrl}/company-admin/activate?token=${activationToken}`;
 
       await this.sendEmail({
         to: toEmail,
@@ -236,10 +239,11 @@ export class NotificationsService {
     inviteToken: string,
   ) {
     try {
-      const frontendUrl = normalizeUrl(
-        this.configService.get('FRONTEND_URL') || 'localhost:3000',
+      const inviteUrl = buildFrontendUrl(
+        this.configService.get('FRONTEND_URL'),
+        'companyAdminInvite',
+        { token: inviteToken },
       );
-      const inviteUrl = `${frontendUrl}/company-admin/invite?token=${inviteToken}`;
 
       await this.sendEmail({
         to: toEmail,

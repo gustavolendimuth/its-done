@@ -65,3 +65,7 @@ Thumbs.db
 # playwright mcp
 .playwright-mcp/
 /work-hours-*.png
+
+# Playwright (packages/e2e)
+test-results/
+playwright-report/

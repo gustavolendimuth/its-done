@@ -11,6 +11,7 @@
     "dev:backend": "pnpm --filter backend dev",
     "preview:start": "./scripts/preview-worktree.sh start",
     "preview:stop": "./scripts/preview-worktree.sh stop",
+    "e2e:email-links": "./scripts/e2e-email-links.sh",
     "lint": "turbo run lint",
     "test": "turbo run test",
   "format": "prettier --write \"**/*.{ts,tsx,md}\"",

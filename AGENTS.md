@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
 
 ## IMPORTANT: Documentation Rules
 
@@ -10,7 +10,7 @@ The project maintains a minimal set of documentation files. When updating code:
 
 - **Docker changes** → Update `DOCKER.md` (don't create DOCKER-*.md)
 - **Railway changes** → Update `RAILWAY.md` (don't create RAILWAY-*.md)
-- **Architecture changes** → Update `CLAUDE.md` (this file)
+- **Architecture changes** → Update `AGENTS.md` (this file)
 
 **Rule:** One topic = One file. Always update existing files instead of creating new ones.
 
@@ -89,12 +89,6 @@ registered — credentials login (email/password) is unaffected either way.
 - **Welcome Email**: Sent on user registration
 - **Anti-spam**: Uses NotificationLog to prevent duplicate alerts for same threshold
 
-### Client Dashboard (Public)
-
-- Public route: `/client-dashboard/[clientId]` (no auth required)
-- Clients can view their invoices, hours worked, and download files
-- Share via WhatsApp, Email, or copy link from Clients page
-
 ## Deployment
 
 ### Railway (Recommended)
@@ -115,12 +109,10 @@ registered — credentials login (email/password) is unaffected either way.
 
 ### Reachability (vertical slices)
 
-Origin: MW-28/MW-29. Activation and invite shipped as backend endpoints plus an
+Activation and invite shipped as backend endpoints plus an
 email whose link pointed to a page nobody built, so the flow was a 404 for users.
 
-- **Slice by user flow, not by layer.** A ticket for a user-facing flow is done only
-  when a user can complete it from a real entry point to the final result. Backend-only
-  is fine for internal APIs, and the ticket must say so.
+- **Slice by user flow, not by layer.** A ticket for a user-facing flow is done only when a user can complete it from a real entry point to the final result. Backend-only is fine for internal APIs, and the ticket must say so.
 - **Every URL the backend emits needs a real page.** Register the path in
   `FRONTEND_ROUTES` (`apps/backend/src/notifications/frontend-routes.ts`) and build the
   link with `buildFrontendUrl()`; never hand-build `${frontendUrl}/...`. The matching
