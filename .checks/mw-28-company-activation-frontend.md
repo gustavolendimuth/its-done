@@ -58,6 +58,12 @@ Proof: same file, `-t "explains that the account exists when the automatic sign-
 **C6** - `/company-admin/activate` is no longer in `KNOWN_MISSING_PAGES`, and the contract test finds a page serving it
 Proof: `pnpm --filter backend exec jest src/notifications/frontend-links.contract.spec.ts -t "companyAdminActivate"` and `-t "keeps KNOWN_MISSING_PAGES honest"`
 
+**C30** - A 400 on confirm (invalid or expired token) shows the backend message and the "Ir para o login" link, and never calls `signIn`
+Proof: same file, `-t "shows the backend message and a login link when the token is invalid or expired"`
+
+**C31** - A `message` that is a list (Nest `ValidationPipe` 400) is shown joined by `"; "` on the confirm page
+Proof: same file, `-t "joins a list of validation messages into one readable line"`
+
 ### S2 - Request page · 2 files · ~1k
 
 **C7** - Submitting with `companyId` from the URL and an email calls the mutation with `{ companyId, email, domain: undefined }` for a blank domain, then hides the form and shows "enviamos um link de confirmação"
@@ -71,6 +77,9 @@ Proof: same file, `-t "shows an error and no form when the companyId is missing"
 
 **C10** - A 400 keeps the form (email value preserved) and shows the backend message
 Proof: same file, `-t "keeps the form and shows the backend message on 400"`
+
+**C32** - A `message` that is a list is shown joined by `"; "` on the request page
+Proof: `pnpm --filter frontend exec jest "src/app/\[locale\]/company-admin/activate/request" --ci -t "joins a list of validation messages into one readable line"`
 
 ### S3 - Share menu entry point · 3 files · ~22k
 
@@ -93,7 +102,10 @@ Proof: same file, `-t "opens the mail client for the activation link"` (split fr
 Proof: same file, `-t "hides the activation items when hasActiveAdmin is unknown"` (added: the code comment promises it)
 
 **C17** - `en.json` and `pt-BR.json` carry the same keys under `clients` (7 new) and `companyActivation` (3 new)
-Proof: `pnpm --filter frontend exec jest src/messages --ci -t "activation message keys"` (new `src/messages/activation-keys.test.ts`, asserts the 10 key names present in both files)
+Proof: `pnpm --filter frontend exec jest src/messages --ci -t "activation message keys"` (new `src/messages/activation-keys.test.ts`, asserts the 10 key names present in both files and the same `companyActivation` key set in both)
+
+**C33** - In both locales the activation templates use exactly the placeholders the share menu passes: `activationWhatsappMessage` `{url}`, `activationEmailSubject` `{company}`, `activationEmailBody` `{url}`, and no other new `clients` key has any
+Proof: same file, `-t "activation message keys"` (`placeholders` describe blocks)
 
 ### S4 - Public activation status endpoint · 4 files · ~4k
 
@@ -121,14 +133,14 @@ Proof: same file, `-t "renders nothing when the company already has an admin"`
 Proof: same file, `-t "renders nothing while loading or when the status request fails"`
 
 **C25** - `/client-dashboard/<companyId>` renders the banner with that id, above the overview
-Proof: covered end to end by C27 (portal step); no unit test on this page today
+Proof: C27 (portal step): the flow test asserts the banner link is visible with `companyId` in its `href` and sits above the overview heading; no unit test on this page
 
 ### S6 - Whole flow in a browser · 2 files · ~1k
 
 **C26** - The emailed activation link opens a real page (`companyAdminActivate`) and only `companyAdminInvite` remains an expected failure
 Proof: `pnpm e2e:email-links` (test `companyAdminActivate: emailed link to /company-admin/activate opens a real page`)
 
-**C27** - A representative goes portal banner -> request page -> emailed link -> confirm page and lands on `/company-admin/dashboard`
+**C27** - A representative goes portal banner -> request page -> emailed link -> confirm page, lands on `/company-admin/dashboard`, sees the admin dashboard content and holds a NextAuth session cookie
 Proof: `pnpm e2e:email-links` (test `a company representative activates from the public portal and lands on the dashboard`; 6 passed)
 
 ### S7 - Spec brought up to date · 1 file · ~2k
@@ -144,8 +156,8 @@ Proof: `grep -qE "^7\. " .tasks/empresa-admin-ativacao-frontend.md && grep -qE "
 - validation: existing - backend DTOs unchanged; C3 (password match), C9 (companyId), C2 (token); `minLength={6}` on password inputs mirrors the DTO
 - failure modes: C2, C4, C5, C9, C10, C20, C21, C24
 - idempotency: n/a - request is already safe to repeat (spec Swept); the status endpoint is a read
-- authorization: C21 (no auth header, public by design, same as `PublicInvoicesController`); the boolean is exposed to any holder of the company UUID - plan Risks accepts it
-- concurrency: existing - backend `assertCompanyNotActivated` serialises activation; 409 handled by C4
+- authorization: C21 (no auth header, public by design, same as `PublicInvoicesController`); the boolean is exposed to any holder of the company UUID - plan Risks accepts it. Only the global 60/min/IP `ThrottlerGuard` limits the endpoint
+- concurrency: existing, with a gap - `assertCompanyNotActivated` is a `count` then `create` with no transaction and no unique on `CompanyAdmin.companyId` (`email` only), so it rejects sequential activations (409, C4) but two simultaneous confirms with different emails can both pass. MW-19 behaviour, not changed here (plan: backend activation endpoints stay as they are)
 - data lifecycle: existing - token expires in 1h, unchanged
 - dependency failure: C5 (`signIn` fails after account creation), C24 (status endpoint fails)
 - state transitions: C12/C13 (menu follows `hasActiveAdmin`), C22/C23 (banner follows status)
@@ -155,6 +167,8 @@ Proof: `grep -qE "^7\. " .tasks/empresa-admin-ativacao-frontend.md && grep -qE "
 
 - Claims naming a status code, route or response shape: C4 (409), C10 (400), C20 and C21 (404/200). C4 and C10 assert what the page does with a mocked error (component level; the backend returns those codes today, proven by `company-activation.e2e-spec.ts`). C21 crosses the HTTP boundary for the new endpoint.
 - Frontend `hasActiveAdmin` set: true C12, false C13-C15, undefined C16 (3 members, 3 proofs).
+- The share menu shows activation items only when the list payload carries `hasActiveAdmin: false` (`companies.service.ts` `findAll`, existing, proven by `companies.service.spec.ts`); C12/C13/C16 assert the menu side only.
+- C4/C10/C30 assert the page with a mocked axios error. The exact messages they mock are pinned against the real backend in `company-activation.e2e-spec.ts` (409 already activated, 400 request that does not prove ownership; 400 wrong token type asserts a non-empty message).
 - No other check claims more than the single case its proof exercises.
 
 ## Deviations from the plan (decided while writing this checklist)
@@ -162,3 +176,8 @@ Proof: `grep -qE "^7\. " .tasks/empresa-admin-ativacao-frontend.md && grep -qE "
 - Plan Task 1 step 7 (`pnpm e2e:email-links` after removing the allowlist entry) runs once in S6, where it covers a superset (6 tests). The unit contract test (C6) settles the allowlist claim at commit time. Reason: one preview stack at a time, and builders run in parallel.
 - Plan tests for S3 WhatsApp/email split into two tests (C14, C15) so each check has one proof; C16, C17 and C21 are additions the plan lacked (unknown-`hasActiveAdmin` claim in its own comment, message parity, boundary proof for the new route).
 - Builders never commit; the orchestrator commits per task with the plan's commit messages.
+- The two `{ timeout: NEXT_DEV_COMPILE_MS }` (30s) on post-navigation `expect`s in the flow test are wiring: `next dev` compiles each page on first visit, longer than the 5s default. No assertion changed.
+
+## Amendments after verification round 1
+
+Findings F1-F8 of `.checks/mw-28-company-activation-frontend.verified.md` were fixed in a follow-up: `company-activation.e2e-spec.ts` now overrides `NotificationsService` (no real Resend calls, F1) and pins the backend messages (F4); C30-C33 added (F3, F5); C25/C27 assertions strengthened in the flow test (F6, F7); the concurrency and authorization Swept rows and Coverage text corrected (F2, F8). Additive only: no earlier check was weakened.

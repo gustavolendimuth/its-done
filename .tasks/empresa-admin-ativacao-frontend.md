@@ -93,8 +93,8 @@ Administrador. Dois pontos de entrada levam ao pedido: o menu de compartilhar do
 - validation: existing - `class-validator` nos DTOs (`RequestCompanyActivationDto`, `ConfirmCompanyActivationDto`), inalterado
 - failure modes: 3, 5, 6, 8
 - idempotency and retry: n/a - reenviar o pedido de ativação já é seguro hoje (backend rejeita Empresa já ativada, sem efeito colateral novo); o endpoint de status é leitura
-- authorization: existing - os dois endpoints de ativação já são públicos por design (MW-19), inalterado. O endpoint de status também é público: qualquer pessoa com o UUID da Empresa descobre se ela tem Administrador. Aceito, porque o Portal Público já expõe as invoices da Empresa pra quem tem o mesmo UUID
-- concurrency and ordering: n/a - `assertCompanyNotActivated` no backend já serializa a corrida entre dois pedidos de ativação simultâneos pra mesma Empresa, sem mudança nesta task
+- authorization: existing - os dois endpoints de ativação já são públicos por design (MW-19), inalterado. O endpoint de status também é público: qualquer pessoa com o UUID da Empresa descobre se ela tem Administrador. Aceito, porque o Portal Público já expõe as invoices da Empresa pra quem tem o mesmo UUID. Além do throttle global de 60 req/min por IP, o endpoint não tem limite próprio
+- concurrency and ordering: existing, com lacuna - `assertCompanyNotActivated` é um `count` seguido de `create`, sem transação nem unique em `CompanyAdmin.companyId` (só `email` é unique). Rejeita ativações em sequência (409), mas dois confirms simultâneos com emails diferentes podem passar os dois. Comportamento do MW-19, fora do escopo desta task
 - data lifecycle: n/a - token de ativação já expira em 1h no backend, inalterado
 - external-dependency failure: existing - falha do Resend já é tratada (retorna `false`, loga erro) em `sendCompanyActivationEmail`, sem mudança de contrato. Novo: falha do `signIn` depois da conta criada (4) e falha do endpoint de status (8, banner oculto)
 - state transitions: 7 e 8 - menu e banner seguem `hasActiveAdmin`. A transição "Empresa sem Administrador → Empresa ativada" continua no backend (MW-19)
