@@ -53,4 +53,33 @@ describe("CompanyCard edit modal", () => {
       ).toBeInTheDocument();
     }
   );
+
+  it("opens with empty fields and no React warning when name and phone are null", async () => {
+    // Company.name and Company.phone are nullable columns: the API sends null
+    // even though the type says `string | undefined`.
+    const apiCompany = {
+      ...company,
+      name: null,
+      phone: null,
+    } as unknown as Company;
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    render(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <CompanyCard company={apiCompany} />
+      </NextIntlClientProvider>
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: enMessages.clients.edit })
+    );
+
+    expect(screen.getByLabelText(enMessages.clients.name)).toHaveValue("");
+    expect(screen.getByLabelText(enMessages.clients.phone)).toHaveValue("");
+    expect(consoleError).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
+  });
 });

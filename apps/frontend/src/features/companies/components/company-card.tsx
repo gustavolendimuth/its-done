@@ -39,11 +39,11 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { useCompanySpecificStats } from "@/features/companies/company-stats";
 import {
   useUpdateCompany,
   UpdateCompanyDto,
 } from "@/features/companies/companies";
+import { useCompanySpecificStats } from "@/features/companies/company-stats";
 import { Company } from "@/features/companies/types";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
 
@@ -70,9 +70,10 @@ export function CompanyCard({ company }: CompanyCardProps) {
   const form = useForm<CompanyFormData>({
     resolver: zodResolver(companyFormSchema),
     defaultValues: {
-      name: company.name,
+      // Nullable columns: the API sends null, which a controlled <Input> rejects.
+      name: company.name ?? "",
       email: company.email,
-      phone: company.phone,
+      phone: company.phone ?? "",
       company: company.company,
     },
   });
