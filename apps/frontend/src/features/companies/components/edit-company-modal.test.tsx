@@ -7,6 +7,15 @@ import { Company } from "@/features/companies/types";
 import { EditCompanyModal } from "./edit-company-modal";
 
 const mockUpdateMutateAsync = jest.fn();
+const mockToastSuccess = jest.fn();
+const mockToastError = jest.fn();
+
+jest.mock("sonner", () => ({
+  toast: {
+    success: (...args: unknown[]) => mockToastSuccess(...args),
+    error: (...args: unknown[]) => mockToastError(...args),
+  },
+}));
 
 jest.mock("@/features/companies/companies", () => ({
   useUpdateCompany: () => ({
@@ -36,6 +45,8 @@ const messages = {
     validationInvalidEmail: "Invalid email address",
     validationPhoneRequired: "Phone is required",
     validationCompanyRequired: "Company is required",
+    clientUpdatedSuccessfully: "Client updated successfully!",
+    failedToUpdateClient: "Failed to update client",
   },
 };
 
@@ -166,5 +177,105 @@ describe("EditCompanyModal", () => {
     await waitFor(() => expect(mockUpdateMutateAsync).toHaveBeenCalled());
     const payload = mockUpdateMutateAsync.mock.calls[0][0].data;
     expect(payload.hourlyRate).toBeUndefined();
+  });
+
+  it("requires a company name that is not only whitespace", async () => {
+    render(
+      <TestWrapper>
+        <EditCompanyModal company={mockCompany} />
+      </TestWrapper>
+    );
+
+    fireEvent.click(screen.getByText("Edit Company"));
+    fireEvent.change(screen.getByLabelText("Company"), {
+      target: { value: "   " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    expect(await screen.findByText("Company is required")).toBeInTheDocument();
+    expect(mockUpdateMutateAsync).not.toHaveBeenCalled();
+  });
+
+  it("sends the company name without surrounding whitespace", async () => {
+    mockUpdateMutateAsync.mockResolvedValueOnce({});
+
+    render(
+      <TestWrapper>
+        <EditCompanyModal company={mockCompany} />
+      </TestWrapper>
+    );
+
+    fireEvent.click(screen.getByText("Edit Company"));
+    fireEvent.change(screen.getByLabelText("Company"), {
+      target: { value: "  Acme Corp  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(mockUpdateMutateAsync).toHaveBeenCalled());
+    expect(mockUpdateMutateAsync.mock.calls[0][0].data.company).toBe(
+      "Acme Corp"
+    );
+  });
+
+  it("marks the fields the form requires and leaves hourly rate optional", () => {
+    render(
+      <TestWrapper>
+        <EditCompanyModal company={mockCompany} />
+      </TestWrapper>
+    );
+
+    fireEvent.click(screen.getByText("Edit Company"));
+
+    for (const label of ["Company", "Name", "Email", "Phone"]) {
+      expect(screen.getByLabelText(label)).toBeRequired();
+    }
+    expect(screen.getByLabelText("Hourly Rate")).not.toBeRequired();
+  });
+
+  it("confirms a saved change with a toast and closes the modal", async () => {
+    mockUpdateMutateAsync.mockResolvedValueOnce({});
+
+    render(
+      <TestWrapper>
+        <EditCompanyModal company={mockCompany} />
+      </TestWrapper>
+    );
+
+    fireEvent.click(screen.getByText("Edit Company"));
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() =>
+      expect(mockToastSuccess).toHaveBeenCalledWith(
+        "Client updated successfully!"
+      )
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(mockToastError).not.toHaveBeenCalled();
+  });
+
+  it("reports a failed save with a toast and keeps the modal open", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    mockUpdateMutateAsync.mockRejectedValueOnce(new Error("boom"));
+
+    render(
+      <TestWrapper>
+        <EditCompanyModal company={mockCompany} />
+      </TestWrapper>
+    );
+
+    fireEvent.click(screen.getByText("Edit Company"));
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith("Failed to update client")
+    );
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(mockToastSuccess).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
   });
 });

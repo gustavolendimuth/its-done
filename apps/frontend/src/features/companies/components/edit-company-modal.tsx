@@ -5,6 +5,7 @@ import { Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { CompanyAddresses } from "./company-addresses";
@@ -28,6 +29,9 @@ import {
 } from "@/features/companies/company-edit-form";
 import { Company, UpdateCompanyDto } from "@/features/companies/types";
 
+// Visual "required" marker, drawn by CSS so it stays out of the label text.
+const REQUIRED_LABEL = "after:ml-0.5 after:text-destructive after:content-['*']";
+
 interface EditCompanyModalProps {
   company: Company;
   trigger?: React.ReactNode;
@@ -48,13 +52,6 @@ export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
 
   type CompanyFormData = z.infer<typeof companyFormSchema>;
 
-  console.log(
-    "EditCompanyModal rendered for company:",
-    company.company,
-    "open:",
-    open,
-  );
-
   const form = useForm<CompanyFormData>({
     resolver: zodResolver(companyFormSchema),
     defaultValues: {
@@ -74,15 +71,14 @@ export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
         data: formattedData as UpdateCompanyDto,
       });
       setOpen(false);
+      toast.success(t("clientUpdatedSuccessfully"));
     } catch (error) {
       console.error("Failed to update company:", error);
+      toast.error(t("failedToUpdateClient"));
     }
   };
 
-  const handleTriggerClick = () => {
-    console.log("Edit trigger clicked for company:", company.company);
-    setOpen(true);
-  };
+  const handleTriggerClick = () => setOpen(true);
 
   return (
     <>
@@ -98,10 +94,7 @@ export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
 
       <FormModal
         open={open}
-        onOpenChange={(newOpen) => {
-          console.log("FormModal onOpenChange:", newOpen);
-          setOpen(newOpen);
-        }}
+        onOpenChange={setOpen}
         title={t("editClient")}
         description={t("editClientFormSubtitle")}
         icon={Users}
@@ -118,9 +111,9 @@ export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
               name="company"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("company")}</FormLabel>
+                  <FormLabel className={REQUIRED_LABEL}>{t("company")}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} aria-required="true" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -131,9 +124,9 @@ export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("name")}</FormLabel>
+                  <FormLabel className={REQUIRED_LABEL}>{t("name")}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} aria-required="true" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -144,9 +137,9 @@ export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("email")}</FormLabel>
+                  <FormLabel className={REQUIRED_LABEL}>{t("email")}</FormLabel>
                   <FormControl>
-                    <Input {...field} type="email" />
+                    <Input {...field} type="email" aria-required="true" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -157,9 +150,13 @@ export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("phone")}</FormLabel>
+                  <FormLabel className={REQUIRED_LABEL}>{t("phone")}</FormLabel>
                   <FormControl>
-                    <PhoneInput {...field} placeholder="(11) 99999-9999" />
+                    <PhoneInput
+                      {...field}
+                      placeholder="(11) 99999-9999"
+                      aria-required="true"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

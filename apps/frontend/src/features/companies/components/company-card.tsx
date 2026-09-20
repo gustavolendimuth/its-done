@@ -1,6 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Building2,
   Mail,
@@ -11,42 +10,18 @@ import {
   Eye,
   CheckCircle,
   Timer,
-  Users,
   Link2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
-import { CompanyAddresses } from "./company-addresses";
 import { CompanyShareMenu } from "./company-share-menu";
+import { EditCompanyModal } from "./edit-company-modal";
 
 import { Badge } from "@/components/ui/badge";
 import { BigCardStat, BigCardContactInfo } from "@/components/ui/big-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { FormModal } from "@/components/ui/form-modal";
-import { Input } from "@/components/ui/input";
-import { PhoneInput } from "@/components/ui/phone-input";
-import {
-  useUpdateCompany,
-  UpdateCompanyDto,
-} from "@/features/companies/companies";
-import {
-  CompanyEditFormValues,
-  createCompanyEditSchema,
-  toCompanyEditFormValues,
-} from "@/features/companies/company-edit-form";
 import { useCompanySpecificStats } from "@/features/companies/company-stats";
 import { Company } from "@/features/companies/types";
 import { cn, formatHoursToHHMM } from "@/lib/utils";
@@ -58,38 +33,11 @@ interface CompanyCardProps {
 export function CompanyCard({ company }: CompanyCardProps) {
   const t = useTranslations("clients");
   const { data: stats, isLoading } = useCompanySpecificStats(company.id);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const router = useRouter();
-  const updateCompany = useUpdateCompany();
-
-  const form = useForm<CompanyEditFormValues>({
-    resolver: zodResolver(createCompanyEditSchema(t)),
-    defaultValues: toCompanyEditFormValues(company),
-  });
 
   const handleViewClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     router.push(`/companies/${company.id}`);
-  };
-
-  const handleEditClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log("Edit button clicked for company:", company.company);
-    setIsEditModalOpen(true);
-  };
-
-  const onSubmit = async (data: CompanyEditFormValues) => {
-    try {
-      await updateCompany.mutateAsync({
-        id: company.id,
-        data: data as UpdateCompanyDto,
-      });
-      setIsEditModalOpen(false);
-      toast.success(t("clientUpdatedSuccessfully"));
-    } catch (_error) {
-      console.error("Failed to update company:", _error);
-      toast.error(t("failedToUpdateClient"));
-    }
   };
 
   // Prepare contact info
@@ -206,90 +154,19 @@ export function CompanyCard({ company }: CompanyCardProps) {
               <Eye className="h-4 w-4 mr-1" />
               {t("view")}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={handleEditClick}
-            >
-              <Edit2 className="h-4 w-4 mr-1" />
-              {t("edit")}
-            </Button>
+            <EditCompanyModal
+              company={company}
+              trigger={
+                <Button variant="outline" size="sm" className="w-full">
+                  <Edit2 className="h-4 w-4 mr-1" />
+                  {t("edit")}
+                </Button>
+              }
+            />
             <CompanyShareMenu company={company} />
           </div>
         </div>
       </div>
-
-      {/* Edit Modal */}
-      <FormModal
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        title={t("editClient")}
-        description={t("editClientFormSubtitle")}
-        icon={Users}
-        className="sm:max-w-[600px]"
-      >
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="company"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("company")}</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("name")}</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("email")}</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="email" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("phone")}</FormLabel>
-                  <FormControl>
-                    <PhoneInput {...field} placeholder="(11) 99999-9999" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <CompanyAddresses companyId={company.id} />
-            <Button type="submit" className="w-full">
-              {t("saveChanges")}
-            </Button>
-          </form>
-        </Form>
-      </FormModal>
     </div>
   );
 }

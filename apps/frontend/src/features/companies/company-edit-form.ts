@@ -10,7 +10,7 @@ export function createCompanyEditSchema(t: Translate) {
     name: z.string().min(1, t("validationNameRequired")),
     email: z.string().email(t("validationInvalidEmail")),
     phone: z.string().min(1, t("validationPhoneRequired")),
-    company: z.string().min(1, t("validationCompanyRequired")),
+    company: z.string().trim().min(1, t("validationCompanyRequired")),
   });
 }
 

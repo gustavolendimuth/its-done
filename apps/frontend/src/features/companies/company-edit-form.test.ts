@@ -68,4 +68,28 @@ describe("createCompanyEditSchema", () => {
       "t:validationCompanyRequired",
     ]);
   });
+
+  it.each([["   "], ["\t\n"]])(
+    "rejects a company name that is only whitespace (%j)",
+    (blank) => {
+      const result = schema.safeParse({
+        ...toCompanyEditFormValues(company),
+        company: blank,
+      });
+
+      expect(result.success).toBe(false);
+      expect(
+        result.success ? [] : result.error.issues.map((issue) => issue.message)
+      ).toEqual(["t:validationCompanyRequired"]);
+    }
+  );
+
+  it("trims the company name it accepts", () => {
+    const result = schema.parse({
+      ...toCompanyEditFormValues(company),
+      company: "  Acme Corp  ",
+    });
+
+    expect(result.company).toBe("Acme Corp");
+  });
 });

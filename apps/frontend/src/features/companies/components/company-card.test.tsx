@@ -82,4 +82,20 @@ describe("CompanyCard edit modal", () => {
 
     consoleError.mockRestore();
   });
+
+  it("offers the hourly rate in the same modal the edit button opens", async () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <CompanyCard company={{ ...company, hourlyRate: 120.5 }} />
+      </NextIntlClientProvider>
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: enMessages.clients.edit })
+    );
+
+    expect(screen.getByLabelText(enMessages.clients.hourlyRate)).toHaveValue(
+      120.5
+    );
+  });
 });
