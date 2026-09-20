@@ -13,6 +13,7 @@ export default defineConfig({
   timeout: 90_000,
   reporter: [["list"]],
   use: {
+    locale: "pt-BR",
     trace: "retain-on-failure",
     navigationTimeout: 60_000,
   },
