@@ -1,13 +1,17 @@
 import {
   IsEmail,
+  IsNotEmpty,
   IsString,
   IsOptional,
   MinLength,
   MaxLength,
 } from 'class-validator';
+import { TrimString } from '../../utils/trim-string';
 
 export class RegisterCompanyAdminDto {
-  @IsString()
+  @TrimString()
+  @IsString({ message: 'Company must be a string' })
+  @IsNotEmpty({ message: 'Company is required' })
   @MinLength(2, { message: 'Company must be at least 2 characters long' })
   @MaxLength(100, { message: 'Company must not exceed 100 characters' })
   company: string;

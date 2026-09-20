@@ -133,4 +133,69 @@ describe('Companies and Collaborators (e2e)', () => {
     expect(resA.body.id).toBe(companyId);
     expect(resB.body.id).toBe(companyId);
   });
+
+  describe('Company name is required and non-blank', () => {
+    it('POST /companies rejects a name made only of spaces with 400', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/companies')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ company: '   ', email: 'a@b.test' })
+        .expect(400);
+
+      expect(res.body.message).toContain('Company is required');
+    });
+
+    it('POST /companies stores the trimmed name', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/companies')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ company: '  Padded Co  ', email: 'padded@test.local' })
+        .expect(201);
+
+      expect(res.body.company).toBe('Padded Co');
+      const row = await prisma.company.findUnique({
+        where: { id: res.body.id },
+      });
+      expect(row?.company).toBe('Padded Co');
+    });
+
+    it('PATCH /companies/:id rejects null and blank names with 400 and keeps the stored name', async () => {
+      const createRes = await request(app.getHttpServer())
+        .post('/companies')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ company: 'Keep Me', email: 'keep@test.local' })
+        .expect(201);
+      const companyId = createRes.body.id;
+
+      for (const bad of [null, '   ', '']) {
+        const res = await request(app.getHttpServer())
+          .patch(`/companies/${companyId}`)
+          .set('Authorization', `Bearer ${tokenA}`)
+          .send({ company: bad })
+          .expect(400);
+        expect(res.body.message).toContain('Company is required');
+      }
+
+      const row = await prisma.company.findUnique({ where: { id: companyId } });
+      expect(row?.company).toBe('Keep Me');
+    });
+
+    it('PATCH /companies/:id without the company key still updates other fields', async () => {
+      const createRes = await request(app.getHttpServer())
+        .post('/companies')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ company: 'Partial Co', email: 'partial@test.local' })
+        .expect(201);
+      const companyId = createRes.body.id;
+
+      const res = await request(app.getHttpServer())
+        .patch(`/companies/${companyId}`)
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ phone: '555' })
+        .expect(200);
+
+      expect(res.body.company).toBe('Partial Co');
+      expect(res.body.phone).toBe('555');
+    });
+  });
 });
