@@ -164,7 +164,21 @@ test("a company representative activates from the public portal and lands on the
 
   // Entry point: the public portal banner.
   await page.goto(`${FRONTEND_URL}/client-dashboard/${company.id}`);
-  await page.getByRole("link", { name: "Ativar minha Empresa" }).click();
+  const activateLink = page.getByRole("link", { name: "Ativar minha Empresa" });
+  await expect(activateLink).toBeVisible({ timeout: NEXT_DEV_COMPILE_MS });
+  // The banner must sit above the overview. A company with no invoices renders
+  // "Company Dashboard" (h1) from OverviewHeader.
+  const overviewHeading = page.getByRole("heading", {
+    level: 1,
+    name: "Company Dashboard",
+  });
+  await expect(overviewHeading).toBeVisible({ timeout: NEXT_DEV_COMPILE_MS });
+  const bannerBox = await activateLink.boundingBox();
+  const overviewBox = await overviewHeading.boundingBox();
+  expect(bannerBox, "banner link has a bounding box").not.toBeNull();
+  expect(overviewBox, "overview heading has a bounding box").not.toBeNull();
+  expect(bannerBox!.y).toBeLessThan(overviewBox!.y);
+  await activateLink.click();
   await expect(page).toHaveURL(
     `${FRONTEND_URL}/company-admin/activate/request?companyId=${company.id}`,
     { timeout: NEXT_DEV_COMPILE_MS },
@@ -187,6 +201,16 @@ test("a company representative activates from the public portal and lands on the
   await expect(page).toHaveURL(`${FRONTEND_URL}/company-admin/dashboard`, {
     timeout: NEXT_DEV_COMPILE_MS,
   });
+  // Authenticated admin content, not just the URL.
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Dashboard da Empresa" }),
+  ).toBeVisible({ timeout: NEXT_DEV_COMPILE_MS });
+  // NextAuth session cookie (plain or __Secure- prefixed).
+  const cookies = await page.context().cookies();
+  expect(
+    cookies.some((cookie) => /session-token/.test(cookie.name)),
+    `session cookie in [${cookies.map((cookie) => cookie.name).join(", ")}]`,
+  ).toBe(true);
 });
 
 test("every route in FRONTEND_ROUTES is exercised by an email", () => {
