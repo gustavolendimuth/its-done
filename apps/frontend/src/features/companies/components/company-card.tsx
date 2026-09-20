@@ -235,7 +235,7 @@ export function CompanyCard({ company }: CompanyCardProps) {
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         title={t("editClient")}
-        description={t("formSubtitle")}
+        description={t("editClientFormSubtitle")}
         icon={Users}
         className="sm:max-w-[600px]"
       >
