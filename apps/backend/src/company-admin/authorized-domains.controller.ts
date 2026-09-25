@@ -18,9 +18,7 @@ import {
 
 @Controller('company-admin/domains')
 export class AuthorizedDomainsController {
-  constructor(
-    private authorizedDomainsService: AuthorizedDomainsService,
-  ) {}
+  constructor(private authorizedDomainsService: AuthorizedDomainsService) {}
 
   // MW-27 — 20 creations/min per IP: same slack as invites, stricter than
   // the global cap.
@@ -28,10 +26,7 @@ export class AuthorizedDomainsController {
   @UseGuards(CompanyAdminJwtAuthGuard)
   @Post()
   create(@Request() req, @Body() dto: CreateAuthorizedDomainDto) {
-    return this.authorizedDomainsService.create(
-      req.user.companyId,
-      dto.domain,
-    );
+    return this.authorizedDomainsService.create(req.user.companyId, dto.domain);
   }
 
   @UseGuards(CompanyAdminJwtAuthGuard)

@@ -1,4 +1,11 @@
-import { Controller, Get, Query, Request, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { CompanyDashboardService } from './company-dashboard.service';
 import { CompanyAdminJwtAuthGuard } from './guards/company-admin-jwt-auth.guard';

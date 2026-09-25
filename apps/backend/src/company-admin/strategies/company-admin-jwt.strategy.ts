@@ -31,7 +31,8 @@ export class CompanyAdminJwtStrategy extends PassportStrategy(
       return null;
     }
 
-    const { password: _password, ...adminWithoutPassword } = admin;
+    const adminWithoutPassword: Partial<typeof admin> = { ...admin };
+    delete adminWithoutPassword.password;
     return adminWithoutPassword;
   }
 }

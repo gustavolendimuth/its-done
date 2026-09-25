@@ -72,11 +72,7 @@ export class AuthorizedDomainsService {
    * proved ownership of that email at Activation/login time, so this avoids
    * needing a generic admin@domain address.
    */
-  async requestConfirmation(
-    companyId: string,
-    id: string,
-    adminEmail: string,
-  ) {
+  async requestConfirmation(companyId: string, id: string, adminEmail: string) {
     const authorizedDomain = await this.prisma.authorizedDomain.findFirst({
       where: { id, companyId },
     });
