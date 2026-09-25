@@ -5,7 +5,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { SentryModule } from '@sentry/nestjs/setup';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -33,13 +32,6 @@ import { WorkSessionSchedulerService } from './work-sessions/services/work-sessi
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
-    // MW-27 — Rate limiting básico, aplicado a toda a aplicação.
-    // Camada 'default': 60 req/min por IP, teto geral pra tráfego autenticado
-    // normal (não incomoda uso legítimo, mas barra abuso grosseiro).
-    // Rotas sensíveis (login, forgot/reset-password, criar PendingInvite,
-    // criar/confirmar AuthorizedDomain) sobrescrevem esse teto com
-    // @Throttle({ default: { limit, ttl } }) direto no controller/handler —
-    // ver auth.controller.ts e company-admin/*.controller.ts.
     ThrottlerModule.forRoot([
       {
         name: 'default',
@@ -68,7 +60,6 @@ import { WorkSessionSchedulerService } from './work-sessions/services/work-sessi
   ],
   controllers: [AppController],
   providers: [
-    AppService,
     WorkSessionSchedulerService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
