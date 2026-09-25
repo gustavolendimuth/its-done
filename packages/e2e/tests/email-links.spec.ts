@@ -51,6 +51,57 @@ async function api<T = any>(
   return text ? JSON.parse(text) : ({} as T);
 }
 
+async function apiGet<T = any>(path: string, token: string): Promise<T> {
+  const res = await fetch(`${BACKEND_URL}/api${path}`, {
+    headers: { authorization: `Bearer ${token}` },
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`GET /api${path} -> ${res.status}: ${text}`);
+  }
+  return JSON.parse(text);
+}
+
+// Registers a fresh Company admin, adds an Authorized Domain and asks for its
+// confirmation email. Returns the emailed link, its raw token and what is
+// needed to read the domain's status back from the API.
+async function emailedDomainConfirmation(label: string) {
+  const run = `${Date.now()}-${label}`;
+  const adminEmail = `e2e-domain-${run}@example.test`;
+  const admin = await api("/company-admin/auth/register", {
+    company: `E2E Domain ${run}`,
+    email: adminEmail,
+    password: PASSWORD,
+  });
+  const domain = await api(
+    "/company-admin/domains",
+    { domain: `e2e-${run}.com` },
+    admin.access_token,
+  );
+  await api(
+    `/company-admin/domains/${domain.id}/confirm`,
+    {},
+    admin.access_token,
+  );
+  const email = await mail.waitForEmail(adminEmail, "Authorized Domain");
+  const [link] = frontendLinksIn(email.html);
+  return {
+    link,
+    token: new URL(link).searchParams.get("token")!,
+    domainId: domain.id as string,
+    domainName: domain.domain as string,
+    adminToken: admin.access_token as string,
+  };
+}
+
+async function domainStatus(adminToken: string, domainId: string) {
+  const domains = await apiGet<{ id: string; status: string }[]>(
+    "/company-admin/domains",
+    adminToken,
+  );
+  return domains.find((d) => d.id === domainId)?.status;
+}
+
 function frontendLinksIn(html: string): string[] {
   const frontendOrigin = new URL(FRONTEND_URL).origin;
   const links: string[] = [];
@@ -113,6 +164,13 @@ test.beforeAll(async () => {
     email: email("contact"),
   });
   collectLinks((await mail.waitForEmail(email("contact"), "Activation")).html);
+
+  // Company admin: authorized domain confirmation.
+  const domainConfirmation = await emailedDomainConfirmation("smoke");
+  emailedLinks.set(
+    new URL(domainConfirmation.link).pathname,
+    domainConfirmation.link,
+  );
 });
 
 test.afterAll(async () => {
@@ -408,6 +466,61 @@ test.describe("invite page rejects bad links", () => {
       timeout: NEXT_DEV_COMPILE_MS,
     });
     expect(confirmCalls).toEqual([]);
+  });
+});
+
+test.describe("authorized domain confirmation page", () => {
+  const confirmPath = "/company-admin/domains/confirm";
+
+  test("confirms the authorized domain from the emailed link without a session", async ({
+    page,
+  }) => {
+    const { link, domainId, domainName, adminToken } =
+      await emailedDomainConfirmation("confirm");
+    expect(await domainStatus(adminToken, domainId)).toBe("PENDING");
+
+    // Fresh context: no NextAuth cookie, the emailed token alone is the proof.
+    await page.goto(link);
+
+    await expect(page.getByText("Domínio confirmado")).toBeVisible({
+      timeout: NEXT_DEV_COMPILE_MS,
+    });
+    await expect(
+      page.getByText(`O domínio ${domainName} agora está confirmado.`),
+    ).toBeVisible();
+    expect(await domainStatus(adminToken, domainId)).toBe("CONFIRMED");
+    expect(await sessionCookies(page)).toEqual([]);
+  });
+
+  test("reusing the domain confirmation link shows the backend error", async ({
+    page,
+  }) => {
+    const { link, token, domainId, adminToken } =
+      await emailedDomainConfirmation("reuse");
+    await api("/company-admin/domains/confirm", { token });
+
+    await page.goto(link);
+
+    await expect(
+      page.getByText("Authorized domain is not pending confirmation"),
+    ).toBeVisible({ timeout: NEXT_DEV_COMPILE_MS });
+    await expect(page.getByText("Domínio confirmado")).toHaveCount(0);
+    expect(await domainStatus(adminToken, domainId)).toBe("CONFIRMED");
+  });
+
+  test("a tampered domain confirmation token shows the backend error", async ({
+    page,
+  }) => {
+    const { token, domainId, adminToken } =
+      await emailedDomainConfirmation("tampered");
+    const tampered = `${token.slice(0, -2)}${token.endsWith("AA") ? "BB" : "AA"}`;
+
+    await page.goto(`${FRONTEND_URL}${confirmPath}?token=${tampered}`);
+
+    await expect(
+      page.getByText("Invalid or expired confirmation token"),
+    ).toBeVisible({ timeout: NEXT_DEV_COMPILE_MS });
+    expect(await domainStatus(adminToken, domainId)).toBe("PENDING");
   });
 });
 
