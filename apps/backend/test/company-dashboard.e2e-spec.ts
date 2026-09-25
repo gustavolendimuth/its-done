@@ -56,7 +56,7 @@ describe('Dashboard da Company (e2e) — MW-24', () => {
 
   async function registerCompanyAdmin(company: string) {
     const email = `mw24-admin-${uuidv4()}@test.local`;
-    const password = 'super-secret-1';
+    const password = `pw-${uuidv4()}`;
     const res = await request(app.getHttpServer())
       .post('/company-admin/auth/register')
       .send({ company, email, password })

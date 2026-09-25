@@ -75,7 +75,7 @@ describe('Notificação de vínculo + desvinculação/remoção (e2e) — MW-23'
 
   async function registerCompanyAdmin(company: string) {
     const email = `mw23-admin-${uuidv4()}@test.local`;
-    const password = 'super-secret-1';
+    const password = `pw-${uuidv4()}`;
     const res = await request(app.getHttpServer())
       .post('/company-admin/auth/register')
       .send({ company, email, password })
@@ -125,7 +125,7 @@ describe('Notificação de vínculo + desvinculação/remoção (e2e) — MW-23'
   it('vínculo idempotente (segundo login) não gera uma segunda notificação de vínculo', async () => {
     const admin = await registerCompanyAdmin('Acme Idempotente');
     const email = `mw23-idempotent-${uuidv4()}@test.local`;
-    const password = 'super-secret-1';
+    const password = `pw-${uuidv4()}`;
 
     await request(app.getHttpServer())
       .post('/company-admin/invites')

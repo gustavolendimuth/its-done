@@ -11,7 +11,7 @@ describe('CompanyAdmin auth (e2e)', () => {
   let prisma: PrismaService;
   let jwtService: JwtService;
   const email = `company-admin-e2e-${uuidv4()}@test.local`;
-  const password = 'super-secret-1';
+  const password = `pw-${uuidv4()}`;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

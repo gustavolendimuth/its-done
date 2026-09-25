@@ -53,7 +53,7 @@ describe('Company admin invite (e2e) — MW-20', () => {
     });
     companyIdsToCleanup.push(company.id);
 
-    const password = 'super-secret-1';
+    const password = `pw-${uuidv4()}`;
     const admin = await prisma.companyAdmin.create({
       data: {
         companyId: company.id,
@@ -69,7 +69,7 @@ describe('Company admin invite (e2e) — MW-20', () => {
       companyId: company.id,
     });
 
-    return { company, admin, token };
+    return { company, admin, token, password };
   }
 
   it('rejects inviting without authentication', async () => {
@@ -80,7 +80,7 @@ describe('Company admin invite (e2e) — MW-20', () => {
   });
 
   it('an authenticated Administrador can invite an email from any domain, and confirming creates a new CompanyAdmin linked to the same Company, crediting who invited', async () => {
-    const { company, admin, token } = await createActivatedCompany();
+    const { company, admin, token, password } = await createActivatedCompany();
     const inviteeEmail = `invitee-${uuidv4()}@totally-external-domain.test`;
 
     await request(app.getHttpServer())
@@ -116,7 +116,7 @@ describe('Company admin invite (e2e) — MW-20', () => {
     // Both Administradores can now log in independently.
     await request(app.getHttpServer())
       .post('/company-admin/auth/login')
-      .send({ email: admin.email, password: 'super-secret-1' })
+      .send({ email: admin.email, password })
       .expect(201);
 
     await request(app.getHttpServer())

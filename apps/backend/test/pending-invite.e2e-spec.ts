@@ -48,7 +48,7 @@ describe('Convite Pendente (e2e)', () => {
 
   async function registerCompanyAdmin(company: string) {
     const email = `convite-pendente-admin-${uuidv4()}@test.local`;
-    const password = 'super-secret-1';
+    const password = `pw-${uuidv4()}`;
     const res = await request(app.getHttpServer())
       .post('/company-admin/auth/register')
       .send({ company, email, password })
@@ -129,7 +129,7 @@ describe('Convite Pendente (e2e)', () => {
   it('links automatically on login when the User already existed before the invite', async () => {
     const admin = await registerCompanyAdmin('Acme Login');
     const email = `login-${uuidv4()}@test.local`;
-    const password = 'super-secret-1';
+    const password = `pw-${uuidv4()}`;
     const hashed = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: { email, name: 'Pre-existing User', password: hashed },

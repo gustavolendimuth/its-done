@@ -53,7 +53,7 @@ describe('Domínio Autorizado (e2e)', () => {
 
   async function registerCompanyAdmin(company: string) {
     const email = `dominio-admin-${uuidv4()}@test.local`;
-    const password = 'super-secret-1';
+    const password = `pw-${uuidv4()}`;
     const res = await request(app.getHttpServer())
       .post('/company-admin/auth/register')
       .send({ company, email, password })
