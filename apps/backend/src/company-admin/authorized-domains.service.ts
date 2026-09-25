@@ -99,12 +99,9 @@ export class AuthorizedDomainsService {
       { expiresIn: '1h' },
     );
 
-    // Reuses the existing password-reset email infrastructure to deliver the
-    // confirmation link — no dedicated email template was added (out of
-    // scope: apps/backend/src/notifications/ was not touched).
-    await this.notificationsService.sendPasswordResetEmail(
+    await this.notificationsService.sendAuthorizedDomainConfirmationEmail(
       adminEmail,
-      adminEmail,
+      authorizedDomain.domain,
       token,
     );
 

@@ -11,6 +11,7 @@ export const FRONTEND_ROUTES = {
   companyAdminResetPassword: '/company-admin/reset-password',
   companyAdminActivate: '/company-admin/activate',
   companyAdminInvite: '/company-admin/invite',
+  companyAdminDomainConfirm: '/company-admin/domains/confirm',
 } as const;
 
 export type FrontendRouteName = keyof typeof FRONTEND_ROUTES;

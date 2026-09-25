@@ -18,6 +18,7 @@ const jwtServiceMock = {
 
 const notificationsServiceMock = {
   sendPasswordResetEmail: jest.fn(),
+  sendAuthorizedDomainConfirmationEmail: jest.fn(),
 } as any;
 
 describe('AuthorizedDomainsService', () => {
@@ -200,6 +201,27 @@ describe('AuthorizedDomainsService', () => {
       await expect(service.confirm('expired-token')).rejects.toThrow(
         BadRequestException,
       );
+    });
+  });
+
+  describe('requestConfirmation()', () => {
+    it('requestConfirmation sends the dedicated confirmation email', async () => {
+      prismaMock.authorizedDomain.findFirst.mockResolvedValueOnce({
+        id: 'dom-1',
+        companyId,
+        domain: 'acme.com',
+        status: 'PENDING',
+      });
+      jwtServiceMock.sign.mockReturnValueOnce('signed-token');
+
+      await service.requestConfirmation(companyId, 'dom-1', 'admin@acme.com');
+
+      expect(
+        notificationsServiceMock.sendAuthorizedDomainConfirmationEmail,
+      ).toHaveBeenCalledWith('admin@acme.com', 'acme.com', 'signed-token');
+      expect(
+        notificationsServiceMock.sendPasswordResetEmail,
+      ).not.toHaveBeenCalled();
     });
   });
 });

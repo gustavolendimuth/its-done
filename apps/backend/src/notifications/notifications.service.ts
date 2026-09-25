@@ -233,6 +233,38 @@ export class NotificationsService {
     }
   }
 
+  async sendAuthorizedDomainConfirmationEmail(
+    toEmail: string,
+    domain: string,
+    confirmationToken: string,
+  ) {
+    try {
+      const confirmationUrl = buildFrontendUrl(
+        this.configService.get('FRONTEND_URL'),
+        'companyAdminDomainConfirm',
+        { token: confirmationToken },
+      );
+
+      await this.sendEmail({
+        to: toEmail,
+        subject: 'Confirm Authorized Domain - Its Done',
+        html: this.generateAuthorizedDomainConfirmationEmailTemplate(
+          domain,
+          confirmationUrl,
+        ),
+      });
+
+      console.log(`Authorized domain confirmation email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error(
+        'Failed to send Authorized domain confirmation email:',
+        error,
+      );
+      return false;
+    }
+  }
+
   async sendCompanyAdminInviteEmail(
     toEmail: string,
     companyName: string,
@@ -483,6 +515,47 @@ export class NotificationsService {
             <li>Configure notification settings</li>
           </ul>
           <p>Get started by logging your first work session!</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateAuthorizedDomainConfirmationEmailTemplate(
+    domain: string,
+    confirmationUrl: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Confirm Authorized Domain</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Authorized Domain</h1>
+        </div>
+        <div class="content">
+          <p>You asked to confirm <strong>${domain}</strong> as an Authorized Domain of your Company on Its Done.</p>
+          <p>Click the button below to confirm the domain:</p>
+          <div style="text-align: center;">
+            <a href="${confirmationUrl}" class="button">Confirm Domain</a>
+          </div>
+          <p>Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">${confirmationUrl}</p>
+          <p>This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>
