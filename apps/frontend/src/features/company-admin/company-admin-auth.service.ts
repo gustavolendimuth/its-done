@@ -1,3 +1,5 @@
+import type { AuthorizedDomain } from "./company-admin-dashboard.service";
+
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { default as companyAdminApi } from "@/lib/axios";
@@ -19,6 +21,10 @@ export interface ConfirmCompanyActivationDto {
 export interface ConfirmCompanyAdminInviteDto {
   token: string;
   password: string;
+}
+
+export interface ConfirmCompanyDomainDto {
+  token: string;
 }
 
 export interface CompanyAdminAuthResponse {
@@ -72,6 +78,18 @@ export function useConfirmCompanyAdminInvite() {
     mutationFn: async (data: ConfirmCompanyAdminInviteDto) => {
       const res = await companyAdminApi.post<CompanyAdminAuthResponse>(
         "/company-admin/auth/invite/confirm",
+        data
+      );
+      return res.data;
+    },
+  });
+}
+
+export function useConfirmCompanyDomain() {
+  return useMutation({
+    mutationFn: async (data: ConfirmCompanyDomainDto) => {
+      const res = await companyAdminApi.post<AuthorizedDomain>(
+        "/company-admin/domains/confirm",
         data
       );
       return res.data;
