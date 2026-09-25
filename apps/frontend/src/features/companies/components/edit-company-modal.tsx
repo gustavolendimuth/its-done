@@ -124,9 +124,9 @@ export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={REQUIRED_LABEL}>{t("name")}</FormLabel>
+                  <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
-                    <Input {...field} aria-required="true" />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -150,13 +150,9 @@ export function EditCompanyModal({ company, trigger }: EditCompanyModalProps) {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={REQUIRED_LABEL}>{t("phone")}</FormLabel>
+                  <FormLabel>{t("phone")}</FormLabel>
                   <FormControl>
-                    <PhoneInput
-                      {...field}
-                      placeholder="(11) 99999-9999"
-                      aria-required="true"
-                    />
+                    <PhoneInput {...field} placeholder="(11) 99999-9999" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

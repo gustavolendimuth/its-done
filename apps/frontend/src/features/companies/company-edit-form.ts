@@ -7,9 +7,11 @@ type Translate = (key: string) => string;
 /** Fields shared by every form that edits an existing Company. */
 export function createCompanyEditSchema(t: Translate) {
   return z.object({
-    name: z.string().min(1, t("validationNameRequired")),
+    // Contact name and phone are optional, same as on create (CompanyForm)
+    // and on the backend (CreateCompanyDto/UpdateCompanyDto).
+    name: z.string().optional(),
     email: z.string().email(t("validationInvalidEmail")),
-    phone: z.string().min(1, t("validationPhoneRequired")),
+    phone: z.string().optional(),
     company: z.string().trim().min(1, t("validationCompanyRequired")),
   });
 }

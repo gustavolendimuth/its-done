@@ -217,7 +217,7 @@ describe("EditCompanyModal", () => {
     );
   });
 
-  it("marks the fields the form requires and leaves hourly rate optional", () => {
+  it("marks company and email as required, and leaves name, phone and hourly rate optional", () => {
     render(
       <TestWrapper>
         <EditCompanyModal company={mockCompany} />
@@ -226,10 +226,31 @@ describe("EditCompanyModal", () => {
 
     fireEvent.click(screen.getByText("Edit Company"));
 
-    for (const label of ["Company", "Name", "Email", "Phone"]) {
+    for (const label of ["Company", "Email"]) {
       expect(screen.getByLabelText(label)).toBeRequired();
     }
-    expect(screen.getByLabelText("Hourly Rate")).not.toBeRequired();
+    for (const label of ["Name", "Phone", "Hourly Rate"]) {
+      expect(screen.getByLabelText(label)).not.toBeRequired();
+    }
+  });
+
+  it("saves with name and phone left blank", async () => {
+    mockUpdateMutateAsync.mockResolvedValueOnce({});
+
+    render(
+      <TestWrapper>
+        <EditCompanyModal company={mockCompany} />
+      </TestWrapper>
+    );
+
+    fireEvent.click(screen.getByText("Edit Company"));
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "" } });
+    fireEvent.change(screen.getByLabelText("Phone"), {
+      target: { value: "" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(mockUpdateMutateAsync).toHaveBeenCalled());
   });
 
   it("confirms a saved change with a toast and closes the modal", async () => {

@@ -50,7 +50,7 @@ describe("createCompanyEditSchema", () => {
     );
   });
 
-  it("reports a translated message for each invalid field", () => {
+  it("reports a translated message for each invalid required field", () => {
     const result = schema.safeParse({
       name: "",
       email: "not-an-email",
@@ -61,12 +61,24 @@ describe("createCompanyEditSchema", () => {
     expect(result.success).toBe(false);
     expect(
       result.success ? [] : result.error.issues.map((issue) => issue.message)
-    ).toEqual([
-      "t:validationNameRequired",
-      "t:validationInvalidEmail",
-      "t:validationPhoneRequired",
-      "t:validationCompanyRequired",
-    ]);
+    ).toEqual(["t:validationInvalidEmail", "t:validationCompanyRequired"]);
+  });
+
+  it("accepts a blank or missing name and phone", () => {
+    expect(
+      schema.safeParse({
+        name: "",
+        email: "ana@acme.test",
+        phone: "",
+        company: "Acme",
+      }).success
+    ).toBe(true);
+    expect(
+      schema.safeParse({
+        email: "ana@acme.test",
+        company: "Acme",
+      }).success
+    ).toBe(true);
   });
 
   it.each([["   "], ["\t\n"]])(
