@@ -179,7 +179,9 @@ describe("backend proxy", () => {
     mockGetToken.mockResolvedValue({ accessToken: "internal-token" });
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce(jsonUpstream({ updated: true }, 202))
-      .mockResolvedValueOnce(binaryUpstream(new Uint8Array([0, 1, 2, 255]), 206));
+      .mockResolvedValueOnce(
+        binaryUpstream(new Uint8Array([0, 1, 2, 255]), 206)
+      );
 
     const patchReq = request(
       "http://frontend.test/api/backend/projects/project-1?include=tasks",
@@ -236,4 +238,18 @@ describe("backend proxy", () => {
       new Uint8Array([0, 1, 2, 255]).buffer
     );
   });
+
+  it.each([[".."], ["."], [""], ["a/b"], ["a\\b"]])(
+    "rejects the path segment %j without calling the backend",
+    async (segment) => {
+      const response = await GET(
+        request("http://frontend.test/api/backend/x"),
+        { params: Promise.resolve({ path: ["company-admin", segment] }) }
+      );
+
+      expect(response.status).toBe(400);
+      expect(global.fetch).not.toHaveBeenCalled();
+      expect(mockGetToken).not.toHaveBeenCalled();
+    }
+  );
 });

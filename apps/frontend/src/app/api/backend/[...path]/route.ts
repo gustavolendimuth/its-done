@@ -1,5 +1,5 @@
-import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 import { getApiUrl } from "@/lib/utils";
 
@@ -19,9 +19,28 @@ function removeAccessTokens(data: unknown): unknown {
   return data;
 }
 
+function isSafeSegment(segment: string): boolean {
+  return (
+    segment !== "" &&
+    segment !== "." &&
+    segment !== ".." &&
+    !/[\\/]/.test(segment)
+  );
+}
+
 async function proxy(req: NextRequest, path: string[]) {
+  // The path comes from the browser: only plain segments may reach the
+  // backend, so it cannot climb out of the API or change the target host.
+  if (path.some((segment) => !isSafeSegment(segment))) {
+    return NextResponse.json({ message: "Invalid path" }, { status: 400 });
+  }
+
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  const targetUrl = `${getApiUrl()}/${path.join("/")}${req.nextUrl.search}`;
+  const apiUrl = getApiUrl();
+  const targetUrl = `${apiUrl}/${path.map(encodeURIComponent).join("/")}${req.nextUrl.search}`;
+  if (new URL(targetUrl).origin !== new URL(apiUrl).origin) {
+    return NextResponse.json({ message: "Invalid path" }, { status: 400 });
+  }
 
   const headers: Record<string, string> = {};
   if (token?.accessToken) {
