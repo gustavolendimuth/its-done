@@ -20,9 +20,7 @@ export type FrontendRouteName = keyof typeof FRONTEND_ROUTES;
  * ticket that builds it. The contract test and the smoke both fail once an
  * entry becomes resolvable, so this list only ever shrinks.
  */
-export const KNOWN_MISSING_PAGES: Record<string, string> = {
-  '/company-admin/invite': 'MW-29',
-};
+export const KNOWN_MISSING_PAGES: Record<string, string> = {};
 
 export function buildFrontendUrl(
   baseUrl: string | undefined,

@@ -213,6 +213,204 @@ test("a company representative activates from the public portal and lands on the
   ).toBe(true);
 });
 
+test("an invitee accepts the emailed invite and lands on the dashboard", async ({
+  page,
+}) => {
+  const run = Date.now();
+  const admin = await api("/company-admin/auth/register", {
+    company: `E2E Invite ${run}`,
+    email: `e2e-inviter-${run}@example.test`,
+    password: PASSWORD,
+  });
+  const invitee = `e2e-invited-${run}@example.test`;
+  await api("/company-admin/auth/invite", { email: invitee }, admin.access_token);
+
+  const email = await mail.waitForEmail(invitee, "invited");
+  const [link] = frontendLinksIn(email.html);
+
+  // No prior session: the invite link alone is the proof of identity.
+  await page.goto(link);
+  await page.getByLabel("Senha", { exact: true }).fill(PASSWORD);
+  await page.getByLabel("Confirmar senha").fill(PASSWORD);
+  await page.getByRole("button", { name: "Aceitar convite" }).click();
+  await expect(page).toHaveURL(`${FRONTEND_URL}/company-admin/dashboard`, {
+    timeout: NEXT_DEV_COMPILE_MS,
+  });
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Dashboard da Empresa" }),
+  ).toBeVisible({ timeout: NEXT_DEV_COMPILE_MS });
+  const cookies = await page.context().cookies();
+  expect(
+    cookies.some((cookie) => /session-token/.test(cookie.name)),
+    `session cookie in [${cookies.map((cookie) => cookie.name).join(", ")}]`,
+  ).toBe(true);
+});
+
+// Issues a fresh invite and returns the emailed link plus its raw token.
+async function emailedInvite(label: string) {
+  const run = `${Date.now()}-${label}`;
+  const admin = await api("/company-admin/auth/register", {
+    company: `E2E Invite ${run}`,
+    email: `e2e-inviter-${run}@example.test`,
+    password: PASSWORD,
+  });
+  const invitee = `e2e-invited-${run}@example.test`;
+  await api("/company-admin/auth/invite", { email: invitee }, admin.access_token);
+  const email = await mail.waitForEmail(invitee, "invited");
+  const [link] = frontendLinksIn(email.html);
+  return { link, token: new URL(link).searchParams.get("token")! };
+}
+
+function unsignedJwt(payload: object): string {
+  const encode = (value: object) =>
+    Buffer.from(JSON.stringify(value)).toString("base64url");
+  return `${encode({ alg: "HS256", typ: "JWT" })}.${encode(payload)}.signature`;
+}
+
+async function sessionCookies(page: import("@playwright/test").Page) {
+  return (await page.context().cookies()).filter((cookie) =>
+    /session-token/.test(cookie.name),
+  );
+}
+
+test.describe("invite page rejects bad links", () => {
+  const invitePath = "/company-admin/invite";
+
+  test("missing token shows an error, no form and no request", async ({
+    page,
+  }) => {
+    const confirmCalls: string[] = [];
+    page.on("request", (req) => {
+      if (req.url().includes("/invite/confirm")) confirmCalls.push(req.url());
+    });
+
+    await page.goto(`${FRONTEND_URL}${invitePath}`);
+
+    await expect(
+      page.getByText("Link de convite inválido ou incompleto."),
+    ).toBeVisible({ timeout: NEXT_DEV_COMPILE_MS });
+    await expect(page.getByLabel("Senha", { exact: true })).toHaveCount(0);
+    expect(confirmCalls).toEqual([]);
+  });
+
+  test("expired token shows an error, no form and no request", async ({
+    page,
+  }) => {
+    const confirmCalls: string[] = [];
+    page.on("request", (req) => {
+      if (req.url().includes("/invite/confirm")) confirmCalls.push(req.url());
+    });
+    const expired = unsignedJwt({ exp: Math.floor(Date.now() / 1000) - 60 });
+
+    await page.goto(`${FRONTEND_URL}${invitePath}?token=${expired}`);
+
+    await expect(page.getByText(/Este convite expirou/)).toBeVisible({
+      timeout: NEXT_DEV_COMPILE_MS,
+    });
+    await expect(page.getByLabel("Senha", { exact: true })).toHaveCount(0);
+    expect(confirmCalls).toEqual([]);
+  });
+
+  test("a tampered signature is rejected by the backend and offers the login link", async ({
+    page,
+  }) => {
+    const { token } = await emailedInvite("tampered");
+    const tampered = `${token.slice(0, -2)}${token.endsWith("AA") ? "BB" : "AA"}`;
+
+    await page.goto(`${FRONTEND_URL}${invitePath}?token=${tampered}`);
+    await page.getByLabel("Senha", { exact: true }).fill(PASSWORD);
+    await page.getByLabel("Confirmar senha").fill(PASSWORD);
+    await page.getByRole("button", { name: "Aceitar convite" }).click();
+
+    await expect(page.getByText("Invalid token")).toBeVisible({
+      timeout: NEXT_DEV_COMPILE_MS,
+    });
+    await expect(
+      page.getByRole("link", { name: "Ir para o login" }),
+    ).toHaveAttribute("href", "/login");
+    expect(await sessionCookies(page)).toEqual([]);
+  });
+
+  test("an activation token is not accepted as an invite token", async ({
+    page,
+  }) => {
+    const activationLink = emailedLinks.get("/company-admin/activate")!;
+    const activationToken = new URL(activationLink).searchParams.get("token")!;
+
+    await page.goto(`${FRONTEND_URL}${invitePath}?token=${activationToken}`);
+    await page.getByLabel("Senha", { exact: true }).fill(PASSWORD);
+    await page.getByLabel("Confirmar senha").fill(PASSWORD);
+    await page.getByRole("button", { name: "Aceitar convite" }).click();
+
+    await expect(page.getByText("Invalid token")).toBeVisible({
+      timeout: NEXT_DEV_COMPILE_MS,
+    });
+    expect(await sessionCookies(page)).toEqual([]);
+  });
+
+  test("using the same invite twice shows the backend 409 and does not redirect", async ({
+    page,
+  }) => {
+    const { link, token } = await emailedInvite("twice");
+    await api("/company-admin/auth/invite/confirm", {
+      token,
+      password: PASSWORD,
+    });
+
+    await page.goto(link);
+    await page.getByLabel("Senha", { exact: true }).fill(PASSWORD);
+    await page.getByLabel("Confirmar senha").fill(PASSWORD);
+    await page.getByRole("button", { name: "Aceitar convite" }).click();
+
+    await expect(
+      page.getByText("An CompanyAdmin already exists with this email"),
+    ).toBeVisible({ timeout: NEXT_DEV_COMPILE_MS });
+    expect(new URL(page.url()).pathname).toBe(invitePath);
+    expect(await sessionCookies(page)).toEqual([]);
+  });
+
+  test("a password shorter than 6 characters is blocked by the browser before any request", async ({
+    page,
+  }) => {
+    const { link } = await emailedInvite("short");
+    const confirmCalls: string[] = [];
+    page.on("request", (req) => {
+      if (req.url().includes("/invite/confirm")) confirmCalls.push(req.url());
+    });
+
+    await page.goto(link);
+    await page.getByLabel("Senha", { exact: true }).fill("12345");
+    await page.getByLabel("Confirmar senha").fill("12345");
+    await page.getByRole("button", { name: "Aceitar convite" }).click();
+
+    await expect(
+      page.getByLabel("Senha", { exact: true }),
+    ).toHaveJSProperty("validity.tooShort", true);
+    expect(confirmCalls).toEqual([]);
+    expect(new URL(page.url()).pathname).toBe(invitePath);
+  });
+
+  test("mismatched passwords block the submit before any request", async ({
+    page,
+  }) => {
+    const { link } = await emailedInvite("mismatch");
+    const confirmCalls: string[] = [];
+    page.on("request", (req) => {
+      if (req.url().includes("/invite/confirm")) confirmCalls.push(req.url());
+    });
+
+    await page.goto(link);
+    await page.getByLabel("Senha", { exact: true }).fill(PASSWORD);
+    await page.getByLabel("Confirmar senha").fill(`${PASSWORD}x`);
+    await page.getByRole("button", { name: "Aceitar convite" }).click();
+
+    await expect(page.getByText("As senhas não coincidem.")).toBeVisible({
+      timeout: NEXT_DEV_COMPILE_MS,
+    });
+    expect(confirmCalls).toEqual([]);
+  });
+});
+
 test("every route in FRONTEND_ROUTES is exercised by an email", () => {
   const missing = Object.values(FRONTEND_ROUTES).filter(
     (path) => !emailedLinks.has(path),

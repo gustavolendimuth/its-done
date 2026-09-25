@@ -16,6 +16,11 @@ export interface ConfirmCompanyActivationDto {
   password: string;
 }
 
+export interface ConfirmCompanyAdminInviteDto {
+  token: string;
+  password: string;
+}
+
 export interface CompanyAdminAuthResponse {
   admin: { id: string; email: string; companyId: string };
 }
@@ -55,6 +60,18 @@ export function useConfirmCompanyActivation() {
     mutationFn: async (data: ConfirmCompanyActivationDto) => {
       const res = await companyAdminApi.post<CompanyAdminAuthResponse>(
         "/company-admin/auth/activate/confirm",
+        data
+      );
+      return res.data;
+    },
+  });
+}
+
+export function useConfirmCompanyAdminInvite() {
+  return useMutation({
+    mutationFn: async (data: ConfirmCompanyAdminInviteDto) => {
+      const res = await companyAdminApi.post<CompanyAdminAuthResponse>(
+        "/company-admin/auth/invite/confirm",
         data
       );
       return res.data;

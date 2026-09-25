@@ -1,4 +1,8 @@
-import { ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CompanyAdminAuthService } from './company-admin-auth.service';
 
 const prismaMock = {} as any;
@@ -160,6 +164,113 @@ describe('CompanyAdminAuthService', () => {
           password: 'password123',
         }),
       ).rejects.toThrow(ConflictException);
+    });
+
+    describe('token, company and email checks', () => {
+      const validPayload = {
+        companyId: 'company-1',
+        email: 'invitee@test.local',
+        invitedById: 'admin-1',
+        type: 'company-admin-invite',
+      };
+      const dto = { token: 'invite-token', password: 'password123' };
+
+      const tokenError = (name: string) =>
+        Object.assign(new Error(name), { name });
+
+      beforeEach(() => {
+        prismaMock.company = {
+          findUnique: jest
+            .fn()
+            .mockResolvedValue({ id: 'company-1', company: 'Acme' }),
+        };
+        prismaMock.companyAdmin = { create: jest.fn() };
+        companyAdminsServiceMock.findByEmail.mockResolvedValue(null);
+        usersServiceMock.findByEmail.mockResolvedValue(null);
+      });
+
+      it('creates the second admin linked to the inviter and returns a session', async () => {
+        jwtServiceMock.verify.mockReturnValueOnce(validPayload);
+        prismaMock.companyAdmin.create.mockResolvedValueOnce({
+          id: 'admin-2',
+          email: 'invitee@test.local',
+          companyId: 'company-1',
+        });
+        jwtServiceMock.sign.mockReturnValueOnce('session-token');
+
+        const result = await service.confirmCompanyAdminInvite(dto);
+
+        expect(prismaMock.companyAdmin.create).toHaveBeenCalledWith({
+          data: {
+            companyId: 'company-1',
+            email: 'invitee@test.local',
+            password: expect.stringMatching(/^\$2[aby]\$/),
+            invitedById: 'admin-1',
+          },
+        });
+        expect(result).toEqual({
+          access_token: 'session-token',
+          admin: {
+            id: 'admin-2',
+            email: 'invitee@test.local',
+            companyId: 'company-1',
+          },
+        });
+      });
+
+      it('rejects with 409 when the email already belongs to a CompanyAdmin (token used twice)', async () => {
+        jwtServiceMock.verify.mockReturnValueOnce(validPayload);
+        companyAdminsServiceMock.findByEmail.mockResolvedValueOnce({
+          id: 'admin-2',
+        });
+
+        await expect(service.confirmCompanyAdminInvite(dto)).rejects.toThrow(
+          'An CompanyAdmin already exists with this email',
+        );
+        expect(prismaMock.companyAdmin.create).not.toHaveBeenCalled();
+      });
+
+      it('rejects with 404 when the invited company no longer exists', async () => {
+        jwtServiceMock.verify.mockReturnValueOnce(validPayload);
+        prismaMock.company.findUnique.mockResolvedValueOnce(null);
+
+        await expect(service.confirmCompanyAdminInvite(dto)).rejects.toThrow(
+          NotFoundException,
+        );
+        expect(prismaMock.companyAdmin.create).not.toHaveBeenCalled();
+      });
+
+      it('rejects a token of another type (activation token on the invite endpoint)', async () => {
+        jwtServiceMock.verify.mockReturnValueOnce({
+          ...validPayload,
+          type: 'company-activation',
+        });
+
+        await expect(service.confirmCompanyAdminInvite(dto)).rejects.toThrow(
+          new BadRequestException('Invalid token'),
+        );
+        expect(prismaMock.companyAdmin.create).not.toHaveBeenCalled();
+      });
+
+      it('rejects an expired token', async () => {
+        jwtServiceMock.verify.mockImplementationOnce(() => {
+          throw tokenError('TokenExpiredError');
+        });
+
+        await expect(service.confirmCompanyAdminInvite(dto)).rejects.toThrow(
+          new BadRequestException('Token has expired'),
+        );
+      });
+
+      it('rejects a token with a bad signature', async () => {
+        jwtServiceMock.verify.mockImplementationOnce(() => {
+          throw tokenError('JsonWebTokenError');
+        });
+
+        await expect(service.confirmCompanyAdminInvite(dto)).rejects.toThrow(
+          new BadRequestException('Invalid token'),
+        );
+      });
     });
   });
 });
