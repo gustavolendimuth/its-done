@@ -47,6 +47,6 @@ export class CreateAddressDto {
   isPrimary?: boolean;
 
   @IsString()
-  @IsNotEmpty({ message: 'Client ID is required' })
-  clientId: string;
+  @IsNotEmpty({ message: 'Company ID is required' })
+  companyId: string;
 }

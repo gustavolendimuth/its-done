@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { WorkSessionFinishForm } from "./work-session-finish-form";
 
 import type { LocalWorkSession } from "../lib/work-timer-db";
-import type { Client } from "@/features/clients";
+import type { Company } from "@/features/companies";
 
 const mockMutateAsync = jest.fn();
 const mockDiscard = jest.fn();
@@ -14,10 +14,8 @@ const mockReset = jest.fn();
 // suite's assertions target the WorkSessionFinishForm message keys directly
 // instead of pt-BR/en copy — that stays in messages/{en,pt-BR}.json (Fix 4).
 jest.mock("next-intl", () => ({
-  useTranslations:
-    () =>
-    (key: string, values?: Record<string, unknown>) =>
-      values ? `${key}:${JSON.stringify(values)}` : key,
+  useTranslations: () => (key: string, values?: Record<string, unknown>) =>
+    values ? `${key}:${JSON.stringify(values)}` : key,
 }));
 
 jest.mock("../lib/work-timer-engine", () => ({
@@ -34,7 +32,7 @@ jest.mock("../work-sessions", () => ({
   }),
 }));
 
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "client-1",
     company: "Acme",
@@ -44,12 +42,12 @@ const mockClients: Client[] = [
   },
 ];
 
-jest.mock("@/features/clients", () => ({
-  useClients: () => ({ data: mockClients }),
+jest.mock("@/features/companies", () => ({
+  useCompanies: () => ({ data: mockClients }),
 }));
 
-jest.mock("@/components/ui/client-combobox", () => ({
-  ClientCombobox: ({
+jest.mock("@/components/ui/company-combobox", () => ({
+  CompanyCombobox: ({
     value,
     onSelect,
   }: {
@@ -61,7 +59,7 @@ jest.mock("@/components/ui/client-combobox", () => ({
       value={value}
       onChange={(e) => onSelect(e.target.value)}
     >
-      <option value="">select client</option>
+      <option value="">select company</option>
       <option value="client-1">Acme</option>
     </select>
   ),
@@ -118,13 +116,17 @@ jest.mock("@/components/ui/date-picker", () => ({
       type="date"
       value={value ? value.toISOString().slice(0, 10) : ""}
       onChange={(e) =>
-        onChange(e.target.value ? new Date(`${e.target.value}T00:00:00.000Z`) : null)
+        onChange(
+          e.target.value ? new Date(`${e.target.value}T00:00:00.000Z`) : null,
+        )
       }
     />
   ),
 }));
 
-function baseSession(overrides: Partial<LocalWorkSession> = {}): LocalWorkSession {
+function baseSession(
+  overrides: Partial<LocalWorkSession> = {},
+): LocalWorkSession {
   return {
     id: "session-1",
     status: "STOPPING",
@@ -157,7 +159,9 @@ describe("WorkSessionFinishForm", () => {
   });
 
   it("blocks submit and shows the missing-client message when description is filled but client is empty", async () => {
-    render(<WorkSessionFinishForm session={baseSession()} onSuccess={jest.fn()} />);
+    render(
+      <WorkSessionFinishForm session={baseSession()} onSuccess={jest.fn()} />,
+    );
 
     fireEvent.change(screen.getByPlaceholderText("descriptionPlaceholder"), {
       target: { value: "Worked on the landing page" },
@@ -171,7 +175,9 @@ describe("WorkSessionFinishForm", () => {
   });
 
   it("blocks submit and shows the missing-description message when client is filled but description is empty", async () => {
-    render(<WorkSessionFinishForm session={baseSession()} onSuccess={jest.fn()} />);
+    render(
+      <WorkSessionFinishForm session={baseSession()} onSuccess={jest.fn()} />,
+    );
 
     fireEvent.change(screen.getByTestId("client-combobox"), {
       target: { value: "client-1" },
@@ -189,7 +195,7 @@ describe("WorkSessionFinishForm", () => {
     const onSuccess = jest.fn();
 
     render(
-      <WorkSessionFinishForm session={baseSession()} onSuccess={onSuccess} />
+      <WorkSessionFinishForm session={baseSession()} onSuccess={onSuccess} />,
     );
 
     fireEvent.change(screen.getByTestId("client-combobox"), {
@@ -204,7 +210,7 @@ describe("WorkSessionFinishForm", () => {
       expect(mockMutateAsync).toHaveBeenCalledWith({
         sessionId: "session-1",
         data: {
-          clientId: "client-1",
+          companyId: "client-1",
           projectId: undefined,
           description: "Worked on the landing page",
           date: "2026-01-01T00:00:00.000Z",
@@ -220,7 +226,7 @@ describe("WorkSessionFinishForm", () => {
       <WorkSessionFinishForm
         session={baseSession({ startedAt: "2025-06-15T00:00:00.000Z" })}
         onSuccess={jest.fn()}
-      />
+      />,
     );
 
     expect(screen.getByTestId("date-picker")).toHaveValue("2025-06-15");
@@ -233,7 +239,7 @@ describe("WorkSessionFinishForm", () => {
       <WorkSessionFinishForm
         session={baseSession({ startedAt: "2025-06-15T00:00:00.000Z" })}
         onSuccess={jest.fn()}
-      />
+      />,
     );
 
     fireEvent.change(screen.getByTestId("client-combobox"), {
@@ -251,7 +257,7 @@ describe("WorkSessionFinishForm", () => {
       expect(mockMutateAsync).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({ date: "2025-06-10T00:00:00.000Z" }),
-        })
+        }),
       );
     });
   });
@@ -260,23 +266,25 @@ describe("WorkSessionFinishForm", () => {
     render(
       <WorkSessionFinishForm
         session={baseSession({
-          clientId: "client-1",
+          companyId: "client-1",
           projectId: "project-1",
           description: "Planejado com antecedência",
         })}
         onSuccess={jest.fn()}
-      />
+      />,
     );
 
     expect(screen.getByTestId("client-combobox")).toHaveValue("client-1");
     expect(screen.getByTestId("project-combobox")).toHaveValue("project-1");
     expect(screen.getByPlaceholderText("descriptionPlaceholder")).toHaveValue(
-      "Planejado com antecedência"
+      "Planejado com antecedência",
     );
   });
 
   it("does not discard when only the discard trigger is clicked, without confirming", () => {
-    render(<WorkSessionFinishForm session={baseSession()} onSuccess={jest.fn()} />);
+    render(
+      <WorkSessionFinishForm session={baseSession()} onSuccess={jest.fn()} />,
+    );
 
     fireEvent.click(screen.getByTestId("discard-trigger"));
 
@@ -284,7 +292,9 @@ describe("WorkSessionFinishForm", () => {
   });
 
   it("discards the session once the confirmation action is clicked", async () => {
-    render(<WorkSessionFinishForm session={baseSession()} onSuccess={jest.fn()} />);
+    render(
+      <WorkSessionFinishForm session={baseSession()} onSuccess={jest.fn()} />,
+    );
 
     fireEvent.click(screen.getByTestId("discard-trigger"));
     fireEvent.click(await screen.findByTestId("discard-confirm"));
@@ -298,10 +308,12 @@ describe("WorkSessionFinishForm", () => {
       value: false,
     });
 
-    render(<WorkSessionFinishForm session={baseSession()} onSuccess={jest.fn()} />);
+    render(
+      <WorkSessionFinishForm session={baseSession()} onSuccess={jest.fn()} />,
+    );
 
     expect(
-      screen.getByTestId("work-session-finish-form-offline")
+      screen.getByTestId("work-session-finish-form-offline"),
     ).toBeInTheDocument();
     expect(screen.queryByTestId("client-combobox")).not.toBeInTheDocument();
   });

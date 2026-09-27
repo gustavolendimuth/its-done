@@ -10,7 +10,7 @@ import { resolveHourlyRate } from '../work-hours/utils/resolve-hourly-rate.util'
 interface StatsFilters {
   from?: Date;
   to?: Date;
-  clientId?: string;
+  companyId?: string;
 }
 
 @Injectable()
@@ -40,10 +40,10 @@ export class InvoicesService {
       throw new NotFoundException('Some work hours not found');
     }
 
-    // Verificar se todas as horas pertencem ao mesmo cliente
-    const clientIds = [...new Set(workHours.map((wh) => wh.clientId))];
-    if (clientIds.length > 1) {
-      throw new Error('All work hours must belong to the same client');
+    // Verificar se todas as horas pertencem à mesma empresa
+    const companyIds = [...new Set(workHours.map((wh) => wh.companyId))];
+    if (companyIds.length > 1) {
+      throw new Error('All work hours must belong to the same company');
     }
 
     // Verificar se há horas já faturadas em faturas não canceladas
@@ -78,10 +78,10 @@ export class InvoicesService {
       );
     }
 
-    const clientId = workHours[0].clientId;
+    const companyId = workHours[0].companyId;
 
     // Compute amount based on project hourly rates, falling back to the
-    // client's default rate when a work hour has no project.
+    // company's default rate when a work hour has no project.
     const projectIds = Array.from(
       new Set(
         workHours
@@ -90,13 +90,13 @@ export class InvoicesService {
       ),
     );
 
-    const [projects, client] = await Promise.all([
+    const [projects, company] = await Promise.all([
       projectIds.length
         ? this.prisma.project.findMany({
             where: { id: { in: projectIds } },
           })
         : Promise.resolve([]),
-      this.prisma.client.findUnique({ where: { id: clientId } }),
+      this.prisma.company.findUnique({ where: { id: companyId } }),
     ]);
 
     type ProjectRate = { id: string; hourlyRate?: number | null };
@@ -106,15 +106,15 @@ export class InvoicesService {
 
     const computedAmount = workHours.reduce((sum, wh) => {
       const project = wh.projectId ? rateMap.get(wh.projectId) : undefined;
-      const rate = resolveHourlyRate(project, client);
+      const rate = resolveHourlyRate(project, company);
       return sum + wh.hours * rate;
     }, 0);
 
     // Criar a invoice
     const invoice = await this.prisma.invoice.create({
       data: {
-        clientId,
-        // If client sent amount explicitly, use it; otherwise use computed
+        companyId,
+        // If the caller sent amount explicitly, use it; otherwise use computed
         amount:
           typeof createInvoiceDto.amount === 'number'
             ? createInvoiceDto.amount
@@ -129,17 +129,17 @@ export class InvoicesService {
         },
       },
       include: {
-        client: true,
+        company: true,
         invoiceWorkHours: true,
       },
     });
 
-    // Enviar notificação ao cliente sobre a nova invoice (reaproveita o
-    // client já buscado acima para resolver a rate)
-    if (client?.email) {
+    // Enviar notificação ao cliente sobre a nova invoice (reaproveita a
+    // company já buscada acima para resolver a rate)
+    if (company?.email) {
       try {
         await this.notificationsService.sendInvoiceUploadNotification(
-          client.email,
+          company.email,
           invoice.id,
         );
       } catch (error) {
@@ -182,12 +182,12 @@ export class InvoicesService {
           fileUrl: uploadResult.url,
         },
         include: {
-          client: true,
+          company: true,
           invoiceWorkHours: {
             include: {
               workHour: {
                 include: {
-                  client: true,
+                  company: true,
                   project: true,
                 },
               },
@@ -230,12 +230,12 @@ export class InvoicesService {
         },
       },
       include: {
-        client: true,
+        company: true,
         invoiceWorkHours: {
           include: {
             workHour: {
               include: {
-                client: true,
+                company: true,
                 project: true,
               },
             },
@@ -261,12 +261,12 @@ export class InvoicesService {
         },
       },
       include: {
-        client: true,
+        company: true,
         invoiceWorkHours: {
           include: {
             workHour: {
               include: {
-                client: true,
+                company: true,
                 project: true,
               },
             },
@@ -301,10 +301,10 @@ export class InvoicesService {
         throw new NotFoundException('Some work hours not found');
       }
 
-      // Verificar se todas as horas pertencem ao mesmo cliente
-      const clientIds = [...new Set(workHours.map((wh) => wh.clientId))];
-      if (clientIds.length > 1) {
-        throw new Error('All work hours must belong to the same client');
+      // Verificar se todas as horas pertencem à mesma empresa
+      const companyIds = [...new Set(workHours.map((wh) => wh.companyId))];
+      if (companyIds.length > 1) {
+        throw new Error('All work hours must belong to the same company');
       }
 
       // Verificar se há horas já faturadas em faturas não canceladas (excluindo a fatura atual)
@@ -366,12 +366,12 @@ export class InvoicesService {
         description: updateInvoiceDto.description,
       },
       include: {
-        client: true,
+        company: true,
         invoiceWorkHours: {
           include: {
             workHour: {
               include: {
-                client: true,
+                company: true,
                 project: true,
               },
             },
@@ -402,12 +402,12 @@ export class InvoicesService {
     });
   }
 
-  // Buscar invoices por cliente (para dashboard público)
-  async findByClient(clientId: string) {
+  // Buscar invoices por empresa (para dashboard público)
+  async findByClient(companyId: string) {
     return this.prisma.invoice.findMany({
-      where: { clientId },
+      where: { companyId },
       include: {
-        client: {
+        company: {
           select: {
             id: true,
             name: true,
@@ -451,13 +451,13 @@ export class InvoicesService {
           },
         },
       },
-      ...(filters.clientId ? { clientId: filters.clientId } : {}),
+      ...(filters.companyId ? { companyId: filters.companyId } : {}),
     };
 
     const invoices = await this.prisma.invoice.findMany({
       where,
       include: {
-        client: true,
+        company: true,
       },
     });
 
@@ -473,19 +473,19 @@ export class InvoicesService {
       .filter((inv) => inv.status === 'CANCELED')
       .reduce((sum, inv) => sum + inv.amount, 0);
 
-    // Group by client
+    // Group by company
     const clientMap = new Map();
     invoices.forEach((inv) => {
-      const key = inv.clientId;
+      const key = inv.companyId;
       if (!clientMap.has(key)) {
         clientMap.set(key, {
-          clientId: inv.clientId,
-          clientName: inv.client.name,
+          companyId: inv.companyId,
+          clientName: inv.company.name,
           totalAmount: 0,
         });
       }
-      const client = clientMap.get(key);
-      client.totalAmount += inv.amount;
+      const company = clientMap.get(key);
+      company.totalAmount += inv.amount;
     });
 
     // Group by month

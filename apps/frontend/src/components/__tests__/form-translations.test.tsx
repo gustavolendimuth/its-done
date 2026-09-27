@@ -60,16 +60,16 @@ describe("Form Translations", () => {
       render(<TestComponent locale="pt-BR" />);
 
       expect(screen.getByTestId("edit-client-form-subtitle")).toHaveTextContent(
-        "Modifique os detalhes e informações de contato do cliente"
+        "Modifique os detalhes e informações de contato da empresa"
       );
       expect(screen.getByTestId("add-client-form-subtitle")).toHaveTextContent(
-        "Digite as informações e detalhes de contato do cliente"
+        "Digite as informações e detalhes de contato da empresa"
       );
       expect(screen.getByTestId("add-hours-form-subtitle")).toHaveTextContent(
-        "Registre o tempo gasto em projetos de clientes"
+        "Registre o tempo gasto em projetos de empresas"
       );
       expect(screen.getByTestId("add-project-form-subtitle")).toHaveTextContent(
-        "Crie um novo projeto e associe-o a um cliente"
+        "Crie um novo projeto e associe-o a uma empresa"
       );
       expect(
         screen.getByTestId("create-invoice-form-subtitle")

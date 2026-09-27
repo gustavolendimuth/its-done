@@ -21,7 +21,7 @@ export interface CreateTimeEntryDto {
   hours: number;
   startTime?: string;
   endTime?: string;
-  clientId: string;
+  companyId: string;
   projectId?: string;
   taskId?: string;
 }

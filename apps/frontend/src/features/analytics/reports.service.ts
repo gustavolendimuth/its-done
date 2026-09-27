@@ -3,15 +3,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
 // Tipos específicos para diferentes tipos de filtros de relatório
-type ClientReportFilters = {
-  clientIds?: string[];
+type CompanyReportFilters = {
+  companyIds?: string[];
   startDate?: string;
   endDate?: string;
 };
 
 type InvoiceReportFilters = {
   status?: string[];
-  clientIds?: string[];
+  companyIds?: string[];
   startDate?: string;
   endDate?: string;
   minAmount?: number;
@@ -19,7 +19,7 @@ type InvoiceReportFilters = {
 };
 
 type TimeReportFilters = {
-  clientIds?: string[];
+  companyIds?: string[];
   projectIds?: string[];
   userIds?: string[];
   startDate?: string;
@@ -35,7 +35,7 @@ type UserReportFilters = {
 
 // União de todos os tipos de filtros possíveis
 type ReportFiltersUnion =
-  | ClientReportFilters
+  | CompanyReportFilters
   | InvoiceReportFilters
   | TimeReportFilters
   | UserReportFilters;
@@ -44,7 +44,7 @@ export interface Report {
   id: string;
   name: string;
   description: string;
-  type: "client" | "invoice" | "time" | "user";
+  type: "company" | "invoice" | "time" | "user";
   format: "pdf" | "excel" | "csv";
   filters: ReportFiltersUnion;
   status: "pending" | "processing" | "completed" | "failed";
@@ -64,16 +64,16 @@ export interface CreateReportDto {
 export interface ReportFilters {
   startDate?: string;
   endDate?: string;
-  clientId?: string;
+  companyId?: string;
 }
 
 export interface HoursReport {
   totalHours: number;
   totalDays: number;
   averageHoursPerDay: number;
-  clientBreakdown: {
-    clientId: string;
-    clientName: string;
+  companyBreakdown: {
+    companyId: string;
+    companyName: string;
     totalHours: number;
     percentage: number;
   }[];
@@ -91,9 +91,9 @@ export interface InvoiceReport {
   totalInvoices: number;
   pendingInvoices: number;
   paidInvoices: number;
-  clientBreakdown: {
-    clientId: string;
-    clientName: string;
+  companyBreakdown: {
+    companyId: string;
+    companyName: string;
     totalInvoices: number;
     pendingInvoices: number;
     paidInvoices: number;
@@ -118,7 +118,7 @@ export const useHoursReport = (filters?: ReportFilters) => {
 
       if (filters?.startDate) params.append("startDate", filters.startDate);
       if (filters?.endDate) params.append("endDate", filters.endDate);
-      if (filters?.clientId) params.append("clientId", filters.clientId);
+      if (filters?.companyId) params.append("companyId", filters.companyId);
 
       const { data } = await api.get<HoursReport>(`/reports/hours?${params}`);
 
@@ -137,10 +137,10 @@ export const useInvoiceReport = (filters?: ReportFilters) => {
 
       if (filters?.startDate) params.append("startDate", filters.startDate);
       if (filters?.endDate) params.append("endDate", filters.endDate);
-      if (filters?.clientId) params.append("clientId", filters.clientId);
+      if (filters?.companyId) params.append("companyId", filters.companyId);
 
       const { data } = await api.get<InvoiceReport>(
-        `/reports/invoices?${params}`
+        `/reports/invoices?${params}`,
       );
 
       return data;
@@ -150,7 +150,9 @@ export const useInvoiceReport = (filters?: ReportFilters) => {
   });
 };
 
-export const useSummaryReport = (filters?: Omit<ReportFilters, "clientId">) => {
+export const useSummaryReport = (
+  filters?: Omit<ReportFilters, "companyId">,
+) => {
   return useQuery({
     queryKey: ["reports", "summary", filters],
     queryFn: async () => {
@@ -160,7 +162,7 @@ export const useSummaryReport = (filters?: Omit<ReportFilters, "clientId">) => {
       if (filters?.endDate) params.append("endDate", filters.endDate);
 
       const { data } = await api.get<SummaryReport>(
-        `/reports/summary?${params}`
+        `/reports/summary?${params}`,
       );
 
       return data;

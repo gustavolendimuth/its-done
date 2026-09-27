@@ -80,8 +80,8 @@ export function WorkHoursTable({
     return workHours.filter((workHour) => {
       const haystack = [
         workHour.description,
-        workHour.client?.company,
-        workHour.client?.name,
+        workHour.company?.company,
+        workHour.company?.name,
         workHour.project?.name,
         workHour.task?.title,
       ]
@@ -231,11 +231,11 @@ export function WorkHoursTable({
 
                       {week.entries.map((workHour) => {
                         const clientLabel =
-                          workHour.client?.company ?? t("noClient");
+                          workHour.company?.company ?? t("noClient");
                         const clientSubtitle =
-                          workHour.client?.name &&
-                          workHour.client.name !== workHour.client.company
-                            ? workHour.client.name
+                          workHour.company?.name &&
+                          workHour.company.name !== workHour.company.company
+                            ? workHour.company.name
                             : null;
 
                         return (

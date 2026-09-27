@@ -16,7 +16,7 @@ const mockInvoices = [
     status: "PAID",
     amount: 1000,
     createdAt: "2024-01-15T00:00:00Z",
-    client: { name: "Client A" },
+    company: { name: "Client A" },
     invoiceWorkHours: [{ workHour: { hours: 10 } }],
   },
   {
@@ -26,7 +26,7 @@ const mockInvoices = [
     status: "PENDING",
     amount: 1500,
     createdAt: "2024-01-20T00:00:00Z",
-    client: { name: "Client B" },
+    company: { name: "Client B" },
     invoiceWorkHours: [{ workHour: { hours: 15 } }],
   },
   {
@@ -36,7 +36,7 @@ const mockInvoices = [
     status: "CANCELED",
     amount: 800,
     createdAt: "2024-01-10T00:00:00Z",
-    client: { name: "Client C" },
+    company: { name: "Client C" },
     invoiceWorkHours: [{ workHour: { hours: 8 } }],
   },
 ];

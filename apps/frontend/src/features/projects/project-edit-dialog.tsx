@@ -11,12 +11,12 @@ import { z } from "zod";
 import { useUpdateProject, type Project } from "./projects.service";
 
 import { Button } from "@/components/ui/button";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useClients } from "@/features/clients";
+import { useCompanies } from "@/features/companies";
 
 const projectSchema = z.object({
   name: z.string().min(1, { message: "Project name is required" }),
@@ -31,7 +31,7 @@ const projectSchema = z.object({
     .min(0, { message: "Alert hours must be 0 or greater" })
     .optional()
     .nullable(),
-  clientId: z.string().min(1, { message: "Client is required" }),
+  companyId: z.string().min(1, { message: "Company is required" }),
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
@@ -50,7 +50,7 @@ export function ProjectEditDialog({
   onSuccess,
 }: ProjectEditDialogProps) {
   const updateProject = useUpdateProject();
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const t = useTranslations("ProjectEditDialog");
 
   const {
@@ -66,7 +66,7 @@ export function ProjectEditDialog({
       description: project.description || "",
       hourlyRate: project.hourlyRate || null,
       alertHours: (project as any).alertHours || null,
-      clientId: project.clientId,
+      companyId: project.companyId,
     },
   });
 
@@ -78,7 +78,7 @@ export function ProjectEditDialog({
         description: project.description || "",
         hourlyRate: project.hourlyRate || null,
         alertHours: (project as any).alertHours || null,
-        clientId: project.clientId,
+        companyId: project.companyId,
       });
     }
   }, [project, reset]);
@@ -121,24 +121,24 @@ export function ProjectEditDialog({
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="clientId">{t("client")} *</Label>
+          <Label htmlFor="companyId">{t("client")} *</Label>
           <Controller
-            name="clientId"
+            name="companyId"
             control={control}
             render={({ field }) => (
-              <ClientCombobox
+              <CompanyCombobox
                 clients={clients}
                 value={field.value}
                 onSelect={field.onChange}
                 placeholder={t("selectClient", {
-                  defaultMessage: "Select a client",
+                  defaultMessage: "Select a company",
                 })}
               />
             )}
           />
-          {errors.clientId && (
+          {errors.companyId && (
             <p className="text-sm text-destructive">
-              {errors.clientId.message}
+              {errors.companyId.message}
             </p>
           )}
         </div>

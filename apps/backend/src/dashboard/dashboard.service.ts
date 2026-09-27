@@ -10,13 +10,13 @@ export interface DashboardStats {
   lastMonthHours: number;
   hoursGrowth: number;
   recentActivities: {
-    type: 'work_hour' | 'invoice' | 'client';
+    type: 'work_hour' | 'invoice' | 'company';
     description: {
       key: string;
       values: Record<string, any>;
     };
     date: Date;
-    client?: string;
+    company?: string;
   }[];
   topClients: {
     id: string;
@@ -67,8 +67,8 @@ export class DashboardService {
       }),
 
       // Total clients
-      this.prisma.client.count({
-        where: { userId },
+      this.prisma.company.count({
+        where: { collaborators: { some: { userId } } },
       }),
 
       // Total invoices
@@ -118,7 +118,7 @@ export class DashboardService {
       // Recent work hours (last 10)
       this.prisma.workHour.findMany({
         where: { userId },
-        include: { client: true },
+        include: { company: true },
         orderBy: { createdAt: 'desc' },
         take: 5,
       }),
@@ -132,14 +132,14 @@ export class DashboardService {
             },
           },
         },
-        include: { client: true },
+        include: { company: true },
         orderBy: { createdAt: 'desc' },
         take: 3,
       }),
 
       // Recent clients (last 3)
-      this.prisma.client.findMany({
-        where: { userId },
+      this.prisma.company.findMany({
+        where: { collaborators: { some: { userId } } },
         orderBy: { createdAt: 'desc' },
         take: 2,
       }),
@@ -150,7 +150,7 @@ export class DashboardService {
           userId,
           date: { gte: last4Weeks },
         },
-        include: { client: true },
+        include: { company: true },
         orderBy: { date: 'asc' },
       }),
     ]);
@@ -173,33 +173,33 @@ export class DashboardService {
           },
         },
         date: wh.createdAt,
-        client: wh.client.company,
+        company: wh.company.company,
       })),
       ...recentInvoices.map((inv) => ({
         type: 'invoice' as const,
         description: {
           key: 'invoiceCreatedFor',
-          values: { company: inv.client.company },
+          values: { company: inv.company.company },
         },
         date: inv.createdAt,
-        client: inv.client.company,
+        company: inv.company.company,
       })),
-      ...recentClients.map((client) => ({
-        type: 'client' as const,
+      ...recentClients.map((company) => ({
+        type: 'company' as const,
         description: {
           key: 'newClient',
-          values: { company: client.company },
+          values: { company: company.company },
         },
-        date: client.createdAt,
-        client: client.company,
+        date: company.createdAt,
+        company: company.company,
       })),
     ]
       .sort((a, b) => b.date.getTime() - a.date.getTime())
       .slice(0, 10);
 
     // Get top clients by hours and invoices
-    const clientStats = await this.prisma.client.findMany({
-      where: { userId },
+    const clientStats = await this.prisma.company.findMany({
+      where: { collaborators: { some: { userId } } },
       include: {
         workHours: {
           select: { hours: true },
@@ -211,11 +211,11 @@ export class DashboardService {
     });
 
     const topClients = clientStats
-      .map((client) => ({
-        id: client.id,
-        name: client.company,
-        totalHours: client.workHours.reduce((sum, wh) => sum + wh.hours, 0),
-        totalInvoices: client.invoices.length,
+      .map((company) => ({
+        id: company.id,
+        name: company.company,
+        totalHours: company.workHours.reduce((sum, wh) => sum + wh.hours, 0),
+        totalInvoices: company.invoices.length,
       }))
       .sort((a, b) => b.totalHours - a.totalHours)
       .slice(0, 5);

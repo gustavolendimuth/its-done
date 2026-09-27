@@ -41,9 +41,9 @@ const mockWorkHours: WorkHour[] = [
     date: "2024-03-01",
     description: "Web development",
     hours: 5,
-    client: {
+    company: {
       id: "client1",
-      name: "Client 1",
+      name: "Company 1",
       email: "client1@example.com",
     },
     project: {
@@ -56,9 +56,9 @@ const mockWorkHours: WorkHour[] = [
     date: "2024-03-02",
     description: "App design",
     hours: 3,
-    client: {
+    company: {
       id: "client2",
-      name: "Client 2",
+      name: "Company 2",
       email: "client2@example.com",
     },
     project: {
@@ -112,7 +112,7 @@ jest.mock("@/features/time-tracking", () => ({
       {workHours.map((workHour: any) => (
         <div data-testid="work-hour-row" key={workHour.id}>
           <p>Hours: {workHour.hours}</p>
-          <p>Client: {workHour.client?.name}</p>
+          <p>Company: {workHour.company?.name}</p>
           <p>Project: {workHour.project?.name}</p>
           <p>Deleting: {(deletingId === workHour.id).toString()}</p>
           <button
@@ -146,8 +146,8 @@ jest.mock("@/features/time-tracking", () => ({
   ),
 }));
 
-jest.mock("@/features/clients", () => ({
-  useClients: jest.fn(() => ({
+jest.mock("@/features/companies", () => ({
+  useCompanies: jest.fn(() => ({
     data: mockClients,
     isLoading: false,
     error: null,
@@ -196,9 +196,9 @@ describe("WorkHoursPage", () => {
     const rows = screen.getAllByTestId("work-hour-row");
     expect(rows).toHaveLength(2);
     expect(rows[0]).toHaveTextContent("Hours: 5");
-    expect(rows[0]).toHaveTextContent("Client: Client 1");
+    expect(rows[0]).toHaveTextContent("Company: Company 1");
     expect(rows[1]).toHaveTextContent("Hours: 3");
-    expect(rows[1]).toHaveTextContent("Client: Client 2");
+    expect(rows[1]).toHaveTextContent("Company: Company 2");
   });
 
   it("should filter work hours by client", async () => {
@@ -216,7 +216,7 @@ describe("WorkHoursPage", () => {
     // Check if useTimeEntries was called with correct filter
     expect(useTimeEntries).toHaveBeenCalledWith(
       expect.objectContaining({
-        clientId: "client1",
+        companyId: "client1",
       })
     );
   });

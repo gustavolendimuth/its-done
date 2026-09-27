@@ -1,0 +1,102 @@
+"use client";
+
+import { Building2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+
+import { EntityCombobox } from "@/components/ui/entity-combobox";
+import { FormModal } from "@/components/ui/form-modal";
+import { CompanyForm, Company } from "@/features/companies";
+
+interface CompanyComboboxProps {
+  clients: Company[];
+  value?: string;
+  onSelect: (companyId: string) => void;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+  showAddButton?: boolean;
+  onClientAdded?: () => void;
+}
+
+export function CompanyCombobox({
+  clients,
+  value,
+  onSelect,
+  className,
+  disabled = false,
+  showAddButton = true,
+  onClientAdded,
+}: CompanyComboboxProps) {
+  const t = useTranslations("clients");
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+
+  const handleCreateClient = () => {
+    setAddDialogOpen(true);
+  };
+
+  const handleClientCreated = () => {
+    setAddDialogOpen(false);
+    onClientAdded?.();
+  };
+
+  const getSearchString = (company: Company) => {
+    const searchParts = [company.company, company.name, company.email].filter(
+      Boolean,
+    );
+
+    return searchParts.join(" ");
+  };
+
+  return (
+    <>
+      <EntityCombobox
+        items={clients}
+        value={value}
+        onSelect={onSelect}
+        placeholder={t("selectClient")}
+        className={className}
+        disabled={disabled}
+        showAddButton={showAddButton}
+        onAddItem={handleCreateClient}
+        addButtonLabel={t("addNewClient")}
+        noItemsFoundMessage={t("noClientsFound")}
+        searchPlaceholder={t("searchClients")}
+        icon={Building2}
+        getDisplayValue={(company) => company.company}
+        getId={(company) => company.id}
+        getSearchValue={getSearchString}
+        renderItem={(company) => (
+          <div className="flex items-center gap-2">
+            <Building2 className="h-4 w-4 shrink-0 opacity-50" />
+            <div className="flex flex-col items-start">
+              <span className="font-medium">{company.company}</span>
+              {company.name && (
+                <span className="text-sm text-muted-foreground">
+                  {company.name}
+                </span>
+              )}
+              <span className="text-xs text-muted-foreground">
+                {company.email}
+              </span>
+            </div>
+          </div>
+        )}
+      />
+
+      {/* Add Company Dialog */}
+      {addDialogOpen && (
+        <FormModal
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          title={t("addNewClient")}
+          description={t("addNewClientFormSubtitle")}
+          icon={Building2}
+          className="sm:max-w-[600px]"
+        >
+          <CompanyForm onSuccess={handleClientCreated} />
+        </FormModal>
+      )}
+    </>
+  );
+}

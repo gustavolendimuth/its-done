@@ -22,7 +22,7 @@ export interface LocalWorkSession {
   // WKT-10 "preencher detalhes antes de iniciar" — set when the session was
   // started via the upfront details form; null when started plainly and
   // only filled in later at finish().
-  clientId?: string | null;
+  companyId?: string | null;
   projectId?: string | null;
   taskId?: string | null;
   description?: string | null;
@@ -37,7 +37,7 @@ export interface SyncEvent {
   type: SyncEventType;
   clientTimestamp: string;
   // Only meaningful on a "start" event (WKT-10) — ignored by every other type.
-  clientId?: string;
+  companyId?: string;
   projectId?: string;
   taskId?: string;
   description?: string;

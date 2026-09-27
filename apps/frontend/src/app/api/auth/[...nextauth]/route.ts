@@ -22,51 +22,86 @@ const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("=== AUTHORIZE CREDENTIALS ===");
-        console.log("Credentials:", credentials);
-
         if (!credentials?.email || !credentials?.password) {
-          console.log("Missing credentials");
+          return null;
+        }
+
+        const apiUrl = getApiUrl();
+        const body = JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+        });
+
+        try {
+          const userResponse = await fetch(`${apiUrl}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body,
+          });
+
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            if (!userData.access_token) {
+              return null;
+            }
+            return {
+              id: userData.user.id,
+              email: userData.user.email,
+              name: userData.user.name,
+              role: userData.user.role,
+              actorType: "USER",
+              accessToken: userData.access_token,
+            };
+          }
+        } catch (error) {
+          console.error("Error during User login:", error);
+        }
+
+        try {
+          const userCheckResponse = await fetch(
+            `${apiUrl}/users/check?email=${encodeURIComponent(credentials.email)}`
+          );
+          if (!userCheckResponse.ok) {
+            return null;
+          }
+
+          const { exists } = await userCheckResponse.json();
+          if (exists !== false) {
+            return null;
+          }
+        } catch (error) {
+          console.error("Error checking User email:", error);
           return null;
         }
 
         try {
-          const apiUrl = getApiUrl();
+          const adminResponse = await fetch(
+            `${apiUrl}/company-admin/auth/login`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body,
+            }
+          );
 
-          console.log("Backend API URL:", apiUrl);
-
-          const response = await fetch(`${apiUrl}/auth/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
-            }),
-          });
-
-          console.log("Response status:", response.status);
-          const data = await response.json();
-
-          console.log("Response data:", data);
-
-          if (response.ok && data.access_token) {
-            console.log("Login successful");
-
+          if (adminResponse.ok) {
+            const adminData = await adminResponse.json();
+            if (!adminData.access_token) {
+              return null;
+            }
             return {
-              id: data.user.id,
-              email: data.user.email,
-              name: data.user.name,
-              role: data.user.role,
-              accessToken: data.access_token,
+              id: adminData.admin.id,
+              email: adminData.admin.email,
+              name: adminData.admin.email,
+              actorType: "COMPANY_ADMIN",
+              accessToken: adminData.access_token,
             };
           }
-
-          console.log("Login failed - Response:", response.status, data);
-          return null;
         } catch (error) {
-          console.error("Error during login:", error);
-          return null;
+          console.error("Error during CompanyAdmin login:", error);
         }
+
+        return null;
       },
     }),
   ],
@@ -74,10 +109,6 @@ const authOptions: AuthOptions = {
   debug: process.env.NODE_ENV === "development",
   callbacks: {
     async signIn({ account, profile, user }) {
-      console.log("=== SIGNIN CALLBACK ===");
-      console.log("Account provider:", account?.provider);
-      console.log("User:", user);
-
       if (account?.provider === "google" && profile) {
         try {
           const apiUrl = getApiUrl();
@@ -107,6 +138,7 @@ const authOptions: AuthOptions = {
               user.email = data.user.email;
               user.name = data.user.name;
               user.role = data.user.role;
+              user.actorType = "USER";
               user.accessToken = data.access_token;
             }
 
@@ -120,39 +152,29 @@ const authOptions: AuthOptions = {
         }
       }
 
-      console.log("SignIn returning true");
       return true;
     },
     async jwt({ token, user }) {
-      console.log("=== JWT CALLBACK ===");
-      console.log("Token before:", token);
-      console.log("User:", user);
-
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
         token.role = user.role;
+        token.actorType = user.actorType;
         token.accessToken = user.accessToken;
       }
 
-      console.log("Token after:", token);
       return token;
     },
     async session({ session, token }) {
-      console.log("=== SESSION CALLBACK ===");
-      console.log("Session before:", session);
-      console.log("Token:", token);
-
       if (session.user) {
         session.user.id = token.id;
         session.user.email = token.email;
         session.user.name = token.name;
         session.user.role = token.role;
+        session.user.actorType = token.actorType;
       }
-      session.accessToken = token.accessToken;
 
-      console.log("Session after:", session);
       return session;
     },
     async redirect({ url, baseUrl }) {

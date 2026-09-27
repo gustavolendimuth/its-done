@@ -12,16 +12,16 @@ export class ProjectsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createProjectDto: CreateProjectDto, userId: string) {
-    // Verificar se o cliente pertence ao usuário
-    const client = await this.prisma.client.findFirst({
+    // Verificar se a empresa pertence ao usuário
+    const company = await this.prisma.company.findFirst({
       where: {
-        id: createProjectDto.clientId,
-        userId: userId,
+        id: createProjectDto.companyId,
+        collaborators: { some: { userId } },
       },
     });
 
-    if (!client) {
-      throw new NotFoundException('Client not found or access denied');
+    if (!company) {
+      throw new NotFoundException('Company not found or access denied');
     }
 
     return this.prisma.project.create({
@@ -30,7 +30,7 @@ export class ProjectsService {
         userId,
       },
       include: {
-        client: true,
+        company: true,
         _count: {
           select: {
             workHours: true,
@@ -40,14 +40,14 @@ export class ProjectsService {
     });
   }
 
-  async findAll(userId: string, clientId?: string) {
+  async findAll(userId: string, companyId?: string) {
     const projects = await this.prisma.project.findMany({
       where: {
         userId,
-        ...(clientId && { clientId }),
+        ...(companyId && { companyId }),
       },
       include: {
-        client: true,
+        company: true,
         _count: {
           select: {
             workHours: true,
@@ -88,7 +88,7 @@ export class ProjectsService {
         userId,
       },
       include: {
-        client: true,
+        company: true,
         workHours: {
           orderBy: {
             date: 'desc',
@@ -121,17 +121,17 @@ export class ProjectsService {
       throw new NotFoundException('Project not found');
     }
 
-    // Se está mudando o cliente, verificar se o novo cliente pertence ao usuário
-    if (updateProjectDto.clientId) {
-      const client = await this.prisma.client.findFirst({
+    // Se está mudando a empresa, verificar se a nova empresa pertence ao usuário
+    if (updateProjectDto.companyId) {
+      const company = await this.prisma.company.findFirst({
         where: {
-          id: updateProjectDto.clientId,
-          userId: userId,
+          id: updateProjectDto.companyId,
+          collaborators: { some: { userId } },
         },
       });
 
-      if (!client) {
-        throw new NotFoundException('Client not found or access denied');
+      if (!company) {
+        throw new NotFoundException('Company not found or access denied');
       }
     }
 
@@ -139,7 +139,7 @@ export class ProjectsService {
       where: { id },
       data: updateProjectDto,
       include: {
-        client: true,
+        company: true,
         _count: {
           select: {
             workHours: true,

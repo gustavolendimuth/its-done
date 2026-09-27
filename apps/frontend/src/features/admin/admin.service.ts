@@ -42,7 +42,7 @@ export interface RecentActivity {
     date: string;
     hours: number;
     description: string;
-    client: { name: string };
+    company: { name: string };
     project?: { name: string };
   }>;
   invoices: Array<{
@@ -50,7 +50,7 @@ export interface RecentActivity {
     number: string;
     amount: number;
     status: string;
-    client: { name: string };
+    company: { name: string };
     createdAt: string;
   }>;
   newUsers: Array<{

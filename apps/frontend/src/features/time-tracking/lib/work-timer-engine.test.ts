@@ -50,9 +50,9 @@ describe("work-timer-engine", () => {
     );
   });
 
-  it("start(details) sets clientId/projectId/taskId/description on the session and enqueues them on the start event (WKT-10)", async () => {
+  it("start(details) sets companyId/projectId/taskId/description on the session and enqueues them on the start event (WKT-10)", async () => {
     const session = await engine.start({
-      clientId: "client-1",
+      companyId: "client-1",
       projectId: "project-1",
       taskId: "task-1",
       description: "Planejado com antecedência",
@@ -60,7 +60,7 @@ describe("work-timer-engine", () => {
 
     expect(session).toMatchObject({
       status: "RUNNING",
-      clientId: "client-1",
+      companyId: "client-1",
       projectId: "project-1",
       taskId: "task-1",
       description: "Planejado com antecedência",
@@ -68,7 +68,7 @@ describe("work-timer-engine", () => {
     expect(dbMock.enqueueEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "start",
-        clientId: "client-1",
+        companyId: "client-1",
         projectId: "project-1",
         taskId: "task-1",
         description: "Planejado com antecedência",

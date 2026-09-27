@@ -24,7 +24,7 @@ interface WorkHoursBigStatsProps {
     startDate: Date | null;
     endDate: Date | null;
   };
-  clientId?: string;
+  companyId?: string;
   hourlyRate?: number;
   className?: string;
   workHours?: TimeEntry[];
@@ -33,7 +33,7 @@ interface WorkHoursBigStatsProps {
 
 export function WorkHoursBigStats({
   dateRange,
-  clientId,
+  companyId,
   hourlyRate = 50,
   className,
   workHours = [],
@@ -47,7 +47,7 @@ export function WorkHoursBigStats({
       ? {
           from: dateRange.startDate.toISOString(),
           to: dateRange.endDate.toISOString(),
-          clientId: clientId !== "all" ? clientId : undefined,
+          companyId: companyId !== "all" ? companyId : undefined,
         }
       : undefined;
 
@@ -66,7 +66,7 @@ export function WorkHoursBigStats({
     isLoading: isTotalLoading,
     isFetching: isTotalFetching,
   } = useWorkHoursStats({
-    clientId: clientId !== "all" ? clientId : undefined,
+    companyId: companyId !== "all" ? companyId : undefined,
   });
 
   console.log("📊 WorkHoursBigStats - periodStats:", periodStats);

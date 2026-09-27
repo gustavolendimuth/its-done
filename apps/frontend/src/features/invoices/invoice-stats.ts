@@ -9,7 +9,7 @@ export interface InvoiceStats {
   totalPending: number;
   totalOverdue: number;
   totalAmountByClient: {
-    clientId: string;
+    companyId: string;
     clientName: string;
     totalAmount: number;
   }[];
@@ -22,7 +22,7 @@ export interface InvoiceStats {
 export const useInvoiceStats = (params?: {
   from?: string;
   to?: string;
-  clientId?: string;
+  companyId?: string;
 }) => {
   return useQuery({
     queryKey: ["invoices", "stats", params],

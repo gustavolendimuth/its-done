@@ -9,7 +9,7 @@ const prismaMock = {
 describe('DraftInvoiceService - createDraft()', () => {
   let service: DraftInvoiceService;
   const userId = 'user-1';
-  const clientId = 'client-1';
+  const companyId = 'company-1';
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -19,12 +19,12 @@ describe('DraftInvoiceService - createDraft()', () => {
   it('uses the project hourly rate when available', async () => {
     prismaMock.invoice.create.mockResolvedValueOnce({ id: 'inv1' });
 
-    await service.createDraft(userId, clientId, [
+    await service.createDraft(userId, companyId, [
       {
         id: 'wh1',
         hours: 2,
         project: { hourlyRate: 100 },
-        client: { hourlyRate: 40 },
+        company: { hourlyRate: 40 },
       },
     ]);
 
@@ -35,11 +35,11 @@ describe('DraftInvoiceService - createDraft()', () => {
     );
   });
 
-  it("falls back to the client's default rate when there is no project", async () => {
+  it("falls back to the company's default rate when there is no project", async () => {
     prismaMock.invoice.create.mockResolvedValueOnce({ id: 'inv2' });
 
-    await service.createDraft(userId, clientId, [
-      { id: 'wh1', hours: 3, project: null, client: { hourlyRate: 40 } },
+    await service.createDraft(userId, companyId, [
+      { id: 'wh1', hours: 3, project: null, company: { hourlyRate: 40 } },
     ]);
 
     expect(prismaMock.invoice.create).toHaveBeenCalledWith(
@@ -49,11 +49,11 @@ describe('DraftInvoiceService - createDraft()', () => {
     );
   });
 
-  it('computes 0 when neither project nor client have a rate', async () => {
+  it('computes 0 when neither project nor company have a rate', async () => {
     prismaMock.invoice.create.mockResolvedValueOnce({ id: 'inv3' });
 
-    await service.createDraft(userId, clientId, [
-      { id: 'wh1', hours: 5, project: null, client: { hourlyRate: null } },
+    await service.createDraft(userId, companyId, [
+      { id: 'wh1', hours: 5, project: null, company: { hourlyRate: null } },
     ]);
 
     expect(prismaMock.invoice.create).toHaveBeenCalledWith(

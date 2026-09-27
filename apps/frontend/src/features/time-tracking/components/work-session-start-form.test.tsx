@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { WorkSessionStartForm } from "./work-session-start-form";
 
-import type { Client } from "@/features/clients";
+import type { Company } from "@/features/companies";
 
 const mockOnStart = jest.fn();
 
@@ -12,7 +12,7 @@ jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "client-1",
     company: "Acme",
@@ -22,12 +22,12 @@ const mockClients: Client[] = [
   },
 ];
 
-jest.mock("@/features/clients", () => ({
-  useClients: () => ({ data: mockClients }),
+jest.mock("@/features/companies", () => ({
+  useCompanies: () => ({ data: mockClients }),
 }));
 
-jest.mock("@/components/ui/client-combobox", () => ({
-  ClientCombobox: ({
+jest.mock("@/components/ui/company-combobox", () => ({
+  CompanyCombobox: ({
     value,
     onSelect,
   }: {
@@ -39,7 +39,7 @@ jest.mock("@/components/ui/client-combobox", () => ({
       value={value}
       onChange={(e) => onSelect(e.target.value)}
     >
-      <option value="">select client</option>
+      <option value="">select company</option>
       <option value="client-1">Acme</option>
     </select>
   ),
@@ -131,7 +131,7 @@ describe("WorkSessionStartForm", () => {
 
     await waitFor(() => {
       expect(mockOnStart).toHaveBeenCalledWith({
-        clientId: "client-1",
+        companyId: "client-1",
         projectId: "project-1",
         description: "About to work on the landing page",
       });
@@ -158,7 +158,7 @@ describe("WorkSessionStartForm", () => {
     render(<WorkSessionStartForm onCancel={onCancel} onStart={mockOnStart} />);
 
     expect(
-      screen.getByTestId("work-session-start-form-offline")
+      screen.getByTestId("work-session-start-form-offline"),
     ).toBeInTheDocument();
     expect(screen.queryByTestId("client-combobox")).not.toBeInTheDocument();
 

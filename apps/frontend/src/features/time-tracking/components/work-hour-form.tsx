@@ -13,14 +13,14 @@ import { useCreateTimeEntry, useUpdateTimeEntry } from "../time-entries";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { Client } from "@/features/clients";
+import { Company } from "@/features/companies";
 
 type EntryMode = "duration" | "interval";
 
@@ -80,11 +80,11 @@ function buildSchema(
     endTime: timeField,
   };
   if (includeClientProject) {
-    shape.clientId = z.string().min(1, "Client is required");
+    shape.companyId = z.string().min(1, "Company is required");
     // Story 8 (MW-5): Project is optional — dev work logged without one
     // must not be forced into inventing a fake Project just to satisfy the
-    // form. Client is still required (mirrors the backend, which always
-    // needs a clientId).
+    // form. Company is still required (mirrors the backend, which always
+    // needs a companyId).
     shape.projectId = z.string().optional();
     shape.taskId = z.string().optional();
   }
@@ -138,7 +138,7 @@ type WorkHourFormData = {
   hours: string;
   startTime: string;
   endTime: string;
-  clientId?: string;
+  companyId?: string;
   projectId?: string;
   taskId?: string;
 };
@@ -156,7 +156,7 @@ interface EditableWorkHour {
 interface WorkHourFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
-  clients: Client[];
+  clients: Company[];
   defaultClientId?: string;
   hideClientSelection?: boolean;
   workHour?: EditableWorkHour | null;
@@ -203,16 +203,16 @@ export function WorkHourForm({
       hours: workHour ? decimalHoursToHHmm(workHour.hours) : "",
       startTime: workHour?.startTime ?? "",
       endTime: workHour?.endTime ?? "",
-      clientId: defaultClientId || "",
+      companyId: defaultClientId || "",
       description: workHour?.description ?? "",
     },
   });
 
-  const selectedClientId = watch("clientId");
+  const selectedClientId = watch("companyId");
   const isInvoiced = !!workHour?.isInvoiced;
   const fieldsDisabled = isEditMode && isInvoiced;
 
-  // Reset project/task when client changes
+  // Reset project/task when company changes
   useEffect(() => {
     setValue("projectId", "");
     setValue("taskId", "");
@@ -297,7 +297,7 @@ export function WorkHourForm({
       const payload: Record<string, unknown> = {
         date: formData.date.toISOString(),
         hours: decimalHours,
-        clientId: formData.clientId,
+        companyId: formData.companyId,
         projectId: formData.projectId || undefined,
         taskId: formData.taskId || undefined,
         description: formData.description || undefined,
@@ -386,10 +386,10 @@ export function WorkHourForm({
             {t("client")} *
           </Label>
           <Controller
-            name="clientId"
+            name="companyId"
             control={control}
             render={({ field }) => (
-              <ClientCombobox
+              <CompanyCombobox
                 clients={clients}
                 value={field.value ?? ""}
                 onSelect={field.onChange}
@@ -398,9 +398,9 @@ export function WorkHourForm({
               />
             )}
           />
-          {errors.clientId && (
+          {errors.companyId && (
             <p className="text-sm text-destructive">
-              {errors.clientId.message}
+              {errors.companyId.message}
             </p>
           )}
         </div>
@@ -416,7 +416,7 @@ export function WorkHourForm({
             control={control}
             render={({ field }) => (
               <ProjectCombobox
-                clientId={selectedClientId}
+                companyId={selectedClientId}
                 value={field.value}
                 onSelect={(projectId) => field.onChange(projectId ?? "")}
                 placeholder={t("selectProject")}
@@ -448,7 +448,7 @@ export function WorkHourForm({
             control={control}
             render={({ field }) => (
               <TaskCombobox
-                clientId={selectedClientId}
+                companyId={selectedClientId}
                 value={field.value}
                 onSelect={(taskId) => field.onChange(taskId ?? "")}
                 disabled={!selectedClientId}

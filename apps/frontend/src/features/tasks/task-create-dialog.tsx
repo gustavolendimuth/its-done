@@ -12,17 +12,17 @@ import { parseTaskLink } from "./lib/parse-task-link";
 import { useCreateTask, type Task } from "./tasks.service";
 
 import { Button } from "@/components/ui/button";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { FormModal } from "@/components/ui/form-modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
-import { useClients } from "@/features/clients";
+import { useCompanies } from "@/features/companies";
 import { useProjects } from "@/features/projects";
 
 const taskSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
-  clientId: z.string().min(1, { message: "Client is required" }),
+  companyId: z.string().min(1, { message: "Company is required" }),
   projectId: z.string().optional(),
   link: z.string().optional(),
 });
@@ -32,18 +32,18 @@ type TaskFormData = z.infer<typeof taskSchema>;
 interface TaskCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  clientId?: string;
+  companyId?: string;
   onSuccess?: (task: Task) => void;
 }
 
 export function TaskCreateDialog({
   open,
   onOpenChange,
-  clientId,
+  companyId,
   onSuccess,
 }: TaskCreateDialogProps) {
   const createTask = useCreateTask();
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const t = useTranslations("TaskCreateDialog");
 
   const {
@@ -58,14 +58,14 @@ export function TaskCreateDialog({
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-      clientId: clientId || "",
+      companyId: companyId || "",
       projectId: "",
       title: "",
       link: "",
     },
   });
 
-  const selectedClientId = watch("clientId");
+  const selectedClientId = watch("companyId");
   const { data: projects = [] } = useProjects(selectedClientId);
 
   // Story 3/4: when the pasted link itself carries the info (Jira key,
@@ -107,7 +107,7 @@ export function TaskCreateDialog({
     try {
       const task = await createTask.mutateAsync({
         title: data.title,
-        clientId: data.clientId,
+        companyId: data.companyId,
         projectId: data.projectId || undefined,
         link: data.link || undefined,
       });
@@ -137,12 +137,12 @@ export function TaskCreateDialog({
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="clientId">{t("client")} *</Label>
+          <Label htmlFor="companyId">{t("client")} *</Label>
           <Controller
-            name="clientId"
+            name="companyId"
             control={control}
             render={({ field }) => (
-              <ClientCombobox
+              <CompanyCombobox
                 clients={clients}
                 value={field.value}
                 onSelect={field.onChange}
@@ -150,9 +150,9 @@ export function TaskCreateDialog({
               />
             )}
           />
-          {errors.clientId && (
+          {errors.companyId && (
             <p className="text-sm text-destructive">
-              {errors.clientId.message}
+              {errors.companyId.message}
             </p>
           )}
         </div>
@@ -164,7 +164,7 @@ export function TaskCreateDialog({
             control={control}
             render={({ field }) => (
               <ProjectCombobox
-                clientId={selectedClientId}
+                companyId={selectedClientId}
                 value={field.value}
                 onSelect={handleProjectSelect}
                 disabled={!selectedClientId}

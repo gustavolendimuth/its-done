@@ -19,7 +19,7 @@ export interface User {
   };
 }
 
-export interface Client {
+export interface Company {
   id: string;
   name?: string;
   email: string;
@@ -48,11 +48,11 @@ export interface Project {
   name: string;
   description?: string;
   hourlyRate?: number;
-  clientId: string;
+  companyId: string;
   userId: string;
   createdAt: DateField;
   updatedAt: DateField;
-  client?: Client;
+  company?: Company;
   user?: User;
   workHours?: WorkHour[];
   _count?: {
@@ -68,13 +68,13 @@ export interface WorkHour {
   startTime?: string | null;
   endTime?: string | null;
   userId: string;
-  clientId: string;
+  companyId: string;
   projectId?: string;
   taskId?: string;
   createdAt: DateField;
   updatedAt: DateField;
   user?: User;
-  client?: Client;
+  company?: Company;
   project?: Project;
   task?: Task;
 }
@@ -82,13 +82,13 @@ export interface WorkHour {
 export interface Task {
   id: string;
   userId: string;
-  clientId: string;
+  companyId: string;
   projectId?: string;
   title: string;
   link?: string;
   createdAt: DateField;
   updatedAt: DateField;
-  client?: Client;
+  company?: Company;
   project?: Project;
   /** Sum of actual hours worked across this task's entries. */
   totalHours?: number;
@@ -103,10 +103,10 @@ export interface Address {
   country: string;
   type: string;
   isPrimary: boolean;
-  clientId: string;
+  companyId: string;
   createdAt: DateField;
   updatedAt: DateField;
-  client?: Client;
+  company?: Company;
 }
 
 export interface Settings {
@@ -122,14 +122,14 @@ export interface Settings {
 export interface Invoice {
   id: string;
   number?: string;
-  clientId: string;
+  companyId: string;
   fileUrl?: string;
   amount: number;
   status: "PENDING" | "PAID" | "CANCELED";
   description?: string;
   createdAt: DateField;
   updatedAt: DateField;
-  client?: Client;
+  company?: Company;
   invoiceWorkHours?: InvoiceWorkHour[];
 }
 
@@ -157,10 +157,10 @@ export interface TimeEntry {
   date: string;
   description?: string;
   hours: number;
-  clientId: string;
+  companyId: string;
   projectId?: string;
   taskId?: string;
-  client?: {
+  company?: {
     id: string;
     name?: string;
     company: string;
@@ -196,7 +196,7 @@ export interface CreateTimeEntryDto {
   hours: number;
   startTime?: string;
   endTime?: string;
-  clientId: string;
+  companyId: string;
   projectId?: string;
   taskId?: string;
 }

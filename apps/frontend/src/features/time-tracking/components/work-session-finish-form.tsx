@@ -24,13 +24,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { DatePickerComponent } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { useClients } from "@/features/clients";
+import { useCompanies } from "@/features/companies";
 
 export interface WorkSessionFinishFormProps {
   session: LocalWorkSession;
@@ -45,7 +45,7 @@ type TranslateFn = (key: string) => string;
 
 function buildFinishFormSchema(t: TranslateFn) {
   return z.object({
-    clientId: z.string().min(1, t("clientRequired")),
+    companyId: z.string().min(1, t("clientRequired")),
     projectId: z.string().optional(),
     taskId: z.string().optional(),
     description: z.string().min(1, t("descriptionRequired")),
@@ -87,7 +87,7 @@ function useOnlineStatus(): boolean {
 // Rendered inline by WorkTimerWidget once the session reaches STOPPING
 // (spec.md P1 "Encerrar sessão e preencher detalhes", WKT-06). Unlike the
 // rest of the timer, this form is NOT local-first: it needs a connection to
-// load client/project options, so it gates on connectivity (AC1) instead of
+// load company/project options, so it gates on connectivity (AC1) instead of
 // working offline.
 export function WorkSessionFinishForm({
   session,
@@ -95,7 +95,7 @@ export function WorkSessionFinishForm({
 }: WorkSessionFinishFormProps) {
   const t = useTranslations("WorkSessionFinishForm");
   const isOnline = useOnlineStatus();
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const { discard } = useWorkTimerEngine();
   const finishMutation = useFinishWorkSession();
   const [discardOpen, setDiscardOpen] = useState(false);
@@ -108,12 +108,12 @@ export function WorkSessionFinishForm({
     formState: { errors },
   } = useForm<FinishFormData>({
     resolver: zodResolver(finishFormSchema),
-    // WKT-10: pre-fills client/project/description when the session was
+    // WKT-10: pre-fills company/project/description when the session was
     // started with upfront details — still editable here. WKT-11: the date
     // defaults to the day the session actually STARTED, not today, since
     // the person may only be filling this in days later.
     defaultValues: {
-      clientId: session.clientId ?? "",
+      companyId: session.companyId ?? "",
       projectId: session.projectId ?? "",
       taskId: session.taskId ?? "",
       description: session.description ?? "",
@@ -121,13 +121,13 @@ export function WorkSessionFinishForm({
     },
   });
 
-  const selectedClientId = watch("clientId");
+  const selectedClientId = watch("companyId");
 
   const onSubmit = async (data: FinishFormData) => {
     await finishMutation.mutateAsync({
       sessionId: session.id,
       data: {
-        clientId: data.clientId,
+        companyId: data.companyId,
         projectId: data.projectId || undefined,
         taskId: data.taskId || undefined,
         description: data.description,
@@ -194,19 +194,19 @@ export function WorkSessionFinishForm({
           <div className="space-y-2">
             <Label>{t("clientLabel")}</Label>
             <Controller
-              name="clientId"
+              name="companyId"
               control={control}
               render={({ field }) => (
-                <ClientCombobox
+                <CompanyCombobox
                   clients={clients}
                   value={field.value}
                   onSelect={field.onChange}
                 />
               )}
             />
-            {errors.clientId && (
+            {errors.companyId && (
               <p className="text-sm text-destructive">
-                {errors.clientId.message}
+                {errors.companyId.message}
               </p>
             )}
           </div>
@@ -218,7 +218,7 @@ export function WorkSessionFinishForm({
               control={control}
               render={({ field }) => (
                 <ProjectCombobox
-                  clientId={selectedClientId}
+                  companyId={selectedClientId}
                   value={field.value}
                   onSelect={(projectId) => field.onChange(projectId ?? "")}
                   disabled={!selectedClientId}
@@ -235,7 +235,7 @@ export function WorkSessionFinishForm({
               control={control}
               render={({ field }) => (
                 <TaskCombobox
-                  clientId={selectedClientId}
+                  companyId={selectedClientId}
                   value={field.value}
                   onSelect={(taskId) => field.onChange(taskId ?? "")}
                   disabled={!selectedClientId}

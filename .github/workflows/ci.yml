@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Typecheck and unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter backend exec prisma generate
+      - name: Backend typecheck
+        run: pnpm --filter backend exec tsc --noEmit -p tsconfig.json
+      # Includes frontend-links.contract.spec.ts: every URL the backend emails
+      # must have a page in apps/frontend.
+      - name: Backend unit tests
+        run: pnpm --filter backend exec jest --ci --silent
+      - name: E2E package typecheck
+        run: pnpm --filter @its-done/e2e run typecheck
+      - name: Frontend typecheck
+        run: pnpm --filter frontend exec tsc --noEmit
+      - name: Frontend unit tests
+        run: pnpm --filter frontend exec jest --ci
+
+  email-links-smoke:
+    name: Emailed links open real pages
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: its_done
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter backend exec prisma generate
+      - run: pnpm --filter @its-done/e2e exec playwright install --with-deps chromium
+      - name: Run smoke (backend + frontend + mock Resend)
+        run: pnpm e2e:email-links
+      - name: Upload logs and traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: email-links-smoke-debug
+          path: |
+            logs/
+            packages/e2e/test-results/
+          if-no-files-found: ignore

@@ -7,7 +7,7 @@ export interface WorkHourRow {
   hours: number;
   startTime?: string | null;
   endTime?: string | null;
-  client?: {
+  company?: {
     id: string;
     name?: string;
     company: string;

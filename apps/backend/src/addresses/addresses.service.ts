@@ -8,23 +8,23 @@ export class AddressesService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, createAddressDto: CreateAddressDto) {
-    // Verify that the client belongs to the user
-    const client = await this.prisma.client.findFirst({
+    // Verify that the company belongs to the user
+    const company = await this.prisma.company.findFirst({
       where: {
-        id: createAddressDto.clientId,
-        userId,
+        id: createAddressDto.companyId,
+        collaborators: { some: { userId } },
       },
     });
 
-    if (!client) {
-      throw new NotFoundException('Client not found');
+    if (!company) {
+      throw new NotFoundException('Company not found');
     }
 
-    // If this is set as primary, unset other primary addresses for this client
+    // If this is set as primary, unset other primary addresses for this company
     if (createAddressDto.isPrimary) {
       await this.prisma.address.updateMany({
         where: {
-          clientId: createAddressDto.clientId,
+          companyId: createAddressDto.companyId,
           isPrimary: true,
         },
         data: {
@@ -40,7 +40,7 @@ export class AddressesService {
         type: createAddressDto.type || 'billing',
       },
       include: {
-        client: {
+        company: {
           select: {
             id: true,
             company: true,
@@ -53,34 +53,34 @@ export class AddressesService {
     return address;
   }
 
-  async findAll(userId: string, clientId?: string) {
+  async findAll(userId: string, companyId?: string) {
     const where: any = {};
 
-    if (clientId) {
-      // Verify that the client belongs to the user
-      const client = await this.prisma.client.findFirst({
+    if (companyId) {
+      // Verify that the company belongs to the user
+      const company = await this.prisma.company.findFirst({
         where: {
-          id: clientId,
-          userId,
+          id: companyId,
+          collaborators: { some: { userId } },
         },
       });
 
-      if (!client) {
-        throw new NotFoundException('Client not found');
+      if (!company) {
+        throw new NotFoundException('Company not found');
       }
 
-      where.clientId = clientId;
+      where.companyId = companyId;
     } else {
-      // If no clientId specified, get addresses for all user's clients
-      where.client = {
-        userId,
+      // If no companyId specified, get addresses for all user's companies
+      where.company = {
+        collaborators: { some: { userId } },
       };
     }
 
     return this.prisma.address.findMany({
       where,
       include: {
-        client: {
+        company: {
           select: {
             id: true,
             company: true,
@@ -96,12 +96,12 @@ export class AddressesService {
     const address = await this.prisma.address.findFirst({
       where: {
         id,
-        client: {
-          userId,
+        company: {
+          collaborators: { some: { userId } },
         },
       },
       include: {
-        client: {
+        company: {
           select: {
             id: true,
             company: true,
@@ -121,11 +121,11 @@ export class AddressesService {
   async update(userId: string, id: string, updateAddressDto: UpdateAddressDto) {
     const address = await this.findOne(userId, id);
 
-    // If this is being set as primary, unset other primary addresses for this client
+    // If this is being set as primary, unset other primary addresses for this company
     if (updateAddressDto.isPrimary) {
       await this.prisma.address.updateMany({
         where: {
-          clientId: address.clientId,
+          companyId: address.companyId,
           isPrimary: true,
           id: { not: id },
         },
@@ -139,7 +139,7 @@ export class AddressesService {
       where: { id },
       data: updateAddressDto,
       include: {
-        client: {
+        company: {
           select: {
             id: true,
             company: true,
@@ -158,21 +158,21 @@ export class AddressesService {
     return { message: 'Address deleted successfully' };
   }
 
-  async findByClient(userId: string, clientId: string) {
-    // Verify that the client belongs to the user
-    const client = await this.prisma.client.findFirst({
+  async findByClient(userId: string, companyId: string) {
+    // Verify that the company belongs to the user
+    const company = await this.prisma.company.findFirst({
       where: {
-        id: clientId,
-        userId,
+        id: companyId,
+        collaborators: { some: { userId } },
       },
     });
 
-    if (!client) {
-      throw new NotFoundException('Client not found');
+    if (!company) {
+      throw new NotFoundException('Company not found');
     }
 
     return this.prisma.address.findMany({
-      where: { clientId },
+      where: { companyId },
       orderBy: [{ isPrimary: 'desc' }, { createdAt: 'desc' }],
     });
   }
@@ -180,10 +180,10 @@ export class AddressesService {
   async setPrimary(userId: string, id: string) {
     const address = await this.findOne(userId, id);
 
-    // Unset other primary addresses for this client
+    // Unset other primary addresses for this company
     await this.prisma.address.updateMany({
       where: {
-        clientId: address.clientId,
+        companyId: address.companyId,
         isPrimary: true,
         id: { not: id },
       },
@@ -197,7 +197,7 @@ export class AddressesService {
       where: { id },
       data: { isPrimary: true },
       include: {
-        client: {
+        company: {
           select: {
             id: true,
             company: true,
