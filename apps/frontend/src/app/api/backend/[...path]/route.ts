@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+import { isSecureSessionCookie } from "@/lib/session-cookie";
 import { getApiUrl } from "@/lib/utils";
 
 function removeAccessTokens(data: unknown): unknown {
@@ -35,7 +36,11 @@ async function proxy(req: NextRequest, path: string[]) {
     return NextResponse.json({ message: "Invalid path" }, { status: 400 });
   }
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+    secureCookie: isSecureSessionCookie(),
+  });
   const apiUrl = getApiUrl();
   const targetUrl = `${apiUrl}/${path.map(encodeURIComponent).join("/")}${req.nextUrl.search}`;
   if (new URL(targetUrl).origin !== new URL(apiUrl).origin) {

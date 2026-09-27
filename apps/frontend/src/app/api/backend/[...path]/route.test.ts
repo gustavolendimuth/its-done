@@ -124,6 +124,7 @@ describe("backend proxy", () => {
     expect(mockGetToken).toHaveBeenCalledWith({
       req,
       secret: process.env.NEXTAUTH_SECRET,
+      secureCookie: false,
     });
     expect(global.fetch).toHaveBeenCalledWith(
       "http://backend.test/company-admin/dashboard/summary",
@@ -236,6 +237,37 @@ describe("backend proxy", () => {
     );
     await expect(binaryResponse.arrayBuffer()).resolves.toEqual(
       new Uint8Array([0, 1, 2, 255]).buffer
+    );
+  });
+
+  it("looks for the __Secure- session cookie when NEXTAUTH_URL has no scheme", async () => {
+    const original = process.env.NEXTAUTH_URL;
+    process.env.NEXTAUTH_URL = "estafeito.app";
+    mockGetToken.mockResolvedValueOnce({ accessToken: "internal-token" });
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonUpstream({ ok: true }, 200)
+    );
+
+    try {
+      await GET(request("http://frontend.test/api/backend/companies"), {
+        params: Promise.resolve({ path: ["companies"] }),
+      });
+    } finally {
+      if (original === undefined) {
+        delete process.env.NEXTAUTH_URL;
+      } else {
+        process.env.NEXTAUTH_URL = original;
+      }
+    }
+
+    expect(mockGetToken).toHaveBeenCalledWith(
+      expect.objectContaining({ secureCookie: true })
+    );
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://backend.test/companies",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer internal-token" },
+      })
     );
   });
 
