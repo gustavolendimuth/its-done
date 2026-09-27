@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useClients } from "@/features/clients";
+import { useCompanies } from "@/features/companies";
 import {
   TaskCard,
   TaskCreateDialog,
@@ -30,9 +30,9 @@ export default function TasksPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>("all");
 
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const { data: tasks = [], isLoading } = useTasks(
-    selectedClientId === "all" ? undefined : selectedClientId
+    selectedClientId === "all" ? undefined : selectedClientId,
   );
   const deleteTask = useDeleteTask();
 
@@ -82,9 +82,9 @@ export default function TasksPage() {
               <SelectItem value="all">
                 {tCommon("all")} {tCommon("clients")}
               </SelectItem>
-              {clients.map((client) => (
-                <SelectItem key={client.id} value={client.id}>
-                  {client.company}
+              {clients.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.company}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -100,7 +100,9 @@ export default function TasksPage() {
           icon={ListChecks}
           title={t("noTasksFound")}
           description={
-            selectedClientId === "all" ? t("createFirst") : t("noTasksForClient")
+            selectedClientId === "all"
+              ? t("createFirst")
+              : t("noTasksForClient")
           }
           actions={[
             {
@@ -127,7 +129,7 @@ export default function TasksPage() {
         <TaskCreateDialog
           open={showCreateDialog}
           onOpenChange={setShowCreateDialog}
-          clientId={
+          companyId={
             selectedClientId === "all" ? clients[0].id : selectedClientId
           }
           onSuccess={() => setShowCreateDialog(false)}

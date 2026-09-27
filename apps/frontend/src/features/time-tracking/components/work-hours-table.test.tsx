@@ -16,7 +16,7 @@ function makeRow(overrides: Partial<WorkHourRow> = {}): WorkHourRow {
     hours: 2,
     description: "Work",
     createdAt: "2026-01-01",
-    client: { id: "c1", company: "Acme", email: "acme@example.com" },
+    company: { id: "c1", company: "Acme", email: "acme@example.com" },
     ...overrides,
   };
 }

@@ -17,7 +17,7 @@ import {
 import { FormModal } from "@/components/ui/form-modal";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { useClients } from "@/features/clients";
+import { useCompanies } from "@/features/companies";
 import { NotificationBell } from "@/features/notifications";
 import { WorkHourForm } from "@/features/time-tracking";
 import { useAvatar } from "@/hooks/use-avatar";
@@ -34,7 +34,7 @@ export function Topbar({ children }: TopbarProps) {
   const [isAddHoursOpen, setIsAddHoursOpen] = useState(false);
 
   // Fetch clients for the work hour form
-  const { data: clients, isLoading: isLoadingClients } = useClients();
+  const { data: clients, isLoading: isLoadingClients } = useCompanies();
 
   const handleLogout = () => {
     signOut();
@@ -127,7 +127,7 @@ export function Topbar({ children }: TopbarProps) {
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-sm text-muted-foreground">
-                {isLoadingClients ? tCommon("loading") : "No clients found"}...
+                {isLoadingClients ? tCommon("loading") : "No companies found"}...
               </p>
             </div>
           </div>

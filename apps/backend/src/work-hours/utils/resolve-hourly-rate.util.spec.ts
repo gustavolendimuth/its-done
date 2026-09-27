@@ -7,14 +7,14 @@ describe('resolveHourlyRate', () => {
     );
   });
 
-  it('falls back to the client rate when the project has none', () => {
+  it('falls back to the company rate when the project has none', () => {
     expect(resolveHourlyRate(undefined, { hourlyRate: 50 })).toBe(50);
     expect(resolveHourlyRate({ hourlyRate: null }, { hourlyRate: 50 })).toBe(
       50,
     );
   });
 
-  it('falls back to 0 when neither project nor client have a rate', () => {
+  it('falls back to 0 when neither project nor company have a rate', () => {
     expect(resolveHourlyRate()).toBe(0);
     expect(resolveHourlyRate(undefined, undefined)).toBe(0);
     expect(resolveHourlyRate({ hourlyRate: null }, { hourlyRate: null })).toBe(

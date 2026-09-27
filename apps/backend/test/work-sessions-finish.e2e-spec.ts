@@ -11,8 +11,8 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
   let prisma: PrismaService;
   let userId: string;
   let token: string;
-  let clientId: string;
-  let otherClientId: string;
+  let companyId: string;
+  let otherCompanyId: string;
   let projectId: string;
 
   beforeAll(async () => {
@@ -46,28 +46,28 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
     });
     token = jwtService.sign({ sub: userId });
 
-    const client = await prisma.client.create({
+    const company = await prisma.company.create({
       data: {
         email: 'finish-e2e-client@test.local',
         company: 'Finish E2E Co',
-        userId,
+        collaborators: { create: { userId } },
       },
     });
-    clientId = client.id;
+    companyId = company.id;
 
-    const otherClient = await prisma.client.create({
+    const otherCompany = await prisma.company.create({
       data: {
         email: 'finish-e2e-other-client@test.local',
         company: 'Finish E2E Other Co',
-        userId,
+        collaborators: { create: { userId } },
       },
     });
-    otherClientId = otherClient.id;
+    otherCompanyId = otherCompany.id;
 
     const project = await prisma.project.create({
       data: {
         name: 'Finish E2E Project',
-        clientId,
+        companyId,
         userId,
         hourlyRate: 100,
       },
@@ -84,7 +84,9 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
     await prisma.workHour.deleteMany({ where: { userId } });
     await prisma.workSession.deleteMany({ where: { userId } });
     await prisma.project.deleteMany({ where: { userId } });
-    await prisma.client.deleteMany({ where: { userId } });
+    await prisma.company.deleteMany({
+      where: { collaborators: { some: { userId } } },
+    });
     await prisma.user.delete({ where: { id: userId } });
     await app.close();
   });
@@ -111,11 +113,11 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
     const res = await request(app.getHttpServer())
       .post(`/work-sessions/${sessionId}/finish`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ clientId, projectId, description: 'Finished via timer' });
+      .send({ companyId, projectId, description: 'Finished via timer' });
 
     expect(res.status).toBe(201);
     expect(res.body.workHour).toMatchObject({
-      clientId,
+      companyId,
       projectId,
       description: 'Finished via timer',
       hours: 1,
@@ -135,16 +137,14 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
       .post(`/work-sessions/${sessionId}/finish`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        clientId,
+        companyId,
         projectId,
         description: 'Esqueci de registrar no dia certo',
         date: backdatedDate,
       });
 
     expect(res.status).toBe(201);
-    expect(new Date(res.body.workHour.date).toISOString()).toBe(
-      backdatedDate,
-    );
+    expect(new Date(res.body.workHour.date).toISOString()).toBe(backdatedDate);
   });
 
   it('falls back to the session startedAt when date is omitted', async () => {
@@ -156,7 +156,7 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
     const res = await request(app.getHttpServer())
       .post(`/work-sessions/${sessionId}/finish`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ clientId, projectId, description: 'Sem data explícita' });
+      .send({ companyId, projectId, description: 'Sem data explícita' });
 
     expect(res.status).toBe(201);
     expect(new Date(res.body.workHour.date).toISOString()).toBe(
@@ -164,7 +164,7 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
     );
   });
 
-  it('rejects the request when clientId and description are missing', async () => {
+  it('rejects the request when companyId and description are missing', async () => {
     const sessionId = await createStoppingSession();
 
     const res = await request(app.getHttpServer())
@@ -175,15 +175,15 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
     expect(res.status).toBe(400);
   });
 
-  it('rejects when projectId does not belong to the selected clientId', async () => {
+  it('rejects when projectId does not belong to the selected companyId', async () => {
     const sessionId = await createStoppingSession();
 
     const res = await request(app.getHttpServer())
       .post(`/work-sessions/${sessionId}/finish`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        clientId: otherClientId,
-        projectId, // belongs to `clientId`, not `otherClientId`
+        companyId: otherCompanyId,
+        projectId, // belongs to `companyId`, not `otherCompanyId`
         description: 'Mismatched project',
       });
 
@@ -206,7 +206,7 @@ describe('POST /work-sessions/:id/finish (e2e)', () => {
     const res = await request(app.getHttpServer())
       .post(`/work-sessions/${sessionId}/finish`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ clientId, description: 'Should not finish' });
+      .send({ companyId, description: 'Should not finish' });
 
     expect(res.status).toBe(400);
   });

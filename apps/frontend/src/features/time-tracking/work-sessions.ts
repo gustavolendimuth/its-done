@@ -53,7 +53,7 @@ export function useWorkTimerEngine(): WorkTimerEngineState {
 }
 
 export interface FinishWorkSessionDto {
-  clientId: string;
+  companyId: string;
   projectId?: string;
   taskId?: string;
   description: string;

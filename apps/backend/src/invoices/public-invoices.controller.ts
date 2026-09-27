@@ -1,12 +1,12 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 
-@Controller('public/client/:clientId/invoices')
+@Controller('public/company/:companyId/invoices')
 export class PublicInvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
   @Get()
-  async findByClient(@Param('clientId') clientId: string) {
-    return this.invoicesService.findByClient(clientId);
+  async findByClient(@Param('companyId') companyId: string) {
+    return this.invoicesService.findByClient(companyId);
   }
 }

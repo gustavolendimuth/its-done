@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { WorkHourForm } from "./work-hour-form";
 
-import type { Client } from "@/features/clients";
+import type { Company } from "@/features/companies";
 
 function renderWithQueryClient(ui: ReactNode) {
   const queryClient = new QueryClient({
@@ -28,7 +28,7 @@ jest.mock("sonner", () => ({
   },
 }));
 
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "client-1",
     company: "Acme",
@@ -57,8 +57,8 @@ jest.mock("@/components/ui/date-picker", () => ({
   ),
 }));
 
-jest.mock("@/components/ui/client-combobox", () => ({
-  ClientCombobox: ({
+jest.mock("@/components/ui/company-combobox", () => ({
+  CompanyCombobox: ({
     value,
     onSelect,
   }: {
@@ -245,7 +245,7 @@ describe("WorkHourForm", () => {
     await waitFor(() => expect(mockCreateMutateAsync).toHaveBeenCalled());
     const payload = mockCreateMutateAsync.mock.calls[0][0];
     expect(payload.projectId).toBeUndefined();
-    expect(payload.clientId).toBe("client-1");
+    expect(payload.companyId).toBe("client-1");
   });
 
   it("create mode: renders the entry-mode selector defaulted to Duração", () => {

@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useClients, Client } from "@/features/clients";
+import { useCompanies, Company } from "@/features/companies";
 import {
   WorkHourForm,
   WorkHoursBigStats,
@@ -66,7 +66,7 @@ export default function WorkHoursPage() {
     return {
       from: dateRange.startDate.toISOString(),
       to: dateRange.endDate.toISOString(),
-      clientId: selectedClient !== "all" ? selectedClient : undefined,
+      companyId: selectedClient !== "all" ? selectedClient : undefined,
     };
   }, [dateRange.startDate, dateRange.endDate, selectedClient]);
 
@@ -81,7 +81,7 @@ export default function WorkHoursPage() {
     data: clients,
     isLoading: isLoadingClients,
     error: clientsError,
-  } = useClients();
+  } = useCompanies();
 
   // Delete mutation
   const deleteTimeEntry = useDeleteTimeEntry();
@@ -168,7 +168,7 @@ export default function WorkHoursPage() {
             />
           </div>
 
-          {/* Client Filter */}
+          {/* Company Filter */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-3">
               {tCommon("filterByClient")}
@@ -184,11 +184,11 @@ export default function WorkHoursPage() {
                 <SelectItem value="all">
                   {tCommon("all")} {t("clients")}
                 </SelectItem>
-                {clients?.map((client: Client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name
-                      ? `${client.company} (${client.name})`
-                      : client.company}
+                {clients?.map((company: Company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name
+                      ? `${company.company} (${company.name})`
+                      : company.company}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -201,7 +201,7 @@ export default function WorkHoursPage() {
       <div className="mb-8">
         <WorkHoursBigStats
           dateRange={dateRange}
-          clientId={selectedClient}
+          companyId={selectedClient}
           hourlyRate={50} // Pode ser dinâmico no futuro
           workHours={workHours || []}
           isRefetching={isRefetching}
@@ -225,7 +225,7 @@ export default function WorkHoursPage() {
         )}
 
         <WorkHoursTable
-          workHours={(workHours ?? []).filter((workHour) => workHour.client)}
+          workHours={(workHours ?? []).filter((workHour) => workHour.company)}
           onEdit={handleEdit}
           onDelete={handleDelete}
           deletingId={deletingId}

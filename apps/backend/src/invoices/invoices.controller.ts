@@ -45,12 +45,12 @@ export class InvoicesController {
     @Request() req,
     @Query('from') from?: string,
     @Query('to') to?: string,
-    @Query('clientId') clientId?: string,
+    @Query('companyId') companyId?: string,
   ) {
     return this.invoicesService.getStats(req.user.id, {
       from: from ? new Date(from) : undefined,
       to: to ? new Date(to) : undefined,
-      clientId,
+      companyId,
     });
   }
 
@@ -88,7 +88,7 @@ export class InvoicesController {
       workHourIds: Array.isArray(body.workHourIds)
         ? body.workHourIds
         : [body.workHourIds],
-      clientId: body.clientId,
+      companyId: body.companyId,
       fileUrl: file.filename,
       amount: parseFloat(body.amount) || 0,
     };
@@ -115,7 +115,7 @@ export class InvoicesController {
     @Body()
     createData: {
       workHourIds: string | string[];
-      clientId: string;
+      companyId: string;
       amount: number;
     },
     @Request() req,
@@ -129,7 +129,7 @@ export class InvoicesController {
       workHourIds: Array.isArray(createData.workHourIds)
         ? createData.workHourIds
         : [createData.workHourIds],
-      clientId: createData.clientId,
+      companyId: createData.companyId,
       amount: createData.amount || 0,
     };
 

@@ -64,9 +64,9 @@ export function EditInvoiceForm({
   const updateInvoiceMutation = useUpdateInvoice();
   const uploadFileMutation = useUploadInvoiceFile();
 
-  // Fetch available time entries for the invoice's client
+  // Fetch available time entries for the invoice's company
   const { data: availableTimeEntries = [] } = useAvailableTimeEntries({
-    clientId: invoice.clientId,
+    companyId: invoice.companyId,
   });
 
   // Extract currently associated work hours from invoice
@@ -108,7 +108,7 @@ export function EditInvoiceForm({
     setSelectedWorkHourIds(initialIds);
 
     const initialAmount = currentWorkHours.reduce((sum, entry) => {
-      const rate = resolveHourlyRate(entry.project, entry.client);
+      const rate = resolveHourlyRate(entry.project, entry.company);
       return sum + entry.hours * rate;
     }, 0);
     setCalculatedAmount(initialAmount);
@@ -241,7 +241,7 @@ export function EditInvoiceForm({
             {/* Work Hours Selector */}
             {allAvailableEntries.length > 0 ? (
               <WorkHoursSelector
-                key={`${invoice.clientId}-${invoice.id}`}
+                key={`${invoice.companyId}-${invoice.id}`}
                 timeEntries={allAvailableEntries}
                 initialSelectedIds={selectedWorkHourIds}
                 onSelectionChange={(workHourIds, totalAmount) =>
@@ -251,7 +251,7 @@ export function EditInvoiceForm({
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <Clock className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>No work hours available for this client</p>
+                <p>No work hours available for this company</p>
               </div>
             )}
           </div>

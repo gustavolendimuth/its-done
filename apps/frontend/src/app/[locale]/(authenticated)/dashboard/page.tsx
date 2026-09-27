@@ -8,7 +8,7 @@ import { useState, useMemo } from "react";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
-import { useClients } from "@/features/clients";
+import { useCompanies } from "@/features/companies";
 import { Overview, OverviewData } from "@/features/dashboard";
 import { useInvoices } from "@/features/invoices";
 import { useTimeEntries, useWorkHoursStats } from "@/features/time-tracking";
@@ -33,7 +33,7 @@ export default function DashboardPage() {
     to: period.to,
   });
 
-  const { data: clients = [], isLoading: clientsLoading } = useClients();
+  const { data: clients = [], isLoading: clientsLoading } = useCompanies();
 
   const { isLoading: statsLoading } = useWorkHoursStats({
     from: period.from,
@@ -68,7 +68,7 @@ export default function DashboardPage() {
     const totalInvoices = invoices.length;
     const totalAmount = invoices.reduce(
       (sum, invoice) => sum + invoice.amount,
-      0
+      0,
     );
     const paidAmount = invoices
       .filter((inv) => inv.status === "PAID")
@@ -79,10 +79,10 @@ export default function DashboardPage() {
 
     const paidInvoices = invoices.filter((inv) => inv.status === "PAID").length;
     const pendingInvoices = invoices.filter(
-      (inv) => inv.status === "PENDING"
+      (inv) => inv.status === "PENDING",
     ).length;
     const canceledInvoices = invoices.filter(
-      (inv) => inv.status === "CANCELED"
+      (inv) => inv.status === "CANCELED",
     ).length;
 
     const averageInvoiceValue =
@@ -92,27 +92,29 @@ export default function DashboardPage() {
     const recentInvoices = invoices
       .sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )
       .slice(0, 5);
 
     // Calculate top clients by hours worked
     const clientHours = timeEntries.reduce(
       (acc, entry) => {
-        const clientId = entry.clientId;
+        const companyId = entry.companyId;
 
-        if (!acc[clientId]) {
-          const client = clients.find((c) => c.id === clientId);
+        if (!acc[companyId]) {
+          const company = clients.find(
+            (candidate) => candidate.id === companyId,
+          );
 
-          acc[clientId] = {
-            id: clientId,
-            name: client?.name || "Unknown Client",
-            company: client?.company || "",
+          acc[companyId] = {
+            id: companyId,
+            name: company?.name || "Unknown Company",
+            company: company?.company || "",
             hours: 0,
             invoices: 0,
           };
         }
-        acc[clientId].hours += entry.hours;
+        acc[companyId].hours += entry.hours;
 
         return acc;
       },
@@ -125,13 +127,13 @@ export default function DashboardPage() {
           hours: number;
           invoices: number;
         }
-      >
+      >,
     );
 
     // Add invoice counts to clients
     invoices.forEach((invoice) => {
-      if (clientHours[invoice.clientId]) {
-        clientHours[invoice.clientId].invoices++;
+      if (clientHours[invoice.companyId]) {
+        clientHours[invoice.companyId].invoices++;
       }
     });
 

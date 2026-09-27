@@ -43,7 +43,7 @@ export function ProjectsBigStats({
   const projectsWithWork = projects.filter(
     (project) => project._count.workHours > 0,
   ).length;
-  const uniqueClients = new Set(projects.map((project) => project.clientId))
+  const uniqueClients = new Set(projects.map((project) => project.companyId))
     .size;
 
   const averageHoursPerProject =

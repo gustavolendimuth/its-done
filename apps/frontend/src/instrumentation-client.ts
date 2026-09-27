@@ -4,6 +4,8 @@
 
 import * as Sentry from "@sentry/nextjs";
 
+const NODE_ENV = process.env.NODE_ENV;
+
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN || "",
   enabled: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN),
@@ -13,10 +15,10 @@ Sentry.init({
   integrations: [Sentry.replayIntegration()],
 
   // Define how likely traces are sampled. Lower in production.
-  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+  tracesSampleRate: NODE_ENV === "production" ? 0.1 : 1.0,
 
   // Enable logs to be sent to Sentry (keep false in production unless needed)
-  enableLogs: false,
+  enableLogs: NODE_ENV === 'development',
 
   // Replay sampling configuration
   replaysSessionSampleRate: 0.1,

@@ -120,10 +120,10 @@ describe("work-timer-sync", () => {
     );
   });
 
-  it("carries clientId/projectId/description from the authoritative response instead of dropping them (WKT-10)", async () => {
+  it("carries companyId/projectId/description from the authoritative response instead of dropping them (WKT-10)", async () => {
     const remoteSession = {
       ...makeLocalSession(),
-      clientId: "client-1",
+      companyId: "client-1",
       projectId: "project-1",
       description: "Planejado com antecedência",
     };
@@ -134,7 +134,7 @@ describe("work-timer-sync", () => {
 
     expect(mockedDb.setActiveSession).toHaveBeenCalledWith(
       expect.objectContaining({
-        clientId: "client-1",
+        companyId: "client-1",
         projectId: "project-1",
         description: "Planejado com antecedência",
       })
@@ -224,11 +224,11 @@ describe("work-timer-sync", () => {
       );
     });
 
-    it("carries clientId/projectId/description when hydrating a fresh device from the server (WKT-10)", async () => {
+    it("carries companyId/projectId/description when hydrating a fresh device from the server (WKT-10)", async () => {
       mockedDb.getActiveSession.mockResolvedValue(null);
       const remoteSession = {
         ...makeLocalSession({ status: "RUNNING" }),
-        clientId: "client-1",
+        companyId: "client-1",
         projectId: null,
         description: "Planejado com antecedência",
       };
@@ -238,7 +238,7 @@ describe("work-timer-sync", () => {
 
       expect(mockedDb.setActiveSession).toHaveBeenCalledWith(
         expect.objectContaining({
-          clientId: "client-1",
+          companyId: "client-1",
           projectId: null,
           description: "Planejado com antecedência",
         })

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import { ProjectCreateDialog } from "./project-create-dialog";
 
-import type { Client } from "@/features/clients";
+import type { Company } from "@/features/companies";
 import type { Project, CreateProjectData } from "./projects.service";
 
 // Mock next-intl
@@ -16,7 +16,7 @@ jest.mock("sonner", () => ({
   toast: {
     success: jest.fn(),
     error: jest.fn(),
-  }
+  },
 }));
 
 // Mock services
@@ -26,16 +26,16 @@ const mockCreateProject = jest.fn(
       id: "1",
       name: data.name,
       description: data.description,
-      clientId: data.clientId,
+      companyId: data.companyId,
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      client: mockClients.find((c) => c.id === data.clientId)!,
+      company: mockCompanies.find((c) => c.id === data.companyId)!,
       _count: {
         workHours: 0,
       },
     });
-  }
+  },
 );
 
 jest.mock("./projects.service", () => ({
@@ -45,7 +45,7 @@ jest.mock("./projects.service", () => ({
   })),
 }));
 
-const mockClients: Client[] = [
+const mockCompanies: Company[] = [
   {
     id: "1",
     name: "John Doe",
@@ -64,16 +64,16 @@ const mockClients: Client[] = [
   },
 ];
 
-jest.mock("@/features/clients", () => ({
-  useClients: () => ({
-    data: mockClients,
+jest.mock("@/features/companies", () => ({
+  useCompanies: () => ({
+    data: mockCompanies,
     isLoading: false,
   }),
 }));
 
 // Mock components
-jest.mock("@/components/ui/client-combobox", () => ({
-  ClientCombobox: ({
+jest.mock("@/components/ui/company-combobox", () => ({
+  CompanyCombobox: ({
     value,
     onSelect,
     placeholder,
@@ -88,9 +88,9 @@ jest.mock("@/components/ui/client-combobox", () => ({
       onChange={(e) => onSelect(e.target.value)}
     >
       <option value="">{placeholder}</option>
-      {mockClients.map((client) => (
-        <option key={client.id} value={client.id}>
-          {client.company}
+      {mockCompanies.map((company) => (
+        <option key={company.id} value={company.id}>
+          {company.company}
         </option>
       ))}
     </select>
@@ -122,20 +122,14 @@ describe("ProjectCreateDialog", () => {
     expect(screen.getByText("title")).toBeInTheDocument();
     expect(screen.getByText("formSubtitle")).toBeInTheDocument();
     expect(screen.getByTestId("client-combobox")).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText("enterName")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText("enterDescription")
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("enterName")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("enterDescription")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "cancel" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "create" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "create" })).toBeInTheDocument();
   });
 
   it("renders with preselected client", () => {
-    render(<ProjectCreateDialog {...defaultProps} clientId="1" />);
+    render(<ProjectCreateDialog {...defaultProps} companyId="1" />);
 
     expect(screen.getByTestId("client-combobox")).toHaveValue("1");
   });
@@ -149,7 +143,7 @@ describe("ProjectCreateDialog", () => {
     // Wait for validation messages
     await waitFor(() => {
       expect(screen.getByText("Project name is required")).toBeInTheDocument();
-      expect(screen.getByText("Client is required")).toBeInTheDocument();
+      expect(screen.getByText("Company is required")).toBeInTheDocument();
     });
   });
 
@@ -158,11 +152,11 @@ describe("ProjectCreateDialog", () => {
       id: "1",
       name: "Test Project",
       description: "Test Description",
-      clientId: "1",
+      companyId: "1",
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      client: mockClients[0],
+      company: mockCompanies[0],
       _count: {
         workHours: 0,
       },
@@ -174,11 +168,11 @@ describe("ProjectCreateDialog", () => {
     // Fill form
     await userEvent.type(
       screen.getByPlaceholderText("enterName"),
-      "Test Project"
+      "Test Project",
     );
     await userEvent.type(
       screen.getByPlaceholderText("enterDescription"),
-      "Test Description"
+      "Test Description",
     );
     fireEvent.change(screen.getByTestId("client-combobox"), {
       target: { value: "1" },
@@ -192,8 +186,8 @@ describe("ProjectCreateDialog", () => {
       expect(mockCreateProject).toHaveBeenCalledWith({
         name: "Test Project",
         description: "Test Description",
-        clientId: "1",
-        hourlyRate: undefined
+        companyId: "1",
+        hourlyRate: undefined,
       });
       expect(defaultProps.onSuccess).toHaveBeenCalledWith(mockProject);
       const { toast } = require("sonner");
@@ -212,7 +206,7 @@ describe("ProjectCreateDialog", () => {
     // Fill form
     await userEvent.type(
       screen.getByPlaceholderText("enterName"),
-      "Test Project"
+      "Test Project",
     );
     fireEvent.change(screen.getByTestId("client-combobox"), {
       target: { value: "1" },
@@ -225,7 +219,7 @@ describe("ProjectCreateDialog", () => {
     await waitFor(() => {
       expect(consoleError).toHaveBeenCalledWith(
         "Error creating project:",
-        expect.any(Error)
+        expect.any(Error),
       );
       expect(defaultProps.onSuccess).not.toHaveBeenCalled();
       const { toast } = require("sonner");
@@ -248,9 +242,7 @@ describe("ProjectCreateDialog", () => {
     const { rerender } = render(<ProjectCreateDialog {...defaultProps} />);
 
     // Initial state
-    expect(
-      screen.getByRole("button", { name: "create" })
-    ).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: "create" })).not.toBeDisabled();
 
     // Mock pending state
     const { useCreateProject } = require("./projects.service");
@@ -271,11 +263,11 @@ describe("ProjectCreateDialog", () => {
       id: "1",
       name: "Test Project",
       description: "Test Description",
-      clientId: "1",
+      companyId: "1",
       userId: "user1",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      client: mockClients[0],
+      company: mockCompanies[0],
       _count: {
         workHours: 0,
       },
@@ -287,11 +279,11 @@ describe("ProjectCreateDialog", () => {
     // Fill form
     await userEvent.type(
       screen.getByPlaceholderText("enterName"),
-      "Test Project"
+      "Test Project",
     );
     await userEvent.type(
       screen.getByPlaceholderText("enterDescription"),
-      "Test Description"
+      "Test Description",
     );
     fireEvent.change(screen.getByTestId("client-combobox"), {
       target: { value: "1" },
@@ -303,9 +295,7 @@ describe("ProjectCreateDialog", () => {
     // Wait for form reset
     await waitFor(() => {
       expect(screen.getByPlaceholderText("enterName")).toHaveValue("");
-      expect(
-        screen.getByPlaceholderText("enterDescription")
-      ).toHaveValue("");
+      expect(screen.getByPlaceholderText("enterDescription")).toHaveValue("");
       expect(screen.getByTestId("client-combobox")).toHaveValue("");
     });
   });

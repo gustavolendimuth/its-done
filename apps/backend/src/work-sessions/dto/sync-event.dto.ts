@@ -33,8 +33,8 @@ export class SyncEventDto {
   // Only meaningful on a `start` event — WKT-10 "preencher detalhes antes de
   // iniciar". Ignored by every other event type.
   @IsOptional()
-  @IsUUID(4, { message: 'Client ID must be a valid UUID' })
-  clientId?: string;
+  @IsUUID(4, { message: 'Company ID must be a valid UUID' })
+  companyId?: string;
 
   @IsOptional()
   @IsUUID(4, { message: 'Project ID must be a valid UUID' })

@@ -1,5 +1,5 @@
 export { InvoiceCard } from "./components/invoice-card";
-export { ClientInvoiceCard } from "./components/client-invoice-card";
+export { CompanyInvoiceCard } from "./components/company-invoice-card";
 export {
   InvoiceSearchFilters,
   useInvoiceFilters,

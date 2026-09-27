@@ -122,8 +122,8 @@ export function useInvoiceFilters(invoices: Invoice[]) {
           invoice.id.toLowerCase().includes(searchLower) ||
           (invoice.description &&
             invoice.description.toLowerCase().includes(searchLower)) ||
-          (invoice.client?.name &&
-            invoice.client.name.toLowerCase().includes(searchLower))
+          (invoice.company?.name &&
+            invoice.company.name.toLowerCase().includes(searchLower))
         );
       }
 

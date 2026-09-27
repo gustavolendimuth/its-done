@@ -42,6 +42,9 @@ next-env.d.ts
 logs
 *.log
 
+# preview de worktree
+.preview-worktree.state
+
 # uploads directory
 uploads/
 
@@ -62,3 +65,7 @@ Thumbs.db
 # playwright mcp
 .playwright-mcp/
 /work-hours-*.png
+
+# Playwright (packages/e2e)
+test-results/
+playwright-report/

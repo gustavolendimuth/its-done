@@ -10,7 +10,7 @@ const prismaMock = {
     update: jest.fn(),
     delete: jest.fn(),
   },
-  client: {
+  company: {
     findFirst: jest.fn(),
   },
   project: {
@@ -32,19 +32,19 @@ describe('TasksService', () => {
 
   describe('create()', () => {
     it('creates a task when the client belongs to the user', async () => {
-      prismaMock.client.findFirst.mockResolvedValueOnce({ id: 'client-1' });
+      prismaMock.company.findFirst.mockResolvedValueOnce({ id: 'client-1' });
       prismaMock.task.create.mockResolvedValueOnce({ id: 'task-1' });
 
-      await service.create({ title: 'Fix bug', clientId: 'client-1' }, userId);
+      await service.create({ title: 'Fix bug', companyId: 'client-1' }, userId);
 
-      expect(prismaMock.client.findFirst).toHaveBeenCalledWith({
-        where: { id: 'client-1', userId },
+      expect(prismaMock.company.findFirst).toHaveBeenCalledWith({
+        where: { id: 'client-1', collaborators: { some: { userId } } },
       });
       expect(prismaMock.task.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             title: 'Fix bug',
-            clientId: 'client-1',
+            companyId: 'client-1',
             userId,
           }),
         }),
@@ -52,24 +52,24 @@ describe('TasksService', () => {
     });
 
     it('rejects a client that does not belong to the user', async () => {
-      prismaMock.client.findFirst.mockResolvedValueOnce(null);
+      prismaMock.company.findFirst.mockResolvedValueOnce(null);
 
       await expect(
-        service.create({ title: 'Fix bug', clientId: 'client-1' }, userId),
+        service.create({ title: 'Fix bug', companyId: 'client-1' }, userId),
       ).rejects.toThrow(NotFoundException);
       expect(prismaMock.task.create).not.toHaveBeenCalled();
     });
 
     it('rejects a project that belongs to a different client', async () => {
-      prismaMock.client.findFirst.mockResolvedValueOnce({ id: 'client-1' });
+      prismaMock.company.findFirst.mockResolvedValueOnce({ id: 'client-1' });
       prismaMock.project.findUnique.mockResolvedValueOnce({
         id: 'project-1',
-        clientId: 'client-2',
+        companyId: 'client-2',
       });
 
       await expect(
         service.create(
-          { title: 'Fix bug', clientId: 'client-1', projectId: 'project-1' },
+          { title: 'Fix bug', companyId: 'client-1', projectId: 'project-1' },
           userId,
         ),
       ).rejects.toThrow(BadRequestException);
@@ -77,15 +77,15 @@ describe('TasksService', () => {
     });
 
     it('accepts a project that belongs to the same client', async () => {
-      prismaMock.client.findFirst.mockResolvedValueOnce({ id: 'client-1' });
+      prismaMock.company.findFirst.mockResolvedValueOnce({ id: 'client-1' });
       prismaMock.project.findUnique.mockResolvedValueOnce({
         id: 'project-1',
-        clientId: 'client-1',
+        companyId: 'client-1',
       });
       prismaMock.task.create.mockResolvedValueOnce({ id: 'task-1' });
 
       await service.create(
-        { title: 'Fix bug', clientId: 'client-1', projectId: 'project-1' },
+        { title: 'Fix bug', companyId: 'client-1', projectId: 'project-1' },
         userId,
       );
 
@@ -117,11 +117,11 @@ describe('TasksService', () => {
       prismaMock.task.findFirst.mockResolvedValueOnce({
         id: 'task-1',
         userId,
-        clientId: 'client-1',
+        companyId: 'client-1',
       });
       prismaMock.project.findUnique.mockResolvedValueOnce({
         id: 'project-1',
-        clientId: 'client-2',
+        companyId: 'client-2',
       });
 
       await expect(
@@ -138,36 +138,36 @@ describe('TasksService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('rejects changing clientId while the task keeps a projectId tied to the old client', async () => {
+    it('rejects changing companyId while the task keeps a projectId tied to the old client', async () => {
       prismaMock.task.findFirst.mockResolvedValueOnce({
         id: 'task-1',
         userId,
-        clientId: 'client-1',
+        companyId: 'client-1',
         projectId: 'project-1',
       });
-      prismaMock.client.findFirst.mockResolvedValueOnce({ id: 'client-2' });
+      prismaMock.company.findFirst.mockResolvedValueOnce({ id: 'client-2' });
       prismaMock.project.findUnique.mockResolvedValueOnce({
         id: 'project-1',
-        clientId: 'client-1',
+        companyId: 'client-1',
       });
 
       await expect(
-        service.update('task-1', { clientId: 'client-2' }, userId),
+        service.update('task-1', { companyId: 'client-2' }, userId),
       ).rejects.toThrow(BadRequestException);
       expect(prismaMock.task.update).not.toHaveBeenCalled();
     });
 
-    it('allows changing clientId when the task has no projectId', async () => {
+    it('allows changing companyId when the task has no projectId', async () => {
       prismaMock.task.findFirst.mockResolvedValueOnce({
         id: 'task-1',
         userId,
-        clientId: 'client-1',
+        companyId: 'client-1',
         projectId: null,
       });
-      prismaMock.client.findFirst.mockResolvedValueOnce({ id: 'client-2' });
+      prismaMock.company.findFirst.mockResolvedValueOnce({ id: 'client-2' });
       prismaMock.task.update.mockResolvedValueOnce({ id: 'task-1' });
 
-      await service.update('task-1', { clientId: 'client-2' }, userId);
+      await service.update('task-1', { companyId: 'client-2' }, userId);
 
       expect(prismaMock.task.update).toHaveBeenCalled();
     });
