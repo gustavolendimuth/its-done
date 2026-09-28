@@ -139,20 +139,24 @@ class MockResizeObserver implements ResizeObserver {
 
 global.ResizeObserver = MockResizeObserver;
 
-// jsdom doesn't implement the Pointer Events capture API or scrollIntoView,
-// which Radix UI components (Select, etc.) call when interacted with via
-// pointer events (e.g. through @testing-library/user-event).
-if (!Element.prototype.hasPointerCapture) {
-  Element.prototype.hasPointerCapture = () => false;
-}
-if (!Element.prototype.setPointerCapture) {
-  Element.prototype.setPointerCapture = () => {};
-}
-if (!Element.prototype.releasePointerCapture) {
-  Element.prototype.releasePointerCapture = () => {};
-}
-if (!Element.prototype.scrollIntoView) {
-  Element.prototype.scrollIntoView = () => {};
+// DOM-only shims: suites that opt into `@jest-environment node` (route handlers
+// that need the real Request/Response) have no Element or window.
+if (typeof window !== "undefined") {
+  // jsdom doesn't implement the Pointer Events capture API or scrollIntoView,
+  // which Radix UI components (Select, etc.) call when interacted with via
+  // pointer events (e.g. through @testing-library/user-event).
+  if (!Element.prototype.hasPointerCapture) {
+    Element.prototype.hasPointerCapture = () => false;
+  }
+  if (!Element.prototype.setPointerCapture) {
+    Element.prototype.setPointerCapture = () => {};
+  }
+  if (!Element.prototype.releasePointerCapture) {
+    Element.prototype.releasePointerCapture = () => {};
+  }
+  if (!Element.prototype.scrollIntoView) {
+    Element.prototype.scrollIntoView = () => {};
+  }
 }
 
 // Configure Testing Library
@@ -160,19 +164,21 @@ configure({
   testIdAttribute: "data-testid",
 });
 
-// Mock window.matchMedia
-Object.defineProperty(window, "matchMedia", {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(), // deprecated
-    removeListener: jest.fn(), // deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
+if (typeof window !== "undefined") {
+  // Mock window.matchMedia
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(), // deprecated
+      removeListener: jest.fn(), // deprecated
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+}
 
 // No additional global type overrides
