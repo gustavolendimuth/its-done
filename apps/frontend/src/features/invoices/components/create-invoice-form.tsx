@@ -10,7 +10,7 @@ import { WorkHoursSelectionSummary } from "./work-hours-selection-summary";
 import { WorkHoursSelector } from "./work-hours-selector";
 
 import { Button } from "@/components/ui/button";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Client } from "@/features/clients";
+import { Company } from "@/features/companies";
 import {
   useCreateInvoice,
   useUploadInvoiceFile,
@@ -30,7 +30,7 @@ import { useAvailableTimeEntries } from "@/features/time-tracking";
 import { TimeEntry } from "@/types";
 
 const invoiceSchema = z.object({
-  clientId: z.string().min(1, "Client is required"),
+  companyId: z.string().min(1, "Company is required"),
   workHourIds: z
     .array(z.string())
     .min(1, "At least one work hour must be selected"),
@@ -43,7 +43,7 @@ const invoiceSchema = z.object({
 type InvoiceFormData = z.infer<typeof invoiceSchema>;
 
 interface CreateInvoiceFormProps {
-  clients: Client[];
+  clients: Company[];
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -85,21 +85,21 @@ export function CreateInvoiceForm({
       );
     } else if (formErrors.workHourIds) {
       toast.error("Select at least one work hour to invoice.");
-    } else if (formErrors.clientId) {
-      toast.error("Select a client.");
+    } else if (formErrors.companyId) {
+      toast.error("Select a company.");
     } else {
       toast.error("Please review the highlighted fields before submitting.");
     }
   };
 
-  const watchedClientId = watch("clientId");
+  const watchedClientId = watch("companyId");
 
   // Buscar horas disponíveis (não faturadas ou de faturas canceladas)
   const { data: availableTimeEntries = [] } = useAvailableTimeEntries({
-    clientId: watchedClientId,
+    companyId: watchedClientId,
   });
 
-  // As horas já vêm filtradas pelo clientId se fornecido
+  // As horas já vêm filtradas pelo companyId se fornecido
   const filteredTimeEntries =
     availableTimeEntries.filter(
       (entry: TimeEntry) => !entry.invoiceWorkHours?.length,
@@ -109,7 +109,7 @@ export function CreateInvoiceForm({
     selectedWorkHourIds.includes(entry.id),
   );
 
-  // Clear selected work hours whenever the client changes
+  // Clear selected work hours whenever the company changes
   useEffect(() => {
     // Reset local selection and calculated values
     setSelectedWorkHourIds([]);
@@ -147,7 +147,7 @@ export function CreateInvoiceForm({
     try {
       // Create invoice using the mutation
       const createdInvoice = await createInvoiceMutation.mutateAsync({
-        clientId: data.clientId,
+        companyId: data.companyId,
         amount: data.amount,
         workHourIds: data.workHourIds,
         description: data.description,
@@ -199,23 +199,23 @@ export function CreateInvoiceForm({
       onSubmit={handleSubmit(onSubmit, onValidationError)}
       className="space-y-6"
     >
-      {/* Client Selection */}
+      {/* Company Selection */}
       <div className="space-y-2">
-        <Label htmlFor="clientId">Client</Label>
+        <Label htmlFor="companyId">Company</Label>
         <Controller
-          name="clientId"
+          name="companyId"
           control={control}
           render={({ field }) => (
-            <ClientCombobox
+            <CompanyCombobox
               clients={clients || []}
               value={field.value}
               onSelect={field.onChange}
-              placeholder="Select a client"
+              placeholder="Select a company"
             />
           )}
         />
-        {errors.clientId && (
-          <p className="text-sm text-red-500">{errors.clientId.message}</p>
+        {errors.companyId && (
+          <p className="text-sm text-red-500">{errors.companyId.message}</p>
         )}
       </div>
 
@@ -234,7 +234,7 @@ export function CreateInvoiceForm({
 
             {/* Work Hours Selector */}
             <WorkHoursSelector
-              key={watchedClientId || "no-client"}
+              key={watchedClientId || "no-company"}
               timeEntries={filteredTimeEntries}
               onSelectionChange={(workHourIds, totalAmount) =>
                 handleWorkHoursSelection(workHourIds, totalAmount)
@@ -252,7 +252,7 @@ export function CreateInvoiceForm({
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             <Clock className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p>Please select a client first to view available work hours</p>
+            <p>Please select a company first to view available work hours</p>
           </div>
         )}
         {errors.workHourIds && (

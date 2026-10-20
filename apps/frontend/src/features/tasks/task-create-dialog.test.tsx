@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import { TaskCreateDialog } from "./task-create-dialog";
 
-import type { Client } from "@/features/clients";
+import type { Company } from "@/features/companies";
 import type { Task, CreateTaskData } from "./tasks.service";
 
 jest.mock("next-intl", () => ({
@@ -22,12 +22,12 @@ const mockCreateTask = jest.fn((data: CreateTaskData): Promise<Task> => {
     id: "task-1",
     title: data.title,
     link: data.link,
-    clientId: data.clientId,
+    companyId: data.companyId,
     projectId: data.projectId,
     userId: "user1",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    client: mockClients.find((c) => c.id === data.clientId)!,
+    company: mockCompanies.find((c) => c.id === data.companyId)!,
   });
 });
 
@@ -38,7 +38,7 @@ jest.mock("./tasks.service", () => ({
   })),
 }));
 
-const mockClients: Client[] = [
+const mockCompanies: Company[] = [
   {
     id: "1",
     name: "John Doe",
@@ -49,8 +49,8 @@ const mockClients: Client[] = [
   },
 ];
 
-jest.mock("@/features/clients", () => ({
-  useClients: () => ({ data: mockClients, isLoading: false }),
+jest.mock("@/features/companies", () => ({
+  useCompanies: () => ({ data: mockCompanies, isLoading: false }),
 }));
 
 const mockProjects = [
@@ -62,8 +62,8 @@ jest.mock("@/features/projects", () => ({
   useProjects: () => ({ data: mockProjects, isLoading: false }),
 }));
 
-jest.mock("@/components/ui/client-combobox", () => ({
-  ClientCombobox: ({
+jest.mock("@/components/ui/company-combobox", () => ({
+  CompanyCombobox: ({
     value,
     onSelect,
     placeholder,
@@ -78,9 +78,9 @@ jest.mock("@/components/ui/client-combobox", () => ({
       onChange={(e) => onSelect(e.target.value)}
     >
       <option value="">{placeholder}</option>
-      {mockClients.map((client) => (
-        <option key={client.id} value={client.id}>
-          {client.company}
+      {mockCompanies.map((company) => (
+        <option key={company.id} value={company.id}>
+          {company.company}
         </option>
       ))}
     </select>
@@ -115,7 +115,7 @@ describe("TaskCreateDialog", () => {
     open: true,
     onOpenChange: jest.fn(),
     onSuccess: jest.fn(),
-    clientId: "1",
+    companyId: "1",
   };
 
   beforeEach(() => {
@@ -169,7 +169,7 @@ describe("TaskCreateDialog", () => {
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText("enterTitle")).toHaveValue(
-        "ENG-42 Fix login bug"
+        "ENG-42 Fix login bug",
       );
     });
   });
@@ -235,9 +235,7 @@ describe("TaskCreateDialog", () => {
       target: { value: "p1" },
     });
 
-    await waitFor(() =>
-      expect(titleInput).toHaveValue("[estafeito.app] ")
-    );
+    await waitFor(() => expect(titleInput).toHaveValue("[estafeito.app] "));
 
     await userEvent.type(titleInput, "Fix login bug");
     expect(titleInput).toHaveValue("[estafeito.app] Fix login bug");
@@ -270,7 +268,7 @@ describe("TaskCreateDialog", () => {
     expect(titleInput).toHaveValue("[estafeito.app] ");
   });
 
-  it("submits with clientId, title and optional projectId/link", async () => {
+  it("submits with companyId, title and optional projectId/link", async () => {
     render(<TaskCreateDialog {...defaultProps} />);
 
     fireEvent.change(screen.getByTestId("client-combobox"), {
@@ -283,7 +281,7 @@ describe("TaskCreateDialog", () => {
     await waitFor(() => {
       expect(mockCreateTask).toHaveBeenCalledWith({
         title: "Fix bug",
-        clientId: "1",
+        companyId: "1",
         projectId: undefined,
         link: undefined,
       });

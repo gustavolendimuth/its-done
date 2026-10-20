@@ -6,17 +6,18 @@ declare module "next-auth" {
       id: string;
       email: string;
       name: string;
-      role: "USER" | "ADMIN";
+      role?: "USER" | "ADMIN";
+      actorType: "USER" | "COMPANY_ADMIN";
       image?: string;
     };
-    accessToken?: string;
   }
 
   interface User {
     id: string;
     email: string;
     name: string;
-    role: "USER" | "ADMIN";
+    role?: "USER" | "ADMIN";
+    actorType: "USER" | "COMPANY_ADMIN";
     image?: string;
     accessToken?: string;
   }
@@ -27,7 +28,8 @@ declare module "next-auth/jwt" {
     id: string;
     email: string;
     name: string;
-    role: "USER" | "ADMIN";
+    role?: "USER" | "ADMIN";
+    actorType: "USER" | "COMPANY_ADMIN";
     accessToken?: string;
   }
 }

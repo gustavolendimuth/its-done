@@ -26,8 +26,8 @@ export class TasksController {
   }
 
   @Get()
-  findAll(@Request() req, @Query('clientId') clientId?: string) {
-    return this.tasksService.findAll(req.user.id, clientId);
+  findAll(@Request() req, @Query('companyId') companyId?: string) {
+    return this.tasksService.findAll(req.user.id, companyId);
   }
 
   @Get(':id')

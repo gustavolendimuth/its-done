@@ -26,8 +26,8 @@ export class ProjectsController {
   }
 
   @Get()
-  findAll(@Request() req, @Query('clientId') clientId?: string) {
-    return this.projectsService.findAll(req.user.id, clientId);
+  findAll(@Request() req, @Query('companyId') companyId?: string) {
+    return this.projectsService.findAll(req.user.id, companyId);
   }
 
   @Get(':id')

@@ -12,8 +12,8 @@ jest.mock("next-intl", () => ({
 jest.mock("@/features/time-tracking", () => ({
   useTimeEntries: jest.fn(() => ({
     data: [
-      { id: "1", hours: 5, clientId: "client1" },
-      { id: "2", hours: 3, clientId: "client2" },
+      { id: "1", hours: 5, companyId: "client1" },
+      { id: "2", hours: 3, companyId: "client2" },
     ],
     isLoading: false,
   })),
@@ -29,21 +29,21 @@ jest.mock("@/features/invoices", () => ({
         id: "1",
         amount: 1000,
         status: "PAID",
-        clientId: "client1",
+        companyId: "client1",
         createdAt: "2024-03-01T00:00:00Z",
       },
       {
         id: "2",
         amount: 500,
         status: "PENDING",
-        clientId: "client2",
+        companyId: "client2",
         createdAt: "2024-03-02T00:00:00Z",
       },
       {
         id: "3",
         amount: 200,
         status: "CANCELED",
-        clientId: "client1",
+        companyId: "client1",
         createdAt: "2024-03-03T00:00:00Z",
       },
     ],
@@ -51,11 +51,11 @@ jest.mock("@/features/invoices", () => ({
   })),
 }));
 
-jest.mock("@/features/clients", () => ({
-  useClients: jest.fn(() => ({
+jest.mock("@/features/companies", () => ({
+  useCompanies: jest.fn(() => ({
     data: [
-      { id: "client1", name: "Client 1", company: "Company 1" },
-      { id: "client2", name: "Client 2", company: "Company 2" },
+      { id: "client1", name: "Company 1", company: "Company 1" },
+      { id: "client2", name: "Company 2", company: "Company 2" },
     ],
     isLoading: false,
   })),

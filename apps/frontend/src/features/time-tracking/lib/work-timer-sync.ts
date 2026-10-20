@@ -27,7 +27,7 @@ interface RemoteWorkSession {
   lastPromptAt: string | null;
   lastConfirmedAt: string | null;
   hours: number | null;
-  clientId: string | null;
+  companyId: string | null;
   projectId: string | null;
   taskId: string | null;
   description: string | null;
@@ -56,7 +56,7 @@ function mapRemoteSession(remote: RemoteWorkSession): LocalWorkSession {
     // would silently wipe out details entered upfront on another device or
     // via the start-with-details form, since the authoritative response
     // always overwrites the local mirror.
-    clientId: remote.clientId,
+    companyId: remote.companyId,
     projectId: remote.projectId,
     taskId: remote.taskId,
     description: remote.description,

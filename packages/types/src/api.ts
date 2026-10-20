@@ -37,7 +37,7 @@ export interface DashboardStats {
 export interface ReportFilters {
   startDate?: string;
   endDate?: string;
-  clientId?: string;
+  companyId?: string;
   userId?: string;
 }
 

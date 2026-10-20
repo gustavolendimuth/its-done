@@ -15,14 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useClients } from "@/features/clients";
+import { useCompanies } from "@/features/companies";
 import {
   ProjectCard,
   ProjectCreateDialog,
   ProjectsBigStats,
   useProjects,
   useDeleteProject,
- ProjectsPageSkeleton } from "@/features/projects";
+  ProjectsPageSkeleton,
+} from "@/features/projects";
 
 export default function ProjectsPage() {
   const t = useTranslations("projects");
@@ -30,9 +31,9 @@ export default function ProjectsPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>("all");
 
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const { data: projects = [], isLoading } = useProjects(
-    selectedClientId === "all" ? undefined : selectedClientId
+    selectedClientId === "all" ? undefined : selectedClientId,
   );
   const deleteProject = useDeleteProject();
 
@@ -86,9 +87,9 @@ export default function ProjectsPage() {
               <SelectItem value="all">
                 {tCommon("all")} {tCommon("clients")}
               </SelectItem>
-              {clients.map((client) => (
-                <SelectItem key={client.id} value={client.id}>
-                  {client.company}
+              {clients.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.company}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -135,7 +136,7 @@ export default function ProjectsPage() {
         <ProjectCreateDialog
           open={showCreateDialog}
           onOpenChange={setShowCreateDialog}
-          clientId={clients[0].id} // Will be changeable in the dialog
+          companyId={clients[0].id} // Will be changeable in the dialog
           onSuccess={() => setShowCreateDialog(false)}
         />
       )}

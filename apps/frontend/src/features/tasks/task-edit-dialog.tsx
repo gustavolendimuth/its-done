@@ -59,10 +59,10 @@ export function TaskEditDialog({
     },
   });
 
-  // Task.clientId is fixed after creation — Story 25 only asks to edit
-  // title/link, and a Task's Project must keep belonging to its own Client
-  // (Story 28), so reassigning the Client isn't exposed here.
-  const { data: projects = [] } = useProjects(task.clientId);
+  // Task.companyId is fixed after creation — Story 25 only asks to edit
+  // title/link, and a Task's Project must keep belonging to its own Company
+  // (Story 28), so reassigning the Company isn't exposed here.
+  const { data: projects = [] } = useProjects(task.companyId);
 
   useEffect(() => {
     if (task) {
@@ -140,7 +140,7 @@ export function TaskEditDialog({
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         <div className="space-y-2">
           <Label>{t("client")}</Label>
-          <p className="text-sm text-muted-foreground">{task.client.company}</p>
+          <p className="text-sm text-muted-foreground">{task.company.company}</p>
         </div>
 
         <div className="space-y-2">
@@ -150,7 +150,7 @@ export function TaskEditDialog({
             control={control}
             render={({ field }) => (
               <ProjectCombobox
-                clientId={task.clientId}
+                companyId={task.companyId}
                 value={field.value}
                 onSelect={handleProjectSelect}
                 allowClear

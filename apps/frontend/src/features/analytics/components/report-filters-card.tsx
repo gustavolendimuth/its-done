@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReportFilters, ReportType } from "../types";
-import type { Client } from "@/features/clients";
+import type { Company } from "@/features/companies";
 
 import { format } from "date-fns";
 import { Filter } from "lucide-react";
@@ -28,7 +28,7 @@ import {
 export interface ReportFiltersCardProps {
   filters: ReportFilters;
   reportType: ReportType;
-  clients: Client[] | undefined;
+  companies: Company[] | undefined;
   onFilterChange: (key: keyof ReportFilters, value: string) => void;
   onReportTypeChange: (value: ReportType) => void;
   onQuickDateRange: (range: "thisMonth" | "lastMonth" | "last3Months") => void;
@@ -37,7 +37,7 @@ export interface ReportFiltersCardProps {
 export function ReportFiltersCard({
   filters,
   reportType,
-  clients,
+  companies,
   onFilterChange,
   onReportTypeChange,
   onQuickDateRange,
@@ -90,19 +90,19 @@ export function ReportFiltersCard({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="client">{t("client")}</Label>
+            <Label htmlFor="company">{t("client")}</Label>
             <Select
-              value={filters.clientId || "all"}
-              onValueChange={(value) => onFilterChange("clientId", value)}
+              value={filters.companyId || "all"}
+              onValueChange={(value) => onFilterChange("companyId", value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder={t("selectClient")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allClients")}</SelectItem>
-                {clients?.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
+                {companies?.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -20,7 +20,7 @@ model User {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   workHours       WorkHour[]
-  clients         Client[]
+  collaborators   Collaborator[]
   projects        Project[]
   tasks           Task[]
   settings        Settings?
@@ -38,47 +38,111 @@ model WorkHour {
   startTime   String?
   endTime     String?
   userId      String
-  clientId    String
+  companyId   String
   projectId   String?
   taskId      String?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   user        User                @relation(fields: [userId], references: [id])
-  client      Client              @relation(fields: [clientId], references: [id])
+  company     Company             @relation(fields: [companyId], references: [id])
   project     Project?            @relation(fields: [projectId], references: [id])
   task        Task?               @relation(fields: [taskId], references: [id], onDelete: SetNull)
   invoiceWorkHours InvoiceWorkHour[]
 }
 
-model Client {
+model Company {
   id          String    @id @default(uuid())
   name        String?
   email       String
   phone       String?
   company     String
-  userId      String
   hourlyRate  Float?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  user        User      @relation(fields: [userId], references: [id])
+  collaborators Collaborator[]
+  companyAdmins CompanyAdmin[]
   workHours   WorkHour[]
   invoices    Invoice[]
   addresses   Address[]
   projects    Project[]
   tasks       Task[]
+  pendingInvites    PendingInvite[]
+  authorizedDomains  AuthorizedDomain[]
+}
+
+model Collaborator {
+  id        String             @id @default(uuid())
+  userId    String
+  companyId String
+  // MW-24 — origin of the link (PendingInvite / AuthorizedDomain), to
+  // show the link type in the Company Dashboard table. Optional: rows
+  // created before this column (or directly via prisma in tests) stay
+  // null and the UI shows "—".
+  origin    CollaboratorOrigin?
+  createdAt DateTime           @default(now())
+  user      User               @relation(fields: [userId], references: [id])
+  company   Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+}
+
+model CompanyAdmin {
+  id            String         @id @default(uuid())
+  companyId     String
+  email         String         @unique
+  password      String
+  invitedById   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invitedBy     CompanyAdmin?  @relation("CompanyAdminInvitedBy", fields: [invitedById], references: [id], onDelete: SetNull)
+  invitedAdmins CompanyAdmin[] @relation("CompanyAdminInvitedBy")
+  pendingInvitesCreated PendingInvite[]
+}
+
+model PendingInvite {
+  id                      String                @id @default(uuid())
+  companyId               String
+  email                   String
+  status                  PendingInviteStatus @default(PENDING)
+  // MW-26 — opcional + SetNull: Desativação de Company faz hard-delete dos
+  // CompanyAdmin da Company, mas o PendingInvite (mesmo já REVOKED/LINKED)
+  // continua existindo como histórico. Sem isso, o FK original (RESTRICT)
+  // impediria apagar um CompanyAdmin que criou algum convite.
+  createdByCompanyAdminId String?
+  linkedAt                DateTime?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  company                 Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdByCompanyAdmin   CompanyAdmin?         @relation(fields: [createdByCompanyAdminId], references: [id], onDelete: SetNull)
+
+  @@unique([companyId, email])
+}
+
+model AuthorizedDomain {
+  id          String                  @id @default(uuid())
+  companyId   String
+  domain      String
+  status      AuthorizedDomainStatus @default(PENDING)
+  confirmedAt DateTime?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  company     Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, domain])
 }
 
 model Project {
   id          String     @id @default(uuid())
   name        String
   description String?
-  clientId    String
+  companyId   String
   userId      String
   hourlyRate  Float      @default(0)
   alertHours  Float?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  client      Client     @relation(fields: [clientId], references: [id])
+  company     Company    @relation(fields: [companyId], references: [id])
   user        User       @relation(fields: [userId], references: [id])
   workHours   WorkHour[]
   tasks       Task[]
@@ -87,14 +151,14 @@ model Project {
 model Task {
   id           String        @id @default(uuid())
   userId       String
-  clientId     String
+  companyId    String
   projectId    String?
   title        String
   link         String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   user         User          @relation(fields: [userId], references: [id])
-  client       Client        @relation(fields: [clientId], references: [id])
+  company      Company       @relation(fields: [companyId], references: [id])
   project      Project?      @relation(fields: [projectId], references: [id])
   workHours    WorkHour[]
   workSessions WorkSession[]
@@ -109,10 +173,10 @@ model Address {
   country     String   @default("Brazil")
   type        String   @default("billing") // billing, shipping, office, etc.
   isPrimary   Boolean  @default(false)
-  clientId    String
+  companyId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 model Settings {
@@ -129,14 +193,14 @@ model Settings {
 model Invoice {
   id          String              @id @default(uuid())
   number      String?
-  clientId    String
+  companyId   String
   fileUrl     String?
   amount      Float               @default(0)
   status      InvoiceStatus       @default(PENDING)
   description String?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
-  client      Client              @relation(fields: [clientId], references: [id])
+  company     Company             @relation(fields: [companyId], references: [id])
   invoiceWorkHours InvoiceWorkHour[]
 }
 
@@ -154,7 +218,7 @@ model InvoiceWorkHour {
 model NotificationLog {
   id           String           @id @default(uuid())
   userId       String
-  clientId     String?
+  companyId    String?
   type         NotificationType
   threshold    Float
   totalHours   Float
@@ -162,7 +226,7 @@ model NotificationLog {
   user         User             @relation(fields: [userId], references: [id])
 
   @@index([userId, type, threshold])
-  @@index([userId, clientId, type, threshold])
+  @@index([userId, companyId, type, threshold])
 }
 
 model InAppNotification {
@@ -191,7 +255,7 @@ model WorkSession {
   lastPromptAt            DateTime?
   lastConfirmedAt         DateTime?
   promptNonce             String?
-  clientId                String?
+  companyId               String?
   projectId               String?
   taskId                  String?
   description             String?
@@ -253,4 +317,21 @@ enum InvoiceStatus {
 enum UserRole {
   USER
   ADMIN
-} 
+}
+
+enum PendingInviteStatus {
+  PENDING
+  LINKED
+  REVOKED
+}
+
+enum AuthorizedDomainStatus {
+  PENDING
+  CONFIRMED
+  REVOKED
+}
+
+enum CollaboratorOrigin {
+  INVITE
+  DOMAIN
+}

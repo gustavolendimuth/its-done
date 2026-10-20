@@ -17,7 +17,7 @@ interface TaskComboboxProps {
   disabled?: boolean;
   showAddButton?: boolean;
   onTaskAdded?: () => void;
-  clientId?: string;
+  companyId?: string;
   allowClear?: boolean;
 }
 
@@ -28,13 +28,13 @@ export function TaskCombobox({
   disabled = false,
   showAddButton = true,
   onTaskAdded,
-  clientId,
+  companyId,
   allowClear = true,
 }: TaskComboboxProps) {
   const t = useTranslations("tasks");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
-  const { data: tasks = [] } = useTasks(clientId);
+  const { data: tasks = [] } = useTasks(companyId);
 
   const handleCreateTask = () => {
     setAddDialogOpen(true);
@@ -82,11 +82,11 @@ export function TaskCombobox({
         )}
       />
 
-      {addDialogOpen && clientId && (
+      {addDialogOpen && companyId && (
         <TaskCreateDialog
           open={addDialogOpen}
           onOpenChange={setAddDialogOpen}
-          clientId={clientId}
+          companyId={companyId}
           onSuccess={handleTaskCreated}
         />
       )}

@@ -17,7 +17,7 @@ interface ProjectComboboxProps {
   disabled?: boolean;
   showAddButton?: boolean;
   onProjectAdded?: () => void;
-  clientId?: string;
+  companyId?: string;
   allowClear?: boolean;
 }
 
@@ -28,13 +28,13 @@ export function ProjectCombobox({
   disabled = false,
   showAddButton = true,
   onProjectAdded,
-  clientId,
+  companyId,
   allowClear = false,
 }: ProjectComboboxProps) {
   const t = useTranslations("projects");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
-  const { data: projects = [] } = useProjects(clientId);
+  const { data: projects = [] } = useProjects(companyId);
 
   const handleCreateProject = () => {
     setAddDialogOpen(true);
@@ -83,11 +83,11 @@ export function ProjectCombobox({
       />
 
       {/* Add Project Dialog */}
-      {addDialogOpen && clientId && (
+      {addDialogOpen && companyId && (
         <ProjectCreateDialog
           open={addDialogOpen}
           onOpenChange={setAddDialogOpen}
-          clientId={clientId}
+          companyId={companyId}
           onSuccess={handleProjectCreated}
         />
       )}

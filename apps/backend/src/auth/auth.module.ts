@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { CompanyAdminModule } from '../company-admin/company-admin.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -32,6 +33,7 @@ const googleStrategyProvider = {
   imports: [
     UsersModule,
     NotificationsModule,
+    CompanyAdminModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

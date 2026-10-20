@@ -195,7 +195,7 @@ describe("MainLayout", () => {
     );
     expect(screen.getByRole("link", { name: /clients/i })).toHaveAttribute(
       "href",
-      "/clients"
+      "/companies"
     );
     expect(screen.getByRole("link", { name: /settings/i })).toHaveAttribute(
       "href",

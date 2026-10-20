@@ -74,9 +74,9 @@ export class WorkHoursService {
         where: { id: createWorkHourDto.projectId },
       });
 
-      if (!project || project.clientId !== createWorkHourDto.clientId) {
+      if (!project || project.companyId !== createWorkHourDto.companyId) {
         throw new BadRequestException(
-          'Project does not belong to the selected client',
+          'Project does not belong to the selected company',
         );
       }
     }
@@ -86,9 +86,9 @@ export class WorkHoursService {
         where: { id: createWorkHourDto.taskId },
       });
 
-      if (!task || task.clientId !== createWorkHourDto.clientId) {
+      if (!task || task.companyId !== createWorkHourDto.companyId) {
         throw new BadRequestException(
-          'Task does not belong to the selected client',
+          'Task does not belong to the selected company',
         );
       }
     }
@@ -102,9 +102,9 @@ export class WorkHoursService {
         startTime: createWorkHourDto.startTime,
         endTime: createWorkHourDto.endTime,
         description: createWorkHourDto.description,
-        client: {
+        company: {
           connect: {
-            id: createWorkHourDto.clientId,
+            id: createWorkHourDto.companyId,
           },
         },
         project: createWorkHourDto.projectId
@@ -128,7 +128,7 @@ export class WorkHoursService {
         },
       },
       include: {
-        client: true,
+        company: true,
         project: true,
         task: true,
       },
@@ -140,7 +140,7 @@ export class WorkHoursService {
     return workHour;
   }
 
-  async findAll(userId: string, from?: Date, to?: Date, clientId?: string) {
+  async findAll(userId: string, from?: Date, to?: Date, companyId?: string) {
     const where = {
       userId,
       ...(from && to
@@ -151,13 +151,13 @@ export class WorkHoursService {
             },
           }
         : {}),
-      ...(clientId ? { clientId } : {}),
+      ...(companyId ? { companyId } : {}),
     };
 
     return this.prisma.workHour.findMany({
       where,
       include: {
-        client: true,
+        company: true,
         project: true,
         task: true,
         invoiceWorkHours: {
@@ -183,7 +183,7 @@ export class WorkHoursService {
     userId: string,
     from?: Date,
     to?: Date,
-    clientId?: string,
+    companyId?: string,
   ) {
     const where = {
       userId,
@@ -195,7 +195,7 @@ export class WorkHoursService {
             },
           }
         : {}),
-      ...(clientId ? { clientId } : {}),
+      ...(companyId ? { companyId } : {}),
     };
 
     return this.prisma.workHour.findMany({
@@ -221,7 +221,7 @@ export class WorkHoursService {
         ],
       },
       include: {
-        client: true,
+        company: true,
         project: true,
         task: true,
         invoiceWorkHours: {
@@ -250,7 +250,7 @@ export class WorkHoursService {
         userId,
       },
       include: {
-        client: true,
+        company: true,
         project: true,
         task: true,
       },
@@ -308,11 +308,11 @@ export class WorkHoursService {
         where: { id: updateWorkHourDto.taskId },
       });
 
-      const effectiveClientId = updateWorkHourDto.clientId ?? workHour.clientId;
+      const effectiveClientId = updateWorkHourDto.companyId ?? workHour.companyId;
 
-      if (!task || task.clientId !== effectiveClientId) {
+      if (!task || task.companyId !== effectiveClientId) {
         throw new BadRequestException(
-          'Task does not belong to the selected client',
+          'Task does not belong to the selected company',
         );
       }
     }
@@ -329,7 +329,7 @@ export class WorkHoursService {
       where: { id },
       data,
       include: {
-        client: true,
+        company: true,
         project: true,
         task: true,
       },
@@ -383,7 +383,7 @@ export class WorkHoursService {
     return workHours.reduce((total, workHour) => total + workHour.hours, 0);
   }
 
-  async getStats(userId: string, from?: Date, to?: Date, clientId?: string) {
+  async getStats(userId: string, from?: Date, to?: Date, companyId?: string) {
     const where = {
       userId,
       ...(from && to
@@ -394,13 +394,13 @@ export class WorkHoursService {
             },
           }
         : {}),
-      ...(clientId ? { clientId } : {}),
+      ...(companyId ? { companyId } : {}),
     };
 
     const workHours = await this.prisma.workHour.findMany({
       where,
       include: {
-        client: true,
+        company: true,
         project: true,
       },
     });
@@ -419,7 +419,7 @@ export class WorkHoursService {
     const averageHoursPerDay = workedDays > 0 ? totalHours / workedDays : 0;
 
     // Count unique clients
-    const uniqueClients = new Set(workHours.map((wh) => wh.clientId));
+    const uniqueClients = new Set(workHours.map((wh) => wh.companyId));
     const activeClients = uniqueClients.size;
 
     return {
@@ -438,7 +438,7 @@ export class WorkHoursService {
   }
 
   /**
-   * Check if any client has reached hours threshold
+   * Check if any company has reached hours threshold
    * Delegates to HoursThresholdCheckerService
    */
   private async checkAndSendHoursThresholdNotification(userId: string) {

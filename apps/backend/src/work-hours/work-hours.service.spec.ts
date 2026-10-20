@@ -55,7 +55,7 @@ describe('WorkHoursService - create()', () => {
     await service.create(userId, {
       date: new Date('2026-01-01'),
       hours: 1.37,
-      clientId: 'client-1',
+      companyId: 'client-1',
     } as any);
 
     expect(prismaMock.workHour.create).toHaveBeenCalledWith(
@@ -77,7 +77,7 @@ describe('WorkHoursService - create()', () => {
     await service.create(userId, {
       date: new Date('2026-01-01'),
       hours: 1.37,
-      clientId: 'client-1',
+      companyId: 'client-1',
     } as any);
 
     expect(prismaMock.workHour.create).toHaveBeenCalledWith(
@@ -96,23 +96,23 @@ describe('WorkHoursService - create()', () => {
       service.create(userId, {
         date: new Date('2026-01-01'),
         hours: 0.2,
-        clientId: 'client-1',
+        companyId: 'client-1',
       } as any),
     ).rejects.toThrow(BadRequestException);
 
     expect(prismaMock.workHour.create).not.toHaveBeenCalled();
   });
 
-  it('rejects creation when projectId does not belong to clientId', async () => {
+  it('rejects creation when projectId does not belong to companyId', async () => {
     prismaMock.project.findUnique.mockResolvedValueOnce({
       id: 'p1',
-      clientId: 'other-client',
+      companyId: 'other-client',
     });
 
     const dto = {
       date: new Date('2026-01-01'),
       hours: 1,
-      clientId: 'c1',
+      companyId: 'c1',
       projectId: 'p1',
     } as any;
 
@@ -122,60 +122,60 @@ describe('WorkHoursService - create()', () => {
     expect(prismaMock.workHour.create).not.toHaveBeenCalled();
   });
 
-  it('accepts creation when projectId belongs to clientId', async () => {
+  it('accepts creation when projectId belongs to companyId', async () => {
     prismaMock.project.findUnique.mockResolvedValueOnce({
       id: 'p1',
-      clientId: 'c1',
+      companyId: 'c1',
     });
     prismaMock.workHour.create.mockResolvedValueOnce({
       id: 'wh1',
-      clientId: 'c1',
+      companyId: 'c1',
       projectId: 'p1',
     });
 
     const dto = {
       date: new Date('2026-01-01'),
       hours: 1,
-      clientId: 'c1',
+      companyId: 'c1',
       projectId: 'p1',
     } as any;
 
     const result = await service.create(userId, dto);
 
     expect(prismaMock.workHour.create).toHaveBeenCalled();
-    expect(result).toEqual({ id: 'wh1', clientId: 'c1', projectId: 'p1' });
+    expect(result).toEqual({ id: 'wh1', companyId: 'c1', projectId: 'p1' });
   });
 
   it('accepts creation when no projectId is provided (unchanged behavior)', async () => {
     prismaMock.workHour.create.mockResolvedValueOnce({
       id: 'wh2',
-      clientId: 'c1',
+      companyId: 'c1',
       projectId: null,
     });
 
     const dto = {
       date: new Date('2026-01-01'),
       hours: 1,
-      clientId: 'c1',
+      companyId: 'c1',
     } as any;
 
     const result = await service.create(userId, dto);
 
     expect(prismaMock.project.findUnique).not.toHaveBeenCalled();
     expect(prismaMock.workHour.create).toHaveBeenCalled();
-    expect(result).toEqual({ id: 'wh2', clientId: 'c1', projectId: null });
+    expect(result).toEqual({ id: 'wh2', companyId: 'c1', projectId: null });
   });
 
-  it('rejects creation when taskId does not belong to clientId', async () => {
+  it('rejects creation when taskId does not belong to companyId', async () => {
     prismaMock.task.findUnique.mockResolvedValueOnce({
       id: 't1',
-      clientId: 'other-client',
+      companyId: 'other-client',
     });
 
     const dto = {
       date: new Date('2026-01-01'),
       hours: 1,
-      clientId: 'c1',
+      companyId: 'c1',
       taskId: 't1',
     } as any;
 
@@ -185,28 +185,28 @@ describe('WorkHoursService - create()', () => {
     expect(prismaMock.workHour.create).not.toHaveBeenCalled();
   });
 
-  it('accepts creation when taskId belongs to clientId', async () => {
+  it('accepts creation when taskId belongs to companyId', async () => {
     prismaMock.task.findUnique.mockResolvedValueOnce({
       id: 't1',
-      clientId: 'c1',
+      companyId: 'c1',
     });
     prismaMock.workHour.create.mockResolvedValueOnce({
       id: 'wh5',
-      clientId: 'c1',
+      companyId: 'c1',
       taskId: 't1',
     });
 
     const dto = {
       date: new Date('2026-01-01'),
       hours: 1,
-      clientId: 'c1',
+      companyId: 'c1',
       taskId: 't1',
     } as any;
 
     const result = await service.create(userId, dto);
 
     expect(prismaMock.workHour.create).toHaveBeenCalled();
-    expect(result).toEqual({ id: 'wh5', clientId: 'c1', taskId: 't1' });
+    expect(result).toEqual({ id: 'wh5', companyId: 'c1', taskId: 't1' });
   });
 
   it('persists startTime and endTime when provided', async () => {
@@ -215,7 +215,7 @@ describe('WorkHoursService - create()', () => {
     const dto = {
       date: new Date('2026-01-01'),
       hours: 3.5,
-      clientId: 'c1',
+      companyId: 'c1',
       startTime: '09:00',
       endTime: '12:30',
     } as any;
@@ -238,7 +238,7 @@ describe('WorkHoursService - create()', () => {
     const dto = {
       date: new Date('2026-01-01'),
       hours: 1,
-      clientId: 'c1',
+      companyId: 'c1',
     } as any;
 
     await service.create(userId, dto);
@@ -257,7 +257,7 @@ describe('WorkHoursService - create()', () => {
     const dto = {
       date: new Date('2026-01-01'),
       hours: 1,
-      clientId: 'c1',
+      companyId: 'c1',
       startTime: '09:00',
     } as any;
 
@@ -271,7 +271,7 @@ describe('WorkHoursService - create()', () => {
     const dto = {
       date: new Date('2026-01-01'),
       hours: 1,
-      clientId: 'c1',
+      companyId: 'c1',
       startTime: '12:00',
       endTime: '12:00',
     } as any;
@@ -346,12 +346,12 @@ describe('WorkHoursService - update()', () => {
     prismaMock.workHour.findFirst.mockResolvedValueOnce({
       id: 'wh1',
       userId,
-      clientId: 'c1',
+      companyId: 'c1',
       invoiceWorkHours: [],
     });
     prismaMock.task.findUnique.mockResolvedValueOnce({
       id: 't1',
-      clientId: 'other-client',
+      companyId: 'other-client',
     });
 
     await expect(
@@ -364,12 +364,12 @@ describe('WorkHoursService - update()', () => {
     prismaMock.workHour.findFirst.mockResolvedValueOnce({
       id: 'wh1',
       userId,
-      clientId: 'c1',
+      companyId: 'c1',
       invoiceWorkHours: [],
     });
     prismaMock.task.findUnique.mockResolvedValueOnce({
       id: 't1',
-      clientId: 'c1',
+      companyId: 'c1',
     });
     prismaMock.workHour.update.mockResolvedValueOnce({
       id: 'wh1',

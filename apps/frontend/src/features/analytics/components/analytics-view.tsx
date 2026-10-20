@@ -22,7 +22,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { InfoCard } from "@/components/ui/info-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useClients } from "@/features/clients";
+import { useCompanies } from "@/features/companies";
 import { useDashboardStats } from "@/features/dashboard";
 import { useTimeEntries } from "@/features/time-tracking";
 
@@ -43,7 +43,7 @@ export function AnalyticsView() {
   const [filters, setFilters] = useState<ReportFilters>({
     startDate: format(startOfMonth(new Date()), "yyyy-MM-dd"),
     endDate: format(endOfMonth(new Date()), "yyyy-MM-dd"),
-    clientId: "all",
+    companyId: "all",
   });
 
   // Dashboard stats for overview
@@ -55,7 +55,7 @@ export function AnalyticsView() {
   const { data: dashboardStats, isLoading: statsLoading } =
     useDashboardStats(period);
   const { isLoading: entriesLoading } = useTimeEntries(period);
-  const { data: clients } = useClients();
+  const { data: companies } = useCompanies();
 
   // Fetch reports based on type and filters
   const {
@@ -93,9 +93,9 @@ export function AnalyticsView() {
 
   // Process data for dashboard insights
   const topClientsData =
-    dashboardStats?.topClients?.map((client, index) => ({
-      name: client.name,
-      hours: client.totalHours,
+    dashboardStats?.topClients?.map((company, index) => ({
+      name: company.name,
+      hours: company.totalHours,
       color: COLORS[index % COLORS.length],
     })) || [];
 
@@ -108,12 +108,12 @@ export function AnalyticsView() {
   const recentActivities = dashboardStats?.recentActivities?.slice(0, 8) || [];
 
   // Process data for detailed reports
-  const clientHoursChartData = useMemo(() => {
+  const companyHoursChartData = useMemo(() => {
     return (
-      hoursReport?.clientBreakdown?.map((client, index) => ({
-        name: client.clientName,
-        hours: client.totalHours,
-        percentage: client.percentage,
+      hoursReport?.companyBreakdown?.map((company, index) => ({
+        name: company.companyName,
+        hours: company.totalHours,
+        percentage: company.percentage,
         color: COLORS[index % COLORS.length],
       })) || []
     );
@@ -235,12 +235,12 @@ export function AnalyticsView() {
           <AnalyticsReportsTab
             filters={filters}
             reportType={reportType}
-            clients={clients}
+            companies={companies}
             onFilterChange={handleFilterChange}
             onReportTypeChange={setReportType}
             onQuickDateRange={handleQuickDateRange}
             hoursReport={hoursReport}
-            clientHoursChartData={clientHoursChartData}
+            companyHoursChartData={companyHoursChartData}
             weeklyChartData={weeklyChartData}
             invoiceReport={invoiceReport}
             summaryReport={summaryReport}

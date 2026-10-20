@@ -5,7 +5,7 @@ import { CreateWorkHourDto } from './create-work-hour.dto';
 const validBase = {
   date: '2026-01-01T00:00:00.000Z',
   hours: 1.5,
-  clientId: '11111111-1111-1111-1111-111111111111',
+  companyId: '11111111-1111-1111-1111-111111111111',
 };
 
 describe('CreateWorkHourDto', () => {

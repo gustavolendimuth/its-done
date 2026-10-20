@@ -38,8 +38,8 @@ jest.mock("../../../hooks/use-safe-hydration", () => ({
 }));
 
 // Mock clients service (Topbar fetches clients for the work hour form)
-jest.mock("@/features/clients", () => ({
-  useClients: () => ({ data: [] }),
+jest.mock("@/features/companies", () => ({
+  useCompanies: () => ({ data: [] }),
 }));
 
 // Mock notifications (avoids an unmocked network call for the unread count)

@@ -6,14 +6,14 @@ import api from "@/lib/axios";
 type ExportFilters = {
   startDate?: string;
   endDate?: string;
-  clientIds?: string[];
+  companyIds?: string[];
   userIds?: string[];
   status?: string[];
   includeArchived?: boolean;
 };
 
 export interface ExportOptions {
-  type: "client" | "invoice" | "time" | "user";
+  type: "company" | "invoice" | "time" | "user";
   format: "pdf" | "excel" | "csv";
   filters?: ExportFilters;
 }

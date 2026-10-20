@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 
 import { ProjectsBigStats } from "./projects-big-stats";
 
-import type { Client } from "@/features/clients";
+import type { Company } from "@/features/companies";
 import type { Project } from "./projects.service";
 
 // Mock next-intl
@@ -11,7 +11,7 @@ jest.mock("next-intl", () => ({
 }));
 
 // Mock data
-const mockClient1: Client = {
+const mockClient1: Company = {
   id: "client1",
   name: "John Doe",
   company: "Company A",
@@ -20,7 +20,7 @@ const mockClient1: Client = {
   updatedAt: "2024-03-01T00:00:00Z",
 };
 
-const mockClient2: Client = {
+const mockClient2: Company = {
   id: "client2",
   name: "Jane Smith",
   company: "Company B",
@@ -34,11 +34,11 @@ const mockProjects: Project[] = [
     id: "1",
     name: "Project A",
     description: "Description A",
-    clientId: "client1",
+    companyId: "client1",
     userId: "user1",
     createdAt: "2024-03-01T00:00:00Z",
     updatedAt: "2024-03-01T00:00:00Z",
-    client: {
+    company: {
       id: mockClient1.id,
       name: mockClient1.name,
       company: mockClient1.company,
@@ -53,11 +53,11 @@ const mockProjects: Project[] = [
     id: "2",
     name: "Project B",
     description: "Description B",
-    clientId: "client2",
+    companyId: "client2",
     userId: "user1",
     createdAt: "2024-03-02T00:00:00Z",
     updatedAt: "2024-03-02T00:00:00Z",
-    client: {
+    company: {
       id: mockClient2.id,
       name: mockClient2.name,
       company: mockClient2.company,
@@ -72,11 +72,11 @@ const mockProjects: Project[] = [
     id: "3",
     name: "Project C",
     description: "Description C",
-    clientId: "client1",
+    companyId: "client1",
     userId: "user1",
     createdAt: "2024-03-03T00:00:00Z",
     updatedAt: "2024-03-03T00:00:00Z",
-    client: {
+    company: {
       id: mockClient1.id,
       name: mockClient1.name,
       company: mockClient1.company,
@@ -91,9 +91,9 @@ const mockProjects: Project[] = [
 
 // Mock services
 jest.mock("./projects.service", () => ({
-  useProjects: jest.fn((clientId?: string) => ({
-    data: clientId
-      ? mockProjects.filter((p) => p.clientId === clientId)
+  useProjects: jest.fn((companyId?: string) => ({
+    data: companyId
+      ? mockProjects.filter((p) => p.companyId === companyId)
       : mockProjects,
     isLoading: false,
   })),
@@ -105,9 +105,9 @@ describe("ProjectsBigStats", () => {
     // which would otherwise leak into later tests)
     const { useProjects } = require("./projects.service");
 
-    useProjects.mockImplementation((clientId?: string) => ({
-      data: clientId
-        ? mockProjects.filter((p) => p.clientId === clientId)
+    useProjects.mockImplementation((companyId?: string) => ({
+      data: companyId
+        ? mockProjects.filter((p) => p.companyId === companyId)
         : mockProjects,
       isLoading: false,
     }));

@@ -6,7 +6,7 @@ export class CreateTaskDto {
   title: string;
 
   @IsUUID()
-  clientId: string;
+  companyId: string;
 
   @IsOptional()
   @IsUUID()

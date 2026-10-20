@@ -6,7 +6,7 @@ import { TimeEntry, CreateTimeEntryDto } from "@/types";
 export const useTimeEntries = (params?: {
   from?: string;
   to?: string;
-  clientId?: string;
+  companyId?: string;
 }) => {
   console.log("⏰ useTimeEntries called with params:", params);
 
@@ -32,7 +32,7 @@ export const useTimeEntries = (params?: {
 export const useAvailableTimeEntries = (params?: {
   from?: string;
   to?: string;
-  clientId?: string;
+  companyId?: string;
 }) => {
   return useQuery({
     queryKey: ["timeEntries", "available", params],
@@ -75,7 +75,7 @@ export const useCreateTimeEntry = () => {
     },
     onSuccess: () => {
       console.log(
-        "🚀 Time entry created successfully, invalidating queries..."
+        "🚀 Time entry created successfully, invalidating queries...",
       );
 
       // Invalidate and immediately refetch active queries
@@ -100,7 +100,7 @@ export const useCreateTimeEntry = () => {
       });
 
       console.log(
-        "✅ All active queries invalidated and will refetch immediately"
+        "✅ All active queries invalidated and will refetch immediately",
       );
     },
   });
@@ -127,7 +127,7 @@ export const useUpdateTimeEntry = () => {
       queryClient.invalidateQueries({ queryKey: ["timeEntries", id] });
       // Invalidate work hours stats
       queryClient.invalidateQueries({ queryKey: ["workHours", "stats"] });
-      // Invalidate client stats
+      // Invalidate company stats
       queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -150,7 +150,7 @@ export const useDeleteTimeEntry = () => {
       queryClient.invalidateQueries({ queryKey: ["timeEntries", id] });
       // Invalidate work hours stats
       queryClient.invalidateQueries({ queryKey: ["workHours", "stats"] });
-      // Invalidate client stats
+      // Invalidate company stats
       queryClient.invalidateQueries({ queryKey: ["clients", "stats"] });
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });

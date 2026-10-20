@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ProjectsPage from "../page";
 
-import type { Client } from "@/features/clients";
+import type { Company } from "@/features/companies";
 import type { Project } from "@/features/projects";
 
 // Mock next-intl
@@ -23,16 +23,16 @@ jest.mock("sonner", () => ({
 jest.mock("@/features/projects", () => ({
   ProjectCreateDialog: ({
     onOpenChange,
-    clientId,
+    companyId,
     onSuccess,
   }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    clientId: string;
+    companyId: string;
     onSuccess: () => void;
   }) => (
     <div data-testid="project-create-dialog">
-      <p>Client ID: {clientId}</p>
+      <p>Company ID: {companyId}</p>
       <button onClick={() => onSuccess()}>Create</button>
       <button onClick={() => onOpenChange(false)}>Cancel</button>
     </div>
@@ -48,7 +48,7 @@ jest.mock("@/features/projects", () => ({
   }) => (
     <div data-testid="project-card">
       <p>Name: {project.name}</p>
-      <p>Client: {project.client.company}</p>
+      <p>Company: {project.company.company}</p>
       <p>Hours: {project._count.workHours}</p>
       <button
         onClick={() => onDelete(project.id)}
@@ -61,12 +61,12 @@ jest.mock("@/features/projects", () => ({
   ),
   ProjectsBigStats: ({ selectedClientId }: { selectedClientId: string }) => (
     <div data-testid="projects-big-stats">
-      <p>Stats for client: {selectedClientId}</p>
+      <p>Stats for company: {selectedClientId}</p>
     </div>
   ),
-  useProjects: jest.fn((clientId?: string) => ({
-    data: clientId
-      ? mockProjects.filter((p) => p.clientId === clientId)
+  useProjects: jest.fn((companyId?: string) => ({
+    data: companyId
+      ? mockProjects.filter((p) => p.companyId === companyId)
       : mockProjects,
     isLoading: false,
   })),
@@ -116,7 +116,7 @@ jest.mock("@/components/layout/empty-state", () => ({
 }));
 
 // Mock data
-const mockClients: Client[] = [
+const mockClients: Company[] = [
   {
     id: "client1",
     name: "John Doe",
@@ -140,11 +140,11 @@ const mockProjects: Project[] = [
     id: "1",
     name: "Web App",
     description: "Company website",
-    clientId: "client1",
+    companyId: "client1",
     userId: "user1",
     createdAt: "2024-03-01T00:00:00Z",
     updatedAt: "2024-03-01T00:00:00Z",
-    client: mockClients[0],
+    company: mockClients[0],
     _count: {
       workHours: 40,
     },
@@ -153,19 +153,19 @@ const mockProjects: Project[] = [
     id: "2",
     name: "Mobile App",
     description: "iOS application",
-    clientId: "client2",
+    companyId: "client2",
     userId: "user1",
     createdAt: "2024-03-02T00:00:00Z",
     updatedAt: "2024-03-02T00:00:00Z",
-    client: mockClients[1],
+    company: mockClients[1],
     _count: {
       workHours: 60,
     },
   },
 ];
 
-jest.mock("@/features/clients", () => ({
-  useClients: jest.fn(() => ({
+jest.mock("@/features/companies", () => ({
+  useCompanies: jest.fn(() => ({
     data: mockClients,
     isLoading: false,
   })),
@@ -177,9 +177,9 @@ describe("ProjectsPage", () => {
     // Restore the default implementation (previous tests may have overridden it via
     // mockReturnValue, which clearAllMocks does not undo)
     const { useProjects } = require("@/features/projects");
-    useProjects.mockImplementation((clientId?: string) => ({
-      data: clientId
-        ? mockProjects.filter((p) => p.clientId === clientId)
+    useProjects.mockImplementation((companyId?: string) => ({
+      data: companyId
+        ? mockProjects.filter((p) => p.companyId === companyId)
         : mockProjects,
       isLoading: false,
     }));
@@ -212,10 +212,10 @@ describe("ProjectsPage", () => {
     const cards = screen.getAllByTestId("project-card");
     expect(cards).toHaveLength(2);
     expect(cards[0]).toHaveTextContent("Name: Web App");
-    expect(cards[0]).toHaveTextContent("Client: Company A");
+    expect(cards[0]).toHaveTextContent("Company: Company A");
     expect(cards[0]).toHaveTextContent("Hours: 40");
     expect(cards[1]).toHaveTextContent("Name: Mobile App");
-    expect(cards[1]).toHaveTextContent("Client: Company B");
+    expect(cards[1]).toHaveTextContent("Company: Company B");
     expect(cards[1]).toHaveTextContent("Hours: 60");
   });
 
@@ -234,7 +234,7 @@ describe("ProjectsPage", () => {
     const cards = screen.getAllByTestId("project-card");
     expect(cards).toHaveLength(1);
     expect(cards[0]).toHaveTextContent("Name: Web App");
-    expect(cards[0]).toHaveTextContent("Client: Company A");
+    expect(cards[0]).toHaveTextContent("Company: Company A");
     expect(cards[0]).toHaveTextContent("Hours: 40");
   });
 
@@ -281,7 +281,7 @@ describe("ProjectsPage", () => {
     // Check if dialog is open
     expect(screen.getByTestId("project-create-dialog")).toBeInTheDocument();
     expect(
-      screen.getByText(`Client ID: ${mockClients[0].id}`)
+      screen.getByText(`Company ID: ${mockClients[0].id}`),
     ).toBeInTheDocument();
   });
 
@@ -298,7 +298,7 @@ describe("ProjectsPage", () => {
 
     // Check if dialog is closed
     expect(
-      screen.queryByTestId("project-create-dialog")
+      screen.queryByTestId("project-create-dialog"),
     ).not.toBeInTheDocument();
   });
 

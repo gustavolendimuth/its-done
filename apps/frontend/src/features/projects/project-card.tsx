@@ -40,10 +40,10 @@ interface ProjectCardProps {
     description?: string;
     createdAt: string;
     updatedAt: string;
-    clientId: string;
+    companyId: string;
     userId: string;
     hourlyRate?: number;
-    client: {
+    company: {
       id: string;
       name?: string;
       email: string;
@@ -68,9 +68,9 @@ export function ProjectCard({
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
-  const handleViewClient = (e: React.MouseEvent) => {
+  const handleViewCompany = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/clients/${project.clientId}`);
+    router.push(`/companies/${project.companyId}`);
   };
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -85,7 +85,7 @@ export function ProjectCard({
 
   // Prepare contact info
   const contactInfo = [
-    { icon: Building2, value: project.client.company },
+    { icon: Building2, value: project.company.company },
     {
       icon: Calendar,
       value: `${t("created")} ${formatTimeAgo(new Date(project.createdAt), tCommon)}`,
@@ -184,7 +184,7 @@ export function ProjectCard({
               variant="outline"
               size="sm"
               className="w-full"
-              onClick={handleViewClient}
+              onClick={handleViewCompany}
             >
               <ExternalLink className="h-4 w-4 mr-1" />
               {t("client")}

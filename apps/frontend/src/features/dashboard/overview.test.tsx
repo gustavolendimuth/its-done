@@ -24,7 +24,7 @@ jest.mock("@/components/layout/loading-skeleton", () => ({
 
 jest.mock("@/features/invoices", () => ({
   ...jest.requireActual("@/features/invoices"),
-  ClientInvoiceCard: ({ invoice }: any) => (
+  CompanyInvoiceCard: ({ invoice }: any) => (
     <div data-testid="invoice-card">
       <p>Invoice {invoice.number}</p>
       <p>Amount: ${invoice.amount}</p>
@@ -40,7 +40,7 @@ const mockWorkHours: WorkHour[] = [
     date: "2024-03-01",
     description: "Web development work",
     hours: 20,
-    client: {
+    company: {
       id: "client1",
       name: "Client 1",
       email: "client1@example.com",
@@ -55,7 +55,7 @@ const mockWorkHours: WorkHour[] = [
     date: "2024-03-02",
     description: "App design work",
     hours: 30,
-    client: {
+    company: {
       id: "client2",
       name: "Client 2",
       email: "client2@example.com",
@@ -87,7 +87,7 @@ const mockInvoices: Invoice[] = [
     createdAt: "2024-03-01T00:00:00Z",
     updatedAt: "2024-03-01T00:00:00Z",
     description: "Web development",
-    clientId: "client1",
+    companyId: "client1",
     invoiceWorkHours: [mockInvoiceWorkHours[0]],
   },
   {
@@ -98,7 +98,7 @@ const mockInvoices: Invoice[] = [
     createdAt: "2024-03-02T00:00:00Z",
     updatedAt: "2024-03-02T00:00:00Z",
     description: "App design",
-    clientId: "client2",
+    companyId: "client2",
     invoiceWorkHours: [mockInvoiceWorkHours[1]],
   },
 ];
@@ -131,7 +131,7 @@ describe("Overview", () => {
         data={mockData}
         isLoading={false}
         error={new Error("Test error")}
-      />
+      />,
     );
     expect(screen.getByText("Error loading dashboard")).toBeInTheDocument();
   });

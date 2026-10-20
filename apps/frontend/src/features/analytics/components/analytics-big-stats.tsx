@@ -19,7 +19,6 @@ import {
 import { useDashboardStats } from "@/features/dashboard";
 import { formatHoursToHHMM } from "@/lib/utils";
 
-
 interface AnalyticsBigStatsProps {
   className?: string;
   isRefetching?: boolean;
@@ -53,7 +52,7 @@ export function AnalyticsBigStats({
       else if (stats.hoursGrowth >= 0) score += 10;
     }
 
-    // Client diversity factor (0-30 points)
+    // Company diversity factor (0-30 points)
     if (stats.totalClients >= 10) score += 30;
     else if (stats.totalClients >= 5) score += 20;
     else if (stats.totalClients >= 3) score += 10;

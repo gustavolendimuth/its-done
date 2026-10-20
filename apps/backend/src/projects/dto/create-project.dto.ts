@@ -9,7 +9,7 @@ export class CreateProjectDto {
   description?: string;
 
   @IsUUID()
-  clientId: string;
+  companyId: string;
 
   @IsOptional()
   @IsNumber()

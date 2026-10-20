@@ -14,7 +14,7 @@ export class CreateInvoiceDto {
   workHourIds: string[];
 
   @IsUUID()
-  clientId: string;
+  companyId: string;
 
   @IsString()
   @IsOptional()

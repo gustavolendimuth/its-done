@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
-import { normalizeUrl } from '../utils/url';
+import { buildFrontendUrl } from './frontend-routes';
 
 @Injectable()
 export class NotificationsService {
@@ -104,10 +104,11 @@ export class NotificationsService {
         `📧 Iniciando envio de email de reset de senha para: ${userEmail}`,
       );
 
-      const frontendUrl = normalizeUrl(
-        this.configService.get('FRONTEND_URL') || 'localhost:3000',
+      const resetUrl = buildFrontendUrl(
+        this.configService.get('FRONTEND_URL'),
+        'resetPassword',
+        { token: resetToken },
       );
-      const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
       const isDevelopment =
         this.configService.get('NODE_ENV') === 'development';
 
@@ -163,6 +164,206 @@ export class NotificationsService {
         );
       }
 
+      return false;
+    }
+  }
+
+  // MW-31 — método próprio, não compartilhado com o `sendPasswordResetEmail`
+  // de `User` (assinatura idêntica, URL diferente): mudar a assinatura do
+  // método genérico pra aceitar um tipo de URL seria breaking change pro
+  // `auth/` de `User`, que já o consome sem esse parâmetro.
+  async sendCompanyAdminPasswordResetEmail(
+    toEmail: string,
+    adminEmail: string,
+    resetToken: string,
+  ) {
+    try {
+      const resetUrl = buildFrontendUrl(
+        this.configService.get('FRONTEND_URL'),
+        'companyAdminResetPassword',
+        { token: resetToken },
+      );
+
+      await this.sendEmail({
+        to: toEmail,
+        subject: 'Reset Your Password - Its Done',
+        html: this.generateCompanyAdminPasswordResetEmailTemplate(
+          adminEmail,
+          resetUrl,
+        ),
+      });
+
+      console.log(`Company admin password reset email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error(
+        'Failed to send Company admin password reset email:',
+        error,
+      );
+      return false;
+    }
+  }
+
+  async sendCompanyActivationEmail(
+    toEmail: string,
+    companyName: string,
+    activationToken: string,
+  ) {
+    try {
+      const activationUrl = buildFrontendUrl(
+        this.configService.get('FRONTEND_URL'),
+        'companyAdminActivate',
+        { token: activationToken },
+      );
+
+      await this.sendEmail({
+        to: toEmail,
+        subject: 'Confirm Company Activation - Its Done',
+        html: this.generateCompanyActivationEmailTemplate(
+          companyName,
+          activationUrl,
+        ),
+      });
+
+      console.log(`Company activation email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send Company activation email:', error);
+      return false;
+    }
+  }
+
+  async sendAuthorizedDomainConfirmationEmail(
+    toEmail: string,
+    domain: string,
+    confirmationToken: string,
+  ) {
+    try {
+      const confirmationUrl = buildFrontendUrl(
+        this.configService.get('FRONTEND_URL'),
+        'companyAdminDomainConfirm',
+        { token: confirmationToken },
+      );
+
+      await this.sendEmail({
+        to: toEmail,
+        subject: 'Confirm Authorized Domain - Its Done',
+        html: this.generateAuthorizedDomainConfirmationEmailTemplate(
+          domain,
+          confirmationUrl,
+        ),
+      });
+
+      console.log(`Authorized domain confirmation email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error(
+        'Failed to send Authorized domain confirmation email:',
+        error,
+      );
+      return false;
+    }
+  }
+
+  async sendCompanyAdminInviteEmail(
+    toEmail: string,
+    companyName: string,
+    inviteToken: string,
+  ) {
+    try {
+      const inviteUrl = buildFrontendUrl(
+        this.configService.get('FRONTEND_URL'),
+        'companyAdminInvite',
+        { token: inviteToken },
+      );
+
+      await this.sendEmail({
+        to: toEmail,
+        subject: 'You were invited as Company Administrator - Its Done',
+        html: this.generateCompanyAdminInviteEmailTemplate(
+          companyName,
+          inviteUrl,
+        ),
+      });
+
+      console.log(`Company admin invite email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send Company admin invite email:', error);
+      return false;
+    }
+  }
+
+  async sendCollaboratorLinkedEmail(
+    toEmail: string,
+    userName: string,
+    companyName: string,
+  ) {
+    try {
+      await this.sendEmail({
+        to: toEmail,
+        subject: `You were linked to ${companyName} - Its Done`,
+        html: this.generateCollaboratorLinkedEmailTemplate(
+          userName,
+          companyName,
+        ),
+      });
+
+      console.log(`Collaborator linked email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send Collaborator linked email:', error);
+      return false;
+    }
+  }
+
+  async sendCollaboratorUnlinkedEmail(
+    toEmail: string,
+    userName: string,
+    companyName: string,
+    unlinkedBy: 'collaborator' | 'admin',
+  ) {
+    try {
+      await this.sendEmail({
+        to: toEmail,
+        subject: `You were unlinked from ${companyName} - Its Done`,
+        html: this.generateCollaboratorUnlinkedEmailTemplate(
+          userName,
+          companyName,
+          unlinkedBy,
+        ),
+      });
+
+      console.log(`Collaborator unlinked email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send Collaborator unlinked email:', error);
+      return false;
+    }
+  }
+
+  // MW-26 — notifica um Collaborator de que a Company foi desativada (todos
+  // os CompanyAdmin dela removidos). O vínculo Collaborator em si permanece
+  // intacto; isso só avisa que a Company não tem mais Administrador ativo.
+  async sendCompanyDeactivatedEmail(
+    toEmail: string,
+    userName: string,
+    companyName: string,
+  ) {
+    try {
+      await this.sendEmail({
+        to: toEmail,
+        subject: `${companyName} was deactivated - Its Done`,
+        html: this.generateCompanyDeactivatedEmailTemplate(
+          userName,
+          companyName,
+        ),
+      });
+
+      console.log(`Company deactivated email sent to ${toEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send Company deactivated email:', error);
       return false;
     }
   }
@@ -270,7 +471,7 @@ export class NotificationsService {
             Invoice ID: <strong>${invoiceId}</strong>
           </div>
           <p>A new invoice has been uploaded and is now available for your review.</p>
-          <p>Please log in to your client dashboard to view and download the invoice.</p>
+          <p>Please log in to your company dashboard to view and download the invoice.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>
@@ -309,11 +510,300 @@ export class NotificationsService {
           <p>You can now:</p>
           <ul>
             <li>Track your work hours</li>
-            <li>Manage clients and projects</li>
+            <li>Manage companies and projects</li>
             <li>Generate reports and analytics</li>
             <li>Configure notification settings</li>
           </ul>
           <p>Get started by logging your first work session!</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateAuthorizedDomainConfirmationEmailTemplate(
+    domain: string,
+    confirmationUrl: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Confirm Authorized Domain</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Authorized Domain</h1>
+        </div>
+        <div class="content">
+          <p>You asked to confirm <strong>${domain}</strong> as an Authorized Domain of your Company on Its Done.</p>
+          <p>Click the button below to confirm the domain:</p>
+          <div style="text-align: center;">
+            <a href="${confirmationUrl}" class="button">Confirm Domain</a>
+          </div>
+          <p>Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">${confirmationUrl}</p>
+          <p>This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateCompanyActivationEmailTemplate(
+    companyName: string,
+    activationUrl: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Confirm Company Activation</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Company Activation</h1>
+        </div>
+        <div class="content">
+          <p>You're activating <strong>${companyName}</strong> as an Company account on Its Done.</p>
+          <p>Click the button below to confirm and set up the first Administrator password:</p>
+          <div style="text-align: center;">
+            <a href="${activationUrl}" class="button">Confirm Activation</a>
+          </div>
+          <p>Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">${activationUrl}</p>
+          <p>This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateCompanyAdminPasswordResetEmailTemplate(
+    adminEmail: string,
+    resetUrl: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reset Your Password</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Password Reset</h1>
+        </div>
+        <div class="content">
+          <p>We received a request to reset the password for the Administrator account <strong>${adminEmail}</strong>. If you didn't make this request, you can safely ignore this email.</p>
+          <p>Click the button below to reset your password:</p>
+          <div style="text-align: center;">
+            <a href="${resetUrl}" class="button">Reset Password</a>
+          </div>
+          <p>Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">${resetUrl}</p>
+          <p>This link expires in 1 hour. If you continue to have problems, please contact our support team.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateCompanyAdminInviteEmailTemplate(
+    companyName: string,
+    inviteUrl: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Company Administrator Invite</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Administrator Invite</h1>
+        </div>
+        <div class="content">
+          <p>You were invited to become an Administrator of <strong>${companyName}</strong> on Its Done.</p>
+          <p>Click the button below to confirm and set your password:</p>
+          <div style="text-align: center;">
+            <a href="${inviteUrl}" class="button">Accept Invite</a>
+          </div>
+          <p>Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">${inviteUrl}</p>
+          <p>This link expires in 1 hour. If you didn't expect this invite, you can safely ignore this email.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateCollaboratorLinkedEmailTemplate(
+    userName: string,
+    companyName: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Linked to a new Company</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .info { background-color: #f0f9ff; border-left: 4px solid #0284c7; padding: 16px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Company Link</h1>
+        </div>
+        <div class="content">
+          <h2>Hello ${userName},</h2>
+          <div class="info">
+            <strong>You were linked to ${companyName}!</strong><br>
+            You are now a Collaborator of this Company.
+          </div>
+          <p>${companyName} can now see your aggregated hours, projects and invoices — your individual entries stay private, only the totals are shared.</p>
+          <p>You can unlink yourself from this Company at any time from your Companys page.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateCollaboratorUnlinkedEmailTemplate(
+    userName: string,
+    companyName: string,
+    unlinkedBy: 'collaborator' | 'admin',
+  ): string {
+    const explanation =
+      unlinkedBy === 'admin'
+        ? `The Administrator of ${companyName} removed you as a Collaborator.`
+        : `You unlinked yourself from ${companyName}.`;
+
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Unlinked from an Company</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .info { background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Company Unlink</h1>
+        </div>
+        <div class="content">
+          <h2>Hello ${userName},</h2>
+          <div class="info">
+            <strong>You were unlinked from ${companyName}.</strong><br>
+            ${explanation}
+          </div>
+          <p>This Company no longer sees your aggregated hours. Your existing hours, projects, tasks and invoices are untouched and remain available to you.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br>The Its Done Team</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateCompanyDeactivatedEmailTemplate(
+    userName: string,
+    companyName: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Company deactivated</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #f8fafc; }
+          .info { background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin: 20px 0; }
+          .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Its Done - Company Deactivated</h1>
+        </div>
+        <div class="content">
+          <h2>Hello ${userName},</h2>
+          <div class="info">
+            <strong>${companyName} deactivated its account.</strong><br>
+            It no longer manages this account.
+          </div>
+          <p>You are still linked to ${companyName} and can keep logging and invoicing hours against it normally. Your existing hours, projects, tasks and invoices are untouched.</p>
+          <p>If ${companyName} activates an Administrator again in the future, it will resume seeing your aggregated hours.</p>
         </div>
         <div class="footer">
           <p>Best regards,<br>The Its Done Team</p>

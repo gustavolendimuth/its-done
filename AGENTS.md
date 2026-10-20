@@ -28,26 +28,53 @@ docker compose -f docker-compose.dev.yml up -d
 docker compose -f docker-compose.dev.yml logs -f
 ```
 
+### Testing changes in a worktree
+
+The main `docker-compose.dev.yml` stack only serves the code from the primary
+checkout, not other git worktrees. To see a worktree's changes in the
+browser, use the preview script instead of the Docker stack:
+
+```bash
+pnpm preview:start   # starts backend + frontend for this worktree on free ports, prints the URLs
+pnpm preview:stop    # tears it down
+```
+
+It reuses the postgres/redis already running from `docker-compose.dev.yml`
+(start that stack first if they're not up). **Always run `pnpm preview:stop`
+once you're done validating** — don't leave preview processes running.
+
+`.env` is gitignored, so a fresh worktree doesn't have one — copy it from the
+main checkout (or from `.env.example` and fill in secrets) into the worktree
+root; the script loads it automatically if present.
+
+### Emailed-link smoke (Playwright)
+
+```bash
+pnpm e2e:email-links   # needs postgres + redis up; first run: pnpm --filter @its-done/e2e exec playwright install chromium
+```
+
+Starts the preview stack with Resend pointed at a local mock (no real email), triggers
+every email that carries a frontend link, and opens each link in a real browser. Fails on
+404s, redirects and render errors. `E2E_STRICT=1` shows the real failure for routes in
+`KNOWN_MISSING_PAGES`. It stops the preview when done, so don't run it while
+`pnpm preview:start` is up. The user/company rows it creates stay in the worktree DB.
+CI (`.github/workflows/ci.yml`) runs typecheck, unit tests and this smoke on every PR.
+
+Google login needs the exact callback URL registered as an authorized
+redirect URI in the Google Cloud OAuth client. The preview frontend defaults
+to port 3100 when free, so `http://localhost:3100/api/auth/callback/google`
+only needs to be added once. If port 3100 is already taken (e.g. another
+preview running) the script picks the next free port instead, and Google
+login will fail with `redirect_uri_mismatch` until that port is also
+registered — credentials login (email/password) is unaffected either way.
+
 ## Architecture
 
 ### Monorepo Structure
 
 - **apps/backend**: NestJS API (TypeScript, Prisma, PostgreSQL)
 - **apps/frontend**: Next.js 14 App Router (React 18, TypeScript, TailwindCSS)
-- **packages/**: Shared TypeScript configurations
-
-## Critical Business Logic
-
-### Invoice Calculation
-
-**IMPORTANT**: Invoice amounts are calculated via `resolveHourlyRate(project, client)` (`apps/backend/src/work-hours/utils/resolve-hourly-rate.util.ts`):
-
-- Each WorkHour uses `project.hourlyRate` when it has a Project
-- Falls back to `client.hourlyRate` when the WorkHour has no Project (dev work without a Project)
-- Falls back to `0` when neither is set
-- Total = Σ(workHour.hours × resolveHourlyRate(workHour.project, workHour.client))
-- Same fallback applies to both the automatic draft invoice (`DraftInvoiceService.createDraft`) and manually-created invoices (`InvoicesService.create`)
-- This is a recent change - historically the rate was per-invoice, then per-project-only
+- **packages/**: Shared TypeScript configurations, plus `packages/e2e` (Playwright smoke, run via `pnpm e2e:email-links`)
 
 ### File Upload Strategy (Priority Order)
 
@@ -60,13 +87,7 @@ docker compose -f docker-compose.dev.yml logs -f
 - **Hours Alert**: Auto-email when user exceeds configured threshold (Settings.alertHours)
 - **Invoice Upload**: Auto-email to client when invoice created
 - **Welcome Email**: Sent on user registration
-- Anti-spam: Uses NotificationLog to prevent duplicate alerts for same threshold
-
-### Client Dashboard (Public)
-
-- Public route: `/client-dashboard/[clientId]` (no auth required)
-- Clients can view their invoices, hours worked, and download files
-- Share via WhatsApp, Email, or copy link from Clients page
+- **Anti-spam**: Uses NotificationLog to prevent duplicate alerts for same threshold
 
 ## Deployment
 

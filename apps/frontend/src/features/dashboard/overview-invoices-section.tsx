@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  ClientInvoiceCard,
+  CompanyInvoiceCard,
   FilterStatus,
   Invoice,
   InvoiceSearchFilters,
@@ -72,7 +72,7 @@ export function OverviewInvoicesSection({
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredInvoices.map((invoice) => (
-              <ClientInvoiceCard key={invoice.id} invoice={invoice} />
+              <CompanyInvoiceCard key={invoice.id} invoice={invoice} />
             ))}
           </div>
         )}

@@ -57,7 +57,7 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
         startedAt: new Date(clientTimestamp),
         currentSegmentStartedAt: new Date(clientTimestamp),
         accumulatedSeconds: 0,
-        clientId: null,
+        companyId: null,
         projectId: null,
         taskId: null,
         description: null,
@@ -69,7 +69,7 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
     expect(result.session).toEqual({ id: sessionId, status: 'RUNNING' });
   });
 
-  it('start with upfront details (WKT-10) persists clientId/projectId/taskId/description on creation', async () => {
+  it('start with upfront details (WKT-10) persists companyId/projectId/taskId/description on creation', async () => {
     const clientTimestamp = '2026-01-15T11:00:00.000Z';
     prismaMock.workSessionSyncedEvent.findUnique.mockResolvedValueOnce(null);
     prismaMock.workSession.findFirst
@@ -82,7 +82,7 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
         sessionId,
         type: SyncEventType.START,
         clientTimestamp,
-        clientId: 'client-1',
+        companyId: 'client-1',
         projectId: 'project-1',
         taskId: 'task-1',
         description: 'Planejado com antecedência',
@@ -97,7 +97,7 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
         startedAt: new Date(clientTimestamp),
         currentSegmentStartedAt: new Date(clientTimestamp),
         accumulatedSeconds: 0,
-        clientId: 'client-1',
+        companyId: 'client-1',
         projectId: 'project-1',
         taskId: 'task-1',
         description: 'Planejado com antecedência',
@@ -414,7 +414,9 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
     ]);
 
     expect(prismaMock.workSession.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ hours: 1.25 }) }),
+      expect.objectContaining({
+        data: expect.objectContaining({ hours: 1.25 }),
+      }),
     );
   });
 
@@ -494,7 +496,9 @@ describe('WorkSessionsService.applyEvents() - event transitions', () => {
     ]);
 
     expect(prismaMock.workSession.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ hours: 0.25 }) }),
+      expect.objectContaining({
+        data: expect.objectContaining({ hours: 0.25 }),
+      }),
     );
   });
 });
@@ -592,7 +596,7 @@ describe('WorkSessionsService.applyEvents() - single-active-session conflict on 
         startedAt: new Date(incomingClientTimestamp),
         currentSegmentStartedAt: new Date(incomingClientTimestamp),
         accumulatedSeconds: 0,
-        clientId: null,
+        companyId: null,
         projectId: null,
         taskId: null,
         description: null,

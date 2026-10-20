@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
 export interface ImportOptions {
-  type: "client" | "invoice" | "time" | "user";
+  type: "company" | "invoice" | "time" | "user";
   format: "excel" | "csv";
   file: File;
 }

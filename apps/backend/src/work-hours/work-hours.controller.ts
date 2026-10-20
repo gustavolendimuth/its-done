@@ -30,13 +30,13 @@ export class WorkHoursController {
     @Request() req,
     @Query('from') from?: string,
     @Query('to') to?: string,
-    @Query('clientId') clientId?: string,
+    @Query('companyId') companyId?: string,
   ) {
     return this.workHoursService.findAll(
       req.user.id,
       from ? new Date(from) : undefined,
       to ? new Date(to) : undefined,
-      clientId,
+      companyId,
     );
   }
 
@@ -58,13 +58,13 @@ export class WorkHoursController {
     @Request() req,
     @Query('from') from?: string,
     @Query('to') to?: string,
-    @Query('clientId') clientId?: string,
+    @Query('companyId') companyId?: string,
   ) {
     return this.workHoursService.getStats(
       req.user.id,
       from ? new Date(from) : undefined,
       to ? new Date(to) : undefined,
-      clientId,
+      companyId,
     );
   }
 
@@ -73,13 +73,13 @@ export class WorkHoursController {
     @Request() req,
     @Query('from') from?: string,
     @Query('to') to?: string,
-    @Query('clientId') clientId?: string,
+    @Query('companyId') companyId?: string,
   ) {
     return this.workHoursService.findAvailable(
       req.user.id,
       from ? new Date(from) : undefined,
       to ? new Date(to) : undefined,
-      clientId,
+      companyId,
     );
   }
 

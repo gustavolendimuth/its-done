@@ -26,13 +26,13 @@ export class AddressesController {
   }
 
   @Get()
-  findAll(@Request() req, @Query('clientId') clientId?: string) {
-    return this.addressesService.findAll(req.user.id, clientId);
+  findAll(@Request() req, @Query('companyId') companyId?: string) {
+    return this.addressesService.findAll(req.user.id, companyId);
   }
 
-  @Get('client/:clientId')
-  findByClient(@Request() req, @Param('clientId') clientId: string) {
-    return this.addressesService.findByClient(req.user.id, clientId);
+  @Get('company/:companyId')
+  findByClient(@Request() req, @Param('companyId') companyId: string) {
+    return this.addressesService.findByClient(req.user.id, companyId);
   }
 
   @Get(':id')

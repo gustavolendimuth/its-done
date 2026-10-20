@@ -5,6 +5,7 @@ import { subMonths, isAfter, isBefore } from "date-fns";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
 
+import { ActivateCompanyBanner } from "@/features/company-admin";
 import { Overview, OverviewData } from "@/features/dashboard";
 import { invoicesService } from "@/features/invoices";
 
@@ -83,8 +84,8 @@ export default function ClientDashboardPage() {
           : 0
         : ((thisMonthAmount - previousMonthAmount) / previousMonthAmount) * 100;
 
-    const clientName = invoices[0]?.client?.name || "Client";
-    const clientEmail = invoices[0]?.client?.email || "";
+    const clientName = invoices[0]?.company?.name || "Company";
+    const clientEmail = invoices[0]?.company?.email || "";
 
     return {
       invoices,
@@ -108,5 +109,10 @@ export default function ClientDashboardPage() {
     };
   }, [invoices]);
 
-  return <Overview data={overviewData} isLoading={isLoading} error={error} />;
+  return (
+    <>
+      <ActivateCompanyBanner companyId={clientId as string} />
+      <Overview data={overviewData} isLoading={isLoading} error={error} />
+    </>
+  );
 }

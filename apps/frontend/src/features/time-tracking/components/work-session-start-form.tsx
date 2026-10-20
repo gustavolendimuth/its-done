@@ -17,12 +17,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ClientCombobox } from "@/components/ui/client-combobox";
+import { CompanyCombobox } from "@/components/ui/company-combobox";
 import { Label } from "@/components/ui/label";
 import { ProjectCombobox } from "@/components/ui/project-combobox";
 import { TaskCombobox } from "@/components/ui/task-combobox";
 import { Textarea } from "@/components/ui/textarea";
-import { useClients } from "@/features/clients";
+import { useCompanies } from "@/features/companies";
 
 export interface WorkSessionStartFormProps {
   onCancel: () => void;
@@ -37,7 +37,7 @@ type TranslateFn = (key: string) => string;
 
 function buildStartFormSchema(t: TranslateFn) {
   return z.object({
-    clientId: z.string().min(1, t("clientRequired")),
+    companyId: z.string().min(1, t("clientRequired")),
     projectId: z.string().optional(),
     taskId: z.string().optional(),
     description: z.string().min(1, t("descriptionRequired")),
@@ -68,7 +68,7 @@ function useOnlineStatus(): boolean {
 // Rendered inline by WorkTimerWidget when the user picks the "start with
 // details" option instead of the plain "Iniciar" button (spec.md P2
 // "Preencher detalhes antes de iniciar", WKT-10). Like the finish form, this
-// isn't local-first: loading client/project options needs a connection —
+// isn't local-first: loading company/project options needs a connection —
 // only the timer itself (start/count/stop) is local-first.
 export function WorkSessionStartForm({
   onCancel,
@@ -76,7 +76,7 @@ export function WorkSessionStartForm({
 }: WorkSessionStartFormProps) {
   const t = useTranslations("WorkSessionStartForm");
   const isOnline = useOnlineStatus();
-  const { data: clients = [] } = useClients();
+  const { data: clients = [] } = useCompanies();
   const startFormSchema = useMemo(() => buildStartFormSchema(t), [t]);
 
   const {
@@ -86,14 +86,19 @@ export function WorkSessionStartForm({
     formState: { errors, isSubmitting },
   } = useForm<StartFormData>({
     resolver: zodResolver(startFormSchema),
-    defaultValues: { clientId: "", projectId: "", taskId: "", description: "" },
+    defaultValues: {
+      companyId: "",
+      projectId: "",
+      taskId: "",
+      description: "",
+    },
   });
 
-  const selectedClientId = watch("clientId");
+  const selectedClientId = watch("companyId");
 
   const onSubmit = async (data: StartFormData) => {
     await onStart({
-      clientId: data.clientId,
+      companyId: data.companyId,
       projectId: data.projectId || undefined,
       taskId: data.taskId || undefined,
       description: data.description,
@@ -142,19 +147,19 @@ export function WorkSessionStartForm({
           <div className="space-y-2">
             <Label>{t("clientLabel")}</Label>
             <Controller
-              name="clientId"
+              name="companyId"
               control={control}
               render={({ field }) => (
-                <ClientCombobox
+                <CompanyCombobox
                   clients={clients}
                   value={field.value}
                   onSelect={field.onChange}
                 />
               )}
             />
-            {errors.clientId && (
+            {errors.companyId && (
               <p className="text-sm text-destructive">
-                {errors.clientId.message}
+                {errors.companyId.message}
               </p>
             )}
           </div>
@@ -166,7 +171,7 @@ export function WorkSessionStartForm({
               control={control}
               render={({ field }) => (
                 <ProjectCombobox
-                  clientId={selectedClientId}
+                  companyId={selectedClientId}
                   value={field.value}
                   onSelect={(projectId) => field.onChange(projectId ?? "")}
                   disabled={!selectedClientId}
@@ -183,7 +188,7 @@ export function WorkSessionStartForm({
               control={control}
               render={({ field }) => (
                 <TaskCombobox
-                  clientId={selectedClientId}
+                  companyId={selectedClientId}
                   value={field.value}
                   onSelect={(taskId) => field.onChange(taskId ?? "")}
                   disabled={!selectedClientId}
