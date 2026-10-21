@@ -27,15 +27,6 @@ jest.mock("@/hooks/use-safe-hydration", () => ({
   useSafeHydration: jest.fn(() => true),
 }));
 
-// Mock next/image
-jest.mock("next/image", () => ({
-  __esModule: true,
-  default: ({ src, alt, ...props }: any) => {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={alt} {...props} />;
-  },
-}));
-
 // Mock MobileNav component
 jest.mock("../mobile-nav", () => ({
   MobileNav: () => <div data-testid="mobile-nav">Mobile Navigation</div>,

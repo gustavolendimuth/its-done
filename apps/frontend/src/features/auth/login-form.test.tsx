@@ -20,14 +20,6 @@ jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-jest.mock("next/image", () => ({
-  __esModule: true,
-  default: ({ src, alt, ...props }: { src: string; alt: string }) => {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={alt} {...props} />;
-  },
-}));
-
 async function fillAndSubmit(email: string, password: string) {
   fireEvent.change(screen.getByLabelText("email"), {
     target: { value: email },

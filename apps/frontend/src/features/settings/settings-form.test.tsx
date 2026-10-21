@@ -90,6 +90,7 @@ describe("SettingsForm", () => {
   });
 
   it("should render error state", () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
     const { useSettings } = require("./settings.service");
     useSettings.mockReturnValue({
       data: null,
@@ -100,6 +101,11 @@ describe("SettingsForm", () => {
     render(<SettingsForm />);
 
     expect(screen.getByText("failedToLoad")).toBeInTheDocument();
+    expect(consoleError).toHaveBeenCalledWith(
+      "Error loading settings:",
+      expect.any(Error)
+    );
+    consoleError.mockRestore();
   });
 
   it("should render form with initial values", () => {
@@ -224,6 +230,7 @@ describe("SettingsForm", () => {
   });
 
   it("should show error message on update failure", async () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
     const { toast } = require("sonner");
     const testError = new Error("Test error");
     mockUpdateSettings.mockImplementation(
@@ -243,6 +250,11 @@ describe("SettingsForm", () => {
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith("Test error");
     });
+    expect(consoleError).toHaveBeenCalledWith(
+      "Error updating settings:",
+      testError
+    );
+    consoleError.mockRestore();
   });
 
   it("should disable submit button when form is pristine", () => {

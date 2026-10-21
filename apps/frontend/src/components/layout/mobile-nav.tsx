@@ -20,7 +20,12 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useSafeHydration } from "@/hooks/use-safe-hydration";
 import { cn } from "@/lib/utils";
 
@@ -153,7 +158,12 @@ export function MobileNav() {
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-64 p-0">
+      <SheetContent
+        side="left"
+        className="w-64 p-0"
+        aria-describedby={undefined}
+      >
+        <SheetTitle className="sr-only">{t("openMenu")}</SheetTitle>
         <div className="flex flex-col h-full bg-card px-5 py-8">
           <MobileNavigation onLinkClick={handleLinkClick} />
         </div>

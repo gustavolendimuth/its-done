@@ -594,6 +594,8 @@ describe("WorkHourForm", () => {
   });
 
   it("edit mode: a failed save keeps the typed value and shows the error alert", async () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
+
     mockUpdateMutateAsync.mockRejectedValueOnce(new Error("network error"));
     mockUseUpdateTimeEntry.mockReturnValue({
       mutateAsync: mockUpdateMutateAsync,
@@ -615,6 +617,11 @@ describe("WorkHourForm", () => {
 
     expect(screen.getByPlaceholderText("HH:mm")).toHaveValue("02:00");
     expect(screen.getByText("errorSaving")).toBeInTheDocument();
+    expect(consoleError).toHaveBeenCalledWith(
+      "❌ Error saving work hour:",
+      expect.any(Error)
+    );
+    consoleError.mockRestore();
   });
 
   it("edit mode: blocks submit on invalid hours format", async () => {
