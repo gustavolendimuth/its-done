@@ -98,7 +98,7 @@ registered — credentials login (email/password) is unaffected either way.
 - Railway Volume for persistent file storage (1GB)
 - See `RAILWAY_COMPLETE_GUIDE.md` for detailed setup
 
-## Important Patterns &amp; Conventions
+## Important Patterns & Conventions
 
 ### Code Organization
 
@@ -106,28 +106,6 @@ registered — credentials login (email/password) is unaffected either way.
 - **Absolute imports**: Use path aliases (`@/components`, not `../../components`)
 - **DTO validation**: Use `class-validator` decorators on all DTOs
 - **Type safety**: Prisma types extended in `apps/backend/src/types/entities.ts`
-
-### Reachability (vertical slices)
-
-Activation and invite shipped as backend endpoints plus an
-email whose link pointed to a page nobody built, so the flow was a 404 for users.
-
-- **Slice by user flow, not by layer.** A ticket for a user-facing flow is done only when a user can complete it from a real entry point to the final result. Backend-only is fine for internal APIs, and the ticket must say so.
-- **Every URL the backend emits needs a real page.** Register the path in
-  `FRONTEND_ROUTES` (`apps/backend/src/notifications/frontend-routes.ts`) and build the
-  link with `buildFrontendUrl()`; never hand-build `${frontendUrl}/...`. The matching
-  `page.tsx` ships in the same change. If the page can't ship yet, add the path to
-  `KNOWN_MISSING_PAGES` in that file with a ticket key. Two checks enforce this:
-  `frontend-links.contract.spec.ts` (unit, runs in CI) and `pnpm e2e:email-links` (see Key Commands).
-  A new route also needs a trigger in `packages/e2e/tests/email-links.spec.ts`, or the
-  smoke fails.
-- **Name the entry point.** Before closing a flow, state how a user gets to it (menu,
-  link, email). "The endpoint exists" doesn't count.
-- **Subagent prompts:** don't scope a user-facing ticket to "backend only". If the work
-  is split, the prompt must name who builds the other half (ticket key) and the exact
-  route or contract the halves agree on. Don't leave URL design to "good judgment".
-- **Report gaps.** When finishing, list any surface you didn't cover (missing page,
-  no entry point) instead of reporting the ticket as done.
 
 ## Agent skills
 
@@ -150,4 +128,4 @@ Single-context: one `CONTEXT.md` + `docs/adr/` at repo root. See `docs/agents/do
 - File uploads validated by MIME type and extension
 - JWT tokens stored in HTTP-only cookies
 - CORS configured for frontend origin only
-
+- Rate limiting should be implemented (currently not enforced)

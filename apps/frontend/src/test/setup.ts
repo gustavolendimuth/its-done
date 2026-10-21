@@ -38,8 +38,26 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Mock Next.js Image
+// Drops the next/image-only props so they don't leak onto the DOM <img>
+// (React warns about e.g. `priority={true}` on a native element).
 jest.mock("next/image", () => ({
-  default: (props: MockImageProps) => props,
+  __esModule: true,
+  default: ({
+    src,
+    alt,
+    fill: _fill,
+    priority: _priority,
+    quality: _quality,
+    placeholder: _placeholder,
+    blurDataURL: _blurDataURL,
+    loader: _loader,
+    unoptimized: _unoptimized,
+    ...props
+  }: MockImageProps) => {
+    const react = require("react");
+
+    return react.createElement("img", { src, alt, ...props });
+  },
 }));
 
 // Mock Recharts

@@ -307,21 +307,15 @@ export function WorkHourForm({
         payload.endTime = formData.endTime;
       }
 
-      console.log("📝 Submitting work hour form with payload:", payload);
-
-      const result = await createTimeEntry.mutateAsync(
+      await createTimeEntry.mutateAsync(
         payload as unknown as FullCreateTimeEntryDto,
       );
-      console.log("✅ Work hour created successfully:", result);
-
       toast.success(t("savedSuccessfully", { type: t("workHour") }));
       reset();
       setEntryMode("duration");
       setLastSavedMode("duration");
 
-      console.log("🔄 Calling onSuccess callback...");
       onSuccess?.();
-      console.log("✅ onSuccess callback completed");
     } catch (error) {
       console.error("❌ Error saving work hour:", error);
       if (error instanceof AxiosError && error.response) {

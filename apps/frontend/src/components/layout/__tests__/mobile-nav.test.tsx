@@ -24,15 +24,6 @@ jest.mock("@/hooks/use-safe-hydration", () => ({
   useSafeHydration: jest.fn(() => true),
 }));
 
-// Mock next/image
-jest.mock("next/image", () => ({
-  __esModule: true,
-  default: ({ src, alt, ...props }) => {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={alt} {...props} />;
-  },
-}));
-
 const mockUseSession = useSession as jest.MockedFunction<typeof useSession>;
 const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>;
 

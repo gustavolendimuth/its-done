@@ -55,6 +55,14 @@ jest.mock("@/services/gravatar", () => ({
   useGravatarProfile: () => ({ data: null, isLoading: false }),
 }));
 
+// jsdom has no fetch, so the real connectivity probe would log a failure
+jest.mock("@/services/network-status", () => ({
+  useShouldSkipExternalServices: () => ({
+    skipGravatar: false,
+    isOffline: false,
+  }),
+}));
+
 const createTestQueryClient = () =>
   new QueryClient({
     defaultOptions: {

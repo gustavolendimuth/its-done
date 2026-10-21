@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
 import WorkHoursPage from "../page";
@@ -240,6 +240,11 @@ describe("WorkHoursPage", () => {
 
     // Check loading state
     expect(screen.getByText("Deleting: true")).toBeInTheDocument();
+
+    // Let the pending delete settle so its state update runs inside the test
+    await waitFor(() =>
+      expect(screen.queryByText("Deleting: true")).not.toBeInTheDocument()
+    );
   });
 
   it("should open add work hour modal", () => {

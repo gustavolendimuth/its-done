@@ -25,16 +25,12 @@ export const useWorkHoursStats = (params?: {
   to?: string;
   companyId?: string;
 }) => {
-  console.log("📈 useWorkHoursStats called with params:", params);
-
   return useQuery({
     queryKey: ["workHours", "stats", params],
     queryFn: async () => {
-      console.log("📈 useWorkHoursStats fetching data with params:", params);
       const { data } = await api.get<WorkHoursStats>("/work-hours/stats", {
         params,
       });
-      console.log("📈 useWorkHoursStats received data:", data);
       return data;
     },
     staleTime: 0, // Always consider data stale
